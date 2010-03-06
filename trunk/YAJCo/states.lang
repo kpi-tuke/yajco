@@ -1,0 +1,20 @@
+concept StateMachine
+    AS: start : State, states : array of State, transitions : array of Transition
+    CS: "start" name : string {References(State)} states {Range(1..*)} transitions {Range(1..*)}
+
+concept State
+    AS: name : string {Identifier}, actions : array of Action
+    CS: "state" name
+      | "state" name "{" actions "}"
+
+concept Transition
+    AS: from : State, to : State, event : Event
+    CS: "transition" "from" name : string {References(State, property = from)} "to" name : string {References(State, property = to)} "when" event
+
+concept Action
+    AS: name : string
+    CS: name
+
+concept Event
+    AS: name : State
+    CS: name

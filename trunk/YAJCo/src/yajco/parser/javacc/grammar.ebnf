@@ -1,0 +1,24 @@
+ArrayType ::= (<array> <of> Type)
+Associativity ::= (<LEFT> | <RIGHT> | <NONE> | <AUTO>)
+Concept ::= ((<concept> <NAME>) ((<:> <NAME>))? ((<{> (ConceptPattern)* <}>))? ((<AS> <:> (Property ((<,> Property))*)))? ((<CS> <:> (Notation ((<|> Notation))*)))?)
+ConceptPattern ::= (Operator | Parentheses)
+Identifier ::= <Identifier>
+Indent ::= <Indent>
+Language ::= ((Concept (Concept)*) | ((<language> <NAME>) (Concept (Concept)*)))
+LocalVariablePart ::= (<NAME> (<:> Type) ((<{> (NotationPartPattern)* <}>))?)
+NewLine ::= <NewLine>
+Notation ::= (NotationPart (NotationPart)*)
+NotationPart ::= (LocalVariablePart | PropertyReferencePart | TokenPart)
+NotationPartPattern ::= (Separator | References | Range | Indent | NewLine)
+Operator ::= ((<Operator> <(> (<priority> <=> <INT_VALUE>) (<associativity> <=> Associativity) <)>) | (<Operator> <(> (<priority> <=> <INT_VALUE>) <)>))
+Parentheses ::= ((<Parentheses> <(> <LEFT> (<,> <RIGHT>) <)>) | <Parentheses>)
+PrimitiveType ::= (<BOOLEAN> | <INTEGER> | <REAL> | <STRING>)
+Property ::= (<NAME> (<:> Type) ((<{> (PropertyPattern)* <}>))?)
+PropertyPattern ::= Identifier
+PropertyReferencePart ::= (<NAME> ((<{> (NotationPartPattern)* <}>))?)
+Range ::= ((<Range> <(> <INT_VALUE> <..> <*> <)>) | (<Range> <(> <INT_VALUE> (<..> <INT_VALUE>) <)>))
+ReferenceType ::= <NAME>
+References ::= (<References> <(> <NAME> ((<,> <property> <=> <name>))? <)>)
+Separator ::= (<Separator> <(> <STRING_VALUE> <)>)
+TokenPart ::= <STRING_VALUE>
+Type ::= (PrimitiveType | ReferenceType | ArrayType)

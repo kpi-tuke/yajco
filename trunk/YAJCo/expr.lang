@@ -1,0 +1,17 @@
+concept Expression {Parentheses}
+
+concept Number : Expression
+    AS: value : int
+    CS: value
+
+concept Add : Expression {Operator(priority = 1)}
+    AS: expression1 : Expression, expression2 : Expression
+    CS: expression1 "+" expression2
+
+concept Mul : Expression {Operator(priority = 2)}
+    AS: expression1 : Expression, expression2 : Expression
+    CS: expression1 "*" expression2
+
+concept UnaryMinus : Expression {Operator(priority = 3)}
+    AS: expression : Expression
+    CS: "-" expression

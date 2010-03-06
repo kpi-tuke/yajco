@@ -1,0 +1,95 @@
+#*
+    TODO: potrebne nastavovat importy podla baliku noveho jazyka
+    je potrebne uviest kazdu triedu, lebo napriklad trieda Number sa nachadza aj v standardne importovanom baliku java.lang
+     a ked som nechal len importovat model.* tak sa to bilo
+*#
+## TODO: componentny typ... napriklad ak by bolo "array of array of array of NIECO"
+package visitor;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import yajco.visitor.VisitorException;
+#foreach( $concept in $language.concepts )
+#if( $language.name )
+import ${language.name}.${Utilities.toUpperCaseIdent($concept.name)};
+#else
+import ${Utilities.toUpperCaseIdent($concept.name)};
+#end
+#end
+
+public class Visitor<P> {
+    private Set<Object> visited = new HashSet<Object>();
+
+    public void visit(Object o, P p) {
+#set( $ifToken = "if" )
+#foreach( $concept in $language.concepts )
+        $ifToken (o instanceof ${Utilities.toUpperCaseIdent($concept.name)}) {
+            visit${Utilities.toUpperCaseIdent($concept.name)}((${Utilities.toUpperCaseIdent($concept.name)}) o, p);
+        }
+#set( $ifToken = "else if" )
+#end
+#if( !$language.concepts.isEmpty() )
+        else {
+            throw new VisitorException("Not supported type " + o.getClass());
+        }
+#end
+    }
+#foreach( $concept in $language.concepts )
+    protected void visit${Utilities.toUpperCaseIdent($concept.name)}(${Utilities.toUpperCaseIdent($concept.name)} ${Utilities.toLowerCaseIdent($concept.name)}, P p) {
+        if (enterVisit(${Utilities.toLowerCaseIdent($concept.name)})) {
+#foreach( $property in $concept.abstractSyntax )
+#set( $type = $property.type )
+#set( $className = ${Utilities.getClassName($type)} )
+#if( $className == $arrayTypeClassName )
+#if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
+        visit${Utilities.toUpperCaseIdent($property.name)}In${concept.name}(${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
+#end
+#elseif( $className == $primitiveTypeClassName )
+## pri primitovnom type sa aktualne dalej nevnarame, cize sa nerobi nic
+#elseif( $className == $referenceTypeClassName )
+        visit${Utilities.toUpperCaseIdent($type.concept.name)}(${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
+#else
+        // not known type for ${property.name}
+#end
+#end
+##
+## Volanie viac specifickych metod ak niektory koncept dedi od aktualneho
+#set( $descendants = ${Utilities.getDirectDescendantConcepts(${concept}, ${language})} )
+#if( !$descendants.isEmpty() )
+#set( $ifToken = "if" )
+#foreach( $descendant in $descendants )
+        $ifToken (${Utilities.toLowerCaseIdent($concept.name)} instanceof ${Utilities.toUpperCaseIdent($descendant.name)}) {
+            visit${Utilities.toUpperCaseIdent($descendant.name)}((${Utilities.toUpperCaseIdent($descendant.name)}) ${Utilities.toLowerCaseIdent($concept.name)}, p);
+        }
+#set( $ifToken = "else if" )
+#end
+#end
+            exitVisit(${Utilities.toLowerCaseIdent($concept.name)});
+        }
+    }
+
+#foreach( $property in $concept.abstractSyntax )
+#set( $type = $property.type )
+#set( $className = ${Utilities.getClassName($type)} )
+#if( $className == $arrayTypeClassName )
+#if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
+    protected void visit${Utilities.toUpperCaseIdent($property.name)}In${concept.name}(List<${Utilities.toUpperCaseIdent($type.componentType.concept.name)}> ${Utilities.toLowerCaseIdent($property.name)}, P p) {
+        for (${Utilities.toUpperCaseIdent($type.componentType.concept.name)} ${Utilities.toLowerCaseIdent($type.componentType.concept.name)} : ${Utilities.toLowerCaseIdent($property.name)}) {
+            visit${Utilities.toUpperCaseIdent($type.componentType.concept.name)}(${Utilities.toLowerCaseIdent($type.componentType.concept.name)}, p);
+        }
+    }
+#end
+#end
+#end
+
+#end
+
+    protected boolean enterVisit(Object o) {
+        return visited.add(o);
+    }
+
+    protected boolean exitVisit(Object o) {
+        return visited.remove(o);
+    }
+}
