@@ -6,10 +6,12 @@ import com.sun.source.tree.Tree;
 import com.sun.source.util.SourcePositions;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
+import com.sun.tools.javac.code.Type.ClassType;
 import yajco.model.type.Type;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.processing.*;
@@ -97,30 +99,30 @@ public class AnnotationProcessor extends AbstractProcessor {
                 }
 
                 //Map element to lines
-                Trees trees = Trees.instance(processingEnv);
-                SourcePositions sc = trees.getSourcePositions();
-                System.out.println("trees=" + trees + ", sc=" + sc);
-                TreePath path = trees.getPath(mainElement);
-                Tree tree = trees.getTree(mainElement);
-                CompilationUnitTree cut = path.getCompilationUnit();
-                LineMap lm = cut.getLineMap();
-                System.out.println("mainElement=" + mainElement + ", class=" + mainElement.getClass());
-                System.out.println("path=" + path);
-                System.out.println("cut=" + cut.getClass());
-                System.out.println("tree=" + tree.getClass());
-                System.out.println("lm=" + lm);
-                long startPosition = sc.getStartPosition(cut, tree);
-                long endPosition = sc.getEndPosition(cut, tree);
-                System.out.println("uri=" + cut.getSourceFile().toUri());
-                System.out.printf("Position (%d,%d) to (%d,%d)\n", lm.getLineNumber(startPosition), lm.getColumnNumber(startPosition), lm.getLineNumber(endPosition), lm.getColumnNumber(endPosition));
+//                Trees trees = Trees.instance(processingEnv);
+//                SourcePositions sc = trees.getSourcePositions();
+//                System.out.println("trees=" + trees + ", sc=" + sc);
+//                TreePath path = trees.getPath(mainElement);
+//                Tree tree = trees.getTree(mainElement);
+//                CompilationUnitTree cut = path.getCompilationUnit();
+//                LineMap lm = cut.getLineMap();
+//                System.out.println("mainElement=" + mainElement + ", class=" + mainElement.getClass());
+//                System.out.println("path=" + path);
+//                System.out.println("cut=" + cut.getClass());
+//                System.out.println("tree=" + tree.getClass());
+//                System.out.println("lm=" + lm);
+//                long startPosition = sc.getStartPosition(cut, tree);
+//                long endPosition = sc.getEndPosition(cut, tree);
+//                System.out.println("uri=" + cut.getSourceFile().toUri());
+//                System.out.printf("Position (%d,%d) to (%d,%d)\n", lm.getLineNumber(startPosition), lm.getColumnNumber(startPosition), lm.getLineNumber(endPosition), lm.getColumnNumber(endPosition));
 
                 //Start processing with the main element
                 processTypeElement(mainElement);
 
-//                Printer printer = new Printer();
-//                System.out.println("--------------------------------------------------------------------------------------------------------");
-//                printer.printLanguage(new PrintWriter(System.out), language);
-//                System.out.println("--------------------------------------------------------------------------------------------------------");
+                Printer printer = new Printer();
+                System.out.println("--------------------------------------------------------------------------------------------------------");
+                printer.printLanguage(new PrintWriter(System.out), language);
+                System.out.println("--------------------------------------------------------------------------------------------------------");
             }
         } catch (Throwable e) {
             e.printStackTrace();
@@ -173,13 +175,20 @@ public class AnnotationProcessor extends AbstractProcessor {
     }
 
     private void processEnum(Concept concept, TypeElement typeElement) {
-        throw new UnsupportedOperationException("Not implemeneted yet");
+        concept.addPattern(new yajco.model.pattern.impl.Enum());
+        for (Element element : typeElement.getEnclosedElements()) {
+            if (element.getKind() == ElementKind.ENUM_CONSTANT) {
+                NotationPart[] parts = {new TokenPart(element.getSimpleName().toString())};
+                concept.addNotation(new Notation(parts));
+            }
+        }
     }
 
     private void processConcreteClass(Concept concept, TypeElement classElement) {
         //Abstract syntax
         for (Element element : classElement.getEnclosedElements()) {
             if (element.getKind().isField()) {
+                System.out.println("+++ "+classElement.toString()+ "> "+element.toString());
                 VariableElement fieldElement = (VariableElement) element;
 
                 //Add only fields with property patterns (PropertyPattern)
@@ -219,6 +228,8 @@ public class AnnotationProcessor extends AbstractProcessor {
     }
 
     private void processAbstractClass(Concept concept, TypeElement typeElement) {
+        //TODO: toto je len docasne pre testovanie
+        processConcreteClass(concept, typeElement);
     }
 
     private void processInterface(Concept concept, TypeElement typeElement) {
@@ -271,9 +282,19 @@ public class AnnotationProcessor extends AbstractProcessor {
     private Type getType(TypeMirror type) {
         if (type.getKind() == TypeKind.ARRAY) {
             return new yajco.model.type.ArrayType(getSimpleType(((ArrayType) type).getComponentType()));
+        } else if (isSupportedCollection(type)) {
+            return new yajco.model.type.ArrayType(getSimpleType(((ClassType) type).getTypeArguments().last()));
         } else {
             return getSimpleType(type);
         }
+    }
+
+    private boolean isSupportedCollection(TypeMirror type) {
+        TypeElement referencedTypeElement = (TypeElement) processingEnv.getTypeUtils().asElement(type);
+        if (referencedTypeElement != null && referencedTypeElement.getQualifiedName().toString().equals(List.class.getName())) {
+            return true;
+        }
+        return false;
     }
 
     private Type getSimpleType(TypeMirror type) {

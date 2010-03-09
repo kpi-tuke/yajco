@@ -9,7 +9,7 @@ import yajco.model.pattern.ConceptPattern;
 public class Operator implements ConceptPattern {
     private int priority;
 
-    private tuke.pargen.annotation.Associativity associativity;
+    private Associativity associativity;
 
     @Before({"Operator", "("})
     @After(")")
@@ -21,7 +21,7 @@ public class Operator implements ConceptPattern {
     @After(")")
     public Operator(
             @Before({"priority", "="}) int intValue,
-            @Before({"associativity", "="}) tuke.pargen.annotation.Associativity associativity) {
+            @Before({"associativity", "="}) Associativity associativity) {
         this.priority = intValue;
         this.associativity = associativity;
     }
@@ -34,7 +34,7 @@ public class Operator implements ConceptPattern {
         return priority;
     }
 
-    public tuke.pargen.annotation.Associativity getAssociativity() {
+    public Associativity getAssociativity() {
         return associativity;
     }
 }

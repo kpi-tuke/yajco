@@ -206,6 +206,8 @@ public class Printer {
             printIndent(writer, (Indent) pattern);
         } else if (pattern instanceof NewLine) {
             printNewLine(writer, (NewLine) pattern);
+        } else if (pattern instanceof yajco.model.pattern.impl.Enum) {
+            printEnum(writer, (yajco.model.pattern.impl.Enum) pattern);
         } else {
             throw new PrinterException("Not supported pattern " + pattern.getClass());
         }
@@ -221,7 +223,7 @@ public class Printer {
 
         writer.print("priority = " + pattern.getPriority());
 
-        if (pattern.getAssociativity() != null && pattern.getAssociativity() != tuke.pargen.annotation.Associativity.AUTO) {
+        if (pattern.getAssociativity() != null && pattern.getAssociativity() != Associativity.AUTO) {
             writer.print(", ");
             writer.print("associativity = " + pattern.getAssociativity());
         }
@@ -283,5 +285,9 @@ public class Printer {
 
     private void printNewLine(PrintWriter writer, NewLine newLine) {
         writer.print("NewLine");
+    }
+
+    private void printEnum(PrintWriter writer, yajco.model.pattern.impl.Enum enumPattern) {
+        writer.print("Enum");
     }
 }

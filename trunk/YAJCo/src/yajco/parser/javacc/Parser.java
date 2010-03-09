@@ -172,7 +172,7 @@ public class Parser implements ParserConstants {
   Token _tokenintValue_1 = null;
   int intValue_2 = 0;
   Token _tokenintValue_2 = null;
-  tuke.pargen.annotation.Associativity associativity_2 = null;
+  yajco.model.pattern.impl.Associativity associativity_2 = null;
     if (jj_2_3(6)) {
       jj_consume_token(OPERATOR);
       jj_consume_token(_40);
@@ -250,23 +250,23 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  static final public tuke.pargen.annotation.Associativity AssociativitySymbol() throws ParseException {
+  static final public yajco.model.pattern.impl.Associativity AssociativitySymbol() throws ParseException {
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case LEFT:
       jj_consume_token(LEFT);
-              {if (true) return tuke.pargen.annotation.Associativity.LEFT;}
+              {if (true) return yajco.model.pattern.impl.Associativity.LEFT;}
       break;
     case RIGHT:
       jj_consume_token(RIGHT);
-              {if (true) return tuke.pargen.annotation.Associativity.RIGHT;}
+              {if (true) return yajco.model.pattern.impl.Associativity.RIGHT;}
       break;
     case NONE:
       jj_consume_token(NONE);
-             {if (true) return tuke.pargen.annotation.Associativity.NONE;}
+             {if (true) return yajco.model.pattern.impl.Associativity.NONE;}
       break;
     case AUTO:
       jj_consume_token(AUTO);
-             {if (true) return tuke.pargen.annotation.Associativity.AUTO;}
+             {if (true) return yajco.model.pattern.impl.Associativity.AUTO;}
       break;
     default:
       jj_la1[8] = jj_gen;

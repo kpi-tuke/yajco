@@ -483,7 +483,7 @@ public class ParserGenerator extends AbstractProcessor {
 
             ExecutableElement constructorElement = getConstructorElement(operatorList.get(0));
             int arity = getArity(operatorTypeElement, constructorElement);
-            Associativity associativity = Associativity.AUTO;
+            yajco.model.pattern.impl.Associativity associativity = yajco.model.pattern.impl.Associativity.AUTO;
 
             //Test validity
             for (TypeElement subclassElement : operatorList) {
@@ -492,12 +492,12 @@ public class ParserGenerator extends AbstractProcessor {
                     throw new GeneratorException("All operators of type '" + operatorTypeElement +
                             "' with the same priority must have the same arity (difference found in '" + subclassElement + "')");
                 }
-                Associativity operatorAssociativity = constructorElement.getAnnotation(Operator.class).associativity();
-                if (associativity == Associativity.AUTO) {
+                yajco.model.pattern.impl.Associativity operatorAssociativity = constructorElement.getAnnotation(Operator.class).associativity();
+                if (associativity == yajco.model.pattern.impl.Associativity.AUTO) {
                     associativity = operatorAssociativity;
                 }
-                if (operatorAssociativity != Associativity.AUTO) {
-                    if (associativity != Associativity.AUTO && associativity != operatorAssociativity) {
+                if (operatorAssociativity != yajco.model.pattern.impl.Associativity.AUTO) {
+                    if (associativity != yajco.model.pattern.impl.Associativity.AUTO && associativity != operatorAssociativity) {
                         throw new GeneratorException("All operators of type '" + operatorTypeElement + "' with the same priority must have the same association type (difference found in '" + subclassElement + "')");
                     }
                 }
@@ -513,19 +513,19 @@ public class ParserGenerator extends AbstractProcessor {
                     if (!prefixed && !postfixed) {
                         throw new GeneratorException("Unary prefix operator of type '" + subclassElement + "' should be prefixed or postfixed");
                     }
-                    if (associativity == Associativity.LEFT && prefixed) {
+                    if (associativity == yajco.model.pattern.impl.Associativity.LEFT && prefixed) {
                         throw new GeneratorException("Unary prefix operator of type '" + subclassElement + "' should not be left-associative");
                     }
-                    if (associativity == Associativity.RIGHT && postfixed) {
+                    if (associativity == yajco.model.pattern.impl.Associativity.RIGHT && postfixed) {
                         throw new GeneratorException("Unary postfix operator of type '" + subclassElement + "' should not be right-associative");
                     }
 
-                    if (associativity == Associativity.AUTO) {
+                    if (associativity == yajco.model.pattern.impl.Associativity.AUTO) {
                         if (prefixed) {
-                            associativity = Associativity.RIGHT;
+                            associativity = yajco.model.pattern.impl.Associativity.RIGHT;
                         }
                         if (postfixed) {
-                            associativity = Associativity.LEFT;
+                            associativity = yajco.model.pattern.impl.Associativity.LEFT;
                         }
                     } /* else {
                     if (associativity == Associativity.RIGHT && prefixed) {
@@ -540,8 +540,8 @@ public class ParserGenerator extends AbstractProcessor {
             }
 
             //Set auto associativity to left if it is not set
-            if (associativity == Associativity.AUTO) {
-                associativity = Associativity.LEFT;
+            if (associativity == yajco.model.pattern.impl.Associativity.AUTO) {
+                associativity = yajco.model.pattern.impl.Associativity.LEFT;
             }
 
             //Declarations
@@ -555,15 +555,15 @@ public class ParserGenerator extends AbstractProcessor {
             String currentPriorityNonterminal = operatorTypeElement.getSimpleName().toString() + priority;
             Expansion expansion = null;
             if (arity == 1) {
-                if (associativity == Associativity.LEFT) {
+                if (associativity == yajco.model.pattern.impl.Associativity.LEFT) {
                     expansion = new Sequence(decl.toString(), "return _node1;",
                             new NonTerminal(nextPriorityNonterminal, "_node1"),
                             new ZeroOrMany(generatePostfixOptions(null, null, operatorList, operatorTypeElement, paramNumber)));
-                } else if (associativity == Associativity.RIGHT) {
+                } else if (associativity == yajco.model.pattern.impl.Associativity.RIGHT) {
                     expansion = new Choice(decl.toString(), "return _node1;",
                             generatePrefixOptions(currentPriorityNonterminal, operatorList, operatorTypeElement, paramNumber),
                             new NonTerminal(nextPriorityNonterminal, "_node1"));
-                } else if (associativity == Associativity.NONE) {
+                } else if (associativity == yajco.model.pattern.impl.Associativity.NONE) {
                     Expansion prefixExpansion = generatePrefixOptions(nextPriorityNonterminal, operatorList, operatorTypeElement, paramNumber);
                     Expansion postfixExpansion = generatePostfixOptions(null, null, operatorList, operatorTypeElement, paramNumber);
                     if (prefixExpansion != null && postfixExpansion != null) {
@@ -588,15 +588,15 @@ public class ParserGenerator extends AbstractProcessor {
                 //TODO: dorobit aritu > 2
                 //Ak je ohranicene medzi dvoma terminalmi/neterminalny treba dat highestpriority
                 //A -> '?' A ':' A
-                if (associativity == Associativity.LEFT) {
+                if (associativity == yajco.model.pattern.impl.Associativity.LEFT) {
                     expansion = new Sequence(decl.toString(), "return _node1;",
                             new NonTerminal(nextPriorityNonterminal, "_node1"),
                             new ZeroOrMany(generatePostfixOptions(highestPriorityNonterminal, nextPriorityNonterminal, operatorList, operatorTypeElement, paramNumber)));
-                } else if (associativity == Associativity.RIGHT) {
+                } else if (associativity == yajco.model.pattern.impl.Associativity.RIGHT) {
                     expansion = new Sequence(decl.toString(), "return _node1;",
                             new NonTerminal(nextPriorityNonterminal, "_node1"),
                             new ZeroOrOne(generatePostfixOptions(highestPriorityNonterminal, currentPriorityNonterminal, operatorList, operatorTypeElement, paramNumber)));
-                } else if (associativity == Associativity.NONE) {
+                } else if (associativity == yajco.model.pattern.impl.Associativity.NONE) {
                     expansion = new Sequence(decl.toString(), "return _node1;",
                             new NonTerminal(nextPriorityNonterminal, "_node1"),
                             new ZeroOrOne(generatePostfixOptions(highestPriorityNonterminal, nextPriorityNonterminal, operatorList, operatorTypeElement, paramNumber)));

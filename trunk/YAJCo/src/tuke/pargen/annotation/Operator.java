@@ -13,5 +13,5 @@ public @interface Operator {
 
 	int priority() default 1;
 
-	Associativity associativity() default Associativity.AUTO;
+	yajco.model.pattern.impl.Associativity associativity() default yajco.model.pattern.impl.Associativity.AUTO;
 }

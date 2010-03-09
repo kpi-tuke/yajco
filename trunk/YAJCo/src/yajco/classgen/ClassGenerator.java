@@ -8,7 +8,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
 import tuke.pargen.GeneratorException;
-import tuke.pargen.annotation.Associativity;
+import yajco.model.pattern.impl.Associativity;
 import yajco.generator.util.Utilities;
 import yajco.model.BindingNotationPart;
 import yajco.model.Concept;
@@ -84,7 +84,25 @@ public class ClassGenerator {
 
     private void writeClassBody(Concept concept, Writer writer) throws IOException {
         for (ConceptPattern conceptPattern : concept.getPatterns()) {
-            if (!(conceptPattern instanceof Operator)) {  //Operator sa pise ku konstruktorom aktualne
+            if (conceptPattern instanceof Enum) {
+                writer.write("public enum " + concept.getName() + " ");
+                writer.write("{");
+                boolean comma = false;
+                for (Notation notation : concept.getConcreteSyntax()) {
+                    for (NotationPart notationPart : notation.getParts()) {
+                        if (notationPart instanceof TokenPart) {
+                            if (comma) {
+                                writer.write(", ");
+                            }
+                            writer.write(((TokenPart)notationPart).getToken());
+                            comma = true;
+                        }
+                    }
+                }
+                writer.write("}");
+                return;
+            }
+            else if (!(conceptPattern instanceof Operator)) {  //Operator sa pise ku konstruktorom aktualne
                 writePattern(writer, conceptPattern);
             }
         }
