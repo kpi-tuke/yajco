@@ -30,9 +30,12 @@ import yajco.printer.Printer;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
 @SupportedAnnotationTypes("tuke.pargen.annotation.config.Parser")
-//TODO - anotacia Optional nie je funkcna, malo by generovat vyskytu @Optional generovat vsetky moznosti v pripade
-//Pocet moznosti je 2x pocet pouziti @Optional
-//Mozno by tato anotacia uplne zrusena
+//TODO - anotacia @Optional nie je funkcna, malo by generovat vyskytu @Optional generovat vsetky moznosti v pripade
+//Ak pocet pouziti @Optional je x, potom pocet moznosti je: (x nad 0)+(x nad 1)+...+(x nad x-1)+(x nad x)
+// (x nad y) = ( x! / ( (x-y)! * y! ) )
+// pre x=1 -> 2, x=2 -> 2, x=3 -> 8, x=4 -> 16, x=5 -> 32
+//Mozno by tato anotacia mala byt uplne zrusena
+//
 //Nutnost upravit reference resolver, ktory funguje len s jednym konstruktoroms
 //Najlepsie to uplne zmenit podla novej struktury
 //TODO: zabezpecit lahsie rozsirenie o rozne anotacie - passing to model bez testovania
@@ -228,7 +231,7 @@ public class AnnotationProcessor extends AbstractProcessor {
     }
 
     private void processAbstractClass(Concept concept, TypeElement typeElement) {
-        //TODO: toto je len docasne pre testovanie
+        //TODO: toto je len docasne pre testovanie a pokial sa ujasni ako to chceme
         processConcreteClass(concept, typeElement);
     }
 
@@ -255,9 +258,31 @@ public class AnnotationProcessor extends AbstractProcessor {
             try {
                 references.value();
             } catch (MirroredTypeException e) {
-                processingEnv.getTypeUtils().asElement(e.getTypeMirror());
                 TypeElement referencedTypeElement = (TypeElement) processingEnv.getTypeUtils().asElement(e.getTypeMirror());
-                part.addPattern(new yajco.model.pattern.impl.References(processTypeElement(referencedTypeElement), null));
+
+                Concept referencedConcept = processTypeElement(referencedTypeElement);
+                Property property = null;
+                if (!references.field().isEmpty()) {
+                    property = concept.getProperty(references.field());
+                }
+                if (property == null) {
+                    property = findReferencedProperty(paramElement, referencedConcept);
+                    if (property == null) {
+                        String propertyName;
+                        if (references.field().isEmpty()) {
+                            propertyName = paramName;
+                        } else {
+                            propertyName = references.field();
+                        }
+                        property = new Property(propertyName,new yajco.model.type.ReferenceType(referencedConcept));
+                    }
+                    concept.addProperty(property);
+                }
+                //if names of notationPart and referenced property are identical, no need to fill property data to References pattern
+                if (property.getName().toString().equals(paramName)) {
+                    property = null;
+                }
+                part.addPattern(new yajco.model.pattern.impl.References(referencedConcept, property));
             }
         } else { //Property reference
             Property property = concept.getProperty(paramName);
@@ -277,6 +302,30 @@ public class AnnotationProcessor extends AbstractProcessor {
         if (paramElement.getAnnotation(After.class) != null) {
             addTokenParts(notation, paramElement.getAnnotation(After.class).value());
         }
+    }
+
+    private Property findReferencedProperty(VariableElement paramElement, Concept referencedConcept) {
+        Element element = paramElement;
+        //Go up on tree until you find class element
+        while (!element.getKind().isClass() && element != null) {
+            element = element.getEnclosingElement();
+        }
+        // Class element found
+        if (element != null) {
+            for (Element elem : element.getEnclosedElements()) {
+                if (elem.getKind().isField()) {
+                    VariableElement fieldElement = (VariableElement) elem;
+                    Type fieldType = getType(fieldElement.asType());
+                    if (fieldType instanceof yajco.model.type.ReferenceType) {
+                        yajco.model.type.ReferenceType referenceType = (yajco.model.type.ReferenceType) fieldType;
+                        if (referenceType.getConcept().equals(referencedConcept)) {
+                            return new Property(fieldElement.getSimpleName().toString(), referenceType);
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     private Type getType(TypeMirror type) {

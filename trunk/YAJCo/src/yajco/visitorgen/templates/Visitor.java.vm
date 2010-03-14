@@ -37,7 +37,7 @@ public class Visitor<P> {
     }
 #foreach( $concept in $language.concepts )
     protected void visit${Utilities.toUpperCaseIdent($concept.name)}(${Utilities.toUpperCaseIdent($concept.name)} ${Utilities.toLowerCaseIdent($concept.name)}, P p) {
-        if (enterVisit(${Utilities.toLowerCaseIdent($concept.name)})) {
+        if (${Utilities.toLowerCaseIdent($concept.name)} != null && enterVisit(${Utilities.toLowerCaseIdent($concept.name)})) {
 #foreach( $property in $concept.abstractSyntax )
 #set( $type = $property.type )
 #set( $className = ${Utilities.getClassName($type)} )

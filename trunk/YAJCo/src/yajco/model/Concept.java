@@ -81,4 +81,12 @@ public class Concept extends PatternSupport<ConceptPattern> {
     public void addNotation(Notation notation) {
         concreteSyntax.add(notation);
     }
+
+    public Property getSuperProperty(String name) {
+        Property property = getProperty(name);
+        if (property == null && parent != null) {
+            property = parent.getSuperProperty(name);
+        }
+        return property;
+    }
 }
