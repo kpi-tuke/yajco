@@ -33,7 +33,7 @@ import yajco.printer.Printer;
 //TODO - anotacia @Optional nie je funkcna, malo by generovat vyskytu @Optional generovat vsetky moznosti v pripade
 //Ak pocet pouziti @Optional je x, potom pocet moznosti je: (x nad 0)+(x nad 1)+...+(x nad x-1)+(x nad x)
 // (x nad y) = ( x! / ( (x-y)! * y! ) )
-// pre x=1 -> 2, x=2 -> 2, x=3 -> 8, x=4 -> 16, x=5 -> 32
+// pre x=1 -> 2, x=2 -> 4, x=3 -> 8, x=4 -> 16, x=5 -> 32
 //Mozno by tato anotacia mala byt uplne zrusena
 //
 //Nutnost upravit reference resolver, ktory funguje len s jednym konstruktoroms
