@@ -82,6 +82,20 @@ public class Concept extends PatternSupport<ConceptPattern> {
         concreteSyntax.add(notation);
     }
 
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof Concept)) {
+			return false;
+		}
+		Concept concept = (Concept) obj;
+		return name.equals(concept.getName());
+	}
+
+	@Override
+	public int hashCode() {
+		return name.hashCode();
+	}
+
     public Property getSuperProperty(String name) {
         Property property = getProperty(name);
         if (property == null && parent != null) {

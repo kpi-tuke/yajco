@@ -10,6 +10,8 @@ import com.sun.tools.javac.code.Type.ClassType;
 import yajco.model.type.Type;
 import java.io.PrintWriter;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -26,6 +28,7 @@ import tuke.pargen.annotation.config.*;
 import tuke.pargen.annotation.reference.*;
 import yajco.model.*;
 import yajco.model.pattern.*;
+import yajco.model.pattern.impl.Factory;
 import yajco.printer.Printer;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
@@ -50,7 +53,7 @@ public class AnnotationProcessor extends AbstractProcessor {
     private RoundEnvironment roundEnv;
 
     /**
-     * Language.
+     * Builded language.
      */
     private Language language = new Language();
 
@@ -122,10 +125,27 @@ public class AnnotationProcessor extends AbstractProcessor {
                 //Start processing with the main element
                 processTypeElement(mainElement);
 
+				// add tokens and skips into language
+				List<yajco.model.TokenDef> tokens = new ArrayList<yajco.model.TokenDef>();
+				List<String> skips = new ArrayList<String>();
+				for (tuke.pargen.annotation.config.TokenDef tokenDef : parserAnnotation.tokens()) {
+					tokens.add(new yajco.model.TokenDef(tokenDef.name(), tokenDef.regexp()));
+				}
+				for (Skip skip : parserAnnotation.skips()) {
+					skips.add(skip.value());
+				}
+				language.setTokens(tokens);
+				language.setSkips(skips);
+
                 Printer printer = new Printer();
                 System.out.println("--------------------------------------------------------------------------------------------------------");
                 printer.printLanguage(new PrintWriter(System.out), language);
                 System.out.println("--------------------------------------------------------------------------------------------------------");
+
+//				System.out.println("--------------------------------------------------------------------------------------------------------");
+//				AnnotationParserGenerator generator = new AnnotationParserGenerator(language);
+//				generator.generate();
+//				System.out.println("--------------------------------------------------------------------------------------------------------");
             }
         } catch (Throwable e) {
             e.printStackTrace();
@@ -178,13 +198,16 @@ public class AnnotationProcessor extends AbstractProcessor {
     }
 
     private void processEnum(Concept concept, TypeElement typeElement) {
-        concept.addPattern(new yajco.model.pattern.impl.Enum());
+		concept.addPattern(new yajco.model.pattern.impl.Enum());
         for (Element element : typeElement.getEnclosedElements()) {
-            if (element.getKind() == ElementKind.ENUM_CONSTANT) {
-                NotationPart[] parts = {new TokenPart(element.getSimpleName().toString())};
-                concept.addNotation(new Notation(parts));
-            }
-        }
+			if (element.getKind() != ElementKind.ENUM_CONSTANT) {
+				continue;
+			}
+			// TODO: @Token anotacia
+			Notation notation = new Notation();
+			notation.addPart(new TokenPart(element.getSimpleName().toString()));
+			concept.addNotation(notation);
+		}
     }
 
     private void processConcreteClass(Concept concept, TypeElement classElement) {
@@ -223,6 +246,9 @@ public class AnnotationProcessor extends AbstractProcessor {
             }
 
             concept.addNotation(notation);
+			if (constructor.getKind() == ElementKind.METHOD) {
+				notation.addPattern(new Factory(constructor.getSimpleName().toString()));
+			}
 
             //TODO: odstranit pri prenesesni @Operator na triedu
             //Add concept pattern from annotations (Type)
@@ -232,7 +258,7 @@ public class AnnotationProcessor extends AbstractProcessor {
 
     private void processAbstractClass(Concept concept, TypeElement typeElement) {
         //TODO: toto je len docasne pre testovanie a pokial sa ujasni ako to chceme
-        processConcreteClass(concept, typeElement);
+        //processConcreteClass(concept, typeElement);
     }
 
     private void processInterface(Concept concept, TypeElement typeElement) {
@@ -264,7 +290,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                 Property property = null;
                 if (!references.field().isEmpty()) {
                     property = concept.getProperty(references.field());
-                }
+            }
                 if (property == null) {
                     property = findReferencedProperty(paramElement, referencedConcept);
                     if (property == null) {
@@ -331,19 +357,9 @@ public class AnnotationProcessor extends AbstractProcessor {
     private Type getType(TypeMirror type) {
         if (type.getKind() == TypeKind.ARRAY) {
             return new yajco.model.type.ArrayType(getSimpleType(((ArrayType) type).getComponentType()));
-        } else if (isSupportedCollection(type)) {
-            return new yajco.model.type.ArrayType(getSimpleType(((ClassType) type).getTypeArguments().last()));
         } else {
             return getSimpleType(type);
         }
-    }
-
-    private boolean isSupportedCollection(TypeMirror type) {
-        TypeElement referencedTypeElement = (TypeElement) processingEnv.getTypeUtils().asElement(type);
-        if (referencedTypeElement != null && referencedTypeElement.getQualifiedName().toString().equals(List.class.getName())) {
-            return true;
-        }
-        return false;
     }
 
     private Type getSimpleType(TypeMirror type) {
