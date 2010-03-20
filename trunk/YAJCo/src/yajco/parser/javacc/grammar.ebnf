@@ -1,15 +1,19 @@
 ArrayType ::= (<array> <of> Type)
 Associativity ::= (<LEFT> | <RIGHT> | <NONE> | <AUTO>)
 Concept ::= ((<concept> <NAME>) ((<:> <NAME>))? ((<{> (ConceptPattern)* <}>))? ((<AS> <:> (Property ((<,> Property))*)))? ((<CS> <:> (Notation ((<|> Notation))*)))?)
-ConceptPattern ::= (Operator | Parentheses)
+ConceptPattern ::= (Enum | Operator | Parentheses)
+Enum ::= <Enum>
+Factory ::= (<Factory> <(> (<method> <=> <NAME>) <)>)
 Identifier ::= <Identifier>
 Indent ::= <Indent>
-Language ::= ((Concept (Concept)*) | ((<language> <NAME>) (Concept (Concept)*)))
+Language ::= (((<tokens> (TokenDef)*) (<skips> (<STRING_VALUE>)*) (Concept (Concept)*)) | ((<language> <NAME>) (<tokens> (TokenDef)*) (<skips> (<STRING_VALUE>)*) (Concept (Concept)*)))
+ListType ::= (<list> <of> Type)
 LocalVariablePart ::= (<NAME> (<:> Type) ((<{> (NotationPartPattern)* <}>))?)
 NewLine ::= <NewLine>
-Notation ::= (NotationPart (NotationPart)*)
-NotationPart ::= (LocalVariablePart | PropertyReferencePart | TokenPart)
-NotationPartPattern ::= (Separator | References | Range | Indent | NewLine)
+Notation ::= ((NotationPart (NotationPart)*) ((<{> (NotationPattern)* <}>))?)
+NotationPart ::= (TokenPart | LocalVariablePart | PropertyReferencePart)
+NotationPartPattern ::= (NewLine | Range | Separator | References | Indent)
+NotationPattern ::= Factory
 Operator ::= ((<Operator> <(> (<priority> <=> <INT_VALUE>) (<associativity> <=> Associativity) <)>) | (<Operator> <(> (<priority> <=> <INT_VALUE>) <)>))
 Parentheses ::= ((<Parentheses> <(> <LEFT> (<,> <RIGHT>) <)>) | <Parentheses>)
 PrimitiveType ::= (<BOOLEAN> | <INTEGER> | <REAL> | <STRING>)
@@ -20,5 +24,7 @@ Range ::= ((<Range> <(> <INT_VALUE> <..> <*> <)>) | (<Range> <(> <INT_VALUE> (<.
 ReferenceType ::= <NAME>
 References ::= (<References> <(> <NAME> ((<,> <property> <=> <name>))? <)>)
 Separator ::= (<Separator> <(> <STRING_VALUE> <)>)
+SetType ::= (<set> <of> Type)
+TokenDef ::= (<NAME> (<=> <STRING_VALUE>))
 TokenPart ::= <STRING_VALUE>
-Type ::= (PrimitiveType | ReferenceType | ArrayType)
+Type ::= (PrimitiveType | SetType | ListType | ArrayType | ReferenceType)

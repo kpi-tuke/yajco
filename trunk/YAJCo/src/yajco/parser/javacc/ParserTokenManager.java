@@ -21,13 +21,16 @@ public class ParserTokenManager implements TokenManager, ParserConstants {
     private static final List<Pattern> skips = new ArrayList<Pattern>();
 
     static {
+        tokens.put(TOKENS, Pattern.compile("tokens"));
+        tokens.put(_61, Pattern.compile("[=]"));
+        tokens.put(SKIPS, Pattern.compile("skips"));
         tokens.put(CONCEPT, Pattern.compile("concept"));
         tokens.put(_58, Pattern.compile("[:]"));
         tokens.put(_123, Pattern.compile("[{]"));
+        tokens.put(ENUM, Pattern.compile("Enum"));
         tokens.put(OPERATOR, Pattern.compile("Operator"));
         tokens.put(_40, Pattern.compile("[(]"));
         tokens.put(PRIORITY, Pattern.compile("priority"));
-        tokens.put(_61, Pattern.compile("[=]"));
         tokens.put(_41, Pattern.compile("[)]"));
         tokens.put(ASSOCIATIVITY, Pattern.compile("associativity"));
         tokens.put(LEFT, Pattern.compile("LEFT"));
@@ -38,19 +41,23 @@ public class ParserTokenManager implements TokenManager, ParserConstants {
         tokens.put(_44, Pattern.compile("[,]"));
         tokens.put(_125, Pattern.compile("[}]"));
         tokens.put(AS, Pattern.compile("AS"));
-        tokens.put(ARRAY, Pattern.compile("array"));
+        tokens.put(SET, Pattern.compile("set"));
         tokens.put(OF, Pattern.compile("of"));
+        tokens.put(LIST, Pattern.compile("list"));
+        tokens.put(ARRAY, Pattern.compile("array"));
         tokens.put(IDENTIFIER, Pattern.compile("Identifier"));
         tokens.put(CS, Pattern.compile("CS"));
         tokens.put(_124, Pattern.compile("[|]"));
-        tokens.put(SEPARATOR, Pattern.compile("Separator"));
-        tokens.put(REFERENCES, Pattern.compile("References"));
-        tokens.put(PROPERTY, Pattern.compile("property"));
+        tokens.put(NEWLINE, Pattern.compile("NewLine"));
         tokens.put(RANGE, Pattern.compile("Range"));
         tokens.put(_46_46, Pattern.compile("[.][.]"));
         tokens.put(_42, Pattern.compile("[*]"));
+        tokens.put(SEPARATOR, Pattern.compile("Separator"));
+        tokens.put(REFERENCES, Pattern.compile("References"));
+        tokens.put(PROPERTY, Pattern.compile("property"));
         tokens.put(INDENT, Pattern.compile("Indent"));
-        tokens.put(NEWLINE, Pattern.compile("NewLine"));
+        tokens.put(FACTORY, Pattern.compile("Factory"));
+        tokens.put(METHOD, Pattern.compile("method"));
         tokens.put(LANGUAGE, Pattern.compile("language"));
 
         tokens.put(BOOLEAN, Pattern.compile("boolean"));

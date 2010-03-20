@@ -29,67 +29,81 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int INT_VALUE = 9;
   /** RegularExpression Id. */
-  int CONCEPT = 10;
+  int TOKENS = 10;
   /** RegularExpression Id. */
-  int _58 = 11;
+  int _61 = 11;
   /** RegularExpression Id. */
-  int _123 = 12;
+  int SKIPS = 12;
   /** RegularExpression Id. */
-  int OPERATOR = 13;
+  int CONCEPT = 13;
   /** RegularExpression Id. */
-  int _40 = 14;
+  int _58 = 14;
   /** RegularExpression Id. */
-  int PRIORITY = 15;
+  int _123 = 15;
   /** RegularExpression Id. */
-  int _61 = 16;
+  int ENUM = 16;
   /** RegularExpression Id. */
-  int _41 = 17;
+  int OPERATOR = 17;
   /** RegularExpression Id. */
-  int ASSOCIATIVITY = 18;
+  int _40 = 18;
   /** RegularExpression Id. */
-  int LEFT = 19;
+  int PRIORITY = 19;
   /** RegularExpression Id. */
-  int RIGHT = 20;
+  int _41 = 20;
   /** RegularExpression Id. */
-  int NONE = 21;
+  int ASSOCIATIVITY = 21;
   /** RegularExpression Id. */
-  int AUTO = 22;
+  int LEFT = 22;
   /** RegularExpression Id. */
-  int PARENTHESES = 23;
+  int RIGHT = 23;
   /** RegularExpression Id. */
-  int _44 = 24;
+  int NONE = 24;
   /** RegularExpression Id. */
-  int _125 = 25;
+  int AUTO = 25;
   /** RegularExpression Id. */
-  int AS = 26;
+  int PARENTHESES = 26;
   /** RegularExpression Id. */
-  int ARRAY = 27;
+  int _44 = 27;
   /** RegularExpression Id. */
-  int OF = 28;
+  int _125 = 28;
   /** RegularExpression Id. */
-  int IDENTIFIER = 29;
+  int AS = 29;
   /** RegularExpression Id. */
-  int CS = 30;
+  int SET = 30;
   /** RegularExpression Id. */
-  int _124 = 31;
+  int OF = 31;
   /** RegularExpression Id. */
-  int SEPARATOR = 32;
+  int LIST = 32;
   /** RegularExpression Id. */
-  int REFERENCES = 33;
+  int ARRAY = 33;
   /** RegularExpression Id. */
-  int PROPERTY = 34;
+  int IDENTIFIER = 34;
   /** RegularExpression Id. */
-  int RANGE = 35;
+  int CS = 35;
   /** RegularExpression Id. */
-  int _46_46 = 36;
+  int _124 = 36;
   /** RegularExpression Id. */
-  int _42 = 37;
+  int NEWLINE = 37;
   /** RegularExpression Id. */
-  int INDENT = 38;
+  int RANGE = 38;
   /** RegularExpression Id. */
-  int NEWLINE = 39;
+  int _46_46 = 39;
   /** RegularExpression Id. */
-  int LANGUAGE = 40;
+  int _42 = 40;
+  /** RegularExpression Id. */
+  int SEPARATOR = 41;
+  /** RegularExpression Id. */
+  int REFERENCES = 42;
+  /** RegularExpression Id. */
+  int PROPERTY = 43;
+  /** RegularExpression Id. */
+  int INDENT = 44;
+  /** RegularExpression Id. */
+  int FACTORY = 45;
+  /** RegularExpression Id. */
+  int METHOD = 46;
+  /** RegularExpression Id. */
+  int LANGUAGE = 47;
 
   /** Literal token values. */
   String[] tokenImage = {
@@ -103,13 +117,16 @@ public interface ParserConstants {
     "\"REAL_VALUE\"",
     "\"STRING_VALUE\"",
     "\"INT_VALUE\"",
+    "\"TOKENS\"",
+    "\"_61\"",
+    "\"SKIPS\"",
     "\"CONCEPT\"",
     "\"_58\"",
     "\"_123\"",
+    "\"ENUM\"",
     "\"OPERATOR\"",
     "\"_40\"",
     "\"PRIORITY\"",
-    "\"_61\"",
     "\"_41\"",
     "\"ASSOCIATIVITY\"",
     "\"LEFT\"",
@@ -120,19 +137,23 @@ public interface ParserConstants {
     "\"_44\"",
     "\"_125\"",
     "\"AS\"",
-    "\"ARRAY\"",
+    "\"SET\"",
     "\"OF\"",
+    "\"LIST\"",
+    "\"ARRAY\"",
     "\"IDENTIFIER\"",
     "\"CS\"",
     "\"_124\"",
-    "\"SEPARATOR\"",
-    "\"REFERENCES\"",
-    "\"PROPERTY\"",
+    "\"NEWLINE\"",
     "\"RANGE\"",
     "\"_46_46\"",
     "\"_42\"",
+    "\"SEPARATOR\"",
+    "\"REFERENCES\"",
+    "\"PROPERTY\"",
     "\"INDENT\"",
-    "\"NEWLINE\"",
+    "\"FACTORY\"",
+    "\"METHOD\"",
     "\"LANGUAGE\"",
   };
 

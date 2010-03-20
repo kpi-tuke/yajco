@@ -11,22 +11,6 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  static final public yajco.model.pattern.impl.printer.NewLine NewLineSymbol() throws ParseException {
-    jj_consume_token(NEWLINE);
-    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.printer.NewLine( ));}
-    throw new Error("Missing return statement in function");
-  }
-
-  static final public yajco.model.type.ArrayType ArrayTypeSymbol() throws ParseException {
-  yajco.model.type.Type componentType_1 = null;
-    jj_consume_token(ARRAY);
-    jj_consume_token(OF);
-    componentType_1 = TypeSymbol();
-
-    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.type.ArrayType( componentType_1), (Object)componentType_1);}
-    throw new Error("Missing return statement in function");
-  }
-
   static final public yajco.model.PropertyReferencePart PropertyReferencePartSymbol() throws ParseException {
   java.lang.String name_1 = null;
   Token _tokenname_1 = null;
@@ -41,11 +25,11 @@ public class Parser implements ParserConstants {
       label_1:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case NEWLINE:
+        case RANGE:
         case SEPARATOR:
         case REFERENCES:
-        case RANGE:
         case INDENT:
-        case NEWLINE:
           ;
           break;
         default:
@@ -66,41 +50,42 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  static final public yajco.model.pattern.impl.Range RangeSymbol() throws ParseException {
-  int minOccurs_1 = 0;
-  Token _tokenminOccurs_1 = null;
-  int minOccurs_2 = 0;
-  Token _tokenminOccurs_2 = null;
-  int maxOccurs_2 = 0;
-  Token _tokenmaxOccurs_2 = null;
-    if (jj_2_1(5)) {
-      jj_consume_token(RANGE);
-      jj_consume_token(_40);
-      _tokenminOccurs_1 = jj_consume_token(INT_VALUE);
-                                           minOccurs_1 = Integer.parseInt(_tokenminOccurs_1.image);
-      jj_consume_token(_46_46);
-      jj_consume_token(_42);
-      jj_consume_token(_41);
-    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Range( minOccurs_1), (Object)minOccurs_1);}
-    } else {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case RANGE:
-        jj_consume_token(RANGE);
-        jj_consume_token(_40);
-        _tokenminOccurs_2 = jj_consume_token(INT_VALUE);
-                                           minOccurs_2 = Integer.parseInt(_tokenminOccurs_2.image);
-        jj_consume_token(_46_46);
-        _tokenmaxOccurs_2 = jj_consume_token(INT_VALUE);
-                                          maxOccurs_2 = Integer.parseInt(_tokenmaxOccurs_2.image);
-        jj_consume_token(_41);
-    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Range( minOccurs_2, maxOccurs_2), (Object)minOccurs_2, maxOccurs_2);}
-        break;
-      default:
-        jj_la1[2] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
-      }
+  static final public yajco.model.type.Type TypeSymbol() throws ParseException {
+  yajco.model.type.Type _value = null;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case BOOLEAN:
+    case INTEGER:
+    case REAL:
+    case STRING:
+      _value = PrimitiveTypeSymbol();
+      break;
+    case SET:
+      _value = SetTypeSymbol();
+      break;
+    case LIST:
+      _value = ListTypeSymbol();
+      break;
+    case ARRAY:
+      _value = ArrayTypeSymbol();
+      break;
+    case NAME:
+      _value = ReferenceTypeSymbol();
+      break;
+    default:
+      jj_la1[2] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
     }
+    {if (true) return _value;}
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public yajco.model.type.ReferenceType ReferenceTypeSymbol() throws ParseException {
+  java.lang.String name_1 = null;
+  Token _tokenname_1 = null;
+    _tokenname_1 = jj_consume_token(NAME);
+                                   name_1 = _tokenname_1.image;
+    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.type.ReferenceType( name_1), (Object)name_1);}
     throw new Error("Missing return statement in function");
   }
 
@@ -109,7 +94,7 @@ public class Parser implements ParserConstants {
   Token _tokenleft_2 = null;
   java.lang.String right_2 = null;
   Token _tokenright_2 = null;
-    if (jj_2_2(2)) {
+    if (jj_2_1(2)) {
       jj_consume_token(PARENTHESES);
       jj_consume_token(_40);
       _tokenleft_2 = jj_consume_token(LEFT);
@@ -134,46 +119,13 @@ public class Parser implements ParserConstants {
     throw new Error("Missing return statement in function");
   }
 
-  static final public yajco.model.type.ReferenceType ReferenceTypeSymbol() throws ParseException {
-  java.lang.String name_1 = null;
-  Token _tokenname_1 = null;
-    _tokenname_1 = jj_consume_token(NAME);
-                                   name_1 = _tokenname_1.image;
-    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.type.ReferenceType( name_1), (Object)name_1);}
-    throw new Error("Missing return statement in function");
-  }
-
-  static final public yajco.model.type.Type TypeSymbol() throws ParseException {
-  yajco.model.type.Type _value = null;
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case BOOLEAN:
-    case INTEGER:
-    case REAL:
-    case STRING:
-      _value = PrimitiveTypeSymbol();
-      break;
-    case NAME:
-      _value = ReferenceTypeSymbol();
-      break;
-    case ARRAY:
-      _value = ArrayTypeSymbol();
-      break;
-    default:
-      jj_la1[4] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
-    }
-    {if (true) return _value;}
-    throw new Error("Missing return statement in function");
-  }
-
   static final public yajco.model.pattern.impl.Operator OperatorSymbol() throws ParseException {
   int intValue_1 = 0;
   Token _tokenintValue_1 = null;
   int intValue_2 = 0;
   Token _tokenintValue_2 = null;
   yajco.model.pattern.impl.Associativity associativity_2 = null;
-    if (jj_2_3(6)) {
+    if (jj_2_2(6)) {
       jj_consume_token(OPERATOR);
       jj_consume_token(_40);
       jj_consume_token(PRIORITY);
@@ -199,7 +151,7 @@ public class Parser implements ParserConstants {
     {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Operator( intValue_1), (Object)intValue_1);}
         break;
       default:
-        jj_la1[5] = jj_gen;
+        jj_la1[4] = jj_gen;
         jj_consume_token(-1);
         throw new ParseException();
       }
@@ -225,15 +177,15 @@ public class Parser implements ParserConstants {
       label_2:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case NEWLINE:
+        case RANGE:
         case SEPARATOR:
         case REFERENCES:
-        case RANGE:
         case INDENT:
-        case NEWLINE:
           ;
           break;
         default:
-          jj_la1[6] = jj_gen;
+          jj_la1[5] = jj_gen;
           break label_2;
         }
         _itempatterns_1 = NotationPartPatternSymbol();
@@ -243,10 +195,258 @@ public class Parser implements ParserConstants {
       jj_consume_token(_125);
       break;
     default:
-      jj_la1[7] = jj_gen;
+      jj_la1[6] = jj_gen;
       ;
     }
     {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.LocalVariablePart( name_1, type_1, patterns_1), (Object)name_1, type_1, patterns_1);}
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public yajco.model.Property PropertySymbol() throws ParseException {
+  java.lang.String name_1 = null;
+  Token _tokenname_1 = null;
+  yajco.model.type.Type type_1 = null;
+  yajco.model.pattern.PropertyPattern[] patterns_1 = null;
+  java.util.List<yajco.model.pattern.PropertyPattern> _listpatterns_1 = new java.util.ArrayList<yajco.model.pattern.PropertyPattern>();
+  yajco.model.pattern.PropertyPattern _itempatterns_1 = null;
+    _tokenname_1 = jj_consume_token(NAME);
+                                   name_1 = _tokenname_1.image;
+    jj_consume_token(_58);
+    type_1 = TypeSymbol();
+
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case _123:
+      jj_consume_token(_123);
+      label_3:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case IDENTIFIER:
+          ;
+          break;
+        default:
+          jj_la1[7] = jj_gen;
+          break label_3;
+        }
+        _itempatterns_1 = PropertyPatternSymbol();
+                                                          _listpatterns_1.add(_itempatterns_1);
+      }
+    patterns_1 = _listpatterns_1.toArray(new yajco.model.pattern.PropertyPattern[] {});
+      jj_consume_token(_125);
+      break;
+    default:
+      jj_la1[8] = jj_gen;
+      ;
+    }
+    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.Property( name_1, type_1, patterns_1), (Object)name_1, type_1, patterns_1);}
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public yajco.model.pattern.ConceptPattern ConceptPatternSymbol() throws ParseException {
+  yajco.model.pattern.ConceptPattern _value = null;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case ENUM:
+      _value = EnumSymbol();
+      break;
+    case OPERATOR:
+      _value = OperatorSymbol();
+      break;
+    case PARENTHESES:
+      _value = ParenthesesSymbol();
+      break;
+    default:
+      jj_la1[9] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    {if (true) return _value;}
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public yajco.model.type.PrimitiveType PrimitiveTypeSymbol() throws ParseException {
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case BOOLEAN:
+      jj_consume_token(BOOLEAN);
+                 {if (true) return yajco.model.type.PrimitiveType.BOOLEAN;}
+      break;
+    case INTEGER:
+      jj_consume_token(INTEGER);
+                {if (true) return yajco.model.type.PrimitiveType.INTEGER;}
+      break;
+    case REAL:
+      jj_consume_token(REAL);
+             {if (true) return yajco.model.type.PrimitiveType.REAL;}
+      break;
+    case STRING:
+      jj_consume_token(STRING);
+               {if (true) return yajco.model.type.PrimitiveType.STRING;}
+      break;
+    default:
+      jj_la1[10] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public yajco.model.type.ListType ListTypeSymbol() throws ParseException {
+  yajco.model.type.Type componentType_1 = null;
+    jj_consume_token(LIST);
+    jj_consume_token(OF);
+    componentType_1 = TypeSymbol();
+
+    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.type.ListType( componentType_1), (Object)componentType_1);}
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public yajco.model.TokenDef TokenDefSymbol() throws ParseException {
+  java.lang.String name_1 = null;
+  Token _tokenname_1 = null;
+  java.lang.String regexp_1 = null;
+  Token _tokenregexp_1 = null;
+    _tokenname_1 = jj_consume_token(NAME);
+                                   name_1 = _tokenname_1.image;
+    jj_consume_token(_61);
+    _tokenregexp_1 = jj_consume_token(STRING_VALUE);
+                                          regexp_1 = _tokenregexp_1.image;
+    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.TokenDef( name_1, regexp_1), (Object)name_1, regexp_1);}
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public yajco.model.pattern.NotationPartPattern NotationPartPatternSymbol() throws ParseException {
+  yajco.model.pattern.NotationPartPattern _value = null;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case NEWLINE:
+      _value = NewLineSymbol();
+      break;
+    case RANGE:
+      _value = RangeSymbol();
+      break;
+    case SEPARATOR:
+      _value = SeparatorSymbol();
+      break;
+    case REFERENCES:
+      _value = ReferencesSymbol();
+      break;
+    case INDENT:
+      _value = IndentSymbol();
+      break;
+    default:
+      jj_la1[11] = jj_gen;
+      jj_consume_token(-1);
+      throw new ParseException();
+    }
+    {if (true) return _value;}
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public yajco.model.pattern.impl.Enum EnumSymbol() throws ParseException {
+    jj_consume_token(ENUM);
+    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Enum( ));}
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public yajco.model.pattern.impl.References ReferencesSymbol() throws ParseException {
+  java.lang.String name_1 = null;
+  Token _tokenname_1 = null;
+  java.lang.String property_1 = null;
+  Token _tokenproperty_1 = null;
+    jj_consume_token(REFERENCES);
+    jj_consume_token(_40);
+    _tokenname_1 = jj_consume_token(NAME);
+                                 name_1 = _tokenname_1.image;
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case _44:
+      jj_consume_token(_44);
+      jj_consume_token(PROPERTY);
+      jj_consume_token(_61);
+      _tokenproperty_1 = jj_consume_token(NAME);
+                                      property_1 = _tokenproperty_1.image;
+      break;
+    default:
+      jj_la1[12] = jj_gen;
+      ;
+    }
+    jj_consume_token(_41);
+    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.References( name_1, property_1), (Object)name_1, property_1);}
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public yajco.model.pattern.impl.Identifier IdentifierSymbol() throws ParseException {
+    jj_consume_token(IDENTIFIER);
+    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Identifier( ));}
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public yajco.model.pattern.impl.Separator SeparatorSymbol() throws ParseException {
+  java.lang.String stringValue_1 = null;
+  Token _tokenstringValue_1 = null;
+    jj_consume_token(SEPARATOR);
+    jj_consume_token(_40);
+    _tokenstringValue_1 = jj_consume_token(STRING_VALUE);
+                                                stringValue_1 = _tokenstringValue_1.image;
+    jj_consume_token(_41);
+    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Separator( stringValue_1), (Object)stringValue_1);}
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public yajco.model.pattern.NotationPattern NotationPatternSymbol() throws ParseException {
+  yajco.model.pattern.NotationPattern _value = null;
+    _value = FactorySymbol();
+    {if (true) return _value;}
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public yajco.model.type.ArrayType ArrayTypeSymbol() throws ParseException {
+  yajco.model.type.Type componentType_1 = null;
+    jj_consume_token(ARRAY);
+    jj_consume_token(OF);
+    componentType_1 = TypeSymbol();
+
+    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.type.ArrayType( componentType_1), (Object)componentType_1);}
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public yajco.model.pattern.impl.printer.NewLine NewLineSymbol() throws ParseException {
+    jj_consume_token(NEWLINE);
+    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.printer.NewLine( ));}
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public yajco.model.pattern.impl.Range RangeSymbol() throws ParseException {
+  int minOccurs_1 = 0;
+  Token _tokenminOccurs_1 = null;
+  int minOccurs_2 = 0;
+  Token _tokenminOccurs_2 = null;
+  int maxOccurs_2 = 0;
+  Token _tokenmaxOccurs_2 = null;
+    if (jj_2_3(5)) {
+      jj_consume_token(RANGE);
+      jj_consume_token(_40);
+      _tokenminOccurs_1 = jj_consume_token(INT_VALUE);
+                                           minOccurs_1 = Integer.parseInt(_tokenminOccurs_1.image);
+      jj_consume_token(_46_46);
+      jj_consume_token(_42);
+      jj_consume_token(_41);
+    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Range( minOccurs_1), (Object)minOccurs_1);}
+    } else {
+      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+      case RANGE:
+        jj_consume_token(RANGE);
+        jj_consume_token(_40);
+        _tokenminOccurs_2 = jj_consume_token(INT_VALUE);
+                                           minOccurs_2 = Integer.parseInt(_tokenminOccurs_2.image);
+        jj_consume_token(_46_46);
+        _tokenmaxOccurs_2 = jj_consume_token(INT_VALUE);
+                                          maxOccurs_2 = Integer.parseInt(_tokenmaxOccurs_2.image);
+        jj_consume_token(_41);
+    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Range( minOccurs_2, maxOccurs_2), (Object)minOccurs_2, maxOccurs_2);}
+        break;
+      default:
+        jj_la1[13] = jj_gen;
+        jj_consume_token(-1);
+        throw new ParseException();
+      }
+    }
     throw new Error("Missing return statement in function");
   }
 
@@ -269,7 +469,7 @@ public class Parser implements ParserConstants {
              {if (true) return yajco.model.pattern.impl.Associativity.AUTO;}
       break;
     default:
-      jj_la1[8] = jj_gen;
+      jj_la1[14] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -307,22 +507,23 @@ public class Parser implements ParserConstants {
                                     parent_1 = _tokenparent_1.image;
       break;
     default:
-      jj_la1[9] = jj_gen;
+      jj_la1[15] = jj_gen;
       ;
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
     case _123:
       jj_consume_token(_123);
-      label_3:
+      label_4:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case ENUM:
         case OPERATOR:
         case PARENTHESES:
           ;
           break;
         default:
-          jj_la1[10] = jj_gen;
-          break label_3;
+          jj_la1[16] = jj_gen;
+          break label_4;
         }
         _itempatterns_1 = ConceptPatternSymbol();
                                                          _listpatterns_1.add(_itempatterns_1);
@@ -331,7 +532,7 @@ public class Parser implements ParserConstants {
       jj_consume_token(_125);
       break;
     default:
-      jj_la1[11] = jj_gen;
+      jj_la1[17] = jj_gen;
       ;
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -340,15 +541,15 @@ public class Parser implements ParserConstants {
       jj_consume_token(_58);
       _itemabstractSyntax_1 = PropertySymbol();
                                                         _listabstractSyntax_1.add(_itemabstractSyntax_1);
-      label_4:
+      label_5:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case _44:
           ;
           break;
         default:
-          jj_la1[12] = jj_gen;
-          break label_4;
+          jj_la1[18] = jj_gen;
+          break label_5;
         }
         jj_consume_token(_44);
         _itemabstractSyntax_1 = PropertySymbol();
@@ -357,7 +558,7 @@ public class Parser implements ParserConstants {
     abstractSyntax_1 = _listabstractSyntax_1.toArray(new yajco.model.Property[] {});
       break;
     default:
-      jj_la1[13] = jj_gen;
+      jj_la1[19] = jj_gen;
       ;
     }
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
@@ -366,15 +567,15 @@ public class Parser implements ParserConstants {
       jj_consume_token(_58);
       _itemconcreteSyntax_1 = NotationSymbol();
                                                         _listconcreteSyntax_1.add(_itemconcreteSyntax_1);
-      label_5:
+      label_6:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case _124:
           ;
           break;
         default:
-          jj_la1[14] = jj_gen;
-          break label_5;
+          jj_la1[20] = jj_gen;
+          break label_6;
         }
         jj_consume_token(_124);
         _itemconcreteSyntax_1 = NotationSymbol();
@@ -383,49 +584,24 @@ public class Parser implements ParserConstants {
     concreteSyntax_1 = _listconcreteSyntax_1.toArray(new yajco.model.Notation[] {});
       break;
     default:
-      jj_la1[15] = jj_gen;
+      jj_la1[21] = jj_gen;
       ;
     }
     {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.Concept( name_1, parent_1, patterns_1, abstractSyntax_1, concreteSyntax_1), (Object)name_1, parent_1, patterns_1, abstractSyntax_1, concreteSyntax_1);}
     throw new Error("Missing return statement in function");
   }
 
-  static final public yajco.model.Property PropertySymbol() throws ParseException {
+  static final public yajco.model.pattern.impl.Factory FactorySymbol() throws ParseException {
   java.lang.String name_1 = null;
   Token _tokenname_1 = null;
-  yajco.model.type.Type type_1 = null;
-  yajco.model.pattern.PropertyPattern[] patterns_1 = null;
-  java.util.List<yajco.model.pattern.PropertyPattern> _listpatterns_1 = new java.util.ArrayList<yajco.model.pattern.PropertyPattern>();
-  yajco.model.pattern.PropertyPattern _itempatterns_1 = null;
+    jj_consume_token(FACTORY);
+    jj_consume_token(_40);
+    jj_consume_token(METHOD);
+    jj_consume_token(_61);
     _tokenname_1 = jj_consume_token(NAME);
-                                   name_1 = _tokenname_1.image;
-    jj_consume_token(_58);
-    type_1 = TypeSymbol();
-
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case _123:
-      jj_consume_token(_123);
-      label_6:
-      while (true) {
-        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-        case IDENTIFIER:
-          ;
-          break;
-        default:
-          jj_la1[16] = jj_gen;
-          break label_6;
-        }
-        _itempatterns_1 = PropertyPatternSymbol();
-                                                          _listpatterns_1.add(_itempatterns_1);
-      }
-    patterns_1 = _listpatterns_1.toArray(new yajco.model.pattern.PropertyPattern[] {});
-      jj_consume_token(_125);
-      break;
-    default:
-      jj_la1[17] = jj_gen;
-      ;
-    }
-    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.Property( name_1, type_1, patterns_1), (Object)name_1, type_1, patterns_1);}
+                                name_1 = _tokenname_1.image;
+    jj_consume_token(_41);
+    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Factory( name_1), (Object)name_1);}
     throw new Error("Missing return statement in function");
   }
 
@@ -433,6 +609,9 @@ public class Parser implements ParserConstants {
   yajco.model.NotationPart[] parts_1 = null;
   java.util.List<yajco.model.NotationPart> _listparts_1 = new java.util.ArrayList<yajco.model.NotationPart>();
   yajco.model.NotationPart _itemparts_1 = null;
+  yajco.model.pattern.NotationPattern[] patterns_1 = null;
+  java.util.List<yajco.model.pattern.NotationPattern> _listpatterns_1 = new java.util.ArrayList<yajco.model.pattern.NotationPattern>();
+  yajco.model.pattern.NotationPattern _itempatterns_1 = null;
     _itemparts_1 = NotationPartSymbol();
                                                     _listparts_1.add(_itemparts_1);
     label_7:
@@ -443,111 +622,47 @@ public class Parser implements ParserConstants {
         ;
         break;
       default:
-        jj_la1[18] = jj_gen;
+        jj_la1[22] = jj_gen;
         break label_7;
       }
       _itemparts_1 = NotationPartSymbol();
                                                   _listparts_1.add(_itemparts_1);
     }
     parts_1 = _listparts_1.toArray(new yajco.model.NotationPart[] {});
-    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.Notation( parts_1), (Object)parts_1);}
-    throw new Error("Missing return statement in function");
-  }
-
-  static final public yajco.model.pattern.ConceptPattern ConceptPatternSymbol() throws ParseException {
-  yajco.model.pattern.ConceptPattern _value = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case OPERATOR:
-      _value = OperatorSymbol();
-      break;
-    case PARENTHESES:
-      _value = ParenthesesSymbol();
+    case _123:
+      jj_consume_token(_123);
+      label_8:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case FACTORY:
+          ;
+          break;
+        default:
+          jj_la1[23] = jj_gen;
+          break label_8;
+        }
+        _itempatterns_1 = NotationPatternSymbol();
+                                                          _listpatterns_1.add(_itempatterns_1);
+      }
+    patterns_1 = _listpatterns_1.toArray(new yajco.model.pattern.NotationPattern[] {});
+      jj_consume_token(_125);
       break;
     default:
-      jj_la1[19] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
-    }
-    {if (true) return _value;}
-    throw new Error("Missing return statement in function");
-  }
-
-  static final public yajco.model.type.PrimitiveType PrimitiveTypeSymbol() throws ParseException {
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case BOOLEAN:
-      jj_consume_token(BOOLEAN);
-                 {if (true) return yajco.model.type.PrimitiveType.BOOLEAN;}
-      break;
-    case INTEGER:
-      jj_consume_token(INTEGER);
-                {if (true) return yajco.model.type.PrimitiveType.INTEGER;}
-      break;
-    case REAL:
-      jj_consume_token(REAL);
-             {if (true) return yajco.model.type.PrimitiveType.REAL;}
-      break;
-    case STRING:
-      jj_consume_token(STRING);
-               {if (true) return yajco.model.type.PrimitiveType.STRING;}
-      break;
-    default:
-      jj_la1[20] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
-    }
-    throw new Error("Missing return statement in function");
-  }
-
-  static final public yajco.model.pattern.NotationPartPattern NotationPartPatternSymbol() throws ParseException {
-  yajco.model.pattern.NotationPartPattern _value = null;
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case SEPARATOR:
-      _value = SeparatorSymbol();
-      break;
-    case REFERENCES:
-      _value = ReferencesSymbol();
-      break;
-    case RANGE:
-      _value = RangeSymbol();
-      break;
-    case INDENT:
-      _value = IndentSymbol();
-      break;
-    case NEWLINE:
-      _value = NewLineSymbol();
-      break;
-    default:
-      jj_la1[21] = jj_gen;
-      jj_consume_token(-1);
-      throw new ParseException();
-    }
-    {if (true) return _value;}
-    throw new Error("Missing return statement in function");
-  }
-
-  static final public yajco.model.pattern.impl.References ReferencesSymbol() throws ParseException {
-  java.lang.String name_1 = null;
-  Token _tokenname_1 = null;
-  java.lang.String property_1 = null;
-  Token _tokenproperty_1 = null;
-    jj_consume_token(REFERENCES);
-    jj_consume_token(_40);
-    _tokenname_1 = jj_consume_token(NAME);
-                                 name_1 = _tokenname_1.image;
-    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case _44:
-      jj_consume_token(_44);
-      jj_consume_token(PROPERTY);
-      jj_consume_token(_61);
-      _tokenproperty_1 = jj_consume_token(NAME);
-                                      property_1 = _tokenproperty_1.image;
-      break;
-    default:
-      jj_la1[22] = jj_gen;
+      jj_la1[24] = jj_gen;
       ;
     }
-    jj_consume_token(_41);
-    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.References( name_1, property_1), (Object)name_1, property_1);}
+    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.Notation( parts_1, patterns_1), (Object)parts_1, patterns_1);}
+    throw new Error("Missing return statement in function");
+  }
+
+  static final public yajco.model.type.SetType SetTypeSymbol() throws ParseException {
+  yajco.model.type.Type componentType_1 = null;
+    jj_consume_token(SET);
+    jj_consume_token(OF);
+    componentType_1 = TypeSymbol();
+
+    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.type.SetType( componentType_1), (Object)componentType_1);}
     throw new Error("Missing return statement in function");
   }
 
@@ -561,58 +676,132 @@ public class Parser implements ParserConstants {
   }
 
   static final public yajco.model.Language LanguageSymbol() throws ParseException {
+  java.util.List<yajco.model.TokenDef> tokens_1 = null;
+  java.util.List<yajco.model.TokenDef> _listtokens_1 = new java.util.ArrayList<yajco.model.TokenDef>();
+  yajco.model.TokenDef _itemtokens_1 = null;
+  java.util.List<java.lang.String> skips_1 = null;
+  java.util.List<java.lang.String> _listskips_1 = new java.util.ArrayList<java.lang.String>();
+  java.lang.String _itemskips_1 = null;
+  Token _token_itemskips_1 = null;
   yajco.model.Concept[] concepts_1 = null;
   java.util.List<yajco.model.Concept> _listconcepts_1 = new java.util.ArrayList<yajco.model.Concept>();
   yajco.model.Concept _itemconcepts_1 = null;
   java.lang.String name_2 = null;
   Token _tokenname_2 = null;
+  java.util.List<yajco.model.TokenDef> tokens_2 = null;
+  java.util.List<yajco.model.TokenDef> _listtokens_2 = new java.util.ArrayList<yajco.model.TokenDef>();
+  yajco.model.TokenDef _itemtokens_2 = null;
+  java.util.List<java.lang.String> skips_2 = null;
+  java.util.List<java.lang.String> _listskips_2 = new java.util.ArrayList<java.lang.String>();
+  java.lang.String _itemskips_2 = null;
+  Token _token_itemskips_2 = null;
   yajco.model.Concept[] concepts_2 = null;
   java.util.List<yajco.model.Concept> _listconcepts_2 = new java.util.ArrayList<yajco.model.Concept>();
   yajco.model.Concept _itemconcepts_2 = null;
     switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-    case CONCEPT:
+    case TOKENS:
+      jj_consume_token(TOKENS);
+      label_9:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case NAME:
+          ;
+          break;
+        default:
+          jj_la1[25] = jj_gen;
+          break label_9;
+        }
+        _itemtokens_1 = TokenDefSymbol();
+                                               _listtokens_1.add(_itemtokens_1);
+      }
+    tokens_1 = _listtokens_1;
+      jj_consume_token(SKIPS);
+      label_10:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case STRING_VALUE:
+          ;
+          break;
+        default:
+          jj_la1[26] = jj_gen;
+          break label_10;
+        }
+        _token_itemskips_1 = jj_consume_token(STRING_VALUE);
+                                                  _itemskips_1 = _token_itemskips_1.image;_listskips_1.add(_itemskips_1);
+      }
+    skips_1 = _listskips_1;
       _itemconcepts_1 = ConceptSymbol();
-                                                  _listconcepts_1.add(_itemconcepts_1);
-      label_8:
+                                                _listconcepts_1.add(_itemconcepts_1);
+      label_11:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case CONCEPT:
           ;
           break;
         default:
-          jj_la1[23] = jj_gen;
-          break label_8;
+          jj_la1[27] = jj_gen;
+          break label_11;
         }
         _itemconcepts_1 = ConceptSymbol();
                                                 _listconcepts_1.add(_itemconcepts_1);
       }
     concepts_1 = _listconcepts_1.toArray(new yajco.model.Concept[] {});
-    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.Language( concepts_1), (Object)concepts_1);}
+    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.Language( tokens_1, skips_1, concepts_1), (Object)tokens_1, skips_1, concepts_1);}
       break;
     case LANGUAGE:
       jj_consume_token(LANGUAGE);
       _tokenname_2 = jj_consume_token(NAME);
                                 name_2 = _tokenname_2.image;
+      jj_consume_token(TOKENS);
+      label_12:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case NAME:
+          ;
+          break;
+        default:
+          jj_la1[28] = jj_gen;
+          break label_12;
+        }
+        _itemtokens_2 = TokenDefSymbol();
+                                               _listtokens_2.add(_itemtokens_2);
+      }
+    tokens_2 = _listtokens_2;
+      jj_consume_token(SKIPS);
+      label_13:
+      while (true) {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case STRING_VALUE:
+          ;
+          break;
+        default:
+          jj_la1[29] = jj_gen;
+          break label_13;
+        }
+        _token_itemskips_2 = jj_consume_token(STRING_VALUE);
+                                                  _itemskips_2 = _token_itemskips_2.image;_listskips_2.add(_itemskips_2);
+      }
+    skips_2 = _listskips_2;
       _itemconcepts_2 = ConceptSymbol();
                                                 _listconcepts_2.add(_itemconcepts_2);
-      label_9:
+      label_14:
       while (true) {
         switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
         case CONCEPT:
           ;
           break;
         default:
-          jj_la1[24] = jj_gen;
-          break label_9;
+          jj_la1[30] = jj_gen;
+          break label_14;
         }
         _itemconcepts_2 = ConceptSymbol();
                                                 _listconcepts_2.add(_itemconcepts_2);
       }
     concepts_2 = _listconcepts_2.toArray(new yajco.model.Concept[] {});
-    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.Language( name_2, concepts_2), (Object)name_2, concepts_2);}
+    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.Language( name_2, tokens_2, skips_2, concepts_2), (Object)name_2, tokens_2, skips_2, concepts_2);}
       break;
     default:
-      jj_la1[25] = jj_gen;
+      jj_la1[31] = jj_gen;
       jj_consume_token(-1);
       throw new ParseException();
     }
@@ -621,47 +810,33 @@ public class Parser implements ParserConstants {
 
   static final public yajco.model.NotationPart NotationPartSymbol() throws ParseException {
   yajco.model.NotationPart _value = null;
-    if (jj_2_4(2)) {
-      _value = LocalVariablePartSymbol();
-    } else {
-      switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
-      case NAME:
-        _value = PropertyReferencePartSymbol();
-        break;
-      case STRING_VALUE:
-        _value = TokenPartSymbol();
-        break;
-      default:
-        jj_la1[26] = jj_gen;
-        jj_consume_token(-1);
-        throw new ParseException();
+    switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+    case STRING_VALUE:
+      _value = TokenPartSymbol();
+      break;
+    default:
+      jj_la1[32] = jj_gen;
+      if (jj_2_4(2)) {
+        _value = LocalVariablePartSymbol();
+      } else {
+        switch ((jj_ntk==-1)?jj_ntk():jj_ntk) {
+        case NAME:
+          _value = PropertyReferencePartSymbol();
+          break;
+        default:
+          jj_la1[33] = jj_gen;
+          jj_consume_token(-1);
+          throw new ParseException();
+        }
       }
     }
     {if (true) return _value;}
     throw new Error("Missing return statement in function");
   }
 
-  static final public yajco.model.pattern.impl.Identifier IdentifierSymbol() throws ParseException {
-    jj_consume_token(IDENTIFIER);
-    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Identifier( ));}
-    throw new Error("Missing return statement in function");
-  }
-
   static final public yajco.model.pattern.impl.printer.Indent IndentSymbol() throws ParseException {
     jj_consume_token(INDENT);
     {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.printer.Indent( ));}
-    throw new Error("Missing return statement in function");
-  }
-
-  static final public yajco.model.pattern.impl.Separator SeparatorSymbol() throws ParseException {
-  java.lang.String stringValue_1 = null;
-  Token _tokenstringValue_1 = null;
-    jj_consume_token(SEPARATOR);
-    jj_consume_token(_40);
-    _tokenstringValue_1 = jj_consume_token(STRING_VALUE);
-                                                stringValue_1 = _tokenstringValue_1.image;
-    jj_consume_token(_41);
-    {if (true) return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Separator( stringValue_1), (Object)stringValue_1);}
     throw new Error("Missing return statement in function");
   }
 
@@ -693,18 +868,16 @@ public class Parser implements ParserConstants {
     finally { jj_save(3, xla); }
   }
 
-  static private boolean jj_3R_10() {
-    if (jj_scan_token(NAME)) return true;
-    if (jj_scan_token(_58)) return true;
-    return false;
-  }
-
-  static private boolean jj_3_4() {
-    if (jj_3R_10()) return true;
-    return false;
-  }
-
   static private boolean jj_3_3() {
+    if (jj_scan_token(RANGE)) return true;
+    if (jj_scan_token(_40)) return true;
+    if (jj_scan_token(INT_VALUE)) return true;
+    if (jj_scan_token(_46_46)) return true;
+    if (jj_scan_token(_42)) return true;
+    return false;
+  }
+
+  static private boolean jj_3_2() {
     if (jj_scan_token(OPERATOR)) return true;
     if (jj_scan_token(_40)) return true;
     if (jj_scan_token(PRIORITY)) return true;
@@ -714,18 +887,20 @@ public class Parser implements ParserConstants {
     return false;
   }
 
-  static private boolean jj_3_2() {
-    if (jj_scan_token(PARENTHESES)) return true;
-    if (jj_scan_token(_40)) return true;
+  static private boolean jj_3R_15() {
+    if (jj_scan_token(NAME)) return true;
+    if (jj_scan_token(_58)) return true;
+    return false;
+  }
+
+  static private boolean jj_3_4() {
+    if (jj_3R_15()) return true;
     return false;
   }
 
   static private boolean jj_3_1() {
-    if (jj_scan_token(RANGE)) return true;
+    if (jj_scan_token(PARENTHESES)) return true;
     if (jj_scan_token(_40)) return true;
-    if (jj_scan_token(INT_VALUE)) return true;
-    if (jj_scan_token(_46_46)) return true;
-    if (jj_scan_token(_42)) return true;
     return false;
   }
 
@@ -740,7 +915,7 @@ public class Parser implements ParserConstants {
   static private Token jj_scanpos, jj_lastpos;
   static private int jj_la;
   static private int jj_gen;
-  static final private int[] jj_la1 = new int[27];
+  static final private int[] jj_la1 = new int[34];
   static private int[] jj_la1_0;
   static private int[] jj_la1_1;
   static {
@@ -748,10 +923,10 @@ public class Parser implements ParserConstants {
       jj_la1_init_1();
    }
    private static void jj_la1_init_0() {
-      jj_la1_0 = new int[] {0x0,0x1000,0x0,0x800000,0x800003e,0x2000,0x0,0x1000,0x780000,0x800,0x802000,0x1000,0x1000000,0x4000000,0x80000000,0x40000000,0x20000000,0x1000,0x120,0x802000,0x1e,0x0,0x1000000,0x400,0x400,0x400,0x120,};
+      jj_la1_0 = new int[] {0x0,0x8000,0x4000003e,0x4000000,0x20000,0x0,0x8000,0x0,0x8000,0x4030000,0x1e,0x0,0x8000000,0x0,0x3c00000,0x4000,0x4030000,0x8000,0x8000000,0x20000000,0x0,0x0,0x120,0x0,0x8000,0x20,0x100,0x2000,0x20,0x100,0x2000,0x400,0x100,0x20,};
    }
    private static void jj_la1_init_1() {
-      jj_la1_1 = new int[] {0xcb,0x0,0x8,0x0,0x0,0x0,0xcb,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0xcb,0x0,0x0,0x0,0x100,0x0,};
+      jj_la1_1 = new int[] {0x1660,0x0,0x3,0x0,0x0,0x1660,0x0,0x4,0x0,0x0,0x0,0x1660,0x0,0x40,0x0,0x0,0x0,0x0,0x0,0x0,0x10,0x8,0x0,0x2000,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x8000,0x0,0x0,};
    }
   static final private JJCalls[] jj_2_rtns = new JJCalls[4];
   static private boolean jj_rescan = false;
@@ -771,7 +946,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 27; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 34; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -781,7 +956,7 @@ public class Parser implements ParserConstants {
     token = new Token();
     jj_ntk = -1;
     jj_gen = 0;
-    for (int i = 0; i < 27; i++) jj_la1[i] = -1;
+    for (int i = 0; i < 34; i++) jj_la1[i] = -1;
     for (int i = 0; i < jj_2_rtns.length; i++) jj_2_rtns[i] = new JJCalls();
   }
 
@@ -893,12 +1068,12 @@ public class Parser implements ParserConstants {
   /** Generate ParseException. */
   static public ParseException generateParseException() {
     jj_expentries.clear();
-    boolean[] la1tokens = new boolean[41];
+    boolean[] la1tokens = new boolean[48];
     if (jj_kind >= 0) {
       la1tokens[jj_kind] = true;
       jj_kind = -1;
     }
-    for (int i = 0; i < 27; i++) {
+    for (int i = 0; i < 34; i++) {
       if (jj_la1[i] == jj_gen) {
         for (int j = 0; j < 32; j++) {
           if ((jj_la1_0[i] & (1<<j)) != 0) {
@@ -910,7 +1085,7 @@ public class Parser implements ParserConstants {
         }
       }
     }
-    for (int i = 0; i < 41; i++) {
+    for (int i = 0; i < 48; i++) {
       if (la1tokens[i]) {
         jj_expentry = new int[1];
         jj_expentry[0] = i;
