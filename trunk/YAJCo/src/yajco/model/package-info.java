@@ -7,7 +7,9 @@
         @TokenDef(name = "REAL", regexp = "real"),
         @TokenDef(name = "STRING", regexp = "string"),
 
-        @TokenDef(name = "NAME", regexp = "(?:[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*)|\\[([a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*)\\]"),
+        //Tato zmena nefunguje dobre, treba skontrolovat regex; nebralo to bezne vstupy jednoduchych stringov
+        //@TokenDef(name = "NAME", regexp = "(?:[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*)|\\[([a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*)\\]"),
+        @TokenDef(name = "NAME", regexp = "[a-zA-Z_][a-zA-Z0-9_]*"),
 
         @TokenDef(name = "BOOLEAN_VALUE", regexp = "true|false"),
         @TokenDef(name = "REAL_VALUE", regexp = "[-]?[0-9]+[.][0-9]+((e|E)[0-9]+)?"),

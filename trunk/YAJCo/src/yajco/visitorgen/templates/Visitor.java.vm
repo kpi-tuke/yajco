@@ -48,7 +48,9 @@ public class Visitor<P> {
 #elseif( $className == $primitiveTypeClassName )
 ## pri primitovnom type sa aktualne dalej nevnarame, cize sa nerobi nic
 #elseif( $className == $referenceTypeClassName )
-        visit${Utilities.toUpperCaseIdent($type.concept.name)}(${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
+        if (${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}() != null) {
+            visit${Utilities.toUpperCaseIdent($type.concept.name)}(${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
+        }
 #else
         // not known type for ${property.name}
 #end
