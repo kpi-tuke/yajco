@@ -7,8 +7,12 @@ import com.sun.source.util.SourcePositions;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
 import com.sun.tools.javac.code.Type.ClassType;
+import java.lang.reflect.InvocationTargetException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import yajco.model.type.Type;
 import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -29,6 +33,9 @@ import tuke.pargen.annotation.reference.*;
 import yajco.model.*;
 import yajco.model.pattern.*;
 import yajco.model.pattern.impl.Factory;
+import yajco.model.type.ComponentType;
+import yajco.model.type.ListType;
+import yajco.model.type.SetType;
 import yajco.printer.Printer;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
@@ -46,12 +53,11 @@ import yajco.printer.Printer;
 //rovno skontruujem objekt a skopirujem rovnake vlasnosti
 //Pozadujem prazdny konstrutkor a priamo vlozim do premennych
 public class AnnotationProcessor extends AbstractProcessor {
+
     /** Version string. */
     private static final String VERSION = "0.3";
-
     /** Stored round environment. */
     private RoundEnvironment roundEnv;
-
     /**
      * Builded language.
      */
@@ -122,20 +128,26 @@ public class AnnotationProcessor extends AbstractProcessor {
 //                System.out.println("uri=" + cut.getSourceFile().toUri());
 //                System.out.printf("Position (%d,%d) to (%d,%d)\n", lm.getLineNumber(startPosition), lm.getColumnNumber(startPosition), lm.getLineNumber(endPosition), lm.getColumnNumber(endPosition));
 
+                //add main package name == language name
+                String languageName = mainElementName.substring(0, mainElementName.lastIndexOf('.'));
+                if (!languageName.isEmpty()) {
+                    language.setName(languageName);
+                }
+
                 //Start processing with the main element
                 processTypeElement(mainElement);
 
-				// add tokens and skips into language
-				List<yajco.model.TokenDef> tokens = new ArrayList<yajco.model.TokenDef>();
-				List<String> skips = new ArrayList<String>();
-				for (tuke.pargen.annotation.config.TokenDef tokenDef : parserAnnotation.tokens()) {
-					tokens.add(new yajco.model.TokenDef(tokenDef.name(), tokenDef.regexp()));
-				}
-				for (Skip skip : parserAnnotation.skips()) {
-					skips.add(skip.value());
-				}
-				language.setTokens(tokens);
-				language.setSkips(skips);
+                // add tokens and skips into language
+                List<yajco.model.TokenDef> tokens = new ArrayList<yajco.model.TokenDef>();
+                List<String> skips = new ArrayList<String>();
+                for (tuke.pargen.annotation.config.TokenDef tokenDef : parserAnnotation.tokens()) {
+                    tokens.add(new yajco.model.TokenDef(tokenDef.name(), tokenDef.regexp()));
+                }
+                for (Skip skip : parserAnnotation.skips()) {
+                    skips.add(skip.value());
+                }
+                language.setTokens(tokens);
+                language.setSkips(skips);
 
                 Printer printer = new Printer();
                 System.out.println("--------------------------------------------------------------------------------------------------------");
@@ -159,7 +171,11 @@ public class AnnotationProcessor extends AbstractProcessor {
     }
 
     private Concept processTypeElement(TypeElement typeElement, Concept superConcept) {
-        String name = typeElement.getSimpleName().toString();
+        //String name = typeElement.getSimpleName().toString();
+        String name = typeElement.getQualifiedName().toString();
+        if (language.getName() != null && !language.getName().isEmpty() && name.startsWith(language.getName())) {
+            name = name.substring(language.getName().length()+1); // +1 because of dot after package name '.'
+        }
         Concept concept = language.getConcept(name);
         if (concept != null) { //Already processed
             if (superConcept != null) { //Set parent
@@ -198,23 +214,23 @@ public class AnnotationProcessor extends AbstractProcessor {
     }
 
     private void processEnum(Concept concept, TypeElement typeElement) {
-		concept.addPattern(new yajco.model.pattern.impl.Enum());
+        concept.addPattern(new yajco.model.pattern.impl.Enum());
         for (Element element : typeElement.getEnclosedElements()) {
-			if (element.getKind() != ElementKind.ENUM_CONSTANT) {
-				continue;
-			}
-			// TODO: @Token anotacia
-			Notation notation = new Notation();
-			notation.addPart(new TokenPart(element.getSimpleName().toString()));
-			concept.addNotation(notation);
-		}
+            if (element.getKind() != ElementKind.ENUM_CONSTANT) {
+                continue;
+            }
+            // TODO: @Token anotacia
+            Notation notation = new Notation();
+            notation.addPart(new TokenPart(element.getSimpleName().toString()));
+            concept.addNotation(notation);
+        }
     }
 
     private void processConcreteClass(Concept concept, TypeElement classElement) {
         //Abstract syntax
         for (Element element : classElement.getEnclosedElements()) {
             if (element.getKind().isField()) {
-                System.out.println("+++ "+classElement.toString()+ "> "+element.toString());
+                System.out.println("+++ " + classElement.toString() + "> " + element.toString());
                 VariableElement fieldElement = (VariableElement) element;
 
                 //Add only fields with property patterns (PropertyPattern)
@@ -246,9 +262,9 @@ public class AnnotationProcessor extends AbstractProcessor {
             }
 
             concept.addNotation(notation);
-			if (constructor.getKind() == ElementKind.METHOD) {
-				notation.addPattern(new Factory(constructor.getSimpleName().toString()));
-			}
+            if (constructor.getKind() == ElementKind.METHOD) {
+                notation.addPattern(new Factory(constructor.getSimpleName().toString()));
+            }
 
             //TODO: odstranit pri prenesesni @Operator na triedu
             //Add concept pattern from annotations (Type)
@@ -290,7 +306,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                 Property property = null;
                 if (!references.field().isEmpty()) {
                     property = concept.getProperty(references.field());
-            }
+                }
                 if (property == null) {
                     property = findReferencedProperty(paramElement, referencedConcept);
                     if (property == null) {
@@ -300,7 +316,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                         } else {
                             propertyName = references.field();
                         }
-                        property = new Property(propertyName,new yajco.model.type.ReferenceType(referencedConcept));
+                        property = new Property(propertyName, new yajco.model.type.ReferenceType(referencedConcept));
                     }
                     concept.addProperty(property);
                 }
@@ -357,9 +373,41 @@ public class AnnotationProcessor extends AbstractProcessor {
     private Type getType(TypeMirror type) {
         if (type.getKind() == TypeKind.ARRAY) {
             return new yajco.model.type.ArrayType(getSimpleType(((ArrayType) type).getComponentType()));
+        } else if (isSpecifiedClassType(type, List.class)) {
+            return getSpecifiedYajcoComponentType(type, ListType.class);
+        } else if (isSpecifiedClassType(type, Set.class)) {
+            return getSpecifiedYajcoComponentType(type, SetType.class);
         } else {
             return getSimpleType(type);
         }
+    }
+
+    private <T extends ComponentType> T getSpecifiedYajcoComponentType(TypeMirror type, Class<T> yajcoType) {
+        if (type.getKind() != TypeKind.DECLARED) {
+            throw new GeneratorException("Type " + type.toString() + " is not class or interface");
+        }
+        com.sun.tools.javac.util.List<com.sun.tools.javac.code.Type> types = ((ClassType) type).getTypeArguments();
+        if (types.isEmpty()) {
+            throw new GeneratorException("Not specified type for " + type.toString() + ", please use generics to specify inner type.");
+        } else {
+            try {
+                Constructor constructor = yajcoType.getConstructor(Type.class);
+                return (T) constructor.newInstance(getSimpleType(types.last()));
+            } catch (NoSuchMethodException ex) {
+                throw new GeneratorException("Cannot find constructor for " + yajcoType.getName() + " with only " + Type.class.getName() + " paramater!", ex);
+            } catch (Exception ex) {
+                throw new GeneratorException("Cannot create new object (" + yajcoType.getName() + ") needed for type " + type.toString(), ex);
+            }
+        }
+    }
+
+    private boolean isSpecifiedClassType(TypeMirror type, Class clazz) {
+        TypeElement referencedTypeElement = (TypeElement) processingEnv.getTypeUtils().asElement(type);
+        if (clazz != null && referencedTypeElement != null
+                && referencedTypeElement.getQualifiedName().toString().equals(clazz.getName())) {
+            return true;
+        }
+        return false;
     }
 
     private Type getSimpleType(TypeMirror type) {

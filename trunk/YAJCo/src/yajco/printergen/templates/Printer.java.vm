@@ -2,20 +2,21 @@
 package printer;
 
 import java.util.List;
+import java.util.Set;
 import java.io.PrintWriter;
 import visitor.Visitor;
 import yajco.printer.PrinterException;
 #foreach( $concept in $language.concepts )
-#if( $language.name )
-import ${language.name}.${Utilities.toUpperCaseIdent($concept.name)};
-#else
-import ${Utilities.toUpperCaseIdent($concept.name)};
-#end
+import ${Utilities.getFullConceptClassName($language, $concept)};
 #end
 
 public class Printer extends Visitor<PrintWriter> {
-
-    private final String WHITE_SPACE = " ";
+#if ( !$language.skips.isEmpty() )
+#set( $whiteSpace = ${language.skips.get(0)} )
+#else
+#set( $whiteSpace = " " )
+#end
+    private final String WHITE_SPACE = "${whiteSpace}";
     private String indentString = "\t";
     private int indent = 0;
     private boolean inNewLine = true;
@@ -68,18 +69,30 @@ public class Printer extends Visitor<PrintWriter> {
      #set( $property = ${Utilities.getPropertyFromNotationPart(${notationPart},${concept})} )
      #set( $type = ${property.type} )
      #set( $className = ${Utilities.getClassName($type)} )
-     #if( $className == $arrayTypeClassName )
+     #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
       #set( $hasRangePattern = ${Utilities.hasClassInList(${notationPart.patterns},${rangePatternClassName})} )
       #set( $rangePattern = ${Utilities.getObjectFromList(${notationPart.patterns},${rangePatternClassName})} )
       #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
           $logicalAndOperator ${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}() != null
        #if( $hasRangePattern )
+         #if( $className == $arrayTypeClassName )
+          && ${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}().length >= ${rangePattern.minOccurs}
+         #else
           && ${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}().size() >= ${rangePattern.minOccurs}
+         #end
         #if( $rangePattern.maxOccurs != $rangePatternInfinityValue )
+         #if( $className == $arrayTypeClassName )
+          && ${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}().length <= ${rangePattern.maxOccurs}
+         #else
           && ${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}().size() <= ${rangePattern.maxOccurs}
+         #end
         #end
        #else
+         #if( $className == $arrayTypeClassName )
+          && ${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}().length > 0
+         #else
           && !${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}().isEmpty()
+         #end
        #end
       #end
      #elseif( $className == $primitiveTypeClassName )
@@ -140,7 +153,7 @@ public class Printer extends Visitor<PrintWriter> {
   #if( $className == $arrayTypeClassName )
    #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
     @Override
-    protected void visit${Utilities.toUpperCaseIdent($property.name)}In${concept.name}(List<${Utilities.toUpperCaseIdent($type.componentType.concept.name)}> ${Utilities.toLowerCaseIdent($property.name)}, PrintWriter p) {
+    protected void visit${Utilities.toUpperCaseIdent($property.name)}In${concept.name}(#writeSpecifiedType($type ${Utilities.toUpperCaseIdent($type.componentType.concept.name)}) ${Utilities.toLowerCaseIdent($property.name)}, PrintWriter p) {
     #set( $patterns = ${Utilities.getAllPatterns(${property},${concept})} )
     #set( $separator = ${Utilities.getObjectFromList(${patterns},${separatorPatternClassName})} )
     #if( $separator )
@@ -235,7 +248,7 @@ public class Printer extends Visitor<PrintWriter> {
     #set( $property = ${Utilities.getPropertyFromNotationPart(${notationPart},${concept})} )
     #set( $type = ${property.type} )
     #set( $className = ${Utilities.getClassName($type)} )
-    #if( $className == $arrayTypeClassName )
+    #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
      #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
         visit${Utilities.toUpperCaseIdent($property.name)}In${concept.name}(${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
      #end
@@ -264,4 +277,17 @@ public class Printer extends Visitor<PrintWriter> {
         decreaseIndent();
     #end
    #end
+#end
+##
+##
+##
+#macro(writeSpecifiedType $type $conceptName )
+#set( $className = ${Utilities.getClassName($type)} )
+#if ( $className == $arrayTypeClassName )
+${conceptName}[]
+#elseif ( $className == $listTypeClassName )
+List<${conceptName}>
+#elseif ( $className == $setTypeClassName )
+Set<${conceptName}>
+#end
 #end

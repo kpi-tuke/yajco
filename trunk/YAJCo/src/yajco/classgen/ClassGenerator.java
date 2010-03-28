@@ -6,7 +6,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import tuke.pargen.GeneratorException;
 import yajco.model.pattern.impl.Associativity;
 import yajco.generator.util.Utilities;
@@ -18,6 +20,7 @@ import yajco.model.Notation;
 import yajco.model.NotationPart;
 import yajco.model.Property;
 import yajco.model.PropertyReferencePart;
+import yajco.model.TokenDef;
 import yajco.model.TokenPart;
 import yajco.model.pattern.ConceptPattern;
 import yajco.model.pattern.NotationPartPattern;
@@ -32,13 +35,14 @@ import yajco.model.pattern.impl.Separator;
 import yajco.model.pattern.impl.printer.Indent;
 import yajco.model.pattern.impl.printer.NewLine;
 import yajco.model.type.ArrayType;
+import yajco.model.type.ComponentType;
+import yajco.model.type.ListType;
 import yajco.model.type.PrimitiveType;
 import yajco.model.type.ReferenceType;
+import yajco.model.type.SetType;
 import yajco.model.type.Type;
 
 public class ClassGenerator {
-
-    private static String DEFAULT_PACKAGE_NAME = "test.model";
 
     private Language actualLanguage;
 
@@ -48,44 +52,129 @@ public class ClassGenerator {
         }
         actualLanguage = language;
 
+        generatePackageInfoFile(directory);
+        generateConceptFiles(directory);
+    }
+
+    private void generateConceptFiles(File directory) throws GeneratorException {
+        FileWriter writer = null;
         Jalopy jalopy = new Jalopy();
-        for (Concept concept : language.getConcepts()) {
-            FileWriter writer = null;
+        for (Concept concept : actualLanguage.getConcepts()) {
             try {
-                File file = new File(directory, concept.getName() + ".java");
+                String filePath = Utilities.getFullConceptClassName(actualLanguage, concept);
+                filePath = filePath.replace('.', File.separatorChar);
+                filePath = filePath + ".java";
+                String path = filePath.substring(0, filePath.lastIndexOf(File.separatorChar));
+                File file = new File(directory, path);
+                if (!file.exists()) {
+                    if (!file.mkdirs()) {
+                        throw new GeneratorException("Cannot create directory: " + file.getAbsolutePath());
+                    }
+                }
+                file = new File(directory, filePath);
                 writer = new FileWriter(file);
                 generate(concept, writer);
                 jalopy.setInput(file);
                 jalopy.setOutput(file);
                 jalopy.format();
+                System.out.println("Success generating file: " + filePath);
             } catch (IOException ex) {
-                throw new GeneratorException("Problem writing file for concept "+concept.getName(), ex);
+                throw new GeneratorException("Problem writing file for concept " + concept.getConceptName(), ex);
             } finally {
                 try {
                     writer.close();
                 } catch (IOException ex) {
-                    throw new GeneratorException("Problem writing file for concept "+concept.getName(), ex);
+                    throw new GeneratorException("Problem writing file for concept " + concept.getConceptName(), ex);
                 }
             }
         }
     }
 
+    private FileWriter generatePackageInfoFile(File directory) throws GeneratorException {
+        FileWriter writer = null;
+        try {
+            File packageInfoFile = new File(directory,
+                    Utilities.getLanguagePackageName(actualLanguage).replace('.', File.separatorChar)
+                    + File.separatorChar + "package-info.java");
+            writer = new FileWriter(packageInfoFile);
+            generatePackageInfo(writer);
+            //Jalopy odstranuje anotaciu @Parser, zatial som dal formatovanie priamo do predchadzajucej metody, je to lahke formatovanie
+            //Jalopy jalopy = new Jalopy();
+            //jalopy.setInput(packageInfoFile);
+            //jalopy.setOutput(packageInfoFile);
+            //jalopy.format();
+            System.out.println("Success generating file: " + packageInfoFile.getPath());
+        } catch (IOException ex) {
+            throw new GeneratorException("Problem writing file for package-info.java", ex);
+        } finally {
+            try {
+                writer.close();
+            } catch (IOException ex) {
+                throw new GeneratorException("Problem writing file for package-info.java", ex);
+            }
+        }
+        return writer;
+    }
+
+    private void generatePackageInfo(Writer writer) {
+        try {
+            writer.write("@"+tuke.pargen.annotation.config.Parser.class.getSimpleName());
+            writer.write("(\n");
+            writer.write("    className = \""+Utilities.getLanguagePackageName(actualLanguage)+".parser.Parser\",\n");
+            writer.write("    mainNode = \""+Utilities.getFullConceptClassName(actualLanguage, actualLanguage.getConcepts().get(0))+"\",\n");
+            //Tokens
+            writer.write("    tokens = ");
+            writer.write("{\n");
+            boolean comma = false;
+            for (TokenDef tokenDef : actualLanguage.getTokens()) {
+                if (comma) {
+                    writer.write(",\n");
+                }
+                writer.write("        @TokenDef(name = \""+tokenDef.getName()+"\", regexp = \""+tokenDef.getRegexp()+"\")");
+                comma = true;
+            }
+            writer.write("\n    },\n");
+            //Skips
+            writer.write("    skips = ");
+            writer.write("{\n");
+            comma = false;
+            for (String skip : actualLanguage.getSkips()) {
+                if (comma) {
+                    writer.write(",\n");
+                }
+                writer.write("        @Skip(\""+skip+"\")");
+                comma = true;
+            }
+            writer.write("\n    }\n");
+            writer.write(")\n");
+            //Package + imports
+            writer.write("package "+Utilities.getLanguagePackageName(actualLanguage)+";\n\n");
+            writer.write("import "+tuke.pargen.annotation.config.Parser.class.getCanonicalName()+";\n");
+            writer.write("import "+tuke.pargen.annotation.config.TokenDef.class.getCanonicalName()+";\n");
+            writer.write("import "+tuke.pargen.annotation.config.Skip.class.getCanonicalName()+";\n");
+
+            writer.flush();
+        } catch (IOException ex) {
+            throw new GeneratorException("Error writing package-info.java", ex);
+        }
+    }
+
     private void generate(Concept concept, Writer writer) {
         try {
-            writePackage(writer);
+            writePackage(concept, writer);
             writeImports(concept, writer);
             writeClassBody(concept, writer);
 
             writer.flush();
         } catch (IOException ex) {
-            throw new GeneratorException("Error writing class for concept " + concept.getName() + ".", ex);
+            throw new GeneratorException("Error writing class for concept " + concept.getConceptName() + ".", ex);
         }
     }
 
     private void writeClassBody(Concept concept, Writer writer) throws IOException {
         for (ConceptPattern conceptPattern : concept.getPatterns()) {
             if (conceptPattern instanceof Enum) {
-                writer.write("public enum " + concept.getName() + " ");
+                writer.write("public enum " + concept.getConceptName() + " ");
                 writer.write("{");
                 boolean comma = false;
                 for (Notation notation : concept.getConcreteSyntax()) {
@@ -106,9 +195,9 @@ public class ClassGenerator {
                 writePattern(writer, conceptPattern);
             }
         }
-        writer.write("public class " + concept.getName() + " ");
+        writer.write("public class " + concept.getConceptName() + " ");
         if (concept.getParent() != null) {
-            writer.write("extends " + concept.getParent().getName());
+            writer.write("extends " + concept.getParent().getConceptName());
         }
         writer.write(" {");
         writePrivateFields(concept, writer);
@@ -148,7 +237,7 @@ public class ClassGenerator {
             writer.write(")");
             list.clear();
         }
-        writer.write("public " + concept.getName() + "(");
+        writer.write("public " + concept.getConceptName() + "(");
         for (NotationPart notationPart : notation.getParts()) {
             if (notationPart instanceof TokenPart) {
                 list.add(((TokenPart) notationPart).getToken());
@@ -209,45 +298,56 @@ public class ClassGenerator {
     }
 
     private void writeImports(Concept concept, Writer writer) throws IOException {
-        boolean arrayType = false;
+        boolean listType = false;
+        boolean setType = false;
+        Set<Concept> importConcepts = new HashSet<Concept>();
         for (Property property : concept.getAbstractSyntax()) {
             Type type = property.getType();
-            if (type instanceof ArrayType) {
-                arrayType = true;
-// TODO: az bude realne funkcne spravena moznost vytvarania roznych balikov pre koncepty v jednom jazyku, toto treba spojazdnit a odstranit duplicity
-//                if (((ArrayType) type).getComponentType() instanceof ReferenceType) {
-//                    writeReferenceTypeImport(writer, (ReferenceType) (((ArrayType) type).getComponentType()));
-//                }
-            } else if (type instanceof ReferenceType) {
-//                writeReferenceTypeImport(writer, (ReferenceType) type);
+            processTypeToConceptSet(concept, type, importConcepts);
+            if (type instanceof ListType) {
+                listType = true;
+            } else if (type instanceof SetType) {
+                setType = true;
             }
         }
-        if (arrayType) {
+        //importConcepts.remove(concept);
+        for (Concept importConcept : importConcepts) {
+            writeConceptImport(writer, importConcept);
+        }
+        if (listType) {
             writer.write("import java.util.List;");
+        }
+        if (setType) {
+            writer.write("import java.util.Set;");
         }
         writer.write("import tuke.pargen.annotation.*;");
         writer.write("import tuke.pargen.annotation.reference.*;");
         writer.write("import yajco.annotation.printer.*;");
     }
 
-    private void writeReferenceTypeImport(Writer writer, ReferenceType type) throws IOException {
-        writer.write("import " + getFullConceptClassName(type.getConcept()) + ";");
-    }
-
-    private void writePackage(Writer writer) throws IOException {
-        writer.write("package " + getPackageName() + ";");
-    }
-
-    private String getPackageName() {
-        if (actualLanguage.getName() != null) {
-            return actualLanguage.getName();
-        } else {
-            return DEFAULT_PACKAGE_NAME;
+    private void processTypeToConceptSet(Concept actualConcept, Type type, Set<Concept> conceptList) {
+        if (type instanceof ComponentType) {
+            processTypeToConceptSet(actualConcept, ((ComponentType)type).getComponentType(), conceptList);
+        } else if (type instanceof ReferenceType) {
+            Concept referencedConcept = ((ReferenceType)type).getConcept();
+            if (!referencedConcept.getSubPackage().equals(actualConcept.getSubPackage())) {
+                conceptList.add(referencedConcept);
+            }
         }
     }
 
-    private String getFullConceptClassName(Concept concept) {
-        return getPackageName() + "." + concept.getName();
+    private void writeConceptImport(Writer writer, Concept concept) throws IOException {
+        writer.write("import " + Utilities.getFullConceptClassName(actualLanguage, concept) + ";");
+    }
+
+    private void writePackage(Concept concept, Writer writer) throws IOException {
+        String packageName;
+        if (concept.getSubPackage().isEmpty()) {
+            packageName = Utilities.getLanguagePackageName(actualLanguage);
+        } else {
+            packageName = Utilities.getLanguagePackageName(actualLanguage) + "." + concept.getSubPackage().substring(0, concept.getSubPackage().length()-1);
+        }
+        writer.write("package " + packageName + ";");
     }
 
     private void writeConstructors(Concept concept, Writer writer) throws IOException {
@@ -294,7 +394,7 @@ public class ClassGenerator {
             writer.write(")");
         } else if (pattern instanceof References) {
             References references = (References) pattern;
-            writer.write("@References(value = " + references.getConcept().getName() + ".class");
+            writer.write("@References(value = " + references.getConcept().getConceptName() + ".class");
             if (references.getProperty() != null) {
                 writer.write(", field = \"" + references.getProperty().getName() + "\"");
             }
@@ -316,8 +416,15 @@ public class ClassGenerator {
     private String getTypeName(Type type) {
         StringBuilder str = new StringBuilder();
         if (type instanceof ArrayType) {
-            str.append("List<");
             str.append(getTypeName(((ArrayType) type).getComponentType()));
+            str.append("[]");
+        } else if (type instanceof ListType) {
+            str.append("List<");
+            str.append(getTypeName(((ListType) type).getComponentType()));
+            str.append(">");
+        } else if (type instanceof SetType) {
+            str.append("Set<");
+            str.append(getTypeName(((SetType) type).getComponentType()));
             str.append(">");
         } else if (type instanceof PrimitiveType) {
             PrimitiveType primitive = (PrimitiveType) type;
@@ -336,7 +443,9 @@ public class ClassGenerator {
                     break;
             }
         } else if (type instanceof ReferenceType) {
-            str.append(((ReferenceType) type).getConcept().getName());
+            str.append(((ReferenceType) type).getConcept().getConceptName());
+        } else {
+            throw new GeneratorException("Not known type: "+type.getClass().getCanonicalName());
         }
         return str.toString();
     }

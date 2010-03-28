@@ -11,14 +11,21 @@ import yajco.model.pattern.impl.*;
 import yajco.model.pattern.impl.printer.Indent;
 import yajco.model.pattern.impl.printer.NewLine;
 import yajco.model.type.ArrayType;
+import yajco.model.type.ListType;
+import yajco.model.type.SetType;
 
 /*TOTO BY MALO BYT GENEROVANE DOMINIKOVYM PRINTER GENERATOROM*/
 public class Printer {
     public void printLanguage(PrintWriter writer, Language language) {
         if (language.getName() != null) {
-            writer.print("language " + language.getName() + "\n\n");
+            writer.print("language " + language.getName() + "\n");
+            writer.println();
+            printTokens(writer, language.getTokens());
+            printSkips(writer, language.getSkips());
             printConcepts(writer, language.getConcepts());
         } else {
+            printTokens(writer, language.getTokens());
+            printSkips(writer, language.getSkips());
             printConcepts(writer, language.getConcepts());
         }
         writer.flush();
@@ -76,6 +83,13 @@ public class Printer {
         printPatterns(writer, property.getPatterns());
     }
 
+    private void printTokenDef(PrintWriter writer, TokenDef tokenDef) {
+        writer.print("   ");
+        writer.print(tokenDef.getName());
+        writer.print(" = ");
+        writer.print("\"" + tokenDef.getRegexp() + "\"\n");
+    }
+
     private void printType(PrintWriter writer, Type type) {
         if (type instanceof PrimitiveType) {
             printPrimitiveType(writer, (PrimitiveType) type);
@@ -83,6 +97,10 @@ public class Printer {
             printReferenceType(writer, (ReferenceType) type);
         } else if (type instanceof ArrayType) {
             printArrayType(writer, (ArrayType) type);
+        } else if (type instanceof ListType) {
+            printListType(writer, (ListType) type);
+        } else if (type instanceof SetType) {
+            printSetType(writer, (SetType) type);
         } else {
             throw new PrinterException("Not supported type " + type.getClass());
         }
@@ -112,6 +130,16 @@ public class Printer {
     private void printArrayType(PrintWriter writer, ArrayType arrayType) {
         writer.print("array of ");
         printType(writer, arrayType.getComponentType());
+    }
+
+    private void printListType(PrintWriter writer, ListType listType) {
+        writer.print("list of ");
+        printType(writer, listType.getComponentType());
+    }
+
+    private void printSetType(PrintWriter writer, SetType setType) {
+        writer.print("set of ");
+        printType(writer, setType.getComponentType());
     }
 
     /* ------------------------ Concrete Syntax ------------------------ */
@@ -290,4 +318,21 @@ public class Printer {
     private void printEnum(PrintWriter writer, yajco.model.pattern.impl.Enum enumPattern) {
         writer.print("Enum");
     }
+
+    private void printTokens(PrintWriter writer, List<TokenDef> tokens) {
+        writer.print("tokens\n");
+        for (TokenDef tokenDef : tokens) {
+            printTokenDef(writer, tokenDef);
+        }
+        writer.println();
+    }
+
+    private void printSkips(PrintWriter writer, List<String> skips) {
+        writer.print("skips\n");
+        for (String skip : skips) {
+            writer.print("   \""+skip+"\"\n");
+        }
+        writer.println();
+    }
+
 }

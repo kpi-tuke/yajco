@@ -29,6 +29,9 @@ import yajco.model.type.Type;
  * @author DeeL
  */
 public class Utilities {
+    
+    private static String DEFAULT_MAIN_PACKAGE_NAME = "model";
+
     public static String toUpperCaseIdent(String ident) {
         return Character.toUpperCase(ident.charAt(0)) + ident.substring(1);
     }
@@ -168,6 +171,18 @@ public class Utilities {
         } catch (ClassNotFoundException ex) {
             return false;
         }
+    }
+
+    public static String getLanguagePackageName(Language language) {
+        if (language.getName() != null) {
+            return language.getName();
+        } else {
+            return DEFAULT_MAIN_PACKAGE_NAME;
+        }
+    }
+
+    public static String getFullConceptClassName(Language language, Concept concept) {
+        return getLanguagePackageName(language) + "." + concept.getName();
     }
 
     public static List<Integer> getValuedNotationList(Concept concept) {

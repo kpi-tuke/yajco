@@ -11,11 +11,7 @@ import java.util.List;
 import java.util.Set;
 import yajco.visitor.VisitorException;
 #foreach( $concept in $language.concepts )
-#if( $language.name )
-import ${language.name}.${Utilities.toUpperCaseIdent($concept.name)};
-#else
-import ${Utilities.toUpperCaseIdent($concept.name)};
-#end
+import ${Utilities.getFullConceptClassName($language, $concept)};
 #end
 
 public class Visitor<P> {
@@ -41,7 +37,7 @@ public class Visitor<P> {
 #foreach( $property in $concept.abstractSyntax )
 #set( $type = $property.type )
 #set( $className = ${Utilities.getClassName($type)} )
-#if( $className == $arrayTypeClassName )
+#if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
 #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
         visit${Utilities.toUpperCaseIdent($property.name)}In${concept.name}(${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
 #end
@@ -74,9 +70,9 @@ public class Visitor<P> {
 #foreach( $property in $concept.abstractSyntax )
 #set( $type = $property.type )
 #set( $className = ${Utilities.getClassName($type)} )
-#if( $className == $arrayTypeClassName )
+#if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
 #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
-    protected void visit${Utilities.toUpperCaseIdent($property.name)}In${concept.name}(List<${Utilities.toUpperCaseIdent($type.componentType.concept.name)}> ${Utilities.toLowerCaseIdent($property.name)}, P p) {
+    protected void visit${Utilities.toUpperCaseIdent($property.name)}In${concept.name}(#writeSpecifiedType($type ${Utilities.toUpperCaseIdent($type.componentType.concept.name)}) ${Utilities.toLowerCaseIdent($property.name)}, P p) {
         for (${Utilities.toUpperCaseIdent($type.componentType.concept.name)} ${Utilities.toLowerCaseIdent($type.componentType.concept.name)} : ${Utilities.toLowerCaseIdent($property.name)}) {
             visit${Utilities.toUpperCaseIdent($type.componentType.concept.name)}(${Utilities.toLowerCaseIdent($type.componentType.concept.name)}, p);
         }
@@ -95,3 +91,16 @@ public class Visitor<P> {
         return visited.remove(o);
     }
 }
+##
+##
+##
+#macro(writeSpecifiedType $type $conceptName )
+#set( $className = ${Utilities.getClassName($type)} )
+#if ( $className == $arrayTypeClassName )
+${conceptName}[]
+#elseif ( $className == $listTypeClassName )
+List<${conceptName}>
+#elseif ( $className == $setTypeClassName )
+Set<${conceptName}>
+#end
+#end

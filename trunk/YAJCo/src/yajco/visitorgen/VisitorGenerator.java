@@ -9,8 +9,10 @@ import tuke.pargen.GeneratorException;
 import yajco.generator.util.Utilities;
 import yajco.model.Language;
 import yajco.model.type.ArrayType;
+import yajco.model.type.ListType;
 import yajco.model.type.PrimitiveType;
 import yajco.model.type.ReferenceType;
+import yajco.model.type.SetType;
 
 public class VisitorGenerator {
     protected static final String TEMPLATE_PACKAGE = "templates";
@@ -30,6 +32,8 @@ public class VisitorGenerator {
             context.put("Utilities", Utilities.class);
             context.put("language", language);
             context.put("arrayTypeClassName", ArrayType.class.getCanonicalName());
+            context.put("listTypeClassName", ListType.class.getCanonicalName());
+            context.put("setTypeClassName", SetType.class.getCanonicalName());
             context.put("referenceTypeClassName", ReferenceType.class.getCanonicalName());
             context.put("primitiveTypeClassName", PrimitiveType.class.getCanonicalName());
             velocityEngine.evaluate(context, writer, "", reader);

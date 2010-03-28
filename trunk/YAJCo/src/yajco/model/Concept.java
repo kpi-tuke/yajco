@@ -15,14 +15,12 @@ import yajco.Utilities;
 import yajco.model.pattern.ConceptPattern;
 
 public class Concept extends PatternSupport<ConceptPattern> {
+
     @Identifier
     private final String name;
-
     //TODO: mnozina superconceptov
     private Concept parent;
-
     private List<Property> abstractSyntax;
-
     private List<Notation> concreteSyntax;
 
     public Concept(
@@ -82,19 +80,41 @@ public class Concept extends PatternSupport<ConceptPattern> {
         concreteSyntax.add(notation);
     }
 
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof Concept)) {
-			return false;
-		}
-		Concept concept = (Concept) obj;
-		return name.equals(concept.getName());
-	}
+    public String getConceptName() {
+        int lastDotIndex = name.lastIndexOf(".");
+        if (lastDotIndex < 0) {
+            return name;
+        } else {
+            return name.substring(lastDotIndex+1, name.length());
+        }
+    }
 
-	@Override
-	public int hashCode() {
-		return name.hashCode();
-	}
+    public String getSubPackage() {
+        int lastDotIndex = name.lastIndexOf(".");
+        if (lastDotIndex < 0) {
+            return "";
+        } else {
+            return name.substring(0, lastDotIndex);
+        }
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (!(obj instanceof Concept)) {
+            return false;
+        }
+        Concept concept = (Concept) obj;
+        return name.equals(concept.getName());
+    }
+
+    @Override
+    public int hashCode() {
+        if (name != null) {
+            return name.hashCode();
+        } else {
+            return super.hashCode();
+        }
+    }
 
     public Property getSuperProperty(String name) {
         Property property = getProperty(name);

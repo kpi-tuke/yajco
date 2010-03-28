@@ -23,8 +23,10 @@ import yajco.model.pattern.impl.Separator;
 import yajco.model.pattern.impl.printer.Indent;
 import yajco.model.pattern.impl.printer.NewLine;
 import yajco.model.type.ArrayType;
+import yajco.model.type.ListType;
 import yajco.model.type.PrimitiveType;
 import yajco.model.type.ReferenceType;
+import yajco.model.type.SetType;
 
 public class PrettyPrinterGenerator {
     protected static final String TEMPLATE_PACKAGE = "templates";
@@ -44,6 +46,8 @@ public class PrettyPrinterGenerator {
             context.put("Utilities", Utilities.class);
             context.put("language", language);
             context.put("arrayTypeClassName", ArrayType.class.getCanonicalName());
+            context.put("listTypeClassName", ListType.class.getCanonicalName());
+            context.put("setTypeClassName", SetType.class.getCanonicalName());
             context.put("referenceTypeClassName", ReferenceType.class.getCanonicalName());
             context.put("primitiveTypeClassName", PrimitiveType.class.getCanonicalName());
             context.put("tokenPartClassName", TokenPart.class.getCanonicalName());
