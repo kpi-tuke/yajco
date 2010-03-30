@@ -2,9 +2,12 @@ package yajco.generator.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import tuke.pargen.GeneratorException;
 import yajco.model.BindingNotationPart;
 import yajco.model.Concept;
 import yajco.model.Language;
@@ -185,6 +188,46 @@ public class Utilities {
         return getLanguagePackageName(language) + "." + concept.getName();
     }
 
+    public static Map<Concept, String> createConceptUniqueNames(Language language) {
+        Map<Concept, String> map = new HashMap<Concept, String>();
+        for (Concept concept : language.getConcepts()) {
+            String conceptName = concept.getConceptName();
+            for (Concept comparingConcept : language.getConcepts()) {
+                if (!concept.equals(comparingConcept) && conceptName.equals(comparingConcept.getConceptName())) {
+                    conceptName = getFullConceptClassName(language, concept);
+                }
+            }
+            map.put(concept, conceptName);
+        }
+        return map;
+    }
+
+    public static String getClassName(Map<Concept,String> map, Concept concept) {
+        return map.get(concept);
+    }
+
+    public static String getMethodPartName(Map<Concept,String> map, Concept concept) {
+        String name = map.get(concept);
+        if (name.contains(".")) {
+            name = concept.getName().replace(".", "_");
+        }
+        return name;
+    }
+
+    public static List<Concept> getConceptsNeededForImport(Map<Concept,String> map) {
+        List<Concept> concepts = new ArrayList<Concept>();
+        for (Concept concept : map.keySet()) {
+            if (!map.get(concept).contains(".")) {
+                concepts.add(concept);
+            }
+        }
+        return concepts;
+    }
+
+    public static void throwGeneratorException(String message) {
+        throw new GeneratorException(message);
+    }
+
     public static List<Integer> getValuedNotationList(Concept concept) {
         final int BINDING_NOTATION_PART_VALUE = 20;
         final int TOKEN_NOTATION_PART_VALUE = 1;
@@ -209,6 +252,7 @@ public class Utilities {
         return list;
     }
 
+    //Internal class
     private static class ValuedObject<T> implements Comparable {
         private T object;
         private int value = 0;

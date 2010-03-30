@@ -1,4 +1,5 @@
 ## TODO: package
+#set( $nameMap = ${Utilities.createConceptUniqueNames($language)} )
 package printer;
 
 import java.util.List;
@@ -6,7 +7,7 @@ import java.util.Set;
 import java.io.PrintWriter;
 import visitor.Visitor;
 import yajco.printer.PrinterException;
-#foreach( $concept in $language.concepts )
+#foreach( $concept in ${Utilities.getConceptsNeededForImport($nameMap)} )
 import ${Utilities.getFullConceptClassName($language, $concept)};
 #end
 
@@ -29,7 +30,7 @@ public class Printer extends Visitor<PrintWriter> {
 
 #foreach( $concept in $language.concepts )
     @Override
-    protected void visit${Utilities.toUpperCaseIdent($concept.name)}(${Utilities.toUpperCaseIdent($concept.name)} ${Utilities.toLowerCaseIdent($concept.name)}, PrintWriter p) {
+    protected void visit${Utilities.getMethodPartName($nameMap, $concept)}(${Utilities.getClassName($nameMap, $concept)} ${Utilities.toLowerCaseIdent($concept.conceptName)}, PrintWriter p) {
  #set( $conceptPatterns = ${concept.patterns} )
  #set( $hasParenthesesPattern = ${Utilities.hasClassInList(${conceptPatterns},${parenthesesPatternClassName})} )
  #set( $parenthesesPattern = ${Utilities.getObjectFromList(${conceptPatterns},${parenthesesPatternClassName})} )
@@ -46,8 +47,8 @@ public class Printer extends Visitor<PrintWriter> {
  #if( !$descendants.isEmpty() )
   #set( $ifBranchToken = "if" )
   #foreach( $descendant in $descendants )
-        $ifBranchToken (${Utilities.toLowerCaseIdent($concept.name)} instanceof ${Utilities.toUpperCaseIdent($descendant.name)}) {
-            visit${Utilities.toUpperCaseIdent($descendant.name)}((${Utilities.toUpperCaseIdent($descendant.name)}) ${Utilities.toLowerCaseIdent($concept.name)}, p);
+        $ifBranchToken (${Utilities.toLowerCaseIdent($concept.conceptName)} instanceof ${Utilities.getClassName($nameMap, $descendant)}) {
+            visit${Utilities.getMethodPartName($nameMap, $descendant)}((${Utilities.getClassName($nameMap, $descendant)}) ${Utilities.toLowerCaseIdent($concept.conceptName)}, p);
         }
   #set( $ifBranchToken = "else if" )
   #end
@@ -73,42 +74,43 @@ public class Printer extends Visitor<PrintWriter> {
       #set( $hasRangePattern = ${Utilities.hasClassInList(${notationPart.patterns},${rangePatternClassName})} )
       #set( $rangePattern = ${Utilities.getObjectFromList(${notationPart.patterns},${rangePatternClassName})} )
       #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
-          $logicalAndOperator ${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}() != null
+          $logicalAndOperator ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null
        #if( $hasRangePattern )
          #if( $className == $arrayTypeClassName )
-          && ${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}().length >= ${rangePattern.minOccurs}
+          && ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}().length >= ${rangePattern.minOccurs}
          #else
-          && ${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}().size() >= ${rangePattern.minOccurs}
+          && ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}().size() >= ${rangePattern.minOccurs}
          #end
         #if( $rangePattern.maxOccurs != $rangePatternInfinityValue )
          #if( $className == $arrayTypeClassName )
-          && ${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}().length <= ${rangePattern.maxOccurs}
+          && ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}().length <= ${rangePattern.maxOccurs}
          #else
-          && ${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}().size() <= ${rangePattern.maxOccurs}
+          && ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}().size() <= ${rangePattern.maxOccurs}
          #end
         #end
        #else
          #if( $className == $arrayTypeClassName )
-          && ${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}().length > 0
+          && ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}().length > 0
          #else
-          && !${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}().isEmpty()
+          && !${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}().isEmpty()
          #end
        #end
       #end
      #elseif( $className == $primitiveTypeClassName )
       #if( ${Utilities.isStringType(${type})} )
-          $logicalAndOperator ${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}() != null
+          $logicalAndOperator ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null
       #end
       ## stale to musi mat nejaku hodnotu pri int, real, boolean, cize netreba dalej kontrolovat
      #elseif( $className == $referenceTypeClassName )
-           $logicalAndOperator ${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}() != null
+           $logicalAndOperator ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null
      #else
+        $Utilities.throwGeneratorException("Not known type for ${property.name}")
         // not known type for ${property.name}
      #end
      #set( $logicalAndOperator = "&&" )
     #end
    #end
-        ) { print${Utilities.toUpperCaseIdent($concept.name)}Notation${notationRank}(${Utilities.toLowerCaseIdent($concept.name)}, p); }
+        ) { print${Utilities.getMethodPartName($nameMap, $concept)}Notation${notationRank}(${Utilities.toLowerCaseIdent($concept.conceptName)}, p); }
    #set( $ifBranchToken = "else if" )
   #end
         else {
@@ -136,7 +138,7 @@ public class Printer extends Visitor<PrintWriter> {
 
  #if ( $notationCount > 1 )
   #foreach( $notation in $concept.concreteSyntax )
-    protected void print${Utilities.toUpperCaseIdent($concept.name)}Notation${concept.concreteSyntax.indexOf(${notation})}(${Utilities.toUpperCaseIdent($concept.name)} ${Utilities.toLowerCaseIdent($concept.name)}, PrintWriter p) {
+    protected void print${Utilities.getMethodPartName($nameMap, $concept)}Notation${concept.concreteSyntax.indexOf(${notation})}(${Utilities.getClassName($nameMap, $concept)} ${Utilities.toLowerCaseIdent($concept.conceptName)}, PrintWriter p) {
    #foreach( $notationPart in $notation.parts )
     #processNotationPart( $notationPart )
    #end
@@ -153,19 +155,19 @@ public class Printer extends Visitor<PrintWriter> {
   #if( $className == $arrayTypeClassName )
    #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
     @Override
-    protected void visit${Utilities.toUpperCaseIdent($property.name)}In${concept.name}(#writeSpecifiedType($type ${Utilities.toUpperCaseIdent($type.componentType.concept.name)}) ${Utilities.toLowerCaseIdent($property.name)}, PrintWriter p) {
+    protected void visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}(#writeSpecifiedType($type ${Utilities.getClassName($nameMap, $type.componentType.concept)}) ${Utilities.toLowerCaseIdent($property.name)}, PrintWriter p) {
     #set( $patterns = ${Utilities.getAllPatterns(${property},${concept})} )
     #set( $separator = ${Utilities.getObjectFromList(${patterns},${separatorPatternClassName})} )
     #if( $separator )
         boolean separate = false;
     #end
-        for (${Utilities.toUpperCaseIdent($type.componentType.concept.name)} ${Utilities.toLowerCaseIdent($type.componentType.concept.name)} : ${Utilities.toLowerCaseIdent($property.name)}) {
+        for (${Utilities.getClassName($nameMap, $type.componentType.concept)} ${Utilities.toLowerCaseIdent($type.componentType.concept.conceptName)} : ${Utilities.toLowerCaseIdent($property.name)}) {
     #if( $separator )
             if (separate) {
                 printNonSpacedLiteral("${separator.value}", p);
             }
     #end
-            visit${Utilities.toUpperCaseIdent($type.componentType.concept.name)}(${Utilities.toLowerCaseIdent($type.componentType.concept.name)}, p);
+            visit${Utilities.getMethodPartName($nameMap, $type.componentType.concept)}(${Utilities.toLowerCaseIdent($type.componentType.concept.conceptName)}, p);
     #if( $separator )
             separate = true;
     #end
@@ -250,23 +252,24 @@ public class Printer extends Visitor<PrintWriter> {
     #set( $className = ${Utilities.getClassName($type)} )
     #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
      #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
-        visit${Utilities.toUpperCaseIdent($property.name)}In${concept.name}(${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
+        visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
      #end
     #elseif( $className == $primitiveTypeClassName )
-        printLiteral(${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($notationPart.property.name)}(), p);
+        printLiteral(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($notationPart.property.name)}(), p);
     #elseif( $className == $referenceTypeClassName )
      #if( $notationPartClassName == $localVariablePartClassName )
       ## je potrebne vypisat len hodnotu z Identifier property, kedze je to referencovane len menom v originali
       #set( $propertyWithIdentifier = ${Utilities.getIdentifierProperty(${type.concept})} )
-        printLiteral(${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}().get${Utilities.toUpperCaseIdent(${propertyWithIdentifier.name})}(), p);
+        printLiteral(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}().get${Utilities.toUpperCaseIdent(${propertyWithIdentifier.name})}(), p);
      #else
 ##      #set( $hasLocalParenthesesPattern = ${Utilities.hasClassInList(${$type.concept.patterns},${parenthesesPatternClassName})} )
 ##        #if ( $hasLocalParenthesesPattern )
 ##
 ##        #end
-        visit${Utilities.toUpperCaseIdent($type.concept.name)}(${Utilities.toLowerCaseIdent($concept.name)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
+        visit${Utilities.getMethodPartName($nameMap, $type.concept)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
      #end
     #else
+        $Utilities.throwGeneratorException("Not known type for ${property.name}")
         // not known type for ${property.name}
     #end
    #else

@@ -34,8 +34,8 @@ public class Main {
         System.out.println("===================================== Printer class ====================================================");
         prettyPrinterGenerator.generate(language, new PrintWriter(System.out));
         System.out.println("==================================* Classes generation *=================================================");
-        File directory = new File(System.getProperty("user.dir")+"\\src\\test\\model");
-        classGenerator.generate(language, directory);
+        File directory = new File(System.getProperty("user.dir")+"\\src\\test");
+//        classGenerator.generate(language, directory);
         System.out.println("--- DONE ---");
 
 //        System.out.println("--------------------------------------------------------------------------------------------------------");
