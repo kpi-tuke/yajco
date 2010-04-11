@@ -1,5 +1,14 @@
+tokens
+   NAME = "[a-zA-Z]+"
+   VALUE = "[0-9]+"
+skips
+   " "
+   "\t"
+   "\n"
+   "\r"
+
 concept Program
-    AS: expression : Expression, constants : array of Constant
+    AS:expression : Expression, constants : list of Constant
     CS: "print" expression
       | "print" expression {NewLine Indent} "where" constants {Separator(",") Range(1..*) NewLine}
 

@@ -58,7 +58,6 @@ public class ClassGenerator {
 
     private void generateConceptFiles(File directory) throws GeneratorException {
         FileWriter writer = null;
-        Jalopy jalopy = new Jalopy();
         for (Concept concept : actualLanguage.getConcepts()) {
             try {
                 String filePath = Utilities.getFullConceptClassName(actualLanguage, concept);
@@ -74,9 +73,7 @@ public class ClassGenerator {
                 file = new File(directory, filePath);
                 writer = new FileWriter(file);
                 generate(concept, writer);
-                jalopy.setInput(file);
-                jalopy.setOutput(file);
-                jalopy.format();
+                Utilities.formatCode(file);
                 System.out.println("Success generating file: " + filePath);
             } catch (IOException ex) {
                 throw new GeneratorException("Problem writing file for concept " + concept.getConceptName(), ex);
@@ -99,10 +96,7 @@ public class ClassGenerator {
             writer = new FileWriter(packageInfoFile);
             generatePackageInfo(writer);
             //Jalopy odstranuje anotaciu @Parser, zatial som dal formatovanie priamo do predchadzajucej metody, je to lahke formatovanie
-            //Jalopy jalopy = new Jalopy();
-            //jalopy.setInput(packageInfoFile);
-            //jalopy.setOutput(packageInfoFile);
-            //jalopy.format();
+            //Utilities.formatCode(packageInfoFile);
             System.out.println("Success generating file: " + packageInfoFile.getPath());
         } catch (IOException ex) {
             throw new GeneratorException("Problem writing file for package-info.java", ex);
@@ -258,10 +252,10 @@ public class ClassGenerator {
                     }
                     if (notationPart instanceof PropertyReferencePart) {
                         PropertyReferencePart part = (PropertyReferencePart) notationPart;
-                        writer.write(getTypeName(part.getProperty().getType()) + " " + part.getProperty().getName());
+                        writer.write(Utilities.getTypeName(part.getProperty().getType()) + " " + part.getProperty().getName());
                     } else if (notationPart instanceof LocalVariablePart) {
                         LocalVariablePart part = (LocalVariablePart) notationPart;
-                        writer.write(getTypeName(part.getType()) + " " + part.getName());
+                        writer.write(Utilities.getTypeName(part.getType()) + " " + part.getName());
                     }
                     separate = true;
                 }
@@ -274,12 +268,12 @@ public class ClassGenerator {
         for (Property property : concept.getAbstractSyntax()) {
             Type type = property.getType();
             writer.write("public ");
-            writer.write(getTypeName(type) + " ");
+            writer.write(Utilities.getTypeName(type) + " ");
             writer.write("get" + Utilities.toUpperCaseIdent(property.getName()) + "() {");
             writer.write("return " + property.getName() + ";");
             writer.write("}");
             writer.write("public void ");
-            writer.write("set" + Utilities.toUpperCaseIdent(property.getName()) + "(" + getTypeName(type) + " " + property.getName() + ") {");
+            writer.write("set" + Utilities.toUpperCaseIdent(property.getName()) + "(" + Utilities.getTypeName(type) + " " + property.getName() + ") {");
             writer.write("this." + property.getName() + " = " + property.getName() + ";");
             writer.write("}");
         }
@@ -292,7 +286,7 @@ public class ClassGenerator {
             }
             writer.write("private ");
             Type type = property.getType();
-            writer.write(getTypeName(type) + " ");
+            writer.write(Utilities.getTypeName(type) + " ");
             writer.write(property.getName() + ";");
         }
     }
@@ -412,41 +406,5 @@ public class ClassGenerator {
         }
         writer.write(" ");
     }
-
-    private String getTypeName(Type type) {
-        StringBuilder str = new StringBuilder();
-        if (type instanceof ArrayType) {
-            str.append(getTypeName(((ArrayType) type).getComponentType()));
-            str.append("[]");
-        } else if (type instanceof ListType) {
-            str.append("List<");
-            str.append(getTypeName(((ListType) type).getComponentType()));
-            str.append(">");
-        } else if (type instanceof SetType) {
-            str.append("Set<");
-            str.append(getTypeName(((SetType) type).getComponentType()));
-            str.append(">");
-        } else if (type instanceof PrimitiveType) {
-            PrimitiveType primitive = (PrimitiveType) type;
-            switch (primitive) {
-                case BOOLEAN:
-                    str.append("boolean");
-                    break;
-                case INTEGER:
-                    str.append("int");
-                    break;
-                case REAL:
-                    str.append("double");
-                    break;
-                case STRING:
-                    str.append("String");
-                    break;
-            }
-        } else if (type instanceof ReferenceType) {
-            str.append(((ReferenceType) type).getConcept().getConceptName());
-        } else {
-            throw new GeneratorException("Not known type: "+type.getClass().getCanonicalName());
-        }
-        return str.toString();
-    }
+    
 }

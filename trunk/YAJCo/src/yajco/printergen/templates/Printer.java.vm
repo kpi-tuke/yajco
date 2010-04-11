@@ -1,11 +1,11 @@
 ## TODO: package
 #set( $nameMap = ${Utilities.createConceptUniqueNames($language)} )
-package printer;
+package ${Utilities.getLanguagePackageName($language)}.printer;
 
 import java.util.List;
 import java.util.Set;
 import java.io.PrintWriter;
-import visitor.Visitor;
+import ${Utilities.getLanguagePackageName($language)}.visitor.Visitor;
 import yajco.printer.PrinterException;
 #foreach( $concept in ${Utilities.getConceptsNeededForImport($nameMap)} )
 import ${Utilities.getFullConceptClassName($language, $concept)};

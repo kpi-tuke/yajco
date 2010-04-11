@@ -7,9 +7,11 @@ import com.sun.source.util.SourcePositions;
 import com.sun.source.util.TreePath;
 import com.sun.source.util.Trees;
 import com.sun.tools.javac.code.Type.ClassType;
+import java.io.File;
 import java.lang.reflect.InvocationTargetException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.tools.FileObject;
 import yajco.model.type.Type;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
@@ -26,10 +28,12 @@ import javax.lang.model.element.*;
 import javax.lang.model.type.*;
 import javax.lang.model.util.*;
 import javax.tools.Diagnostic.Kind;
+import javax.tools.StandardLocation;
 import tuke.pargen.*;
 import tuke.pargen.annotation.*;
 import tuke.pargen.annotation.config.*;
 import tuke.pargen.annotation.reference.*;
+import yajco.generator.util.GeneratorHelper;
 import yajco.model.*;
 import yajco.model.pattern.*;
 import yajco.model.pattern.impl.Factory;
@@ -153,11 +157,15 @@ public class AnnotationProcessor extends AbstractProcessor {
                 System.out.println("--------------------------------------------------------------------------------------------------------");
                 printer.printLanguage(new PrintWriter(System.out), language);
                 System.out.println("--------------------------------------------------------------------------------------------------------");
-
-//				System.out.println("--------------------------------------------------------------------------------------------------------");
-//				AnnotationParserGenerator generator = new AnnotationParserGenerator(language);
-//				generator.generate();
-//				System.out.println("--------------------------------------------------------------------------------------------------------");
+                //				System.out.println("--------------------------------------------------------------------------------------------------------");
+                //				AnnotationParserGenerator generator = new AnnotationParserGenerator(language);
+                //				generator.generate();
+                //				System.out.println("--------------------------------------------------------------------------------------------------------");
+                
+                // generates all new files
+                FileObject fo = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "", "temp.java");
+                GeneratorHelper generatorHelper = new GeneratorHelper(language, new File(fo.toUri()).getParentFile());
+                generatorHelper.generateAllExceptModelClassFiles();
             }
         } catch (Throwable e) {
             e.printStackTrace();

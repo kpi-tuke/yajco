@@ -1,5 +1,8 @@
 package yajco.generator.util;
 
+import de.hunsicker.jalopy.Jalopy;
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -23,8 +26,11 @@ import yajco.model.pattern.PatternSupport;
 import yajco.model.pattern.PropertyPattern;
 import yajco.model.pattern.impl.Identifier;
 import yajco.model.pattern.impl.References;
+import yajco.model.type.ArrayType;
+import yajco.model.type.ListType;
 import yajco.model.type.PrimitiveType;
 import yajco.model.type.ReferenceType;
+import yajco.model.type.SetType;
 import yajco.model.type.Type;
 
 /**
@@ -32,8 +38,9 @@ import yajco.model.type.Type;
  * @author DeeL
  */
 public class Utilities {
-    
+
     private static String DEFAULT_MAIN_PACKAGE_NAME = "model";
+    private static Jalopy jalopy;
 
     public static String toUpperCaseIdent(String ident) {
         return Character.toUpperCase(ident.charAt(0)) + ident.substring(1);
@@ -75,7 +82,7 @@ public class Utilities {
             return propertyReferencePart.getProperty();
         } else if (notationPart instanceof LocalVariablePart) {
             LocalVariablePart localVariablePart = (LocalVariablePart) notationPart;
-            References references = (References)localVariablePart.getPattern(References.class);
+            References references = (References) localVariablePart.getPattern(References.class);
             if (references != null) {
                 if (references.getProperty() != null) {
                     return references.getProperty();
@@ -83,7 +90,7 @@ public class Utilities {
                     for (Property property : concept.getAbstractSyntax()) {
                         Type type = property.getType();
                         if (type instanceof ReferenceType) {
-                            ReferenceType referenceType = (ReferenceType)type;
+                            ReferenceType referenceType = (ReferenceType) type;
                             if (referenceType.getConcept().equals(references.getConcept())) {
                                 return property;
                             }
@@ -148,7 +155,7 @@ public class Utilities {
 
     public static boolean isStringType(Type type) {
         if (type instanceof PrimitiveType) {
-            if (((PrimitiveType)type) == PrimitiveType.STRING) {
+            if (((PrimitiveType) type) == PrimitiveType.STRING) {
                 return true;
             }
         }
@@ -202,11 +209,11 @@ public class Utilities {
         return map;
     }
 
-    public static String getClassName(Map<Concept,String> map, Concept concept) {
+    public static String getClassName(Map<Concept, String> map, Concept concept) {
         return map.get(concept);
     }
 
-    public static String getMethodPartName(Map<Concept,String> map, Concept concept) {
+    public static String getMethodPartName(Map<Concept, String> map, Concept concept) {
         String name = map.get(concept);
         if (name.contains(".")) {
             name = concept.getName().replace(".", "_");
@@ -214,7 +221,7 @@ public class Utilities {
         return name;
     }
 
-    public static List<Concept> getConceptsNeededForImport(Map<Concept,String> map) {
+    public static List<Concept> getConceptsNeededForImport(Map<Concept, String> map) {
         List<Concept> concepts = new ArrayList<Concept>();
         for (Concept concept : map.keySet()) {
             if (!map.get(concept).contains(".")) {
@@ -226,6 +233,17 @@ public class Utilities {
 
     public static void throwGeneratorException(String message) {
         throw new GeneratorException(message);
+    }
+
+    public static void formatCode(File file) {
+        try {
+            Jalopy j = getJalopy();
+            j.setInput(file);
+            j.setOutput(file);
+            j.format();
+        } catch (FileNotFoundException ex) {
+            throw new GeneratorException("File " + file.getAbsolutePath() + " is not available", ex);
+        }
     }
 
     public static List<Integer> getValuedNotationList(Concept concept) {
@@ -243,7 +261,7 @@ public class Utilities {
                     temp += TOKEN_NOTATION_PART_VALUE;
                 }
             }
-            localList.add(new ValuedObject<Notation>(notation,temp));
+            localList.add(new ValuedObject<Notation>(notation, temp));
         }
         Collections.sort(localList);
         for (ValuedObject<Notation> valuedObject : localList) {
@@ -252,8 +270,68 @@ public class Utilities {
         return list;
     }
 
+    public static void createDirectories(File file) throws GeneratorException {
+        createDirectories(file, true);
+    }
+
+    public static void createDirectories(File file, boolean isDirectory) throws GeneratorException {
+        if (!isDirectory) {
+            file = file.getParentFile();
+        }
+        if (!file.exists()) {
+            if (!file.mkdirs()) {
+                throw new GeneratorException("Cannot create directory: " + file.getAbsolutePath());
+            }
+        }
+    }
+
+    public static String getTypeName(Type type) {
+        StringBuilder str = new StringBuilder();
+        if (type instanceof ArrayType) {
+            str.append(getTypeName(((ArrayType) type).getComponentType()));
+            str.append("[]");
+        } else if (type instanceof ListType) {
+            str.append("List<");
+            str.append(getTypeName(((ListType) type).getComponentType()));
+            str.append(">");
+        } else if (type instanceof SetType) {
+            str.append("Set<");
+            str.append(getTypeName(((SetType) type).getComponentType()));
+            str.append(">");
+        } else if (type instanceof PrimitiveType) {
+            PrimitiveType primitive = (PrimitiveType) type;
+            switch (primitive) {
+                case BOOLEAN:
+                    str.append("boolean");
+                    break;
+                case INTEGER:
+                    str.append("int");
+                    break;
+                case REAL:
+                    str.append("double");
+                    break;
+                case STRING:
+                    str.append("String");
+                    break;
+            }
+        } else if (type instanceof ReferenceType) {
+            str.append(((ReferenceType) type).getConcept().getConceptName());
+        } else {
+            throw new GeneratorException("Not known type: " + type.getClass().getCanonicalName());
+        }
+        return str.toString();
+    }
+
+    private static Jalopy getJalopy() {
+        if (jalopy == null) {
+            jalopy = new Jalopy();
+        }
+        return jalopy;
+    }
+
     //Internal class
     private static class ValuedObject<T> implements Comparable {
+
         private T object;
         private int value = 0;
 
@@ -301,7 +379,5 @@ public class Utilities {
         public void setValue(int value) {
             this.value = value;
         }
-
-
     }
 }

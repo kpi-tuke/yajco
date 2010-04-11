@@ -1,7 +1,7 @@
 ## TODO: componentny typ... napriklad ak by bolo "array of array of array of NIECO"
 ##
 #set( $nameMap = ${Utilities.createConceptUniqueNames($language)} )
-package visitor;
+package ${Utilities.getLanguagePackageName($language)}.visitor;
 
 import java.util.HashSet;
 import java.util.List;
@@ -42,7 +42,7 @@ public class Visitor<P> {
 ## pri primitovnom type sa aktualne dalej nevnarame, cize sa nerobi nic
 #elseif( $className == $referenceTypeClassName )
         if (${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null) {
-            visit${Utilities.getMethodPartName($nameMap, $concept)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
+            visit${Utilities.getMethodPartName($nameMap, $type.concept)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
         }
 #else
             $Utilities.throwGeneratorException("Not known type for ${property.name}")
