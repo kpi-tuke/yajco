@@ -93,6 +93,9 @@ public class ReferenceResolver {
     }
 
     public static ReferenceResolver getInstance() {
+        if (instance == null) {
+            createInstance();
+        }
         return instance;
     }
 

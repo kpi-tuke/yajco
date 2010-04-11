@@ -24,13 +24,13 @@ public class GeneratorHelper {
 
     public void generateAll() {
         generateAllExceptModelClassFiles();
-        //generateModelClassFiles();
+        generateModelClassFiles();
     }
 
     public void generateAllExceptModelClassFiles() {
         generateVisitor();
-        //generatePrettyPrinter();
-        //generateReferenceResolverRegistrator();
+        generatePrettyPrinter();
+        generateReferenceResolverRegistrator();
     }
 
     public void generateVisitor() {

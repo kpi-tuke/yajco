@@ -1,8 +1,12 @@
 package yajco.visitorgen;
 
+import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.Writer;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import tuke.pargen.GeneratorException;
@@ -40,6 +44,23 @@ public class VisitorGenerator {
             writer.flush();
         } catch (IOException ex) {
             throw new GeneratorException("Cannot generate visitor class",ex);
+        }
+    }
+
+    public void generate(Language language, File file) {
+        Writer writer = null;
+        try {
+            writer = new FileWriter(file);
+            generate(language, writer);
+            Utilities.formatCode(file);
+        } catch (IOException ex) {
+            throw new GeneratorException("Cannot write to file "+file.getAbsolutePath(), ex);
+        } finally {
+            try {
+                writer.close();
+            } catch (IOException ex) {
+                throw new GeneratorException("Cannot close writer for file "+file.getAbsolutePath(), ex);
+            }
         }
     }
 
