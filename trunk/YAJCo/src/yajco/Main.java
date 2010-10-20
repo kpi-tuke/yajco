@@ -24,11 +24,6 @@ public class Main {
         Printer printer = new Printer();
         Language language;
 
-        VisitorGenerator visitorGenerator = new VisitorGenerator();
-        PrettyPrinterGenerator prettyPrinterGenerator = new PrettyPrinterGenerator();
-        ClassGenerator classGenerator = new ClassGenerator();
-        AspectObjectRegistratorGenerator aspectObjectRegistratorGenerator = new AspectObjectRegistratorGenerator();
-
         System.out.println("--------------------------------------------------------------------------------------------------------");
         language = parser.parse(new FileReader("desk.lang"));
         printer.printLanguage(new PrintWriter(System.out), language);

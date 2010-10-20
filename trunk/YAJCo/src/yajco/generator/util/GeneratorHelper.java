@@ -1,9 +1,19 @@
 package yajco.generator.util;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import tuke.pargen.GeneratorException;
 import yajco.classgen.ClassGenerator;
+import yajco.generator.FilesGenerator;
 import yajco.model.Language;
+import yajco.parser.ParseException;
+import yajco.parser.Parser;
+import yajco.printer.Printer;
 import yajco.printergen.PrettyPrinterGenerator;
 import yajco.refresgen.AspectObjectRegistratorGenerator;
 import yajco.visitorgen.VisitorGenerator;
@@ -13,12 +23,18 @@ public class GeneratorHelper {
     private Language language;
     private File directory;
 
+    public static GeneratorHelper getGeneratorHelper(File file, File directory) throws ParseException, FileNotFoundException {
+        Parser parser = new Parser();
+        Language language = parser.parse(new FileReader(file));
+        return new GeneratorHelper(language, directory);
+    }
+
     public GeneratorHelper(Language language, File directory) {
         if (directory.isDirectory()) {
             this.language = language;
             this.directory = directory;
         } else {
-            throw new GeneratorException("Specified directory ["+directory.getAbsolutePath()+"]does not exist!");
+            throw new GeneratorException("Specified directory [" + directory.getAbsolutePath() + "]does not exist!");
         }
     }
 
@@ -31,37 +47,42 @@ public class GeneratorHelper {
         generateVisitor();
         generatePrettyPrinter();
         generateReferenceResolverRegistrator();
+        //zatial pre test
+        generateYAJCoModelTextFile();
     }
 
     public void generateVisitor() {
-        String visitorPackage = "visitor";
-        String visitorClassFileName = "Visitor.java";
-        String filePath = Utilities.getLanguagePackageName(language).replace('.', File.separatorChar) + File.separator + visitorPackage + File.separator + visitorClassFileName;
-        File file = new File(directory, filePath);
-        Utilities.createDirectories(file, false);
-
-        VisitorGenerator visitorGenerator = new VisitorGenerator();
-        visitorGenerator.generate(language, file);
+        FilesGenerator visitorGenerator = new VisitorGenerator();
+        visitorGenerator.generateFiles(language, directory);
     }
 
     public void generatePrettyPrinter() {
-        String printerPackage = "printer";
-        String printerClassFileName = "Printer.java";
-        String filePath = Utilities.getLanguagePackageName(language).replace('.', File.separatorChar) + File.separator + printerPackage + File.separator + printerClassFileName;
-        File file = new File(directory, filePath);
-        Utilities.createDirectories(file, false);
-
-        PrettyPrinterGenerator prettyPrinterGenerator = new PrettyPrinterGenerator();
-        prettyPrinterGenerator.generate(language, file);
+        FilesGenerator prettyPrinterGenerator = new PrettyPrinterGenerator();
+        prettyPrinterGenerator.generateFiles(language, directory);
     }
 
     public void generateModelClassFiles() {
-        ClassGenerator classGenerator = new ClassGenerator();
-        classGenerator.generate(language, directory);
+        FilesGenerator classGenerator = new ClassGenerator();
+        classGenerator.generateFiles(language, directory);
     }
 
     public void generateReferenceResolverRegistrator() {
-        AspectObjectRegistratorGenerator registratorGenerator = new AspectObjectRegistratorGenerator();
-        registratorGenerator.generate(language, directory);
+        FilesGenerator registratorGenerator = new AspectObjectRegistratorGenerator();
+        registratorGenerator.generateFiles(language, directory);
+    }
+
+    public void generateYAJCoModelTextFile() {
+        PrintWriter printWriter = null;
+        try {
+            File file = new File(directory, language.getName() + ".lang");
+            printWriter = new PrintWriter(file);
+            Printer printer = new Printer();
+            printer.printLanguage(printWriter, language);
+        } catch (FileNotFoundException ex) {
+            throw new GeneratorException("Cannot print language text file", ex);
+        } finally {
+            printWriter.close();
+        }
+
     }
 }

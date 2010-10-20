@@ -1,3 +1,6 @@
+tokens
+skips
+
 concept StateMachine
     AS: start : State, states : array of State, transitions : array of Transition
     CS: "start" name : string {References(State)} states {Range(1..*)} transitions {Range(1..*)}
@@ -9,7 +12,7 @@ concept State
 
 concept Transition
     AS: from : State, to : State, event : Event
-    CS: "transition" "from" name : string {References(State, property = from)} "to" name : string {References(State, property = to)} "when" event
+    CS: "transition" "from" from : string {References(State, property = from)} "to" to : string {References(State, property = to)} "when" event
 
 concept Action
     AS: name : string

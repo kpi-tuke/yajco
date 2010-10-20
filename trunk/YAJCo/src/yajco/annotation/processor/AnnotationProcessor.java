@@ -281,8 +281,11 @@ public class AnnotationProcessor extends AbstractProcessor {
     }
 
     private void processAbstractClass(Concept concept, TypeElement typeElement) {
-        //TODO: toto je len docasne pre testovanie a pokial sa ujasni ako to chceme
-        //processConcreteClass(concept, typeElement);
+        /* TODO: vyzera, ze nie je rozdiel medzi abstract a normalnou triedou,
+         * zvycajne chybaju konstruktory, co je ale jasny jav, ze sa jedna o
+         * abstraktnu triedu. v YAJCo modeli neexistuje nic pre abstraktnu triedu
+         */
+        processConcreteClass(concept, typeElement);
     }
 
     private void processInterface(Concept concept, TypeElement typeElement) {
@@ -316,7 +319,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                     property = concept.getProperty(references.field());
                 }
                 if (property == null) {
-                    property = findReferencedProperty(paramElement, referencedConcept);
+                    property = findReferencedProperty(paramElement, referencedConcept, references.field());
                     if (property == null) {
                         String propertyName;
                         if (references.field().isEmpty()) {
@@ -354,7 +357,7 @@ public class AnnotationProcessor extends AbstractProcessor {
         }
     }
 
-    private Property findReferencedProperty(VariableElement paramElement, Concept referencedConcept) {
+    private Property findReferencedProperty(VariableElement paramElement, Concept referencedConcept, String fieldName) {
         Element element = paramElement;
         //Go up on tree until you find class element
         while (!element.getKind().isClass() && element != null) {
@@ -368,7 +371,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                     Type fieldType = getType(fieldElement.asType());
                     if (fieldType instanceof yajco.model.type.ReferenceType) {
                         yajco.model.type.ReferenceType referenceType = (yajco.model.type.ReferenceType) fieldType;
-                        if (referenceType.getConcept().equals(referencedConcept)) {
+                        if (referenceType.getConcept().equals(referencedConcept) && (fieldName.isEmpty() || fieldName.equals(fieldElement.getSimpleName().toString()))) {
                             return new Property(fieldElement.getSimpleName().toString(), referenceType);
                         }
                     }

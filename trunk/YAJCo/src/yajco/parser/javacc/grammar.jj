@@ -26,32 +26,32 @@ TOKEN :
 | <CONCEPT : "CONCEPT">
 | <_58 : "_58">
 | <_123 : "_123">
-| <ENUM : "ENUM">
-| <OPERATOR : "OPERATOR">
+| <PARENTHESES : "PARENTHESES">
 | <_40 : "_40">
-| <PRIORITY : "PRIORITY">
+| <_44 : "_44">
 | <_41 : "_41">
+| <OPERATOR : "OPERATOR">
+| <PRIORITY : "PRIORITY">
 | <ASSOCIATIVITY : "ASSOCIATIVITY">
 | <LEFT : "LEFT">
 | <RIGHT : "RIGHT">
 | <NONE : "NONE">
 | <AUTO : "AUTO">
-| <PARENTHESES : "PARENTHESES">
-| <_44 : "_44">
+| <ENUM : "ENUM">
 | <_125 : "_125">
 | <AS : "AS">
-| <SET : "SET">
+| <ARRAY : "ARRAY">
 | <OF : "OF">
 | <LIST : "LIST">
-| <ARRAY : "ARRAY">
+| <SET : "SET">
 | <IDENTIFIER : "IDENTIFIER">
 | <CS : "CS">
 | <_124 : "_124">
-| <NEWLINE : "NEWLINE">
+| <SEPARATOR : "SEPARATOR">
 | <RANGE : "RANGE">
 | <_46_46 : "_46_46">
 | <_42 : "_42">
-| <SEPARATOR : "SEPARATOR">
+| <NEWLINE : "NEWLINE">
 | <REFERENCES : "REFERENCES">
 | <PROPERTY : "PROPERTY">
 | <INDENT : "INDENT">
@@ -69,355 +69,6 @@ yajco.model.Language parse() :
   {return _value;}
 }
 
-yajco.model.PropertyReferencePart PropertyReferencePartSymbol() :
-{
-  java.lang.String name_1 = null;
-  Token _tokenname_1 = null;
-  yajco.model.pattern.NotationPartPattern[] patterns_1 = null;
-  java.util.List<yajco.model.pattern.NotationPartPattern> _listpatterns_1 = new java.util.ArrayList<yajco.model.pattern.NotationPartPattern>();
-  yajco.model.pattern.NotationPartPattern _itempatterns_1 = null;
-}
-{
-(((        _tokenname_1 = <NAME>  {name_1 = _tokenname_1.image;}
-)
-
-      (  
-(          <_123>
-(            (  
-              _itempatterns_1 = NotationPartPatternSymbol()  {_listpatterns_1.add(_itempatterns_1);}            )*
-            
-
-)  {patterns_1 = _listpatterns_1.toArray(new yajco.model.pattern.NotationPartPattern[] {});}
-
-          <_125>
-)
-      )?
-      
-
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.PropertyReferencePart( name_1, patterns_1), (Object)name_1, patterns_1);}
-
-)
-}
-
-yajco.model.type.Type TypeSymbol() :
-{
-  yajco.model.type.Type _value = null;
-}
-{
-(    _value = PrimitiveTypeSymbol()
-   |
-    _value = SetTypeSymbol()
-   |
-    _value = ListTypeSymbol()
-   |
-    _value = ArrayTypeSymbol()
-   |
-    _value = ReferenceTypeSymbol()
-)  {return _value;}
-}
-
-yajco.model.type.ReferenceType ReferenceTypeSymbol() :
-{
-  java.lang.String name_1 = null;
-  Token _tokenname_1 = null;
-}
-{
-(((        _tokenname_1 = <NAME>  {name_1 = _tokenname_1.image;}
-)
-
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.type.ReferenceType( name_1), (Object)name_1);}
-
-)
-}
-
-yajco.model.pattern.impl.Parentheses ParenthesesSymbol() :
-{
-  java.lang.String left_2 = null;
-  Token _tokenleft_2 = null;
-  java.lang.String right_2 = null;
-  Token _tokenright_2 = null;
-}
-{
-(LOOKAHEAD(2)(      <PARENTHESES>
-      <_40>
-(        _tokenleft_2 = <LEFT>  {left_2 = _tokenleft_2.image;}
-)
-
-(        <_44>
-        _tokenright_2 = <RIGHT>  {right_2 = _tokenright_2.image;}
-)
-
-      <_41>
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Parentheses( left_2, right_2), (Object)left_2, right_2);}
-
-   |
-(      <PARENTHESES>
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Parentheses( ));}
-
-)
-}
-
-yajco.model.pattern.impl.Operator OperatorSymbol() :
-{
-  int intValue_1 = 0;
-  Token _tokenintValue_1 = null;
-  int intValue_2 = 0;
-  Token _tokenintValue_2 = null;
-  yajco.model.pattern.impl.Associativity associativity_2 = null;
-}
-{
-(LOOKAHEAD(6)(      <OPERATOR>
-      <_40>
-(        <PRIORITY>
-        <_61>
-        _tokenintValue_2 = <INT_VALUE>  {intValue_2 = Integer.parseInt(_tokenintValue_2.image);}
-)
-
-(        <ASSOCIATIVITY>
-        <_61>
-        associativity_2 = AssociativitySymbol()  {}
-)
-
-      <_41>
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Operator( intValue_2, associativity_2), (Object)intValue_2, associativity_2);}
-
-   |
-(      <OPERATOR>
-      <_40>
-(        <PRIORITY>
-        <_61>
-        _tokenintValue_1 = <INT_VALUE>  {intValue_1 = Integer.parseInt(_tokenintValue_1.image);}
-)
-
-      <_41>
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Operator( intValue_1), (Object)intValue_1);}
-
-)
-}
-
-yajco.model.LocalVariablePart LocalVariablePartSymbol() :
-{
-  java.lang.String name_1 = null;
-  Token _tokenname_1 = null;
-  yajco.model.type.Type type_1 = null;
-  yajco.model.pattern.NotationPartPattern[] patterns_1 = null;
-  java.util.List<yajco.model.pattern.NotationPartPattern> _listpatterns_1 = new java.util.ArrayList<yajco.model.pattern.NotationPartPattern>();
-  yajco.model.pattern.NotationPartPattern _itempatterns_1 = null;
-}
-{
-(((        _tokenname_1 = <NAME>  {name_1 = _tokenname_1.image;}
-)
-
-(        <_58>
-        type_1 = TypeSymbol()  {}
-)
-
-      (  
-(          <_123>
-(            (  
-              _itempatterns_1 = NotationPartPatternSymbol()  {_listpatterns_1.add(_itempatterns_1);}            )*
-            
-
-)  {patterns_1 = _listpatterns_1.toArray(new yajco.model.pattern.NotationPartPattern[] {});}
-
-          <_125>
-)
-      )?
-      
-
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.LocalVariablePart( name_1, type_1, patterns_1), (Object)name_1, type_1, patterns_1);}
-
-)
-}
-
-yajco.model.Property PropertySymbol() :
-{
-  java.lang.String name_1 = null;
-  Token _tokenname_1 = null;
-  yajco.model.type.Type type_1 = null;
-  yajco.model.pattern.PropertyPattern[] patterns_1 = null;
-  java.util.List<yajco.model.pattern.PropertyPattern> _listpatterns_1 = new java.util.ArrayList<yajco.model.pattern.PropertyPattern>();
-  yajco.model.pattern.PropertyPattern _itempatterns_1 = null;
-}
-{
-(((        _tokenname_1 = <NAME>  {name_1 = _tokenname_1.image;}
-)
-
-(        <_58>
-        type_1 = TypeSymbol()  {}
-)
-
-      (  
-(          <_123>
-(            (  
-              _itempatterns_1 = PropertyPatternSymbol()  {_listpatterns_1.add(_itempatterns_1);}            )*
-            
-
-)  {patterns_1 = _listpatterns_1.toArray(new yajco.model.pattern.PropertyPattern[] {});}
-
-          <_125>
-)
-      )?
-      
-
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.Property( name_1, type_1, patterns_1), (Object)name_1, type_1, patterns_1);}
-
-)
-}
-
-yajco.model.pattern.ConceptPattern ConceptPatternSymbol() :
-{
-  yajco.model.pattern.ConceptPattern _value = null;
-}
-{
-(    _value = EnumSymbol()
-   |
-    _value = OperatorSymbol()
-   |
-    _value = ParenthesesSymbol()
-)  {return _value;}
-}
-
-yajco.model.type.PrimitiveType PrimitiveTypeSymbol() :
-{
-}
-{
-(    <BOOLEAN>  {return yajco.model.type.PrimitiveType.BOOLEAN;}
-   |
-    <INTEGER>  {return yajco.model.type.PrimitiveType.INTEGER;}
-   |
-    <REAL>  {return yajco.model.type.PrimitiveType.REAL;}
-   |
-    <STRING>  {return yajco.model.type.PrimitiveType.STRING;}
-)
-}
-
-yajco.model.type.ListType ListTypeSymbol() :
-{
-  yajco.model.type.Type componentType_1 = null;
-}
-{
-((      <LIST>
-      <OF>
-(        componentType_1 = TypeSymbol()  {}
-)
-
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.type.ListType( componentType_1), (Object)componentType_1);}
-
-)
-}
-
-yajco.model.TokenDef TokenDefSymbol() :
-{
-  java.lang.String name_1 = null;
-  Token _tokenname_1 = null;
-  java.lang.String regexp_1 = null;
-  Token _tokenregexp_1 = null;
-}
-{
-(((        _tokenname_1 = <NAME>  {name_1 = _tokenname_1.image;}
-)
-
-(        <_61>
-        _tokenregexp_1 = <STRING_VALUE>  {regexp_1 = _tokenregexp_1.image;}
-)
-
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.TokenDef( name_1, regexp_1), (Object)name_1, regexp_1);}
-
-)
-}
-
-yajco.model.pattern.NotationPartPattern NotationPartPatternSymbol() :
-{
-  yajco.model.pattern.NotationPartPattern _value = null;
-}
-{
-(    _value = NewLineSymbol()
-   |
-    _value = RangeSymbol()
-   |
-    _value = SeparatorSymbol()
-   |
-    _value = ReferencesSymbol()
-   |
-    _value = IndentSymbol()
-)  {return _value;}
-}
-
-yajco.model.pattern.impl.Enum EnumSymbol() :
-{
-}
-{
-((      <ENUM>
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Enum( ));}
-
-)
-}
-
-yajco.model.pattern.impl.References ReferencesSymbol() :
-{
-  java.lang.String name_1 = null;
-  Token _tokenname_1 = null;
-  java.lang.String property_1 = null;
-  Token _tokenproperty_1 = null;
-}
-{
-((      <REFERENCES>
-      <_40>
-(        _tokenname_1 = <NAME>  {name_1 = _tokenname_1.image;}
-)
-
-      (  
-(          <_44>
-          <PROPERTY>
-          <_61>
-          _tokenproperty_1 = <NAME>  {property_1 = _tokenproperty_1.image;}
-)
-      )?
-      
-
-      <_41>
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.References( name_1, property_1), (Object)name_1, property_1);}
-
-)
-}
-
-yajco.model.pattern.impl.Identifier IdentifierSymbol() :
-{
-}
-{
-((      <IDENTIFIER>
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Identifier( ));}
-
-)
-}
-
-yajco.model.pattern.impl.Separator SeparatorSymbol() :
-{
-  java.lang.String stringValue_1 = null;
-  Token _tokenstringValue_1 = null;
-}
-{
-((      <SEPARATOR>
-      <_40>
-(        _tokenstringValue_1 = <STRING_VALUE>  {stringValue_1 = _tokenstringValue_1.image;}
-)
-
-      <_41>
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Separator( stringValue_1), (Object)stringValue_1);}
-
-)
-}
-
-yajco.model.pattern.NotationPattern NotationPatternSymbol() :
-{
-  yajco.model.pattern.NotationPattern _value = null;
-}
-{
-(    _value = FactorySymbol()
-)  {return _value;}
-}
-
 yajco.model.type.ArrayType ArrayTypeSymbol() :
 {
   yajco.model.type.Type componentType_1 = null;
@@ -429,52 +80,6 @@ yajco.model.type.ArrayType ArrayTypeSymbol() :
 )
 
 )  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.type.ArrayType( componentType_1), (Object)componentType_1);}
-
-)
-}
-
-yajco.model.pattern.impl.printer.NewLine NewLineSymbol() :
-{
-}
-{
-((      <NEWLINE>
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.printer.NewLine( ));}
-
-)
-}
-
-yajco.model.pattern.impl.Range RangeSymbol() :
-{
-  int minOccurs_1 = 0;
-  Token _tokenminOccurs_1 = null;
-  int minOccurs_2 = 0;
-  Token _tokenminOccurs_2 = null;
-  int maxOccurs_2 = 0;
-  Token _tokenmaxOccurs_2 = null;
-}
-{
-(LOOKAHEAD(5)(      <RANGE>
-      <_40>
-(        _tokenminOccurs_1 = <INT_VALUE>  {minOccurs_1 = Integer.parseInt(_tokenminOccurs_1.image);}
-)
-
-      <_46_46>
-      <_42>
-      <_41>
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Range( minOccurs_1), (Object)minOccurs_1);}
-
-   |
-(      <RANGE>
-      <_40>
-(        _tokenminOccurs_2 = <INT_VALUE>  {minOccurs_2 = Integer.parseInt(_tokenminOccurs_2.image);}
-)
-
-(        <_46_46>
-        _tokenmaxOccurs_2 = <INT_VALUE>  {maxOccurs_2 = Integer.parseInt(_tokenmaxOccurs_2.image);}
-)
-
-      <_41>
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Range( minOccurs_2, maxOccurs_2), (Object)minOccurs_2, maxOccurs_2);}
 
 )
 }
@@ -491,15 +96,6 @@ yajco.model.pattern.impl.Associativity AssociativitySymbol() :
    |
     <AUTO>  {return yajco.model.pattern.impl.Associativity.AUTO;}
 )
-}
-
-yajco.model.pattern.PropertyPattern PropertyPatternSymbol() :
-{
-  yajco.model.pattern.PropertyPattern _value = null;
-}
-{
-(    _value = IdentifierSymbol()
-)  {return _value;}
 }
 
 yajco.model.Concept ConceptSymbol() :
@@ -582,6 +178,29 @@ yajco.model.Concept ConceptSymbol() :
 )
 }
 
+yajco.model.pattern.ConceptPattern ConceptPatternSymbol() :
+{
+  yajco.model.pattern.ConceptPattern _value = null;
+}
+{
+(    _value = ParenthesesSymbol()
+   |
+    _value = OperatorSymbol()
+   |
+    _value = EnumSymbol()
+)  {return _value;}
+}
+
+yajco.model.pattern.impl.Enum EnumSymbol() :
+{
+}
+{
+((      <ENUM>
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Enum( ));}
+
+)
+}
+
 yajco.model.pattern.impl.Factory FactorySymbol() :
 {
   java.lang.String name_1 = null;
@@ -601,68 +220,33 @@ yajco.model.pattern.impl.Factory FactorySymbol() :
 )
 }
 
-yajco.model.Notation NotationSymbol() :
+yajco.model.pattern.impl.Identifier IdentifierSymbol() :
 {
-  yajco.model.NotationPart[] parts_1 = null;
-  java.util.List<yajco.model.NotationPart> _listparts_1 = new java.util.ArrayList<yajco.model.NotationPart>();
-  yajco.model.NotationPart _itemparts_1 = null;
-  yajco.model.pattern.NotationPattern[] patterns_1 = null;
-  java.util.List<yajco.model.pattern.NotationPattern> _listpatterns_1 = new java.util.ArrayList<yajco.model.pattern.NotationPattern>();
-  yajco.model.pattern.NotationPattern _itempatterns_1 = null;
 }
 {
-((((          _itemparts_1 = NotationPartSymbol()  {_listparts_1.add(_itemparts_1);}
-          (  
-            _itemparts_1 = NotationPartSymbol()  {_listparts_1.add(_itemparts_1);}          )*
-          
-
-)  {parts_1 = _listparts_1.toArray(new yajco.model.NotationPart[] {});}
-
-)
-
-      (  
-(          <_123>
-(            (  
-              _itempatterns_1 = NotationPatternSymbol()  {_listpatterns_1.add(_itempatterns_1);}            )*
-            
-
-)  {patterns_1 = _listpatterns_1.toArray(new yajco.model.pattern.NotationPattern[] {});}
-
-          <_125>
-)
-      )?
-      
-
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.Notation( parts_1, patterns_1), (Object)parts_1, patterns_1);}
+((      <IDENTIFIER>
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Identifier( ));}
 
 )
 }
 
-yajco.model.type.SetType SetTypeSymbol() :
+yajco.model.pattern.impl.printer.Indent IndentSymbol() :
 {
-  yajco.model.type.Type componentType_1 = null;
+  int level_2 = 0;
+  Token _tokenlevel_2 = null;
 }
 {
-((      <SET>
-      <OF>
-(        componentType_1 = TypeSymbol()  {}
+(LOOKAHEAD(2)(      <INDENT>
+      <_40>
+(        _tokenlevel_2 = <INT_VALUE>  {level_2 = Integer.parseInt(_tokenlevel_2.image);}
 )
 
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.type.SetType( componentType_1), (Object)componentType_1);}
+      <_41>
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.printer.Indent( level_2), (Object)level_2);}
 
-)
-}
-
-yajco.model.TokenPart TokenPartSymbol() :
-{
-  java.lang.String stringValue_1 = null;
-  Token _tokenstringValue_1 = null;
-}
-{
-(((        _tokenstringValue_1 = <STRING_VALUE>  {stringValue_1 = _tokenstringValue_1.image;}
-)
-
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.TokenPart( stringValue_1), (Object)stringValue_1);}
+   |
+(      <INDENT>
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.printer.Indent( ));}
 
 )
 }
@@ -759,6 +343,103 @@ yajco.model.Language LanguageSymbol() :
 )
 }
 
+yajco.model.type.ListType ListTypeSymbol() :
+{
+  yajco.model.type.Type componentType_1 = null;
+}
+{
+((      <LIST>
+      <OF>
+(        componentType_1 = TypeSymbol()  {}
+)
+
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.type.ListType( componentType_1), (Object)componentType_1);}
+
+)
+}
+
+yajco.model.LocalVariablePart LocalVariablePartSymbol() :
+{
+  java.lang.String name_1 = null;
+  Token _tokenname_1 = null;
+  yajco.model.type.Type type_1 = null;
+  yajco.model.pattern.NotationPartPattern[] patterns_1 = null;
+  java.util.List<yajco.model.pattern.NotationPartPattern> _listpatterns_1 = new java.util.ArrayList<yajco.model.pattern.NotationPartPattern>();
+  yajco.model.pattern.NotationPartPattern _itempatterns_1 = null;
+}
+{
+(((        _tokenname_1 = <NAME>  {name_1 = _tokenname_1.image;}
+)
+
+(        <_58>
+        type_1 = TypeSymbol()  {}
+)
+
+      (  
+(          <_123>
+(            (  
+              _itempatterns_1 = NotationPartPatternSymbol()  {_listpatterns_1.add(_itempatterns_1);}            )*
+            
+
+)  {patterns_1 = _listpatterns_1.toArray(new yajco.model.pattern.NotationPartPattern[] {});}
+
+          <_125>
+)
+      )?
+      
+
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.LocalVariablePart( name_1, type_1, patterns_1), (Object)name_1, type_1, patterns_1);}
+
+)
+}
+
+yajco.model.pattern.impl.printer.NewLine NewLineSymbol() :
+{
+}
+{
+((      <NEWLINE>
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.printer.NewLine( ));}
+
+)
+}
+
+yajco.model.Notation NotationSymbol() :
+{
+  yajco.model.NotationPart[] parts_1 = null;
+  java.util.List<yajco.model.NotationPart> _listparts_1 = new java.util.ArrayList<yajco.model.NotationPart>();
+  yajco.model.NotationPart _itemparts_1 = null;
+  yajco.model.pattern.NotationPattern[] patterns_1 = null;
+  java.util.List<yajco.model.pattern.NotationPattern> _listpatterns_1 = new java.util.ArrayList<yajco.model.pattern.NotationPattern>();
+  yajco.model.pattern.NotationPattern _itempatterns_1 = null;
+}
+{
+((((          _itemparts_1 = NotationPartSymbol()  {_listparts_1.add(_itemparts_1);}
+          (  
+            _itemparts_1 = NotationPartSymbol()  {_listparts_1.add(_itemparts_1);}          )*
+          
+
+)  {parts_1 = _listparts_1.toArray(new yajco.model.NotationPart[] {});}
+
+)
+
+      (  
+(          <_123>
+(            (  
+              _itempatterns_1 = NotationPatternSymbol()  {_listpatterns_1.add(_itempatterns_1);}            )*
+            
+
+)  {patterns_1 = _listpatterns_1.toArray(new yajco.model.pattern.NotationPattern[] {});}
+
+          <_125>
+)
+      )?
+      
+
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.Notation( parts_1, patterns_1), (Object)parts_1, patterns_1);}
+
+)
+}
+
 yajco.model.NotationPart NotationPartSymbol() :
 {
   yajco.model.NotationPart _value = null;
@@ -772,13 +453,343 @@ LOOKAHEAD(2)    _value = LocalVariablePartSymbol()
 )  {return _value;}
 }
 
-yajco.model.pattern.impl.printer.Indent IndentSymbol() :
+yajco.model.pattern.NotationPartPattern NotationPartPatternSymbol() :
+{
+  yajco.model.pattern.NotationPartPattern _value = null;
+}
+{
+(    _value = SeparatorSymbol()
+   |
+    _value = RangeSymbol()
+   |
+    _value = NewLineSymbol()
+   |
+    _value = ReferencesSymbol()
+   |
+    _value = IndentSymbol()
+)  {return _value;}
+}
+
+yajco.model.pattern.NotationPattern NotationPatternSymbol() :
+{
+  yajco.model.pattern.NotationPattern _value = null;
+}
+{
+(    _value = FactorySymbol()
+)  {return _value;}
+}
+
+yajco.model.pattern.impl.Operator OperatorSymbol() :
+{
+  int intValue_1 = 0;
+  Token _tokenintValue_1 = null;
+  int intValue_2 = 0;
+  Token _tokenintValue_2 = null;
+  yajco.model.pattern.impl.Associativity associativity_2 = null;
+}
+{
+(LOOKAHEAD(6)(      <OPERATOR>
+      <_40>
+(        <PRIORITY>
+        <_61>
+        _tokenintValue_2 = <INT_VALUE>  {intValue_2 = Integer.parseInt(_tokenintValue_2.image);}
+)
+
+(        <ASSOCIATIVITY>
+        <_61>
+        associativity_2 = AssociativitySymbol()  {}
+)
+
+      <_41>
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Operator( intValue_2, associativity_2), (Object)intValue_2, associativity_2);}
+
+   |
+(      <OPERATOR>
+      <_40>
+(        <PRIORITY>
+        <_61>
+        _tokenintValue_1 = <INT_VALUE>  {intValue_1 = Integer.parseInt(_tokenintValue_1.image);}
+)
+
+      <_41>
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Operator( intValue_1), (Object)intValue_1);}
+
+)
+}
+
+yajco.model.pattern.impl.Parentheses ParenthesesSymbol() :
+{
+  java.lang.String left_2 = null;
+  Token _tokenleft_2 = null;
+  java.lang.String right_2 = null;
+  Token _tokenright_2 = null;
+}
+{
+(LOOKAHEAD(2)(      <PARENTHESES>
+      <_40>
+(        _tokenleft_2 = <LEFT>  {left_2 = _tokenleft_2.image;}
+)
+
+(        <_44>
+        _tokenright_2 = <RIGHT>  {right_2 = _tokenright_2.image;}
+)
+
+      <_41>
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Parentheses( left_2, right_2), (Object)left_2, right_2);}
+
+   |
+(      <PARENTHESES>
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Parentheses( ));}
+
+)
+}
+
+yajco.model.type.PrimitiveType PrimitiveTypeSymbol() :
 {
 }
 {
-((      <INDENT>
-)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.printer.Indent( ));}
+(    <BOOLEAN>  {return yajco.model.type.PrimitiveType.BOOLEAN;}
+   |
+    <INTEGER>  {return yajco.model.type.PrimitiveType.INTEGER;}
+   |
+    <REAL>  {return yajco.model.type.PrimitiveType.REAL;}
+   |
+    <STRING>  {return yajco.model.type.PrimitiveType.STRING;}
+)
+}
+
+yajco.model.Property PropertySymbol() :
+{
+  java.lang.String name_1 = null;
+  Token _tokenname_1 = null;
+  yajco.model.type.Type type_1 = null;
+  yajco.model.pattern.PropertyPattern[] patterns_1 = null;
+  java.util.List<yajco.model.pattern.PropertyPattern> _listpatterns_1 = new java.util.ArrayList<yajco.model.pattern.PropertyPattern>();
+  yajco.model.pattern.PropertyPattern _itempatterns_1 = null;
+}
+{
+(((        _tokenname_1 = <NAME>  {name_1 = _tokenname_1.image;}
+)
+
+(        <_58>
+        type_1 = TypeSymbol()  {}
+)
+
+      (  
+(          <_123>
+(            (  
+              _itempatterns_1 = PropertyPatternSymbol()  {_listpatterns_1.add(_itempatterns_1);}            )*
+            
+
+)  {patterns_1 = _listpatterns_1.toArray(new yajco.model.pattern.PropertyPattern[] {});}
+
+          <_125>
+)
+      )?
+      
+
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.Property( name_1, type_1, patterns_1), (Object)name_1, type_1, patterns_1);}
 
 )
+}
+
+yajco.model.pattern.PropertyPattern PropertyPatternSymbol() :
+{
+  yajco.model.pattern.PropertyPattern _value = null;
+}
+{
+(    _value = IdentifierSymbol()
+)  {return _value;}
+}
+
+yajco.model.PropertyReferencePart PropertyReferencePartSymbol() :
+{
+  java.lang.String name_1 = null;
+  Token _tokenname_1 = null;
+  yajco.model.pattern.NotationPartPattern[] patterns_1 = null;
+  java.util.List<yajco.model.pattern.NotationPartPattern> _listpatterns_1 = new java.util.ArrayList<yajco.model.pattern.NotationPartPattern>();
+  yajco.model.pattern.NotationPartPattern _itempatterns_1 = null;
+}
+{
+(((        _tokenname_1 = <NAME>  {name_1 = _tokenname_1.image;}
+)
+
+      (  
+(          <_123>
+(            (  
+              _itempatterns_1 = NotationPartPatternSymbol()  {_listpatterns_1.add(_itempatterns_1);}            )*
+            
+
+)  {patterns_1 = _listpatterns_1.toArray(new yajco.model.pattern.NotationPartPattern[] {});}
+
+          <_125>
+)
+      )?
+      
+
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.PropertyReferencePart( name_1, patterns_1), (Object)name_1, patterns_1);}
+
+)
+}
+
+yajco.model.pattern.impl.Range RangeSymbol() :
+{
+  int minOccurs_1 = 0;
+  Token _tokenminOccurs_1 = null;
+  int minOccurs_2 = 0;
+  Token _tokenminOccurs_2 = null;
+  int maxOccurs_2 = 0;
+  Token _tokenmaxOccurs_2 = null;
+}
+{
+(LOOKAHEAD(5)(      <RANGE>
+      <_40>
+(        _tokenminOccurs_1 = <INT_VALUE>  {minOccurs_1 = Integer.parseInt(_tokenminOccurs_1.image);}
+)
+
+      <_46_46>
+      <_42>
+      <_41>
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Range( minOccurs_1), (Object)minOccurs_1);}
+
+   |
+(      <RANGE>
+      <_40>
+(        _tokenminOccurs_2 = <INT_VALUE>  {minOccurs_2 = Integer.parseInt(_tokenminOccurs_2.image);}
+)
+
+(        <_46_46>
+        _tokenmaxOccurs_2 = <INT_VALUE>  {maxOccurs_2 = Integer.parseInt(_tokenmaxOccurs_2.image);}
+)
+
+      <_41>
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Range( minOccurs_2, maxOccurs_2), (Object)minOccurs_2, maxOccurs_2);}
+
+)
+}
+
+yajco.model.type.ReferenceType ReferenceTypeSymbol() :
+{
+  java.lang.String name_1 = null;
+  Token _tokenname_1 = null;
+}
+{
+(((        _tokenname_1 = <NAME>  {name_1 = _tokenname_1.image;}
+)
+
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.type.ReferenceType( name_1), (Object)name_1);}
+
+)
+}
+
+yajco.model.pattern.impl.References ReferencesSymbol() :
+{
+  java.lang.String name_1 = null;
+  Token _tokenname_1 = null;
+  java.lang.String property_1 = null;
+  Token _tokenproperty_1 = null;
+}
+{
+((      <REFERENCES>
+      <_40>
+(        _tokenname_1 = <NAME>  {name_1 = _tokenname_1.image;}
+)
+
+      (  
+(          <_44>
+          <PROPERTY>
+          <_61>
+          _tokenproperty_1 = <NAME>  {property_1 = _tokenproperty_1.image;}
+)
+      )?
+      
+
+      <_41>
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.References( name_1, property_1), (Object)name_1, property_1);}
+
+)
+}
+
+yajco.model.pattern.impl.Separator SeparatorSymbol() :
+{
+  java.lang.String stringValue_1 = null;
+  Token _tokenstringValue_1 = null;
+}
+{
+((      <SEPARATOR>
+      <_40>
+(        _tokenstringValue_1 = <STRING_VALUE>  {stringValue_1 = _tokenstringValue_1.image;}
+)
+
+      <_41>
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Separator( stringValue_1), (Object)stringValue_1);}
+
+)
+}
+
+yajco.model.type.SetType SetTypeSymbol() :
+{
+  yajco.model.type.Type componentType_1 = null;
+}
+{
+((      <SET>
+      <OF>
+(        componentType_1 = TypeSymbol()  {}
+)
+
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.type.SetType( componentType_1), (Object)componentType_1);}
+
+)
+}
+
+yajco.model.TokenDef TokenDefSymbol() :
+{
+  java.lang.String name_1 = null;
+  Token _tokenname_1 = null;
+  java.lang.String regexp_1 = null;
+  Token _tokenregexp_1 = null;
+}
+{
+(((        _tokenname_1 = <NAME>  {name_1 = _tokenname_1.image;}
+)
+
+(        <_61>
+        _tokenregexp_1 = <STRING_VALUE>  {regexp_1 = _tokenregexp_1.image;}
+)
+
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.TokenDef( name_1, regexp_1), (Object)name_1, regexp_1);}
+
+)
+}
+
+yajco.model.TokenPart TokenPartSymbol() :
+{
+  java.lang.String stringValue_1 = null;
+  Token _tokenstringValue_1 = null;
+}
+{
+(((        _tokenstringValue_1 = <STRING_VALUE>  {stringValue_1 = _tokenstringValue_1.image;}
+)
+
+)  {return tuke.pargen.ReferenceResolver.getInstance().register(new yajco.model.TokenPart( stringValue_1), (Object)stringValue_1);}
+
+)
+}
+
+yajco.model.type.Type TypeSymbol() :
+{
+  yajco.model.type.Type _value = null;
+}
+{
+(    _value = ArrayTypeSymbol()
+   |
+    _value = ListTypeSymbol()
+   |
+    _value = SetTypeSymbol()
+   |
+    _value = PrimitiveTypeSymbol()
+   |
+    _value = ReferenceTypeSymbol()
+)  {return _value;}
 }
 

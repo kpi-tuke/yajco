@@ -10,6 +10,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import tuke.pargen.GeneratorException;
+import yajco.generator.FilesGenerator;
 import yajco.model.pattern.impl.Associativity;
 import yajco.generator.util.Utilities;
 import yajco.model.BindingNotationPart;
@@ -42,11 +43,11 @@ import yajco.model.type.ReferenceType;
 import yajco.model.type.SetType;
 import yajco.model.type.Type;
 
-public class ClassGenerator {
+public class ClassGenerator implements FilesGenerator {
 
     private Language actualLanguage;
 
-    public void generate(Language language, File directory) {
+    public void generateFiles(Language language, File directory) {
         if (directory == null || !directory.isDirectory()) {
             throw new GeneratorException("Supplied parameter is not directory.");
         }
@@ -317,6 +318,7 @@ public class ClassGenerator {
         writer.write("import tuke.pargen.annotation.*;");
         writer.write("import tuke.pargen.annotation.reference.*;");
         writer.write("import yajco.annotation.printer.*;");
+        writer.write("import yajco.model.pattern.impl.Associativity;");
     }
 
     private void processTypeToConceptSet(Concept actualConcept, Type type, Set<Concept> conceptList) {
@@ -355,8 +357,13 @@ public class ClassGenerator {
         if (list.size() > 1) {
             writer.write("{");
         }
+        boolean comma = false;
         for (String string : list) {
+            if (comma) {
+                writer.write(",");
+            }
             writer.write("\"" + string + "\"");
+            comma = true;
         }
         if (list.size() > 1) {
             writer.write("}");

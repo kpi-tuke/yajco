@@ -1,30 +1,33 @@
-## TODO: package
 #set( $nameMap = ${Utilities.createConceptUniqueNames($language)} )
-package ${Utilities.getLanguagePackageName($language)}.printer;
+package ${Utilities.getLanguagePackageName($language)}.$package;
 
 import java.util.List;
 import java.util.Set;
+import java.util.HashMap;
+import java.util.Map;
 import java.io.PrintWriter;
-import ${Utilities.getLanguagePackageName($language)}.visitor.Visitor;
+import ${Utilities.getLanguagePackageName($language)}.${visitorPackage}.${visitorClassName};
 import yajco.printer.PrinterException;
+import yajco.printer.PrinterHelper;
 #foreach( $concept in ${Utilities.getConceptsNeededForImport($nameMap)} )
 import ${Utilities.getFullConceptClassName($language, $concept)};
 #end
 
-public class Printer extends Visitor<PrintWriter> {
+public class $className extends ${visitorClassName}<PrintWriter> {
 #if ( !$language.skips.isEmpty() )
 #set( $whiteSpace = ${language.skips.get(0)} )
 #else
 #set( $whiteSpace = " " )
 #end
     private final String WHITE_SPACE = "${whiteSpace}";
-    private String indentString = "\t";
+    private String indentString = "    "; //4 spaces
     private int indent = 0;
     private boolean inNewLine = true;
 
     public void print(Object o, PrintWriter writer) {
         inNewLine = true;
         visit(o, writer);
+        writer.println();
         writer.flush();
     }
 
@@ -32,6 +35,11 @@ public class Printer extends Visitor<PrintWriter> {
     @Override
     protected void visit${Utilities.getMethodPartName($nameMap, $concept)}(${Utilities.getClassName($nameMap, $concept)} ${Utilities.toLowerCaseIdent($concept.conceptName)}, PrintWriter p) {
  #set( $conceptPatterns = ${concept.patterns} )
+ #set( $hasEnumPattern = ${Utilities.hasClassInList(${conceptPatterns},${enumPatternClassName})} )
+#if ( $hasEnumPattern )
+        printLiteral(${Utilities.toLowerCaseIdent($concept.conceptName)}.name(), p);
+    }
+#else
  #set( $hasParenthesesPattern = ${Utilities.hasClassInList(${conceptPatterns},${parenthesesPatternClassName})} )
  #set( $parenthesesPattern = ${Utilities.getObjectFromList(${conceptPatterns},${parenthesesPatternClassName})} )
  #set( $notationCount = $concept.concreteSyntax.size() )
@@ -152,7 +160,7 @@ public class Printer extends Visitor<PrintWriter> {
  #foreach( $property in $concept.abstractSyntax )
   #set( $type = $property.type )
   #set( $className = ${Utilities.getClassName($type)} )
-  #if( $className == $arrayTypeClassName )
+  #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName )
    #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
     @Override
     protected void visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}(#writeSpecifiedType($type ${Utilities.getClassName($nameMap, $type.componentType.concept)}) ${Utilities.toLowerCaseIdent($property.name)}, PrintWriter p) {
@@ -178,7 +186,8 @@ public class Printer extends Visitor<PrintWriter> {
   #end
  #end
 #end
-    public void newLine(PrintWriter p) {
+#end
+    protected void newLine(PrintWriter p) {
         p.println();
         for (int i = 0; i < indent; i++) {
             p.print(indentString);
@@ -186,14 +195,32 @@ public class Printer extends Visitor<PrintWriter> {
         inNewLine = true;
     }
 
-    public void increaseIndent() {
+    protected void increaseIndent() {
         if (indent != Integer.MAX_VALUE) {
             indent++;
         }
     }
+    protected void increaseIndent(int level) {
+        changeIndent(level);
+    }
 
-    public void decreaseIndent() {
-        if (indent <= 0) {
+    protected void decreaseIndent(int level) {
+        changeIndent(-level);
+    }
+
+    protected void changeIndent(int level) {
+        indent = indent + level;
+        if (indent < 0) {
+            if (level > 0) { //pripocitavali sme, muselo pretiect
+                indent = Integer.MAX_VALUE;
+            } else {
+                indent = 0;
+            }
+        }
+    }
+
+    protected void decreaseIndent() {
+        if (indent > 0) {
             indent--;
         }
     }
@@ -206,7 +233,7 @@ public class Printer extends Visitor<PrintWriter> {
         this.indentString = indentString;
     }
 
-    public void printLiteral(String literal, PrintWriter p) {
+    protected void printLiteral(String literal, PrintWriter p) {
         if (!inNewLine) {
             p.write(WHITE_SPACE);
         } else {
@@ -215,15 +242,57 @@ public class Printer extends Visitor<PrintWriter> {
         printNonSpacedLiteral(literal, p);
     }
 
-    public void printLiteral(int number, PrintWriter p) {
+    protected void printLiteral(int number, PrintWriter p) {
         printLiteral(String.valueOf(number), p);
     }
 
-    public void printNonSpacedLiteral(String literal, PrintWriter p) {
-        p.write(literal);
+    protected void printLiteral(long number, PrintWriter p) {
+        printLiteral(String.valueOf(number), p);
+    }
+
+    protected void printLiteral(float number, PrintWriter p) {
+        printLiteral(String.valueOf(number), p);
+    }
+
+    protected void printLiteral(double number, PrintWriter p) {
+        printLiteral(String.valueOf(number), p);
+    }
+
+    protected void printLiteral(boolean number, PrintWriter p) {
+        printLiteral(String.valueOf(number), p);
+    }
+
+    protected void printLiteral(char number, PrintWriter p) {
+        printLiteral(String.valueOf(number), p);
+    }
+
+    protected void printLiteral(char[] number, PrintWriter p) {
+        printLiteral(String.valueOf(number), p);
+    }
+
+    protected void printLiteral(String[] idents, PrintWriter p) {
+        for (String string : idents) {
+            printLiteral(string, p);
+        }
+    }
+
+    protected void printNonSpacedLiteral(String literal, PrintWriter p) {
+        if (tokens.containsKey(literal.toUpperCase())) {
+            //p.write(PrinterHelper.generateExpressionFromRegex(tokens.get(literal.toUpperCase())));
+            p.write(tokens.get(literal.toUpperCase()));
+        } else {
+            p.write(literal);
+        }
         if (inNewLine) {
             inNewLine = false;
         }
+    }
+
+    private Map<String, String> tokens = new HashMap<String, String>();
+    {
+#foreach( $token in $language.tokens)
+        tokens.put("${token.name}".toUpperCase(), "${token.regexp.replace($backslash, $doubleBackslash)}");
+#end
     }
 }
 ##
@@ -236,8 +305,9 @@ public class Printer extends Visitor<PrintWriter> {
    #if( $hasPatternSupport )
     #set( $hasNewLinePattern = ${Utilities.hasClassInList(${notationPart.patterns},${newLinePatternClassName})} )
     #set( $hasIndentPattern = ${Utilities.hasClassInList(${notationPart.patterns},${indentPatternClassName})} )
+    #set( $indentPattern = ${Utilities.getObjectFromList(${notationPart.patterns},${indentPatternClassName})} )
     #if( $hasIndentPattern )
-        increaseIndent();
+        increaseIndent(${indentPattern.level});
     #end
     #if( $hasNewLinePattern )
         newLine(p);
@@ -277,7 +347,7 @@ public class Printer extends Visitor<PrintWriter> {
    #end
    #if( $hasPatternSupport )
     #if( $hasIndentPattern )
-        decreaseIndent();
+        decreaseIndent(${indentPattern.level});
     #end
    #end
 #end

@@ -12,7 +12,8 @@ import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import tuke.pargen.GeneratorException;
-import tuke.pargen.ReferenceResolver;
+import yajco.ReferenceResolver;
+import yajco.generator.FilesGenerator;
 import yajco.generator.util.Utilities;
 import yajco.model.Concept;
 import yajco.model.Language;
@@ -22,12 +23,14 @@ import yajco.model.NotationPart;
 import yajco.model.PropertyReferencePart;
 import yajco.model.type.Type;
 
-public class AspectObjectRegistratorGenerator {
+public class AspectObjectRegistratorGenerator implements FilesGenerator {
 
     private static String CLASS_NAME = "ObjectRegistrator";
+    private static String PACKAGE_NAME = "parser";
+
     private Map<Concept, String> nameMap;
 
-    public void generate(Language language, File directory) {
+    public void generateFiles(Language language, File directory) {
         if (directory == null || !directory.isDirectory()) {
             throw new GeneratorException("Supplied parameter is not directory ("+directory.getAbsolutePath()+").");
         }
@@ -38,7 +41,7 @@ public class AspectObjectRegistratorGenerator {
     private void generateAspectFile(Language language, File directory) {
         FileWriter writer = null;
         try {
-            String filePath = Utilities.getLanguagePackageName(language)+".parser" + "." + CLASS_NAME;
+            String filePath = Utilities.getLanguagePackageName(language)+"."+PACKAGE_NAME+ "." + CLASS_NAME;
             filePath = filePath.replace('.', File.separatorChar);
             filePath = filePath + ".java";
             File file = new File(directory, filePath);
@@ -165,6 +168,7 @@ public class AspectObjectRegistratorGenerator {
                 writer.write(Utilities.toLowerCaseIdent(concept.getConceptName()));
                 for (NotationParameter parameter : parameterList) {
                     writer.write(", ");
+                    writer.write("(Object)"); // pretypovanie
                     writer.write(parameter.getName());
                 }
                 writer.write(");");
@@ -213,7 +217,7 @@ public class AspectObjectRegistratorGenerator {
          * @return the name
          */
         public String getName() {
-            return name;
+            return "p_"+name;
         }
     }
 }

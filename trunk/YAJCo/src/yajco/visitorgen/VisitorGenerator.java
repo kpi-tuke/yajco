@@ -10,6 +10,7 @@ import java.util.logging.Logger;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import tuke.pargen.GeneratorException;
+import yajco.generator.AbstractFileGenerator;
 import yajco.generator.util.Utilities;
 import yajco.model.Language;
 import yajco.model.type.ArrayType;
@@ -18,8 +19,10 @@ import yajco.model.type.PrimitiveType;
 import yajco.model.type.ReferenceType;
 import yajco.model.type.SetType;
 
-public class VisitorGenerator {
+public class VisitorGenerator extends AbstractFileGenerator{
     protected static final String TEMPLATE_PACKAGE = "templates";
+    protected static final String VISITOR_PACKAGE = "visitor";
+    protected static final String VISITOR_CLASS_NAME = "Visitor";
 
     private final String template;
 
@@ -35,6 +38,8 @@ public class VisitorGenerator {
             VelocityContext context = new VelocityContext();
             context.put("Utilities", Utilities.class);
             context.put("language", language);
+            context.put("package", getPackageName());
+            context.put("className", getClassName());
             context.put("arrayTypeClassName", ArrayType.class.getCanonicalName());
             context.put("listTypeClassName", ListType.class.getCanonicalName());
             context.put("setTypeClassName", SetType.class.getCanonicalName());
@@ -47,21 +52,20 @@ public class VisitorGenerator {
         }
     }
 
-    public void generate(Language language, File file) {
-        Writer writer = null;
-        try {
-            writer = new FileWriter(file);
-            generate(language, writer);
-            Utilities.formatCode(file);
-        } catch (IOException ex) {
-            throw new GeneratorException("Cannot write to file "+file.getAbsolutePath(), ex);
-        } finally {
-            try {
-                writer.close();
-            } catch (IOException ex) {
-                throw new GeneratorException("Cannot close writer for file "+file.getAbsolutePath(), ex);
-            }
-        }
+    @Override
+    public String getPackageName() {
+        return VISITOR_PACKAGE;
     }
+
+    @Override
+    public String getFileName() {
+        return getClassName()+".java";
+    }
+
+    @Override
+    public String getClassName() {
+        return VISITOR_CLASS_NAME;
+    }
+
 
 }

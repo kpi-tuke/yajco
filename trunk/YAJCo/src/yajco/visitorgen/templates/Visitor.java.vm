@@ -1,7 +1,7 @@
 ## TODO: componentny typ... napriklad ak by bolo "array of array of array of NIECO"
 ##
 #set( $nameMap = ${Utilities.createConceptUniqueNames($language)} )
-package ${Utilities.getLanguagePackageName($language)}.visitor;
+package ${Utilities.getLanguagePackageName($language)}.$package;
 
 import java.util.HashSet;
 import java.util.List;
@@ -11,14 +11,16 @@ import yajco.visitor.VisitorException;
 import ${Utilities.getFullConceptClassName($language, $concept)};
 #end
 
-public class Visitor<P> {
-    private Set<Object> visited = new HashSet<Object>();
+public class ${className}<P> {
+    protected Set<Object> visited = new HashSet<Object>();
 
     public void visit(Object o, P p) {
 #set( $ifToken = "if" )
 #foreach( $concept in $language.concepts )
         $ifToken (o instanceof ${Utilities.getClassName($nameMap, $concept)}) {
+            enterVisit(o);
             visit${Utilities.getMethodPartName($nameMap, $concept)}((${Utilities.getClassName($nameMap, $concept)}) o, p);
+            exitVisit(o);
         }
 #set( $ifToken = "else if" )
 #end
@@ -30,7 +32,7 @@ public class Visitor<P> {
     }
 #foreach( $concept in $language.concepts )
     protected void visit${Utilities.getMethodPartName($nameMap, $concept)}(${Utilities.getClassName($nameMap, $concept)} ${Utilities.toLowerCaseIdent($concept.conceptName)}, P p) {
-        if (${Utilities.toLowerCaseIdent($concept.conceptName)} != null && enterVisit(${Utilities.toLowerCaseIdent($concept.conceptName)})) {
+        if (${Utilities.toLowerCaseIdent($concept.conceptName)} != null) {
 #foreach( $property in $concept.abstractSyntax )
 #set( $type = $property.type )
 #set( $className = ${Utilities.getClassName($type)} )
@@ -41,8 +43,9 @@ public class Visitor<P> {
 #elseif( $className == $primitiveTypeClassName )
 ## pri primitovnom type sa aktualne dalej nevnarame, cize sa nerobi nic
 #elseif( $className == $referenceTypeClassName )
-        if (${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null) {
+        if (${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null && enterVisit(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}())) {
             visit${Utilities.getMethodPartName($nameMap, $type.concept)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
+            exitVisit(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}());
         }
 #else
             $Utilities.throwGeneratorException("Not known type for ${property.name}")
@@ -61,7 +64,6 @@ public class Visitor<P> {
 #set( $ifToken = "else if" )
 #end
 #end
-            exitVisit(${Utilities.toLowerCaseIdent($concept.conceptName)});
         }
     }
 
@@ -72,7 +74,10 @@ public class Visitor<P> {
 #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
     protected void visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}(#writeSpecifiedType($type ${Utilities.getClassName($nameMap, $type.componentType.concept)}) ${Utilities.toLowerCaseIdent($property.name)}, P p) {
         for (${Utilities.getClassName($nameMap, $type.componentType.concept)} ${Utilities.toLowerCaseIdent($type.componentType.concept.conceptName)} : ${Utilities.toLowerCaseIdent($property.name)}) {
-            visit${Utilities.getMethodPartName($nameMap, $type.componentType.concept)}(${Utilities.toLowerCaseIdent($type.componentType.concept.conceptName)}, p);
+            if (enterVisit(${Utilities.toLowerCaseIdent($type.componentType.concept.conceptName)})) {
+                visit${Utilities.getMethodPartName($nameMap, $type.componentType.concept)}(${Utilities.toLowerCaseIdent($type.componentType.concept.conceptName)}, p);
+                exitVisit(${Utilities.toLowerCaseIdent($type.componentType.concept.conceptName)});
+            }
         }
     }
 #end

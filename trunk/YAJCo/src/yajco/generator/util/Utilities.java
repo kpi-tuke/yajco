@@ -87,15 +87,19 @@ public class Utilities {
                 if (references.getProperty() != null) {
                     return references.getProperty();
                 } else {
+                    Property matchedProperty = null;
                     for (Property property : concept.getAbstractSyntax()) {
                         Type type = property.getType();
                         if (type instanceof ReferenceType) {
                             ReferenceType referenceType = (ReferenceType) type;
                             if (referenceType.getConcept().equals(references.getConcept())) {
-                                return property;
+                                if (matchedProperty == null || localVariablePart.getName().equals(property.getName())) {
+                                    matchedProperty = property;
+                                }
                             }
                         }
                     }
+                    return matchedProperty;
                 }
             } else {
                 throw new RuntimeException("Cannot find references.");

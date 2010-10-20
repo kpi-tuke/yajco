@@ -1,4 +1,4 @@
-package yajco.model;
+    package yajco.model;
 
 import yajco.model.type.Type;
 import yajco.model.pattern.PatternSupport;
