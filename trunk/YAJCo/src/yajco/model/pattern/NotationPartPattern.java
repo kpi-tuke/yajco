@@ -1,4 +1,8 @@
 package yajco.model.pattern;
 
-public interface NotationPartPattern extends Pattern {
+public abstract class NotationPartPattern extends Pattern {
+
+    public NotationPartPattern(Object sourceElement) {
+        super(sourceElement);
+    }
 }

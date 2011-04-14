@@ -49,7 +49,7 @@ public class ${className}<P> {
         }
 #else
             $Utilities.throwGeneratorException("Not known type for ${property.name}")
-            // not known type for ${property.name}
+        // not known type for ${property.name}
 #end
 #end
 ##
@@ -77,8 +77,8 @@ public class ${className}<P> {
             if (enterVisit(${Utilities.toLowerCaseIdent($type.componentType.concept.conceptName)})) {
                 visit${Utilities.getMethodPartName($nameMap, $type.componentType.concept)}(${Utilities.toLowerCaseIdent($type.componentType.concept.conceptName)}, p);
                 exitVisit(${Utilities.toLowerCaseIdent($type.componentType.concept.conceptName)});
-            }
         }
+    }
     }
 #end
 #end

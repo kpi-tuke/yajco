@@ -1,40 +1,50 @@
 package yajco.model.pattern.impl;
 
-import tuke.pargen.annotation.After;
-import tuke.pargen.annotation.Before;
-import tuke.pargen.annotation.Exclude;
+import yajco.annotation.After;
+import yajco.annotation.Before;
+import yajco.annotation.Exclude;
 import yajco.model.pattern.ConceptPattern;
 
 //TODO: po zjednotenie nechat len jeden enum
-public class Operator implements ConceptPattern {
-    private int priority;
+public class Operator extends ConceptPattern {
 
-    private Associativity associativity;
+	private int priority;
+	private Associativity associativity;
 
-    @Before({"Operator", "("})
-    @After(")")
-    public Operator(@Before({"priority", "="}) int intValue) {
-        this.priority = intValue;
-    }
+	@Before({"Operator", "("})
+	@After(")")
+	public Operator(@Before({"priority", "="}) int intValue) {
+		super(null);
+		this.priority = intValue;
+	}
 
-    @Before({"Operator", "("})
-    @After(")")
-    public Operator(
-            @Before({"priority", "="}) int intValue,
-            @Before({"associativity", "="}) Associativity associativity) {
-        this.priority = intValue;
-        this.associativity = associativity;
-    }
+	@Before({"Operator", "("})
+	@After(")")
+	public Operator(
+			@Before({"priority", "="}) int intValue,
+			@Before({"associativity", "="}) Associativity associativity) {
+		super(null);
+		this.priority = intValue;
+		this.associativity = associativity;
+	}
 
-    @Exclude
-    public Operator() {
-    }
+	@Exclude
+	public Operator() {
+		super(null);
+	}
 
-    public int getPriority() {
-        return priority;
-    }
+	@Exclude
+	public Operator(int priority, Associativity associativity, Object sourceElement) {
+		super(sourceElement);
+		this.priority = priority;
+		this.associativity = associativity;
+	}
 
-    public Associativity getAssociativity() {
-        return associativity;
-    }
+	public int getPriority() {
+		return priority;
+	}
+
+	public Associativity getAssociativity() {
+		return associativity;
+	}
 }

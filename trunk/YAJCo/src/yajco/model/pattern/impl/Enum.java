@@ -1,11 +1,18 @@
 package yajco.model.pattern.impl;
 
-import tuke.pargen.annotation.Before;
+import yajco.annotation.Before;
+import yajco.annotation.Exclude;
 import yajco.model.pattern.ConceptPattern;
 
-public class Enum implements ConceptPattern {
+public class Enum extends ConceptPattern {
 
-	@Before("Enum")
-	public Enum() {
-	}
+    @Before("Enum")
+    public Enum() {
+        super(null);
+    }
+
+    @Exclude
+    public Enum(Object sourceElement) {
+        super(sourceElement);
+    }
 }

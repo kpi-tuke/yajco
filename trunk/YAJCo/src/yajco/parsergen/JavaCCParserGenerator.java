@@ -1,6 +1,5 @@
 package yajco.parsergen;
 
-import tuke.pargen.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -13,17 +12,18 @@ import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
 import org.apache.velocity.app.VelocityEngine;
-import tuke.pargen.annotation.config.Option;
-import tuke.pargen.annotation.config.Skip;
-import tuke.pargen.javacc.model.Choice;
-import tuke.pargen.javacc.model.Expansion;
-import tuke.pargen.javacc.model.Model;
-import tuke.pargen.javacc.model.NonTerminal;
-import tuke.pargen.javacc.model.Production;
-import tuke.pargen.javacc.model.Sequence;
-import tuke.pargen.javacc.model.Terminal;
-import tuke.pargen.javacc.model.ZeroOrMany;
-import tuke.pargen.javacc.model.ZeroOrOne;
+import yajco.annotation.config.Option;
+import yajco.annotation.config.Skip;
+import yajco.generator.GeneratorException;
+import yajco.parsergen.javacc.model.Choice;
+import yajco.parsergen.javacc.model.Expansion;
+import yajco.parsergen.javacc.model.Model;
+import yajco.parsergen.javacc.model.NonTerminal;
+import yajco.parsergen.javacc.model.Production;
+import yajco.parsergen.javacc.model.Sequence;
+import yajco.parsergen.javacc.model.Terminal;
+import yajco.parsergen.javacc.model.ZeroOrMany;
+import yajco.parsergen.javacc.model.ZeroOrOne;
 import yajco.model.BindingNotationPart;
 import yajco.model.Concept;
 import yajco.model.Language;
@@ -838,7 +838,7 @@ public class JavaCCParserGenerator {
 	}
 
 	private String primitiveTypeToString(PrimitiveType type) {
-		switch (type) {
+		switch (type.getPrimitiveTypeConst()) {
 			case BOOLEAN:
 				return "boolean";
 			case INTEGER:
@@ -853,7 +853,7 @@ public class JavaCCParserGenerator {
 	}
 
 	private String primitiveTypeToBoxedTypeString(PrimitiveType type) {
-		switch (type) {
+		switch (type.getPrimitiveTypeConst()) {
 			case BOOLEAN:
 				return "Boolean";
 			case INTEGER:

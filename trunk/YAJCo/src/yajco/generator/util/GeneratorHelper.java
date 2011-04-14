@@ -7,7 +7,7 @@ import java.io.FileWriter;
 import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import tuke.pargen.GeneratorException;
+import yajco.generator.GeneratorException;
 import yajco.classgen.ClassGenerator;
 import yajco.generator.FilesGenerator;
 import yajco.model.Language;

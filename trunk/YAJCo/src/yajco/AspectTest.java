@@ -6,14 +6,14 @@ import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.DeclareParents;
 import org.aspectj.lang.annotation.Pointcut;
-import tuke.pargen.ReferenceResolver;
+import yajco.ReferenceResolver;
 
 @Aspect
 public class AspectTest {
 
     private final static String PARSER = "yajco.parser..*";
 
-    @Pointcut("initialization(new(*,@tuke.pargen.annotation.reference.References (*),..)) && args(*,s,..) && within(yajco.model..*) && target(o)")
+    @Pointcut("initialization(new(*,@yajco.annotation.reference.References (*),..)) && args(*,s,..) && within(yajco.model..*) && target(o)")
     public void myAspectTestPointcut(Object o, String s) {
     }
 

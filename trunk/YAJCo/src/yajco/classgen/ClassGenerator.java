@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import tuke.pargen.GeneratorException;
+import yajco.generator.GeneratorException;
 import yajco.generator.FilesGenerator;
 import yajco.model.pattern.impl.Associativity;
 import yajco.generator.util.Utilities;
@@ -21,6 +21,7 @@ import yajco.model.Notation;
 import yajco.model.NotationPart;
 import yajco.model.Property;
 import yajco.model.PropertyReferencePart;
+import yajco.model.SkipDef;
 import yajco.model.TokenDef;
 import yajco.model.TokenPart;
 import yajco.model.pattern.ConceptPattern;
@@ -113,7 +114,7 @@ public class ClassGenerator implements FilesGenerator {
 
     private void generatePackageInfo(Writer writer) {
         try {
-            writer.write("@"+tuke.pargen.annotation.config.Parser.class.getSimpleName());
+            writer.write("@"+yajco.annotation.config.Parser.class.getSimpleName());
             writer.write("(\n");
             writer.write("    className = \""+Utilities.getLanguagePackageName(actualLanguage)+".parser.Parser\",\n");
             writer.write("    mainNode = \""+Utilities.getFullConceptClassName(actualLanguage, actualLanguage.getConcepts().get(0))+"\",\n");
@@ -133,20 +134,20 @@ public class ClassGenerator implements FilesGenerator {
             writer.write("    skips = ");
             writer.write("{\n");
             comma = false;
-            for (String skip : actualLanguage.getSkips()) {
+            for (SkipDef skip : actualLanguage.getSkips()) {
                 if (comma) {
                     writer.write(",\n");
                 }
-                writer.write("        @Skip(\""+skip+"\")");
+                writer.write("        @Skip(\"" + skip.getRegexp() + "\")");
                 comma = true;
             }
             writer.write("\n    }\n");
             writer.write(")\n");
             //Package + imports
             writer.write("package "+Utilities.getLanguagePackageName(actualLanguage)+";\n\n");
-            writer.write("import "+tuke.pargen.annotation.config.Parser.class.getCanonicalName()+";\n");
-            writer.write("import "+tuke.pargen.annotation.config.TokenDef.class.getCanonicalName()+";\n");
-            writer.write("import "+tuke.pargen.annotation.config.Skip.class.getCanonicalName()+";\n");
+            writer.write("import "+yajco.annotation.config.Parser.class.getCanonicalName()+";\n");
+            writer.write("import "+yajco.annotation.config.TokenDef.class.getCanonicalName()+";\n");
+            writer.write("import "+yajco.annotation.config.Skip.class.getCanonicalName()+";\n");
 
             writer.flush();
         } catch (IOException ex) {
@@ -168,7 +169,7 @@ public class ClassGenerator implements FilesGenerator {
 
     private void writeClassBody(Concept concept, Writer writer) throws IOException {
         for (ConceptPattern conceptPattern : concept.getPatterns()) {
-            if (conceptPattern instanceof Enum) {
+            if (conceptPattern instanceof yajco.model.pattern.impl.Enum) {
                 writer.write("public enum " + concept.getConceptName() + " ");
                 writer.write("{");
                 boolean comma = false;
@@ -315,8 +316,8 @@ public class ClassGenerator implements FilesGenerator {
         if (setType) {
             writer.write("import java.util.Set;");
         }
-        writer.write("import tuke.pargen.annotation.*;");
-        writer.write("import tuke.pargen.annotation.reference.*;");
+        writer.write("import yajco.annotation.*;");
+        writer.write("import yajco.annotation.reference.*;");
         writer.write("import yajco.annotation.printer.*;");
         writer.write("import yajco.model.pattern.impl.Associativity;");
     }
@@ -413,5 +414,5 @@ public class ClassGenerator implements FilesGenerator {
         }
         writer.write(" ");
     }
-    
+
 }

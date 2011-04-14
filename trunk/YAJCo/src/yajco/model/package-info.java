@@ -26,6 +26,6 @@
 )
 package yajco.model;
 
-import tuke.pargen.annotation.config.Parser;
-import tuke.pargen.annotation.config.TokenDef;
-import tuke.pargen.annotation.config.Skip;
+import yajco.annotation.config.Parser;
+import yajco.annotation.config.TokenDef;
+import yajco.annotation.config.Skip;

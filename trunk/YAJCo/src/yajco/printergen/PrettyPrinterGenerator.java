@@ -7,7 +7,7 @@ import java.io.InputStreamReader;
 import java.io.Writer;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import tuke.pargen.GeneratorException;
+import yajco.generator.GeneratorException;
 import yajco.generator.AbstractFileGenerator;
 import yajco.generator.util.Utilities;
 import yajco.model.Language;

@@ -1,24 +1,32 @@
 package yajco.model.pattern.impl;
 
-import tuke.pargen.annotation.After;
-import tuke.pargen.annotation.Before;
-import tuke.pargen.annotation.Exclude;
+import yajco.annotation.After;
+import yajco.annotation.Before;
+import yajco.annotation.Exclude;
 import yajco.model.pattern.NotationPartPattern;
 
-public class Separator implements NotationPartPattern {
-    private String value;
+public class Separator extends NotationPartPattern {
 
-    @Before({"Separator", "("})
-    @After(")")
-    public Separator(String stringValue) {
-        this.value = stringValue;
-    }
+	private String value;
 
-    @Exclude
-    public Separator() {
-    }
+	@Before({"Separator", "("})
+	@After(")")
+	public Separator(String stringValue) {
+		super(null);
+		this.value = stringValue;
+	}
 
-    public String getValue() {
-        return value;
-    }
+	@Exclude
+	public Separator() {
+		super(null);
+	}
+
+	@Exclude
+	public Separator(String value, Object sourceElement) {
+		super(sourceElement);
+	}
+
+	public String getValue() {
+		return value;
+	}
 }

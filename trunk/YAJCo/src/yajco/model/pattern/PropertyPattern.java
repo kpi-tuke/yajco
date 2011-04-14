@@ -1,4 +1,8 @@
 package yajco.model.pattern;
 
-public interface PropertyPattern extends Pattern {
+public abstract class PropertyPattern extends Pattern {
+
+    public PropertyPattern(Object sourceElement) {
+        super(sourceElement);
+    }
 }

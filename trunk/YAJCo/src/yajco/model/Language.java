@@ -2,23 +2,23 @@ package yajco.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import tuke.pargen.annotation.Before;
-import tuke.pargen.annotation.Exclude;
-import tuke.pargen.annotation.Range;
-import tuke.pargen.annotation.Token;
+import yajco.annotation.Before;
+import yajco.annotation.Exclude;
+import yajco.annotation.Range;
 import yajco.Utilities;
 
-public class Language {
+public class Language extends YajcoModelElement {
 
     private String name;
     private List<Concept> concepts;
     private List<TokenDef> tokens;
-    private List<String> skips;
+    private List<SkipDef> skips;
 
     public Language(
             @Before("tokens") @Range(minOccurs = 0) List<TokenDef> tokens,
-            @Before("skips") @Range(minOccurs = 0) @Token("STRING_VALUE") List<String> skips,
+            @Before("skips") @Range(minOccurs = 0) List<SkipDef> skips,
             @Range(minOccurs = 1) Concept[] concepts) {
+        super(null);
         this.tokens = tokens;
         this.skips = skips;
         this.concepts = Utilities.asList(concepts);
@@ -27,8 +27,9 @@ public class Language {
     public Language(
             @Before("language") String name,
             @Before("tokens") @Range(minOccurs = 0) List<TokenDef> tokens,
-            @Before("skips") @Range(minOccurs = 0) @Token("STRING_VALUE") List<String> skips,
+            @Before("skips") @Range(minOccurs = 0) List<SkipDef> skips,
             @Range(minOccurs = 1) Concept[] concepts) {
+        super(null);
         this.name = name;
         this.tokens = tokens;
         this.skips = skips;
@@ -36,7 +37,8 @@ public class Language {
     }
 
     @Exclude
-    public Language() {
+    public Language(Object sourceElement) {
+        super(sourceElement);
         concepts = new ArrayList<Concept>();
     }
 
@@ -61,11 +63,11 @@ public class Language {
         concepts.add(concept);
     }
 
-    public List<String> getSkips() {
+    public List<SkipDef> getSkips() {
         return skips;
     }
 
-    public void setSkips(List<String> skips) {
+    public void setSkips(List<SkipDef> skips) {
         this.skips = skips;
     }
 

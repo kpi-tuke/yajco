@@ -11,7 +11,7 @@ import java.util.Set;
 import org.aspectj.lang.annotation.After;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
-import tuke.pargen.GeneratorException;
+import yajco.generator.GeneratorException;
 import yajco.ReferenceResolver;
 import yajco.generator.FilesGenerator;
 import yajco.generator.util.Utilities;

@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
-import tuke.pargen.GeneratorException;
 import yajco.generator.util.Utilities;
 import yajco.model.Language;
 

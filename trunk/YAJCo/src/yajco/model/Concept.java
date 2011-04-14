@@ -3,14 +3,14 @@ package yajco.model;
 import java.util.ArrayList;
 import yajco.model.pattern.PatternSupport;
 import java.util.List;
-import tuke.pargen.annotation.After;
-import tuke.pargen.annotation.Before;
-import tuke.pargen.annotation.Exclude;
-import tuke.pargen.annotation.Optional;
-import tuke.pargen.annotation.Separator;
-import tuke.pargen.annotation.Token;
-import tuke.pargen.annotation.reference.Identifier;
-import tuke.pargen.annotation.reference.References;
+import yajco.annotation.After;
+import yajco.annotation.Before;
+import yajco.annotation.Exclude;
+import yajco.annotation.Optional;
+import yajco.annotation.Separator;
+import yajco.annotation.Token;
+import yajco.annotation.reference.Identifier;
+import yajco.annotation.reference.References;
 import yajco.Utilities;
 import yajco.model.pattern.ConceptPattern;
 
@@ -27,17 +27,17 @@ public class Concept extends PatternSupport<ConceptPattern> {
             @Before("concept") String name,
             @Optional @Before(":") @References(Concept.class) @Token("NAME") String parent,
             @Optional @Before("{") @After("}") ConceptPattern[] patterns,
-            @Optional @Before({"AS", ":"}) @Separator(",") @tuke.pargen.annotation.Range(minOccurs = 1) Property[] abstractSyntax,
-            @Optional @Before({"CS", ":"}) @Separator("|") @tuke.pargen.annotation.Range(minOccurs = 1) Notation[] concreteSyntax) {
-        super(Utilities.asList(patterns));
+            @Optional @Before({"AS", ":"}) @Separator(",") @yajco.annotation.Range(minOccurs = 1) Property[] abstractSyntax,
+            @Optional @Before({"CS", ":"}) @Separator("|") @yajco.annotation.Range(minOccurs = 1) Notation[] concreteSyntax) {
+        super(Utilities.asList(patterns), null);
         this.name = name;
         this.abstractSyntax = Utilities.asList(abstractSyntax);
         this.concreteSyntax = Utilities.asList(concreteSyntax);
     }
 
     @Exclude
-    public Concept(String name) {
-        super();
+    public Concept(String name, Object sourceElement) {
+        super(sourceElement);
         this.name = name;
         this.abstractSyntax = new ArrayList<Property>();
         this.concreteSyntax = new ArrayList<Notation>();
@@ -85,7 +85,7 @@ public class Concept extends PatternSupport<ConceptPattern> {
         if (lastDotIndex < 0) {
             return name;
         } else {
-            return name.substring(lastDotIndex+1, name.length());
+            return name.substring(lastDotIndex + 1, name.length());
         }
     }
 

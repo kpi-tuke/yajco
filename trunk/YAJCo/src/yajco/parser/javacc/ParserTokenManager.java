@@ -27,32 +27,32 @@ public class ParserTokenManager implements TokenManager, ParserConstants {
         tokens.put(CONCEPT, Pattern.compile("concept"));
         tokens.put(_58, Pattern.compile("[:]"));
         tokens.put(_123, Pattern.compile("[{]"));
-        tokens.put(PARENTHESES, Pattern.compile("Parentheses"));
-        tokens.put(_40, Pattern.compile("[(]"));
-        tokens.put(_44, Pattern.compile("[,]"));
-        tokens.put(_41, Pattern.compile("[)]"));
+        tokens.put(ENUM, Pattern.compile("Enum"));
         tokens.put(OPERATOR, Pattern.compile("Operator"));
+        tokens.put(_40, Pattern.compile("[(]"));
         tokens.put(PRIORITY, Pattern.compile("priority"));
+        tokens.put(_41, Pattern.compile("[)]"));
         tokens.put(ASSOCIATIVITY, Pattern.compile("associativity"));
         tokens.put(LEFT, Pattern.compile("LEFT"));
         tokens.put(RIGHT, Pattern.compile("RIGHT"));
         tokens.put(NONE, Pattern.compile("NONE"));
         tokens.put(AUTO, Pattern.compile("AUTO"));
-        tokens.put(ENUM, Pattern.compile("Enum"));
+        tokens.put(PARENTHESES, Pattern.compile("Parentheses"));
+        tokens.put(_44, Pattern.compile("[,]"));
         tokens.put(_125, Pattern.compile("[}]"));
         tokens.put(AS, Pattern.compile("AS"));
-        tokens.put(ARRAY, Pattern.compile("array"));
+        tokens.put(SET, Pattern.compile("set"));
         tokens.put(OF, Pattern.compile("of"));
         tokens.put(LIST, Pattern.compile("list"));
-        tokens.put(SET, Pattern.compile("set"));
+        tokens.put(ARRAY, Pattern.compile("array"));
         tokens.put(IDENTIFIER, Pattern.compile("Identifier"));
         tokens.put(CS, Pattern.compile("CS"));
         tokens.put(_124, Pattern.compile("[|]"));
-        tokens.put(SEPARATOR, Pattern.compile("Separator"));
+        tokens.put(NEWLINE, Pattern.compile("NewLine"));
         tokens.put(RANGE, Pattern.compile("Range"));
         tokens.put(_46_46, Pattern.compile("[.][.]"));
         tokens.put(_42, Pattern.compile("[*]"));
-        tokens.put(NEWLINE, Pattern.compile("NewLine"));
+        tokens.put(SEPARATOR, Pattern.compile("Separator"));
         tokens.put(REFERENCES, Pattern.compile("References"));
         tokens.put(PROPERTY, Pattern.compile("property"));
         tokens.put(INDENT, Pattern.compile("Indent"));
@@ -64,7 +64,7 @@ public class ParserTokenManager implements TokenManager, ParserConstants {
         tokens.put(INTEGER, Pattern.compile("int"));
         tokens.put(REAL, Pattern.compile("real"));
         tokens.put(STRING, Pattern.compile("string"));
-        tokens.put(NAME, Pattern.compile("(?:[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*)|\\[([a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*)\\]"));
+        tokens.put(NAME, Pattern.compile("[a-zA-Z_][a-zA-Z0-9_]*"));
         tokens.put(BOOLEAN_VALUE, Pattern.compile("true|false"));
         tokens.put(REAL_VALUE, Pattern.compile("[-]?[0-9]+[.][0-9]+((e|E)[0-9]+)?"));
         tokens.put(STRING_VALUE, Pattern.compile("\"([^\"]*)\""));
@@ -137,16 +137,14 @@ public class ParserTokenManager implements TokenManager, ParserConstants {
                         if (matcher.group(i) != null) {
                             group = matcher.group(i);
                             break;
-                        }
+                    }
                     }
 
-                    //Create token                    
+                    //Create token
                     token = Token.newToken(kind, group);
                 }
             }
         }
-
-        //System.out.printf("Token %s\n", token.image);
 
         //Return the longest matching token, consume it from input
         if (token != null) {

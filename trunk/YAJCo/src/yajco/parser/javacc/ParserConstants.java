@@ -41,41 +41,41 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int _123 = 15;
   /** RegularExpression Id. */
-  int PARENTHESES = 16;
+  int ENUM = 16;
   /** RegularExpression Id. */
-  int _40 = 17;
+  int OPERATOR = 17;
   /** RegularExpression Id. */
-  int _44 = 18;
+  int _40 = 18;
   /** RegularExpression Id. */
-  int _41 = 19;
+  int PRIORITY = 19;
   /** RegularExpression Id. */
-  int OPERATOR = 20;
+  int _41 = 20;
   /** RegularExpression Id. */
-  int PRIORITY = 21;
+  int ASSOCIATIVITY = 21;
   /** RegularExpression Id. */
-  int ASSOCIATIVITY = 22;
+  int LEFT = 22;
   /** RegularExpression Id. */
-  int LEFT = 23;
+  int RIGHT = 23;
   /** RegularExpression Id. */
-  int RIGHT = 24;
+  int NONE = 24;
   /** RegularExpression Id. */
-  int NONE = 25;
+  int AUTO = 25;
   /** RegularExpression Id. */
-  int AUTO = 26;
+  int PARENTHESES = 26;
   /** RegularExpression Id. */
-  int ENUM = 27;
+  int _44 = 27;
   /** RegularExpression Id. */
   int _125 = 28;
   /** RegularExpression Id. */
   int AS = 29;
   /** RegularExpression Id. */
-  int ARRAY = 30;
+  int SET = 30;
   /** RegularExpression Id. */
   int OF = 31;
   /** RegularExpression Id. */
   int LIST = 32;
   /** RegularExpression Id. */
-  int SET = 33;
+  int ARRAY = 33;
   /** RegularExpression Id. */
   int IDENTIFIER = 34;
   /** RegularExpression Id. */
@@ -83,7 +83,7 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int _124 = 36;
   /** RegularExpression Id. */
-  int SEPARATOR = 37;
+  int NEWLINE = 37;
   /** RegularExpression Id. */
   int RANGE = 38;
   /** RegularExpression Id. */
@@ -91,7 +91,7 @@ public interface ParserConstants {
   /** RegularExpression Id. */
   int _42 = 40;
   /** RegularExpression Id. */
-  int NEWLINE = 41;
+  int SEPARATOR = 41;
   /** RegularExpression Id. */
   int REFERENCES = 42;
   /** RegularExpression Id. */
@@ -123,32 +123,32 @@ public interface ParserConstants {
     "\"CONCEPT\"",
     "\"_58\"",
     "\"_123\"",
-    "\"PARENTHESES\"",
-    "\"_40\"",
-    "\"_44\"",
-    "\"_41\"",
+    "\"ENUM\"",
     "\"OPERATOR\"",
+    "\"_40\"",
     "\"PRIORITY\"",
+    "\"_41\"",
     "\"ASSOCIATIVITY\"",
     "\"LEFT\"",
     "\"RIGHT\"",
     "\"NONE\"",
     "\"AUTO\"",
-    "\"ENUM\"",
+    "\"PARENTHESES\"",
+    "\"_44\"",
     "\"_125\"",
     "\"AS\"",
-    "\"ARRAY\"",
+    "\"SET\"",
     "\"OF\"",
     "\"LIST\"",
-    "\"SET\"",
+    "\"ARRAY\"",
     "\"IDENTIFIER\"",
     "\"CS\"",
     "\"_124\"",
-    "\"SEPARATOR\"",
+    "\"NEWLINE\"",
     "\"RANGE\"",
     "\"_46_46\"",
     "\"_42\"",
-    "\"NEWLINE\"",
+    "\"SEPARATOR\"",
     "\"REFERENCES\"",
     "\"PROPERTY\"",
     "\"INDENT\"",

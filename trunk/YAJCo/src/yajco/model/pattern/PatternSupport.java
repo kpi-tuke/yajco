@@ -2,15 +2,18 @@ package yajco.model.pattern;
 
 import java.util.ArrayList;
 import java.util.List;
+import yajco.model.YajcoModelElement;
 
-public class PatternSupport<T extends Pattern> {
+public class PatternSupport<T extends Pattern> extends YajcoModelElement {
     private List<T> patterns;
 
-    public PatternSupport() {
+    public PatternSupport(Object sourceElement) {
+        super(sourceElement);
         this.patterns = new ArrayList<T>();
     }
 
-    public PatternSupport(List<T> patterns) {
+    public PatternSupport(List<T> patterns, Object sourceElement) {
+        super(sourceElement);
         this.patterns = patterns;
     }
 

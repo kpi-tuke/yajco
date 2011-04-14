@@ -12,7 +12,7 @@ public class Parser {
     }
 
     try {
-      tuke.pargen.ReferenceResolver referenceResolver = tuke.pargen.ReferenceResolver.createInstance();
+      yajco.ReferenceResolver referenceResolver = yajco.ReferenceResolver.createInstance();
       yajco.model.Language root = yajco.parser.javacc.Parser.parse();
       referenceResolver.resolveReferences();
       return root;

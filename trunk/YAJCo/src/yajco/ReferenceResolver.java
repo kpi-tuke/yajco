@@ -1,12 +1,12 @@
 package yajco;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.lang.reflect.TypeVariable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -30,9 +30,9 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
-import tuke.pargen.annotation.Exclude;
-import tuke.pargen.annotation.reference.Identifier;
-import tuke.pargen.annotation.reference.References;
+import yajco.annotation.Exclude;
+import yajco.annotation.reference.Identifier;
+import yajco.annotation.reference.References;
 
 public class ReferenceResolver {
     /** Singleton. */
@@ -110,8 +110,20 @@ public class ReferenceResolver {
      * @return the same object as passed by parameter object
      */
     public <T> T register(T object, Object... objects) {
+        return register(object, null, objects);
+    }
+
+    /**
+     * Registers DOM node for AST node with specified childrens and factory method name.
+     * @param <T>
+     * @param object  AST node
+     * @param methodName name of called factory method
+     * @param objects  child AST nodes
+     * @return the same object as passed by parameter object
+     */
+    public <T> T register(T object, String methodName, Object... objects) {
         registeredObjects.add(object);
-        analyzeConstructor(object, objects);
+        analyzeConstructor(object, methodName, objects);
         createXmlNode(object, objects);
         resolveReferences();
         return object;
@@ -303,12 +315,22 @@ public class ReferenceResolver {
         }
     }
 
-    private void analyzeConstructor(Object object, Object[] objects) {
+    private void analyzeConstructor(Object object, String methodName, Object[] objects) {
         Class<?> clazz = object.getClass();
-        //TODO: tu sa to nemozem viazat na prvy konstruktor ale na vsetky
-        Constructor constructor = findConstructor(clazz, objects);
-        Type[] params = constructor.getParameterTypes();
-        Annotation[][] allAnnotations = constructor.getParameterAnnotations();
+        AccessibleObject accesibleObject = findConstructor(clazz, methodName, objects);
+        Type[] params;
+        Annotation[][] allAnnotations;
+
+        if (accesibleObject instanceof Constructor) {
+            params = ((Constructor)accesibleObject).getParameterTypes();
+            allAnnotations = ((Constructor)accesibleObject).getParameterAnnotations();
+        } else if (accesibleObject instanceof Method) {
+            params = ((Method)accesibleObject).getParameterTypes();
+            allAnnotations = ((Method)accesibleObject).getParameterAnnotations();
+        } else {
+            throw new RuntimeException("Not known type of constructor/method");
+        }
+        
         for (int i = 0; i < params.length; i++) {
             for (Annotation annotation : allAnnotations[i]) {
                 if (annotation instanceof References) {
@@ -325,21 +347,39 @@ public class ReferenceResolver {
         }
     }
 
-    private Constructor findConstructor(Class clazz, Object[] objects) {
-        for (Constructor constructor : clazz.getDeclaredConstructors()) {
+    private AccessibleObject findConstructor(Class clazz, String methodName, Object[] objects) {
+        List<AccessibleObject> list = new ArrayList<AccessibleObject>();
+        if (methodName == null || methodName.isEmpty()) {
+            list.addAll(Arrays.asList(clazz.getDeclaredConstructors()));
+        } else {
+            list.addAll(Arrays.asList(clazz.getDeclaredMethods()));
+        }
+        for (AccessibleObject ao : list) {
+            Class<?>[] parameterTypes = new Class<?>[0];
+            if (ao instanceof Constructor) {
+                parameterTypes = ((Constructor)ao).getParameterTypes();
+            } else if (ao instanceof Method) {
+                Method method = (Method)ao;
+                if (!method.getName().equals(methodName)) {
+                    // Method is not of specified name, do not analyze it
+                    continue;
+                }
+                parameterTypes = method.getParameterTypes();
+            }
             //System.out.println(constructor + " " + Arrays.toString(constructor.getDeclaredAnnotations()));
-            if (constructor.getAnnotation(Exclude.class) != null) {
+            if (ao.getAnnotation(Exclude.class) != null) {
                 continue;
             }
-
+            if (parameterTypes.length != objects.length) {
+                //found = false;
+                continue;
+            }
             boolean found = true;
 //            System.out.println("******************* "+constructor.toGenericString());
 //            System.out.println("*****************++ "+objects.length + " / " + constructor.getParameterTypes().length);
-            if (constructor.getParameterTypes().length != objects.length) {
-                found = false;
-            }
-            for (int i = 0; i < constructor.getParameterTypes().length; i++) {
-                Class class1 = constructor.getParameterTypes()[i];
+            
+            for (int i = 0; i < parameterTypes.length; i++) {
+                Class class1 = parameterTypes[i];
                 Object object = objects[i];
 
                 if (class1.isPrimitive()) {
@@ -372,8 +412,8 @@ public class ReferenceResolver {
             if (!found) {
                 continue;
             }
-            //System.out.println("********* IT IS THIS!");
-            return constructor;
+            //System.out.println("********* THIS IS IT!");
+            return ao;
         }
 
         throw new RuntimeException("Suitable constructor does not exist '" + clazz + "' for values " + Arrays.toString(objects));

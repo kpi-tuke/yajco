@@ -9,7 +9,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import tuke.pargen.GeneratorException;
+import yajco.generator.GeneratorException;
 import yajco.generator.AbstractFileGenerator;
 import yajco.generator.util.Utilities;
 import yajco.model.Language;
@@ -55,7 +55,7 @@ public class VisitorGenerator extends AbstractFileGenerator{
     @Override
     public String getPackageName() {
         return VISITOR_PACKAGE;
-    }
+}
 
     @Override
     public String getFileName() {

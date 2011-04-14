@@ -1,4 +1,10 @@
 package yajco.model.pattern;
 
-public interface Pattern {
+import yajco.model.YajcoModelElement;
+
+public abstract class Pattern extends YajcoModelElement {
+
+    public Pattern(Object sourceElement) {
+        super(sourceElement);
+    }
 }

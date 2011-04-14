@@ -1,23 +1,32 @@
 package yajco.model;
 
-import tuke.pargen.annotation.Before;
-import tuke.pargen.annotation.Token;
+import yajco.annotation.Before;
+import yajco.annotation.Exclude;
+import yajco.annotation.Token;
 
-public class TokenDef {
+public class TokenDef extends YajcoModelElement {
 
-	private final String name;
-	private final String regexp;
+    private final String name;
+    private final String regexp;
 
-	public TokenDef(String name, @Before("=") @Token("STRING_VALUE") String regexp) {
-		this.name = name;
-		this.regexp = regexp;
-	}
+    public TokenDef(String name, @Before("=") @Token("STRING_VALUE") String regexp) {
+        super(null);
+        this.name = name;
+        this.regexp = regexp;
+    }
 
-	public String getName() {
-		return name;
-	}
+    @Exclude
+    public TokenDef(String name, String regexp, Object sourceElement) {
+        super(sourceElement);
+        this.name = name;
+        this.regexp = regexp;
+    }
 
-	public String getRegexp() {
-		return regexp;
-	}
+    public String getName() {
+        return name;
+    }
+
+    public String getRegexp() {
+        return regexp;
+    }
 }

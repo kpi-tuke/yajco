@@ -1,31 +1,33 @@
 package yajco.model.pattern.impl;
 
-import tuke.pargen.annotation.After;
-import tuke.pargen.annotation.Before;
-import tuke.pargen.annotation.Exclude;
-import tuke.pargen.annotation.Optional;
-import tuke.pargen.annotation.Token;
+import yajco.annotation.After;
+import yajco.annotation.Before;
+import yajco.annotation.Exclude;
+import yajco.annotation.Optional;
+import yajco.annotation.Token;
 import yajco.model.Concept;
 import yajco.model.Property;
 import yajco.model.pattern.NotationPartPattern;
 
-public class References implements NotationPartPattern {
-    private Concept concept;
+public class References extends NotationPartPattern {
 
+    private Concept concept;
     private Property property;
 
     @Before({"References", "("})
     @After(")")
     public References(
-            @tuke.pargen.annotation.reference.References(Concept.class) String name,
+            @yajco.annotation.reference.References(Concept.class) String name,
             @Optional
             @Before({",", "property", "="})
             @Token("name")
-            @tuke.pargen.annotation.reference.References(value = Property.class, path = "ancestor::yajco.model.Concept//yajco.model.Property") String property) {
+            @yajco.annotation.reference.References(value = Property.class, path = "ancestor::yajco.model.Concept//yajco.model.Property") String property) {
+        super(null);
     }
 
     @Exclude
-    public References(Concept concept, Property property) {
+    public References(Concept concept, Property property, Object sourceElement) {
+        super(sourceElement);
         this.concept = concept;
         this.property = property;
     }
