@@ -17,8 +17,8 @@ import yajco.ReferenceResolver;
 import yajco.generator.util.Utilities;
 import yajco.model.Language;
 import yajco.grammar.bnf.Grammar;
-import yajco.model.translator.YajcoModelToBNFGrammarTranslator;
-import yajco.parsergen.beaver.BeaverParserGenerator;
+import yajco.grammar.translator.YajcoModelToBNFGrammarTranslator;
+import yajco.generator.parsergen.beaver.BeaverParserGenerator;
 
 public class CompilersGenerator {
 
@@ -37,11 +37,11 @@ public class CompilersGenerator {
 			throw new SecurityException();
 		}
 	}
-	private static final String BEAVER_SCANNER_CLASS_TEMPLATE = "/yajco/parsergen/beaver/templates/BeaverScannerTemplate.vm";
-	private static final String BEAVER_PARSER_CLASS_TEMPLATE = "/yajco/parsergen/beaver/templates/LALRParserClassTemplate.vm";
-	private static final String BEAVER_PARSE_EXCEPTION_CLASS_TEMPLATE = "/yajco/parsergen/beaver/templates/LALRParseExceptionClassTemplate.vm";
-	private static final String SYMBOL_LIST_IMPL_CLASS_TEMPLATE = "/yajco/parsergen/beaver/templates/SymbolListImplClassTemplate.vm";
-        private static final String SYMBOL_WRAPPER_CLASS_TEMPLATE = "/yajco/parsergen/beaver/templates/SymbolWrapperClassTemplate.vm";
+	private static final String BEAVER_SCANNER_CLASS_TEMPLATE = "/yajco/generator/parsergen/beaver/templates/BeaverScannerTemplate.vm";
+	private static final String BEAVER_PARSER_CLASS_TEMPLATE = "/yajco/generator/parsergen/beaver/templates/LALRParserClassTemplate.vm";
+	private static final String BEAVER_PARSE_EXCEPTION_CLASS_TEMPLATE = "/yajco/generator/parsergen/beaver/templates/LALRParseExceptionClassTemplate.vm";
+	private static final String SYMBOL_LIST_IMPL_CLASS_TEMPLATE = "/yajco/generator/parsergen/beaver/templates/SymbolListImplClassTemplate.vm";
+        private static final String SYMBOL_WRAPPER_CLASS_TEMPLATE = "/yajco/generator/parsergen/beaver/templates/SymbolWrapperClassTemplate.vm";
 	private static final BeaverParserGenerator beaverParGen = BeaverParserGenerator.getInstance();
 	private static final YajcoModelToBNFGrammarTranslator modelToBNFGrammarTranslator = YajcoModelToBNFGrammarTranslator.getInstance();
 	private static final CompilersGenerator instance = new CompilersGenerator();
@@ -134,7 +134,7 @@ public class CompilersGenerator {
 		context.put("parserName", parserClassName);
 		context.put("parserPackage", parserPackageName);
 		context.put("defaultSymbolName", YajcoModelToBNFGrammarTranslator.DEFAULT_SYMBOL_NAME);
-		context.put("Utilities", yajco.parsergen.javacc.Utilities.class);
+		context.put("Utilities", yajco.generator.parsergen.javacc.Utilities.class);
 		StringWriter writer = new StringWriter();
 		engine.evaluate(context, writer, "", new InputStreamReader(getClass().getResourceAsStream(BEAVER_SCANNER_CLASS_TEMPLATE)));
 

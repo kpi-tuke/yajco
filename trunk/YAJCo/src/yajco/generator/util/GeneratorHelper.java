@@ -8,15 +8,15 @@ import java.io.PrintWriter;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import yajco.generator.GeneratorException;
-import yajco.classgen.ClassGenerator;
+import yajco.generator.classgen.ClassGenerator;
 import yajco.generator.FilesGenerator;
 import yajco.model.Language;
 import yajco.parser.ParseException;
 import yajco.parser.Parser;
 import yajco.printer.Printer;
-import yajco.printergen.PrettyPrinterGenerator;
-import yajco.refresgen.AspectObjectRegistratorGenerator;
-import yajco.visitorgen.VisitorGenerator;
+import yajco.generator.printergen.PrettyPrinterGenerator;
+import yajco.generator.refresgen.AspectObjectRegistratorGenerator;
+import yajco.generator.visitorgen.VisitorGenerator;
 
 public class GeneratorHelper {
 

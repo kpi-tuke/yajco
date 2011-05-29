@@ -8,10 +8,10 @@ import java.io.StringWriter;
 import java.util.ArrayList;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import yajco.classgen.ClassGenerator;
+import yajco.generator.classgen.ClassGenerator;
 import yajco.generator.util.GeneratorHelper;
-import yajco.printergen.PrettyPrinterGenerator;
-import yajco.visitorgen.VisitorGenerator;
+import yajco.generator.printergen.PrettyPrinterGenerator;
+import yajco.generator.visitorgen.VisitorGenerator;
 import yajco.model.Concept;
 import yajco.model.Language;
 import yajco.model.LocalVariablePart;
@@ -33,15 +33,15 @@ import yajco.model.pattern.impl.Associativity;
 import yajco.model.pattern.impl.Operator;
 import yajco.model.pattern.impl.Parentheses;
 import yajco.model.pattern.impl.References;
-import yajco.model.translator.YajcoModelToBNFGrammarTranslator;
+import yajco.grammar.translator.YajcoModelToBNFGrammarTranslator;
 import yajco.model.type.ArrayType;
 import yajco.model.type.PrimitiveType;
 import yajco.model.type.PrimitiveTypeConst;
 import yajco.model.type.ReferenceType;
 import yajco.parser.Parser;
-import yajco.parsergen.beaver.BeaverParserGenerator;
+import yajco.generator.parsergen.beaver.BeaverParserGenerator;
 import yajco.printer.Printer;
-import yajco.refresgen.AspectObjectRegistratorGenerator;
+import yajco.generator.refresgen.AspectObjectRegistratorGenerator;
 
 public class Main {
     public static void main(String[] args) throws Exception {
