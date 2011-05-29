@@ -16,7 +16,7 @@ import org.apache.velocity.app.VelocityEngine;
 import yajco.ReferenceResolver;
 import yajco.generator.util.Utilities;
 import yajco.model.Language;
-import yajco.model.grammar.bnf.Grammar;
+import yajco.grammar.bnf.Grammar;
 import yajco.model.translator.YajcoModelToBNFGrammarTranslator;
 import yajco.parsergen.beaver.BeaverParserGenerator;
 
