@@ -502,6 +502,7 @@ public class ReferenceResolver {
             for (Method method : methods) {
                 try {
                     method.invoke(o, new Object[]{});
+                    postConstructExecutedObjects.add(o);
                 } catch (Exception e) {
                     throw new RuntimeException("Cannot invoke method " + method + "on object " + o, e);
                 }

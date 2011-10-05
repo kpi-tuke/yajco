@@ -46,7 +46,7 @@ public class GeneratorHelper {
     public void generateAllExceptModelClassFiles() {
         generateVisitor();
         generatePrettyPrinter();
-        generateReferenceResolverRegistrator();
+        //generateReferenceResolverRegistrator();
         //zatial pre test
         generateYAJCoModelTextFile();
     }

@@ -15,7 +15,8 @@ import ${Utilities.getFullConceptClassName($language, $concept)};
 
 public class $className extends ${visitorClassName}<PrintWriter> {
 #if ( !$language.skips.isEmpty() )
-#set( $whiteSpace = ${language.skips.get(0)} )
+## #set( $whiteSpace = ${language.skips.get(0)} )
+#set( $whiteSpace = " " )
 #else
 #set( $whiteSpace = " " )
 #end

@@ -8,6 +8,7 @@ import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -78,6 +79,9 @@ public class AnnotationProcessor extends AbstractProcessor {
 				//Take the first annotation (the only one)
 				Element parserAnnotationElement = elements.iterator().next();
 				Parser parserAnnotation = parserAnnotationElement.getAnnotation(Parser.class);
+
+                                // Extract options from Parser anntotation
+                                List<Option> options = Arrays.asList(parserAnnotation.options());
 
 				//Extract the main element, package or type can be annotated with @Parser
 				ElementKind parserAnnotationElemKind = parserAnnotationElement.getKind();
@@ -163,7 +167,14 @@ public class AnnotationProcessor extends AbstractProcessor {
                 // generates all new files
                 FileObject fo = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "", "temp.java");
                 GeneratorHelper generatorHelper = new GeneratorHelper(language, new File(fo.toUri()).getParentFile());
-                //generatorHelper.generateAllExceptModelClassFiles();
+                
+                for (Option option : options) {
+                    if ("generateTools".equals(option.name()) && "true".equals(option.value())) {
+                        generatorHelper.generateAllExceptModelClassFiles();
+                        break;
+                    }
+                }
+                
 			}
 		} catch (Throwable e) {
 			e.printStackTrace();
@@ -322,7 +333,7 @@ public class AnnotationProcessor extends AbstractProcessor {
 					property = concept.getProperty(references.field());
 				}
 				if (property == null) {
-					property = findReferencedProperty(paramElement, referencedConcept);
+					property = findReferencedProperty(paramElement, referencedConcept,references.field());
 					if (property == null) {
 						String propertyName;
 						if (references.field().isEmpty()) {
@@ -364,7 +375,7 @@ public class AnnotationProcessor extends AbstractProcessor {
 		}
 	}
 
-	private Property findReferencedProperty(VariableElement paramElement, Concept referencedConcept) {
+	private Property findReferencedProperty(VariableElement paramElement, Concept referencedConcept, String proposedName) {
 		Element element = paramElement;
 		//Go up on tree until you find class element
 		while (!element.getKind().isClass() && element != null) {
@@ -379,6 +390,9 @@ public class AnnotationProcessor extends AbstractProcessor {
 					if (fieldType instanceof yajco.model.type.ReferenceType) {
 						yajco.model.type.ReferenceType referenceType = (yajco.model.type.ReferenceType) fieldType;
 						if (referenceType.getConcept().equals(referencedConcept)) {
+                                                    if (!proposedName.isEmpty() && !fieldElement.getSimpleName().toString().equals(proposedName)) {
+                                                        continue;
+                                                    }
 							return new Property(fieldElement.getSimpleName().toString(), referenceType, fieldElement);
 						}
 					}

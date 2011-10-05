@@ -229,29 +229,19 @@ public class BeaverParserGenerator {
 				return "nonassoc";
 			case RIGHT:
 				return "right";
-
+                        case AUTO:
+                                System.out.println("AUTO associativity set to LEFT without any analyse!!!");
+                                return "left";
 			default:
 				throw new IllegalArgumentException("Cann't resolve associativity!");
 		}
 	}
-
-        //DOMINIK TEST
-//        private String typeToStringWrapped(Type type) {
-//            return toSymbolWrapper(typeToString(type));
-//        }
-//
-//        //DOMINIK TEST
-//        private String toSymbolWrapper(String type) {
-//            return parserPackageName + "." + "SymbolWrapper" +"<" + type + ">";
-//        }
 
 	private String typeToString(Type type) {
 		if (type instanceof PrimitiveType) {
 			return primitiveTypeToString((PrimitiveType) type);
 		} else if (type instanceof ReferenceType) {
 			ReferenceType refType = (ReferenceType) type;
-                        //DOMINIK TEST
-                        //return toSymbolWrapper(Utilities.getFullConceptClassName(language, refType.getConcept())); - MOJE
                         return Utilities.getFullConceptClassName(language, refType.getConcept());
 		} else if (type instanceof ComponentType) {
 			ComponentType innerType = (ComponentType) type;
