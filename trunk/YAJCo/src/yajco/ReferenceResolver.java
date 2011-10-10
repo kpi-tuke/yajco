@@ -9,6 +9,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -230,6 +231,9 @@ public class ReferenceResolver {
 
         for (Object param : objects) {
             if (param != null) {
+                if (param instanceof Collection) {
+                    param = ((Collection)param).toArray();
+                }
                 if (param.getClass().isArray()) {
                     int length = Array.getLength(param);
                     for (int i = 0; i < length; i++) {
