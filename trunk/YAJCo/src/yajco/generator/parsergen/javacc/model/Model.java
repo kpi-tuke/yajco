@@ -9,8 +9,8 @@ import java.util.Formatter;
 import java.util.List;
 import java.util.Map;
 import yajco.annotation.config.Option;
-import yajco.annotation.config.Skip;
 import yajco.generator.parsergen.javacc.Utilities;
+import yajco.model.SkipDef;
 
 //TODO: naozaj treba <EOF> v generateParserDefinition?, nebolo by mozne robit kompoziciu jazykov - v tom istom subore viacero jazykov?
 public class Model {
@@ -18,7 +18,7 @@ public class Model {
 
     private final String className;
 
-    private final List<Skip> skips;
+    private final List<SkipDef> skips;
 
     private final Map<String, String> tokens;
 
@@ -28,7 +28,7 @@ public class Model {
 
     private final Production[] productions;
 
-    public Model(String packageName, String className, Skip[] skips, Map<String, String> tokens, yajco.annotation.config.Option[] options, Production mainProduction, Production[] productions) {
+    public Model(String packageName, String className, SkipDef[] skips, Map<String, String> tokens, yajco.annotation.config.Option[] options, Production mainProduction, Production[] productions) {
         this.packageName = packageName;
         this.className = className;
         this.skips = Arrays.asList(skips);
@@ -176,7 +176,7 @@ public class Model {
         return productions;
     }
 
-    public List<Skip> getSkips() {
+    public List<SkipDef> getSkips() {
         return skips;
     }
 

@@ -24,7 +24,7 @@ import yajco.generator.GeneratorException;
 import yajco.annotation.*;
 import yajco.annotation.config.*;
 import yajco.annotation.reference.*;
-import yajco.generator.CompilersGenerator;
+import yajco.generator.BeaverCompilerGenerator;
 import yajco.generator.util.GeneratorHelper;
 import yajco.model.*;
 import yajco.model.pattern.*;
@@ -156,7 +156,7 @@ public class AnnotationProcessor extends AbstractProcessor {
 				System.out.println("--------------------------------------------------------------------------------------------------------");
 
 				///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-				CompilersGenerator.getInstance().generateCompilers(processingEnv, language);
+				BeaverCompilerGenerator.getInstance().generateCompilers(processingEnv, language);
 				///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //				System.out.println("--------------------------------------------------------------------------------------------------------");

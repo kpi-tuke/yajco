@@ -14,13 +14,14 @@ import javax.tools.StandardLocation;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import yajco.ReferenceResolver;
+import yajco.generator.parsergen.javacc.JavaCCParserGenerator;
 import yajco.generator.util.Utilities;
 import yajco.model.Language;
 import yajco.grammar.bnf.Grammar;
 import yajco.grammar.translator.YajcoModelToBNFGrammarTranslator;
 import yajco.generator.parsergen.beaver.BeaverParserGenerator;
 
-public class CompilersGenerator {
+public class BeaverCompilerGenerator implements CompilerGenerator {
 
 	static class SimpleExitSecurityManager extends SecurityManager {
 
@@ -44,12 +45,12 @@ public class CompilersGenerator {
         private static final String SYMBOL_WRAPPER_CLASS_TEMPLATE = "/yajco/generator/parsergen/beaver/templates/SymbolWrapperClassTemplate.vm";
 	private static final BeaverParserGenerator beaverParGen = BeaverParserGenerator.getInstance();
 	private static final YajcoModelToBNFGrammarTranslator modelToBNFGrammarTranslator = YajcoModelToBNFGrammarTranslator.getInstance();
-	private static final CompilersGenerator instance = new CompilersGenerator();
+	private static final BeaverCompilerGenerator instance = new BeaverCompilerGenerator();
 	private ProcessingEnvironment processingEnv;
 	private Language language;
 	private VelocityEngine engine;
 
-	private CompilersGenerator() {
+	private BeaverCompilerGenerator() {
 	}
 
 	public void generateCompilers(ProcessingEnvironment processingEnv, Language language) throws IOException {
@@ -182,7 +183,7 @@ public class CompilersGenerator {
 		return writer.toString();
 	}
 
-	public static CompilersGenerator getInstance() {
+	public static BeaverCompilerGenerator getInstance() {
 		return instance;
 	}
 }

@@ -3,9 +3,10 @@ package yajco.generator.parsergen.beaver;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import yajco.generator.util.Utilities;
 import yajco.model.Language;
@@ -36,7 +37,7 @@ public class BeaverParserGenerator {
 	private Language language;
 	private Grammar grammar;
 	private Set<TerminalSymbol> operatorTerminalsUsed;
-	private Hashtable<Alternative, String> operatorAlternativesMap;
+	private Map<Alternative, String> operatorAlternativesMap;
 	private String parserPackageName;
 
 	private BeaverParserGenerator() {
@@ -46,7 +47,7 @@ public class BeaverParserGenerator {
 		this.language = language;
 		this.grammar = grammar;
 		this.operatorTerminalsUsed = new HashSet<TerminalSymbol>();
-		this.operatorAlternativesMap = new Hashtable<Alternative, String>();
+		this.operatorAlternativesMap = new HashMap<Alternative, String>();
 
 		writePackage(writer);
 		writeClass(writer);
@@ -104,7 +105,7 @@ public class BeaverParserGenerator {
 		List<Integer> priorities = new ArrayList(grammar.getOperatorPool().keySet());
 		Collections.sort(priorities);
 
-		if (priorities.size() == 0) {
+		if (priorities.isEmpty()) {
 			return;
 		}
 
@@ -187,7 +188,7 @@ public class BeaverParserGenerator {
 
 	private String operatorSpecificationToString(Integer priority) {
 		List<Alternative> opAlternatives = grammar.getOperatorPool().get(priority);
-		if (opAlternatives.size() == 0) {
+		if (opAlternatives.isEmpty()) {
 			return null;
 		}
 		Operator opPattern = (Operator) opAlternatives.get(0).getPattern(Operator.class);
