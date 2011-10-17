@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
 public @interface Parser {
 
 	@Deprecated
-        String className();
+        String className() default "";
 
 	String mainNode() default "";
 
