@@ -10,6 +10,9 @@ public final class Utilities {
 
     public static String encodeStringIntoTokenName(String s) {
         StringBuilder sb = new StringBuilder();
+        if ("TOKEN".equals(s.toUpperCase())) {
+            return "_TOKEN";
+        }
 
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);

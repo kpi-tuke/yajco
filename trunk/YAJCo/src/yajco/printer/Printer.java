@@ -18,7 +18,8 @@ import yajco.model.type.SetType;
 public class Printer {
 
 	public void printLanguage(PrintWriter writer, Language language) {
-		if (language.getName() != null) {
+            try {
+                if (language.getName() != null) {
 			writer.print("language " + language.getName() + "\n");
 			writer.println();
 			printTokens(writer, language.getTokens());
@@ -29,7 +30,9 @@ public class Printer {
 			printSkips(writer, language.getSkips());
 			printConcepts(writer, language.getConcepts());
 		}
+            } finally {
 		writer.flush();
+            }
 	}
 
 	private void printConcepts(PrintWriter writer, List<Concept> concepts) {

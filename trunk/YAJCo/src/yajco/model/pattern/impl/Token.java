@@ -11,7 +11,7 @@ public class Token extends NotationPartPattern {
 
 	@Before({"Token", "("})
 	@After(")")
-	public Token(String name) {
+	public Token(@yajco.annotation.Token("STRING_VALUE") String name) {
 		super(null);
 		this.name = name;
 	}

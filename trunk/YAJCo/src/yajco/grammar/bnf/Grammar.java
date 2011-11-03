@@ -2,7 +2,9 @@ package yajco.grammar.bnf;
 
 import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import yajco.grammar.NonterminalSymbol;
 import yajco.grammar.PatternSupport;
 import yajco.grammar.TerminalSymbol;
@@ -11,13 +13,13 @@ import yajco.model.pattern.impl.Operator;
 
 public class Grammar extends PatternSupport {
 
-	private Hashtable<String, NonterminalSymbol> nonterminals;
-	private Hashtable<String, TerminalSymbol> terminals;
-	private Hashtable<NonterminalSymbol, Production> productions;
+	private Map<String, NonterminalSymbol> nonterminals;
+	private Map<String, TerminalSymbol> terminals;
+	private Map<NonterminalSymbol, Production> productions;
 	private NonterminalSymbol startSymbol;
-	private Hashtable<TerminalSymbol, String> terminalPool;
-	private Hashtable<Integer, List<Alternative>> operatorPool;
-	private Hashtable<RangeEntry, NonterminalSymbol> sequencePool;
+	private Map<TerminalSymbol, String> terminalPool;
+	private Map<Integer, List<Alternative>> operatorPool;
+	private Map<RangeEntry, NonterminalSymbol> sequencePool;
 
 	public Grammar(NonterminalSymbol startSymbol) {
 		this(startSymbol, null);
@@ -26,7 +28,7 @@ public class Grammar extends PatternSupport {
 	public Grammar(NonterminalSymbol startSymbol, List<Pattern> patterns) {
 		super(patterns);
 		this.nonterminals = new Hashtable<String, NonterminalSymbol>();
-		this.terminals = new Hashtable<String, TerminalSymbol>();
+		this.terminals = new LinkedHashMap<String, TerminalSymbol>();
 		this.productions = new Hashtable<NonterminalSymbol, Production>();
 		this.startSymbol = startSymbol;
 		this.terminalPool = new Hashtable<TerminalSymbol, String>();
@@ -92,7 +94,7 @@ public class Grammar extends PatternSupport {
 		sequencePool.put(new RangeEntry(name, min, max, sep), nonterminal);
 	}
 
-	public Hashtable<String, NonterminalSymbol> getNonterminals() {
+	public Map<String, NonterminalSymbol> getNonterminals() {
 		return nonterminals;
 	}
 
@@ -104,11 +106,11 @@ public class Grammar extends PatternSupport {
 		return null;
 	}
 
-	public Hashtable<Integer, List<Alternative>> getOperatorPool() {
+	public Map<Integer, List<Alternative>> getOperatorPool() {
 		return operatorPool;
 	}
 
-	public Hashtable<NonterminalSymbol, Production> getProductions() {
+	public Map<NonterminalSymbol, Production> getProductions() {
 		return productions;
 	}
 
@@ -124,11 +126,11 @@ public class Grammar extends PatternSupport {
 		return startSymbol;
 	}
 
-	public Hashtable<TerminalSymbol, String> getTerminalPool() {
+	public Map<TerminalSymbol, String> getTerminalPool() {
 		return terminalPool;
 	}
 
-	public Hashtable<String, TerminalSymbol> getTerminals() {
+	public Map<String, TerminalSymbol> getTerminals() {
 		return terminals;
 	}
 

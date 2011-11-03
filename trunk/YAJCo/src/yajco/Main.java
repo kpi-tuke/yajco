@@ -42,17 +42,18 @@ import yajco.parser.Parser;
 import yajco.generator.parsergen.beaver.BeaverParserGenerator;
 import yajco.printer.Printer;
 import yajco.generator.refresgen.AspectObjectRegistratorGenerator;
+import yajco.model.parser.LALRLanguageParser;
 
 public class Main {
     public static void main(String[] args) throws Exception {
-        Parser parser = new Parser();
-        //LALRLanguageParser newParser = new LALRLanguageParser();
+        //Parser parser = new Parser();
+        LALRLanguageParser newParser = new LALRLanguageParser();
         Printer printer = new Printer();
         Language language = null;
 
         System.out.println("--------------------------------------------------------------------------------------------------------");
-        //language = newParser.parse(new FileReader("desk.lang"));
-        //printer.printLanguage(new PrintWriter(System.out), language);
+        language = newParser.parse(new FileReader("yajco.test.department.model.lang"));
+        printer.printLanguage(new PrintWriter(System.out), language);
 //        System.out.println("===================================== Visitor class ====================================================");
 //        visitorGenerator.generate(language, new PrintWriter(System.out));
 //        System.out.println("===================================== Printer class ====================================================");
@@ -63,9 +64,9 @@ public class Main {
         //System.out.println("--- DONE ---");
         //System.out.println("==================================* Aspect object registrator generation *=================================================");
         //aspectObjectRegistratorGenerator.generate(language, directory);
-        System.out.println("===================================== Generating ====================================================");
-        ////new GeneratorHelper(language, directory).generateAll();
-        System.out.println("--- DONE ---");
+        //System.out.println("===================================== Generating ====================================================");
+        //new GeneratorHelper(language, directory).generateAll();
+        //System.out.println("--- DONE ---");
 
 //        System.out.println("--------------------------------------------------------------------------------------------------------");
 //        language = parser.parse(new FileReader("expr.lang"));

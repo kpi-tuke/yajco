@@ -1,5 +1,6 @@
 package yajco.model;
 
+import java.util.ArrayList;
 import yajco.model.type.Type;
 import yajco.annotation.After;
 import yajco.annotation.Before;
@@ -18,6 +19,14 @@ public class LocalVariablePart extends BindingNotationPart {
             @Before(":") Type type,
             @Optional @Before("{") @After("}") NotationPartPattern[] patterns) {
         super(Utilities.asList(patterns), null);
+        this.name = name;
+        this.type = type;
+    }
+
+    public LocalVariablePart(
+            String name,
+            @Before(":") Type type) {
+        super(new ArrayList<NotationPartPattern>(), null);
         this.name = name;
         this.type = type;
     }

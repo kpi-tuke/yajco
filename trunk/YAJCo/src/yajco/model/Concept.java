@@ -35,6 +35,138 @@ public class Concept extends PatternSupport<ConceptPattern> {
         this.concreteSyntax = Utilities.asList(concreteSyntax);
     }
 
+    public Concept(
+            @Before("concept") String name) {
+        super(new ArrayList<ConceptPattern>(), null);
+        this.name = name;
+    }
+
+    public Concept(
+            @Before("concept") String name,
+            @Optional @Before(":") @References(Concept.class) @Token("NAME") String parent) {
+        super(new ArrayList<ConceptPattern>(), null);
+        this.name = name;
+    }
+
+    public Concept(
+            @Before("concept") String name,
+            @Optional @Before(":") @References(Concept.class) @Token("NAME") String parent,
+            @Optional @Before("{") @After("}") ConceptPattern[] patterns) {
+        super(Utilities.asList(patterns), null);
+        this.name = name;
+    }
+
+        public Concept(
+            @Before("concept") String name,
+            @Optional @Before(":") @References(Concept.class) @Token("NAME") String parent,
+            @Optional @Before("{") @After("}") ConceptPattern[] patterns,
+            @Optional @Before({"AS", ":"}) @Separator(",") @yajco.annotation.Range(minOccurs = 1) Property[] abstractSyntax) {
+        super(Utilities.asList(patterns), null);
+        this.name = name;
+        this.abstractSyntax = Utilities.asList(abstractSyntax);
+    }
+
+        public Concept(
+            @Before("concept") String name,
+            @Optional @Before(":") @References(Concept.class) @Token("NAME") String parent,
+            @Optional @Before("{") @After("}") ConceptPattern[] patterns,
+            @Optional @Before({"CS", ":"}) @Separator("|") @yajco.annotation.Range(minOccurs = 1) Notation[] concreteSyntax) {
+        super(Utilities.asList(patterns), null);
+        this.name = name;
+        this.concreteSyntax = Utilities.asList(concreteSyntax);
+    }
+
+        public Concept(
+            @Before("concept") String name,
+            @Optional @Before("{") @After("}") ConceptPattern[] patterns,
+            @Optional @Before({"AS", ":"}) @Separator(",") @yajco.annotation.Range(minOccurs = 1) Property[] abstractSyntax,
+            @Optional @Before({"CS", ":"}) @Separator("|") @yajco.annotation.Range(minOccurs = 1) Notation[] concreteSyntax) {
+        super(Utilities.asList(patterns), null);
+        this.name = name;
+        this.abstractSyntax = Utilities.asList(abstractSyntax);
+        this.concreteSyntax = Utilities.asList(concreteSyntax);
+    }
+
+        public Concept(
+            @Before("concept") String name,
+            @Optional @Before({"AS", ":"}) @Separator(",") @yajco.annotation.Range(minOccurs = 1) Property[] abstractSyntax,
+            @Optional @Before({"CS", ":"}) @Separator("|") @yajco.annotation.Range(minOccurs = 1) Notation[] concreteSyntax) {
+        super(new ArrayList<ConceptPattern>(), null);
+        this.name = name;
+        this.abstractSyntax = Utilities.asList(abstractSyntax);
+        this.concreteSyntax = Utilities.asList(concreteSyntax);
+    }
+
+    public Concept(
+            @Before("concept") String name,
+            @Optional @Before(":") @References(Concept.class) @Token("NAME") String parent,
+            @Optional @Before({"AS", ":"}) @Separator(",") @yajco.annotation.Range(minOccurs = 1) Property[] abstractSyntax,
+            @Optional @Before({"CS", ":"}) @Separator("|") @yajco.annotation.Range(minOccurs = 1) Notation[] concreteSyntax) {
+        super(new ArrayList<ConceptPattern>(), null);
+        this.name = name;
+        this.abstractSyntax = Utilities.asList(abstractSyntax);
+        this.concreteSyntax = Utilities.asList(concreteSyntax);
+    }
+
+    public Concept(
+            @Before("concept") String name,
+            @Optional @Before("{") @After("}") ConceptPattern[] patterns) {
+        super(Utilities.asList(patterns), null);
+        this.name = name;
+    }
+
+    public Concept(
+            @Before("concept") String name,
+            @Optional @Before({"AS", ":"}) @Separator(",") @yajco.annotation.Range(minOccurs = 1) Property[] abstractSyntax){
+        super(new ArrayList<ConceptPattern>(), null);
+        this.name = name;
+        this.abstractSyntax = Utilities.asList(abstractSyntax);
+    }
+
+    public Concept(
+            @Before("concept") String name,
+            @Optional @Before({"CS", ":"}) @Separator("|") @yajco.annotation.Range(minOccurs = 1) Notation[] concreteSyntax) {
+        super(new ArrayList<ConceptPattern>(), null);
+        this.name = name;
+        this.concreteSyntax = Utilities.asList(concreteSyntax);
+    }
+
+    public Concept(
+            @Before("concept") String name,
+            @Optional @Before(":") @References(Concept.class) @Token("NAME") String parent,
+            @Optional @Before({"AS", ":"}) @Separator(",") @yajco.annotation.Range(minOccurs = 1) Property[] abstractSyntax) {
+        super(new ArrayList<ConceptPattern>(), null);
+        this.name = name;
+        this.abstractSyntax = Utilities.asList(abstractSyntax);
+    }
+
+    public Concept(
+            @Before("concept") String name,
+            @Optional @Before(":") @References(Concept.class) @Token("NAME") String parent,
+            @Optional @Before({"CS", ":"}) @Separator("|") @yajco.annotation.Range(minOccurs = 1) Notation[] concreteSyntax) {
+        super(new ArrayList<ConceptPattern>(), null);
+        this.name = name;
+        this.concreteSyntax = Utilities.asList(concreteSyntax);
+    }
+
+    public Concept(
+            @Before("concept") String name,
+            @Optional @Before("{") @After("}") ConceptPattern[] patterns,
+            @Optional @Before({"AS", ":"}) @Separator(",") @yajco.annotation.Range(minOccurs = 1) Property[] abstractSyntax) {
+        super(Utilities.asList(patterns), null);
+        this.name = name;
+        this.abstractSyntax = Utilities.asList(abstractSyntax);
+    }
+
+    public Concept(
+            @Before("concept") String name,
+            @Optional @Before("{") @After("}") ConceptPattern[] patterns,
+            @Optional @Before({"CS", ":"}) @Separator("|") @yajco.annotation.Range(minOccurs = 1) Notation[] concreteSyntax) {
+        super(Utilities.asList(patterns), null);
+        this.name = name;
+        this.concreteSyntax = Utilities.asList(concreteSyntax);
+    }
+
     @Exclude
     public Concept(String name, Object sourceElement) {
         super(sourceElement);

@@ -8,7 +8,7 @@ skips
    "\r"
 
 concept Program
-    AS:expression : Expression, constants : list of Constant
+    AS: expression : Expression, constants : list of Constant
     CS: "print" expression
       | "print" expression {NewLine Indent} "where" constants {Separator(",") Range(1..*) NewLine}
 

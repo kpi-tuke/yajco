@@ -25,6 +25,13 @@ public class References extends NotationPartPattern {
         super(null);
     }
 
+    @Before({"References", "("})
+    @After(")")
+    public References(
+            @yajco.annotation.reference.References(Concept.class) String name) {
+        super(null);
+    }
+
     @Exclude
     public References(Concept concept, Property property, Object sourceElement) {
         super(sourceElement);

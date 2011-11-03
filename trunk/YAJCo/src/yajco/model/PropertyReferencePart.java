@@ -1,5 +1,6 @@
 package yajco.model;
 
+import java.util.ArrayList;
 import yajco.annotation.After;
 import yajco.annotation.Before;
 import yajco.annotation.Exclude;
@@ -16,6 +17,11 @@ public class PropertyReferencePart extends BindingNotationPart {
             @References(value = Property.class, path = "ancestor::yajco.model.Concept//yajco.model.Property") String name,
             @Optional @Before("{") @After("}") NotationPartPattern[] patterns) {
         super(Utilities.asList(patterns), null);
+    }
+
+    public PropertyReferencePart(
+            @References(value = Property.class, path = "ancestor::yajco.model.Concept//yajco.model.Property") String name) {
+        super(new ArrayList<NotationPartPattern>(), null);
     }
 
     @Exclude

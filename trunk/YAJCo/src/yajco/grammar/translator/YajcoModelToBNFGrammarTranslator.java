@@ -3,6 +3,7 @@ package yajco.grammar.translator;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map.Entry;
 import yajco.generator.util.Utilities;
 import yajco.model.Concept;
 import yajco.model.Language;
@@ -61,7 +62,13 @@ public class YajcoModelToBNFGrammarTranslator {
 		Concept mainConcept = language.getConcepts().get(0);
 		NonterminalSymbol startSymbol = new NonterminalSymbol(mainConcept.getConceptName(), new ReferenceType(Utilities.getTopLevelParent(mainConcept), null), toPatternList(mainConcept.getPatterns()));
 
-		grammar = new Grammar(startSymbol);
+		//TODO: toto je Dominikov test, aby boli terminali vlozene v poradi v akom su zadefinovane prv
+                grammar = new Grammar(startSymbol);
+                for (TokenDef tokenDef : language.getTokens()) {
+                    grammar.addTerminal(new TerminalSymbol(tokenDef.getName(),null), tokenDef.getRegexp());
+                }
+                //koniec
+
 		grammar.addNonterminal(startSymbol);
 		for (int i = 1; i < language.getConcepts().size(); i++) {
 			Concept concept = language.getConcepts().get(i);
@@ -88,7 +95,7 @@ public class YajcoModelToBNFGrammarTranslator {
 	}
 
 	private Production translateConcept(Concept concept) {
-		if (concept.getConcreteSyntax().size() == 0) {
+		if (concept.getConcreteSyntax().isEmpty()) {
 			return translateAbstractConcept(concept);
 		}
 		if (concept.getPattern(yajco.model.pattern.impl.Enum.class) != null) {

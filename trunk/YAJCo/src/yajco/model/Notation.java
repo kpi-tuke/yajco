@@ -22,6 +22,12 @@ public class Notation extends PatternSupport<NotationPattern> {
         this.parts = Utilities.asList(parts);
     }
 
+    public Notation(
+            @Range(minOccurs = 1) NotationPart[] parts) {
+        super(new ArrayList<NotationPattern>(), null);
+        this.parts = Utilities.asList(parts);
+    }
+
     @Exclude
     public Notation(Object sourceElement) {
         super(sourceElement);

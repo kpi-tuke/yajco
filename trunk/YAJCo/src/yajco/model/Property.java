@@ -1,5 +1,6 @@
 package yajco.model;
 
+import java.util.ArrayList;
 import yajco.model.type.Type;
 import yajco.model.pattern.PatternSupport;
 import yajco.annotation.After;
@@ -22,6 +23,14 @@ public class Property extends PatternSupport<PropertyPattern> {
             @Before(":") Type type,
             @Optional @Before("{") @After("}") PropertyPattern[] patterns) {
         super(Utilities.asList(patterns), null);
+        this.name = name;
+        this.type = type;
+    }
+
+    public Property(
+            String name,
+            @Before(":") Type type) {
+        super(new ArrayList<PropertyPattern>(), null);
         this.name = name;
         this.type = type;
     }

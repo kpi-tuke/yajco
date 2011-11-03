@@ -9,6 +9,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -25,6 +26,7 @@ import yajco.annotation.*;
 import yajco.annotation.config.*;
 import yajco.annotation.reference.*;
 import yajco.generator.BeaverCompilerGenerator;
+import yajco.generator.JavaccCompilerGenerator;
 import yajco.generator.util.GeneratorHelper;
 import yajco.model.*;
 import yajco.model.pattern.*;
@@ -147,7 +149,7 @@ public class AnnotationProcessor extends AbstractProcessor {
 				for (Skip skip : parserAnnotation.skips()) {
 					skips.add(new SkipDef(skip.value(), skip));
 				}
-				language.setTokens(tokens);
+		                language.setTokens(tokens);
 				language.setSkips(skips);
 
 				Printer printer = new Printer();
@@ -157,6 +159,7 @@ public class AnnotationProcessor extends AbstractProcessor {
 
 				///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 				BeaverCompilerGenerator.getInstance().generateCompilers(processingEnv, language);
+//                                new JavaccCompilerGenerator().generateCompilers(processingEnv, language);
 				///////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 //				System.out.println("--------------------------------------------------------------------------------------------------------");

@@ -11,8 +11,8 @@
         //Stara forma
         //@TokenDef(name = "NAME", regexp = "[a-zA-Z_][a-zA-Z0-9_]*"),
 
-        @TokenDef(name = "BOOLEAN_VALUE", regexp = "true|false"),
-        @TokenDef(name = "REAL_VALUE", regexp = "[-]?[0-9]+[.][0-9]+((e|E)[0-9]+)?"),
+        //@TokenDef(name = "BOOLEAN_VALUE", regexp = "true|false"),
+        //@TokenDef(name = "REAL_VALUE", regexp = "[-]?[0-9]+[.][0-9]+((e|E)[0-9]+)?"),
         @TokenDef(name = "STRING_VALUE", regexp = "\"([^\"]*)\""),
         @TokenDef(name = "INT_VALUE", regexp = "[0-9]+")
     },
