@@ -120,7 +120,8 @@ public class SemLangToJavaTranslator {
 	private void translateReturnAction(ReturnAction action, PrintStream writer) {
 		//DOMINIK TEST
                 //writer.print("return (Symbol)");
-                writer.print("return (Symbol) new "+ parserPackageName +".SymbolWrapper(");
+                //writer.print("return (Symbol) new "+ parserPackageName +".SymbolWrapper(");
+                writer.print("return (Symbol) new SymbolWrapper(");
 		translateRValue(action.getRValue(), writer);
 		//writer.print("; ");
                 writer.print("); "); // mnou dodane

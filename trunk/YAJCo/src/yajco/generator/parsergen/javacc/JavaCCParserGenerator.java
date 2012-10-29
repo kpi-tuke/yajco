@@ -7,15 +7,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Formatter;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.regex.Pattern;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
@@ -35,6 +28,7 @@ import yajco.generator.parsergen.javacc.model.Sequence;
 import yajco.generator.parsergen.javacc.model.Terminal;
 import yajco.generator.parsergen.javacc.model.ZeroOrMany;
 import yajco.generator.parsergen.javacc.model.ZeroOrOne;
+import yajco.generator.util.RegexUtil;
 import yajco.model.BindingNotationPart;
 import yajco.model.Concept;
 import yajco.model.Language;
@@ -74,18 +68,37 @@ public class JavaCCParserGenerator {
     private final Set<Concept> processedConcepts = new HashSet<Concept>();
     private static final Conversions stringConversions = new Conversions();
     private final ProcessingEnvironment processingEnv;
+    private String providedParserClassName = null;
 
     public JavaCCParserGenerator(ProcessingEnvironment processingEnvironment, Language language) {
         this.language = language;
         this.processingEnv = processingEnvironment;
     }
+    
+    public JavaCCParserGenerator(ProcessingEnvironment processingEnvironment, Language language, String parserClassName) {
+        this.language = language;
+        this.processingEnv = processingEnvironment;
+        this.providedParserClassName = parserClassName;
+    }
 
     public void generate() throws IOException {
         try {
-            String parserClassName = PARSER_CLASS_NAME;
-            String parserPackageName = language.getName();
-            String parserJavaCCPackageName = parserPackageName == null ? DEFAULT_PACKAGE_NAME : parserPackageName + "." + DEFAULT_PACKAGE_NAME;
-            String parserMainParserPackageName = parserJavaCCPackageName.substring(0, parserJavaCCPackageName.lastIndexOf("."));
+            
+            String parserClassName;
+            String parserPackageName;
+            String parserJavaCCPackageName;
+            String parserMainParserPackageName;
+            if (providedParserClassName != null && !providedParserClassName.isEmpty()) {
+                parserClassName = providedParserClassName.substring(providedParserClassName.lastIndexOf(".")+1);
+                parserMainParserPackageName = providedParserClassName.substring(0, providedParserClassName.lastIndexOf("."));
+                parserJavaCCPackageName = parserMainParserPackageName + ".javacc";
+                
+            } else {
+                parserClassName = PARSER_CLASS_NAME;
+                parserPackageName = language.getName();
+                parserJavaCCPackageName = parserPackageName == null ? DEFAULT_PACKAGE_NAME : parserPackageName + "." + DEFAULT_PACKAGE_NAME;
+                parserMainParserPackageName = parserJavaCCPackageName.substring(0, parserJavaCCPackageName.lastIndexOf("."));
+            }
 
             for (TokenDef token : language.getTokens()) {
                 definedTokens.put(token.getName(), token.getRegexp());
@@ -97,8 +110,7 @@ public class JavaCCParserGenerator {
             Model model = new Model(parserJavaCCPackageName, parserClassName != null ? parserClassName.trim() : "",
                     language.getSkips().toArray(new SkipDef[]{}), definedTokens, new Option[]{}, productions.get(getNonterminal(concept, 0)),
                     productions.values().toArray(new Production[]{}));
-
-
+            
             //generate ebnf grammar file
             String ebnfGrammarName = "grammar.ebnf";
             FileObject fo = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, parserJavaCCPackageName, ebnfGrammarName);
@@ -169,13 +181,17 @@ public class JavaCCParserGenerator {
     }
 
     private String generateTokenManagerClass(String parserClassName, String parserPackageName, String parserJavaCCPackageName, SkipDef[] skips) throws IOException {
+        Map<String,String> orderedDefinedTokens = new LinkedHashMap<String,String>();
+        orderedDefinedTokens.putAll(RegexUtil.filterMap(definedTokens, false));
+        orderedDefinedTokens.putAll(RegexUtil.filterMap(definedTokens, true));
+        
         StringWriter writer = new StringWriter();
 
         VelocityContext context = new VelocityContext();
         context.put("Utilities", yajco.generator.parsergen.javacc.Utilities.class);
         context.put("parserClassName", parserClassName);
         context.put("parserJavaCCPackageName", parserJavaCCPackageName);
-        context.put("tokens", definedTokens);
+        context.put("tokens", orderedDefinedTokens);
         context.put("skips", skips);
 
         velocityEngine.evaluate(context, writer, "", new InputStreamReader(getClass().getResourceAsStream(JAVACC_TOKEN_MANAGER_CLASS_TEMPLATE), "utf-8"));
@@ -211,8 +227,8 @@ public class JavaCCParserGenerator {
             expansion = processConcept(concept);
         }
 
-        Production production = new Production(concept.getName(), getFullName(concept.getName()), expansion);
-        productions.put(concept.getName(), production);
+        Production production = new Production(concept.getNameWithoutDots(), getFullName(concept.getName()), expansion);
+        productions.put(concept.getNameWithoutDots(), production);
     }
 
     private Expansion processEnumConcept(Concept concept) {
@@ -281,9 +297,11 @@ public class JavaCCParserGenerator {
     private Expansion processConcept(Concept concept) {
         List<Expansion> sequences = new ArrayList<Expansion>();
         List<Notation> alternatives = concept.getConcreteSyntax();
+        
 
         int paramNumber = 0;
         for (Notation alternative : alternatives) {
+            //System.out.println(">> Concept: "+concept.getName() + " || " + alternative.toString());
             paramNumber++;
             List<Expansion> expansions = new ArrayList<Expansion>();
 
@@ -311,11 +329,11 @@ public class JavaCCParserGenerator {
 
             String referenceResolverAction;
             if (alternative.getPattern(Factory.class) == null) { // je to konstruktor
-                referenceResolverAction = "return yajco.ReferenceResolver.getInstance().register(new " + getFullName(concept.getName()) + "( " + code.toString() + ")" + argsCode + ");";
+                referenceResolverAction = "return yajco.ReferenceResolver.getInstance().register(new " + getFullName(concept.getName()) + "( " + code.toString() + ")"+ argsCode + ");";
             } else { // je to tovarenska metoda
                 Factory factoryPattern = (Factory) alternative.getPattern(Factory.class);
                 String factoryMethodName = factoryPattern.getName();
-                referenceResolverAction = "return yajco.ReferenceResolver.getInstance().register(" + getFullName(concept.getName()) + "." + factoryMethodName + "( " + code.toString() + ")" + argsCode + ");";
+                referenceResolverAction = "return yajco.ReferenceResolver.getInstance().register(" + getFullName(concept.getName()) + "." + factoryMethodName + "( " + code.toString() + "), \"" + factoryMethodName + "\"" + argsCode + ");";
             }
 
             Sequence sequence = new Sequence(
@@ -628,7 +646,7 @@ public class JavaCCParserGenerator {
 
             String highestPriorityNonterminal = getNonterminal(operatorConcept, paramNumber);
             String nextPriorityNonterminal = getHigherPriorityNonterminal(priority, operatorConcept, priorityMap.keySet());
-            String currentPriorityNonterminal = operatorConcept.getName() + priority;
+            String currentPriorityNonterminal = operatorConcept.getNameWithoutDots() + priority;
             Expansion expansion = null;
             if (arity == 1) {
                 if (associativity == Associativity.LEFT) {
@@ -678,8 +696,8 @@ public class JavaCCParserGenerator {
                             new ZeroOrOne(generatePostfixOptions(highestPriorityNonterminal, nextPriorityNonterminal, operatorList, operatorConcept, paramNumber)));
                 }
             }
-            Production production = new Production(operatorConcept.getName() + priority, getFullName(operatorConcept.getName()), expansion);
-            productions.put(operatorConcept.getName() + priority, production);
+            Production production = new Production(operatorConcept.getNameWithoutDots() + priority, getFullName(operatorConcept.getName()), expansion);
+            productions.put(operatorConcept.getNameWithoutDots() + priority, production);
         }
     }
 
@@ -715,7 +733,7 @@ public class JavaCCParserGenerator {
                         if (isSameConcept(operatorConcept, bindingPartToConcept((BindingNotationPart) notationPart))) {
                             params.append("_node" + index);
                         } else {
-                            params.append("(" + getFullName(notationPartToName(notationPart)) + ")" + "_node" + index);
+                            params.append("(" + getFullName(bindingPartToConcept((BindingNotationPart) notationPart).getName()) + ")" + "_node" + index);
                         }
                     } else {
                         sExpansions.add(processBindingNotation((BindingNotationPart) notationPart, paramNumber));
@@ -766,6 +784,7 @@ public class JavaCCParserGenerator {
                         sExpansions.add(new Terminal(createTerminal(((TokenPart) notationPart).getToken())));
                         continue;
                     }
+                    
                     j++;
                     if (separator) {
                         params.append(", ");
@@ -780,18 +799,23 @@ public class JavaCCParserGenerator {
                         }*/
                         //System.out.println(">>>>>>>>>>>>>>>> " + paramElement.asType());
                         index++;
-
-                        if (j == bindingNotationParts.size() - 1 && !hasPostfix(operatorConcept, subconcept.getConcreteSyntax().get(0))) {
-                            sExpansions.add(new NonTerminal(nonterminal, "_node" + index));
-                        } else {
-                            sExpansions.add(new NonTerminal(highestPriorityNonterminal, "_node" + index));
+                        
+                        // Dominik: neiste riesenie problemu vytvarania napr. A ( A + A )*  ma byt  A ( + A ) *
+                        // len to vrchne if(!=0) je moje
+                        if (i!=0) {
+                            if (j == bindingNotationParts.size() - 1 && !hasPostfix(operatorConcept, subconcept.getConcreteSyntax().get(0))) {
+                                sExpansions.add(new NonTerminal(nonterminal, "_node" + index));
+                            } else {
+                                sExpansions.add(new NonTerminal(highestPriorityNonterminal, "_node" + index));
+                            }
                         }
 
                         // add type casting if necessary
                         if (isSameConcept(operatorConcept, bindingPartToConcept((BindingNotationPart) notationPart))) {
                             params.append("_node" + index);
                         } else {
-                            params.append("(" + getFullName(notationPartToName(notationPart)) + ")" + "_node" + index);
+                            params.append("(" + getFullName(bindingPartToConcept((BindingNotationPart) notationPart).getName()) + ")" + "_node" + index);
+                            //params.append("(" + getFullName(notationPartToName(notationPart)) + ")" + "_node" + index);
                         }
                     } else {
                         sExpansions.add(processBindingNotation((BindingNotationPart) notationPart, paramNumber));
@@ -895,9 +919,9 @@ public class JavaCCParserGenerator {
     private String getNonterminal(Concept concept, int paramNumber) {
         processMainConcept(concept, paramNumber);
         if (operatorConcepts.containsKey(concept)) {
-            return concept.getName() + operatorConcepts.get(concept).iterator().next().toString();
+            return concept.getNameWithoutDots() + operatorConcepts.get(concept).iterator().next().toString();
         }
-        return concept.getName();
+        return concept.getNameWithoutDots();
     }
 
     private Expansion generateNonteminal(BindingNotationPart bindingPart, String variableName, String type, String code, int paramNumber) {
@@ -921,9 +945,9 @@ public class JavaCCParserGenerator {
             }
         }
         if (iterator.hasNext()) {
-            return concept.getName() + String.valueOf(iterator.next());
+            return concept.getNameWithoutDots() + String.valueOf(iterator.next());
         }
-        return concept.getName();
+        return concept.getNameWithoutDots();
     }
 
     private boolean isDirectSubconcept(Concept superConcept, Concept concept) {
@@ -966,13 +990,13 @@ public class JavaCCParserGenerator {
     private String primitiveTypeToBoxedTypeString(PrimitiveType type) {
         switch (type.getPrimitiveTypeConst()) {
             case BOOLEAN:
-                return "Boolean";
+                return "java.lang.Boolean";
             case INTEGER:
-                return "Integer";
+                return "java.lang.Integer";
             case REAL:
-                return "Float";
+                return "java.lang.Float";
             case STRING:
-                return "String";
+                return "java.lang.String";
             default:
                 throw new UnsupportedOperationException("Unknown primitive type " + type);
         }
@@ -1059,11 +1083,6 @@ public class JavaCCParserGenerator {
             type = ((ComponentType) type).getComponentType();
         }
         ReferenceType refType = (ReferenceType) type;
-//		if (bindingPart instanceof LocalVariablePart) {
-//			refType = (ReferenceType) ((LocalVariablePart) bindingPart).getType();
-//		} else {
-//			refType = (ReferenceType) ((PropertyReferencePart) bindingPart).getProperty().getType();
-//		}
         return refType.getConcept();
     }
 

@@ -220,6 +220,10 @@ public class Concept extends PatternSupport<ConceptPattern> {
             return name.substring(lastDotIndex + 1, name.length());
         }
     }
+    
+    public String getNameWithoutDots() {
+        return name.replace('.', '_');
+    }
 
     public String getSubPackage() {
         int lastDotIndex = name.lastIndexOf(".");

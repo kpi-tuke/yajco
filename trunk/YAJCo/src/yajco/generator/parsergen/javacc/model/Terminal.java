@@ -37,16 +37,16 @@ public class Terminal extends Expansion {
     }
 
     @Override
-    public String generateExpansion(int level) {
+    public String generateExpansion(int level, boolean withCode) {
         StringBuilder sb = new StringBuilder();
         sb.append(spaces(level));
-        if (variable != null) {
-            sb.append(variable + " = ");
+        if (withCode && variable != null) {
+            sb.append(variable).append(" = ");
         }
-
-        sb.append("<" + Utilities.encodeStringIntoTokenName(token) + ">");
-
-        sb.append(generateCode());
+        sb.append("<").append(Utilities.encodeStringIntoTokenName(token)).append(">");
+        if (withCode) {
+            sb.append(generateCode());
+        }
         return sb.toString();
     }
 

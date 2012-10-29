@@ -41,4 +41,22 @@ public class Notation extends PatternSupport<NotationPattern> {
     public void addPart(NotationPart part) {
         parts.add(part);
     }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (NotationPart notationPart : parts) {
+            if (!first) {
+                sb.append(", ");
+            }
+            sb.append(notationPart.toString());
+            if (first) {
+                first = false;
+            }
+            
+        }
+        return sb.toString();
+    }
+    
 }

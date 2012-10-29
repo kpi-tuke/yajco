@@ -33,4 +33,11 @@ public class PropertyReferencePart extends BindingNotationPart {
     public Property getProperty() {
         return property;
     }
+
+    @Override
+    public String toString() {
+        return "Property reference: "+property.getName();
+    }
+    
+    
 }

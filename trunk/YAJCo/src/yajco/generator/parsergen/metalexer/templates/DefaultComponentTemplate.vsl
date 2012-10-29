@@ -1,0 +1,59 @@
+## Input - parserName
+## Input - terminals
+## Input - defaultSymbolName
+## Input - regexps
+## Input - language
+## Input - Utilities
+## Input - MetaLexerUtilities
+## Velocity Template.
+%component $parserName
+%extern "private Symbol symbol(short type, Object value)"
+%extern "private Symbol symbol(short type)"
+%extern "private void error(String msg) throws Scanner.Exception"
+
+#foreach( $terminal in $terminals )
+#if( $terminal.name.startsWith($defaultSymbolName) )
+#set( $regex = $regexps.get($terminal) )
+##    ${terminal.name} = $Utilities.encodeStringToJavaLiteral($Utilities.encodeStringIntoRegex($regex))
+    ${terminal.name} = $Utilities.encodeStringIntoRegex($regex)
+#end
+#end
+##
+#foreach( $terminal in $terminals )
+#if( !$terminal.name.startsWith($defaultSymbolName) )
+#set( $regex = $regexps.get($terminal) )
+##    ${terminal.name} = $Utilities.encodeStringIntoRegex($regex)
+    ${terminal.name} = $regex
+#end
+#end
+
+%%
+
+#foreach( $terminal in $terminals )
+#if ( !$MetaLexerUtilities.isCyclicRegex($regexps.get($terminal)) )
+    {${terminal.name}} {: return symbol (Terminals.${terminal.name}); :}
+#end
+#end
+#foreach( $skip in $language.skips )
+#if ( !$MetaLexerUtilities.isCyclicRegex($skip.regexp) )
+##    $Utilities.encodeStringToJavaLiteral($skip.regexp) {: /* ignore */ :}
+    $skip.regexp {: /* ignore */ :}
+#end
+#end
+	
+%:
+#foreach( $terminal in $terminals )
+#if ( $MetaLexerUtilities.isCyclicRegex($regexps.get($terminal)) )
+    {${terminal.name}} {: return symbol (Terminals.${terminal.name}, yytext()); :}
+#end
+#end
+#foreach( $skip in $language.skips )
+#if ( $MetaLexerUtilities.isCyclicRegex($skip.regexp) )
+##    $Utilities.encodeStringToJavaLiteral($skip.regexp) {: /* ignore */ :}
+    $skip.regexp {: /* ignore */ :}
+#end
+#end
+
+%:
+<<ANY>> {: error("Not known token:"+yytext()); :}
+<<EOF>> {: return symbol (Terminals.EOF); :}

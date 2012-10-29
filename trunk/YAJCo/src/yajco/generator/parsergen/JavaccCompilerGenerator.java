@@ -1,4 +1,4 @@
-package yajco.generator;
+package yajco.generator.parsergen;
 
 import java.io.IOException;
 import javax.annotation.processing.ProcessingEnvironment;
@@ -9,6 +9,11 @@ public class JavaccCompilerGenerator implements CompilerGenerator {
 
     public void generateCompilers(ProcessingEnvironment processingEnv, Language language) throws IOException {
         JavaCCParserGenerator generator = new JavaCCParserGenerator(processingEnv, language);
+        generator.generate();
+    }
+
+    public void generateCompilers(ProcessingEnvironment processingEnv, Language language, String parserClassName) throws IOException {
+        JavaCCParserGenerator generator = new JavaCCParserGenerator(processingEnv, language, parserClassName);
         generator.generate();
     }
 

@@ -1,6 +1,7 @@
 package yajco.generator.parsergen.javacc;
 
 public final class Utilities {
+
     private Utilities() {
     }
 
@@ -37,6 +38,14 @@ public final class Utilities {
                 sb.append("\\[");
             } else if (c == '^') {
                 sb.append("\\^");
+//dodane na test pre LISA
+//            } else if (c == '+') {
+//                sb.append("\\+");
+//            } else if (c == '(') {
+//                sb.append("\\(");
+//            } else if (c == ')') {
+//                sb.append("\\)");
+//koniec dodatku                
             } else {
                 sb.append("[" + c + "]");
             }

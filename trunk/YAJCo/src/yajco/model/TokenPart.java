@@ -20,4 +20,11 @@ public class TokenPart extends YajcoModelElement implements NotationPart {
     public String getToken() {
         return token;
     }
+
+    @Override
+    public String toString() {
+        return "Token: "+token;
+    }
+    
+    
 }

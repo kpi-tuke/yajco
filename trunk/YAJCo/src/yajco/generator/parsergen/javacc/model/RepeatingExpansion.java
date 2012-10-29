@@ -15,6 +15,10 @@ public abstract class RepeatingExpansion extends Expansion {
     public Expansion getExpansion() {
         return expansion;
     }
+    
+    protected void resolveLookahead() {
+        this.setLookahead(expansion.generateExpansion(1, false));
+    }
 
     @Override
     public String generateDeclaration() {

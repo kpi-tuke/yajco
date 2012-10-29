@@ -227,7 +227,7 @@ public class ReferenceResolver {
 
     private void createXmlNode(Object object, Object... objects) {
         rootElement = document.createElement(object.getClass().getCanonicalName());
-        //System.out.println("Registering " + object + " " + rootElement + " " + Arrays.toString(objects));
+//        System.out.println("Registering " + object + " " + rootElement + " " + Arrays.toString(objects));
 
         for (Object param : objects) {
             if (param != null) {

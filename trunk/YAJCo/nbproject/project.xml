@@ -12,5 +12,11 @@
             </test-roots>
         </data>
         <references xmlns="http://www.netbeans.org/ns/ant-project-references/1"/>
+        <spring-data xmlns="http://www.netbeans.org/ns/spring-data/1">
+            <config-files>
+                <config-file>src/yajco/YajcoXMLConfig.xml</config-file>
+            </config-files>
+            <config-file-groups/>
+        </spring-data>
     </configuration>
 </project>

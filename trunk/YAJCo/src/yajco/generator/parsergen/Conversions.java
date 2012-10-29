@@ -9,7 +9,7 @@ import yajco.generator.GeneratorException;
 public class Conversions {
 
 	public static final String PROPERTIES_FILE = "conversions.properties";
-	public static final String PROPERTIES_FILE_PROPERTY = "yajco.parsergen.conversions";
+	public static final String PROPERTIES_FILE_PROPERTY = "yajco.generator.parsergen.conversions";
 	private final Map<String, Conversion> conversions = new HashMap<String, Conversion>();
 
 	public Conversions() {

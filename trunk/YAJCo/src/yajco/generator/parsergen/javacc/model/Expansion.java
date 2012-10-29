@@ -69,7 +69,11 @@ public abstract class Expansion {
 		return "";
 	}
 
-	public abstract String generateExpansion(int level);
+	public String generateExpansion(int level) {
+            return generateExpansion(level, true);
+        }
+        
+        public abstract String generateExpansion(int level, boolean withCode);
 
 	protected String generateCode() {
 		if (code != null) {

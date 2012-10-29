@@ -45,4 +45,11 @@ public class LocalVariablePart extends BindingNotationPart {
     public Type getType() {
         return type;
     }
+
+    @Override
+    public String toString() {
+        return "LocalVariable name: "+name + " | type: "+type.toString();
+    }
+    
+    
 }
