@@ -17,6 +17,7 @@ import javax.tools.StandardLocation;
 import yajco.generator.GeneratorException;
 import yajco.annotation.*;
 import yajco.annotation.config.*;
+import yajco.annotation.config.parsers.ParserType;
 import yajco.annotation.reference.*;
 import yajco.generator.parsergen.BeaverCompilerGenerator;
 import yajco.generator.parsergen.CompilerGenerator;
@@ -52,7 +53,7 @@ public class AnnotationProcessor extends AbstractProcessor {
     /**
      * Version string.
      */
-    private static final String VERSION = "0.3";
+    private static final String VERSION = "0.4";
     private static final String PROPERTY_SETTINGS_FILE = "/yajco/YajcoSettings.properties";
     /**
      * Stored round environment.
@@ -65,17 +66,17 @@ public class AnnotationProcessor extends AbstractProcessor {
     private Language language/*
              * = new Language()
              */;
-
+    
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-
+        
         properties = new Properties();
         try {
             properties.load(getClass().getResourceAsStream(PROPERTY_SETTINGS_FILE));
         } catch (IOException e) {
             throw new GeneratorException("Cannot load " + PROPERTY_SETTINGS_FILE, e);
         }
-
+        
         this.roundEnv = roundEnv;
         try {
             if (annotations.size() == 1) {
@@ -95,7 +96,11 @@ public class AnnotationProcessor extends AbstractProcessor {
                 Parser parserAnnotation = parserAnnotationElement.getAnnotation(Parser.class);
 
                 // Extract options from Parser anntotation
-                List<Option> options = Arrays.asList(parserAnnotation.options());
+                Map<String, String> options = new HashMap<String, String>();
+                for (Option option : parserAnnotation.options()) {
+                    options.put(option.name(), option.value());
+                }
+
 
                 //Extract the main element, package or type can be annotated with @Parser
                 ElementKind parserAnnotationElemKind = parserAnnotationElement.getKind();
@@ -119,7 +124,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                     //TODO: vypisat co bolo anotovane
                     throw new GeneratorException("Annotation @Parser should annotate only with package, class, interface or enum.");
                 }
-
+                
                 if (mainElement == null) {
                     throw new GeneratorException("Main language concept not found '" + parserAnnotation.mainNode() + "'");
                 }
@@ -163,15 +168,30 @@ public class AnnotationProcessor extends AbstractProcessor {
                 }
                 language.setTokens(tokens);
                 language.setSkips(skips);
-
+                
                 Printer printer = new Printer();
                 System.out.println("--------------------------------------------------------------------------------------------------------");
                 printer.printLanguage(new PrintWriter(System.out), language);
                 System.out.println("--------------------------------------------------------------------------------------------------------");
-
+                
                 String parserClassName = parserAnnotation.className();
-
-                CompilerGenerator compilerGenerator = (CompilerGenerator) Class.forName(properties.getProperty("yajco.parserGenerator")).newInstance();
+                
+                Class compilerGeneratorClass = null;                
+                if (options.containsKey("compilerGenerator")) {
+                    try {
+                        compilerGeneratorClass = Class.forName(options.get("compilerGenerator"));
+                    } catch (ClassNotFoundException ex) {
+                        System.err.println("Cannot find class for specified compiler generator: "+options.get("compilerGenerator") + "\nWill use default compiler generator!!!");
+                    }
+                }
+                if (compilerGeneratorClass == null) {
+                    if (parserAnnotation.parserType() == ParserType.DEFAULT) {
+                        compilerGeneratorClass = Class.forName(properties.getProperty("yajco.parserGenerator"));
+                    } else {
+                        compilerGeneratorClass = parserAnnotation.parserType().getCompilerGeneratorClass();
+                    }
+                }
+                CompilerGenerator compilerGenerator = (CompilerGenerator) compilerGeneratorClass.newInstance();
                 if (parserClassName != null && !parserClassName.isEmpty()) {
                     compilerGenerator.generateCompilers(processingEnv, language, parserClassName);
                 } else {
@@ -192,14 +212,12 @@ public class AnnotationProcessor extends AbstractProcessor {
                 // generates all new files
                 FileObject fo = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "", "temp.java");
                 GeneratorHelper generatorHelper = new GeneratorHelper(language, new File(fo.toUri()).getParentFile());
-
-                for (Option option : options) {
-                    if ("generateTools".equals(option.name()) && "true".equals(option.value())) {
-                        generatorHelper.generateAllExceptModelClassFiles();
-                        break;
-                    }
+                
+                
+                if (options.containsKey("generateTools") && "true".equals(options.get("generateTools"))) {
+                    generatorHelper.generateAllExceptModelClassFiles();
                 }
-
+                
             }
         } catch (Throwable e) {
             e.printStackTrace();
@@ -207,11 +225,11 @@ public class AnnotationProcessor extends AbstractProcessor {
         }
         return false;
     }
-
+    
     private Concept processTypeElement(TypeElement typeElement) {
         return processTypeElement(typeElement, null);
     }
-
+    
     private Concept processTypeElement(TypeElement typeElement, Concept superConcept) {
         //String name = typeElement.getSimpleName().toString();
         String name = typeElement.getQualifiedName().toString();
@@ -230,7 +248,7 @@ public class AnnotationProcessor extends AbstractProcessor {
         concept = new Concept(name, typeElement);
         concept.setParent(superConcept); //Set parent
         language.addConcept(concept);
-
+        
         if (typeElement.getKind() == ElementKind.ENUM) { //Enum type
             processEnum(concept, typeElement);
         } else if (typeElement.getKind() == ElementKind.CLASS) { //Class
@@ -254,7 +272,7 @@ public class AnnotationProcessor extends AbstractProcessor {
         }
         return concept;
     }
-
+    
     private void processEnum(Concept concept, TypeElement typeElement) {
         concept.addPattern(new yajco.model.pattern.impl.Enum());
         for (Element element : typeElement.getEnclosedElements()) {
@@ -262,7 +280,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                 continue; //skip non enum constants
             }
             Token tokenAnnotation = element.getAnnotation(Token.class);
-
+            
             Notation notation = new Notation(typeElement);
             TokenPart tokenPart;
             if (tokenAnnotation != null) {
@@ -274,7 +292,7 @@ public class AnnotationProcessor extends AbstractProcessor {
             concept.addNotation(notation);
         }
     }
-
+    
     private void processConcreteClass(Concept concept, TypeElement classElement) {
         //Abstract syntax
         for (Element element : classElement.getEnclosedElements()) {
@@ -300,7 +318,7 @@ public class AnnotationProcessor extends AbstractProcessor {
             if (constructor.getAnnotation(Before.class) != null) {
                 addTokenParts(notation, constructor.getAnnotation(Before.class).value());
             }
-
+            
             for (VariableElement paramElement : constructor.getParameters()) {
                 processParameter(concept, notation, paramElement);
             }
@@ -309,7 +327,7 @@ public class AnnotationProcessor extends AbstractProcessor {
             if (constructor.getAnnotation(After.class) != null) {
                 addTokenParts(notation, constructor.getAnnotation(After.class).value());
             }
-
+            
             concept.addNotation(notation);
             if (constructor.getKind() == ElementKind.METHOD) {
                 notation.addPattern(new Factory(constructor.getSimpleName().toString()));
@@ -320,38 +338,38 @@ public class AnnotationProcessor extends AbstractProcessor {
             addPatternsFromAnnotations(constructor, concept, ConceptPattern.class);
         }
     }
-
+    
     private void processAbstractClass(Concept concept, TypeElement typeElement) {
         //TODO: toto je len docasne pre testovanie a pokial sa ujasni ako to chceme
         //processConcreteClass(concept, typeElement);
     }
-
+    
     private void processInterface(Concept concept, TypeElement typeElement) {
     }
-
+    
     private void processParameter(Concept concept, Notation notation, VariableElement paramElement) {
         //Before annotation
         if (paramElement.getAnnotation(Before.class) != null) {
             addTokenParts(notation, paramElement.getAnnotation(Before.class).value());
         }
-
+        
         String paramName = paramElement.getSimpleName().toString();
         TypeMirror typeMirror = paramElement.asType();
         References references = paramElement.getAnnotation(References.class);
         Token tokenAnnotation = paramElement.getAnnotation(Token.class);
         BindingNotationPart part;
-
+        
         if (references != null) { //References annotation
             //TODO: zatial nie je podpora pre polia referencii, treba to vsak doriesit
             Type type = getSimpleType(typeMirror);
             part = new LocalVariablePart(paramName, type, paramElement);
             notation.addPart(part);
-
+            
             try {
                 references.value();
             } catch (MirroredTypeException e) {
                 TypeElement referencedTypeElement = (TypeElement) processingEnv.getTypeUtils().asElement(e.getTypeMirror());
-
+                
                 Concept referencedConcept = processTypeElement(referencedTypeElement);
                 Property property = null;
                 if (!references.field().isEmpty()) {
@@ -382,11 +400,11 @@ public class AnnotationProcessor extends AbstractProcessor {
                 property = new Property(paramName, getType(typeMirror), null);
                 concept.addProperty(property);
             }
-
+            
             part = new PropertyReferencePart(property, paramElement);
             notation.addPart(part);
         }
-
+        
         if (tokenAnnotation != null) {
             part.addPattern(new yajco.model.pattern.impl.Token(tokenAnnotation.value(), tokenAnnotation));
         }
@@ -399,7 +417,7 @@ public class AnnotationProcessor extends AbstractProcessor {
             addTokenParts(notation, paramElement.getAnnotation(After.class).value());
         }
     }
-
+    
     private Property findReferencedProperty(VariableElement paramElement, Concept referencedConcept, String proposedName) {
         Element element = paramElement;
         //Go up on tree until you find class element
@@ -426,7 +444,7 @@ public class AnnotationProcessor extends AbstractProcessor {
         }
         return null;
     }
-
+    
     private Type getType(TypeMirror type) {
         if (type.getKind() == TypeKind.ARRAY) {
             return new yajco.model.type.ArrayType(getSimpleType(((ArrayType) type).getComponentType()));
@@ -438,7 +456,7 @@ public class AnnotationProcessor extends AbstractProcessor {
             return getSimpleType(type);
         }
     }
-
+    
     private <T extends ComponentType> T getSpecifiedYajcoComponentType(TypeMirror type, Class<T> yajcoType) {
         if (type.getKind() != TypeKind.DECLARED) {
             throw new GeneratorException("Type " + type.toString() + " is not class or interface");
@@ -457,7 +475,7 @@ public class AnnotationProcessor extends AbstractProcessor {
             }
         }
     }
-
+    
     private boolean isSpecifiedClassType(TypeMirror type, Class clazz) {
         TypeElement referencedTypeElement = (TypeElement) processingEnv.getTypeUtils().asElement(type);
         if (clazz != null && referencedTypeElement != null
@@ -466,7 +484,7 @@ public class AnnotationProcessor extends AbstractProcessor {
         }
         return false;
     }
-
+    
     private Type getSimpleType(TypeMirror type) {
         if (type.getKind().isPrimitive()) {
             PrimitiveTypeConst primTypeConst = PrimitiveTypeConst.INTEGER;
@@ -516,15 +534,15 @@ public class AnnotationProcessor extends AbstractProcessor {
         for (Element element : elementUtils.getAllMembers(classElement)) {
             boolean isConstructor = element.getKind() == ElementKind.CONSTRUCTOR && element.getModifiers().contains(Modifier.PUBLIC) && element.getAnnotation(Exclude.class) == null;
             boolean isFactoryMethod = element.getKind() == ElementKind.METHOD && element.getModifiers().contains(Modifier.PUBLIC) && element.getAnnotation(FactoryMethod.class) != null && element.getAnnotation(Exclude.class) == null;
-
+            
             if (isConstructor || isFactoryMethod) {
                 constructors.add((ExecutableElement) element);
             }
         }
-
+        
         return constructors;
     }
-
+    
     private boolean isKnownClass(Element element) {
         if (element.getKind().isClass() || element.getKind().isInterface()) {
             for (Element elem : roundEnv.getRootElements()) {
@@ -549,7 +567,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                 subclassElements.add((TypeElement) element);
             }
         }
-
+        
         return subclassElements;
     }
 
@@ -580,7 +598,7 @@ public class AnnotationProcessor extends AbstractProcessor {
         }
         return false;
     }
-
+    
     private void addTokenParts(Notation notation, String[] values) {
         for (int i = 0; i < values.length; i++) {
             notation.addPart(new TokenPart(values[i]));
@@ -599,7 +617,7 @@ public class AnnotationProcessor extends AbstractProcessor {
         }
         return false;
     }
-
+    
     private <T extends Pattern> void addPatternsFromAnnotations(Element element, PatternSupport<T> patternSupport, Class<T> patternClass) {
         for (AnnotationMirror am : element.getAnnotationMirrors()) {
             Element annotationElement = processingEnv.getTypeUtils().asElement(am.getAnnotationType());
@@ -612,12 +630,12 @@ public class AnnotationProcessor extends AbstractProcessor {
                 } catch (MirroredTypeException e) {
                     mapsToClass = e.getTypeMirror().toString();
                 }
-
+                
                 patternSupport.addPattern((T) createObjectFromAnnotation(mapsToClass, am));
             }
         }
     }
-
+    
     private Pattern createObjectFromAnnotation(String mapsToClass, AnnotationMirror am) {
         try {
             Class<? extends Pattern> clazz = (Class<? extends Pattern>) Class.forName(mapsToClass);

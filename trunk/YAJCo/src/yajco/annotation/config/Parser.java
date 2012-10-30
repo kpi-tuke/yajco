@@ -4,6 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import yajco.annotation.config.parsers.ParserType;
 
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.PACKAGE, ElementType.TYPE})
@@ -18,4 +19,7 @@ public @interface Parser {
 	Skip[] skips() default {};
 
 	Option[] options() default {};
+        
+        ParserType parserType() default ParserType.DEFAULT;
+        
 }

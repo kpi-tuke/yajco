@@ -13,6 +13,7 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
+import javax.tools.ToolProvider;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.javacc.parser.Main;
@@ -160,6 +161,8 @@ public class JavaCCParserGenerator {
             System.out.println("YAJCo JavaCC parser generator: Generating output to '" + grammarURI + "'");
             String[] args = {"-OUTPUT_DIRECTORY=" + file.getParent(), file.toString()};
             Main.mainProgram(args);
+//            int compileResult = ToolProvider.getSystemJavaCompiler().run(null, null, null, file.getParentFile().list());
+//            System.out.println(">>COMPILE RESULT: "+compileResult);
         } catch (Throwable e) {
             e.printStackTrace();
             processingEnv.getMessager().printMessage(Kind.ERROR, e.getMessage());
