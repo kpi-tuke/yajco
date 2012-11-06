@@ -26,8 +26,10 @@ import yajco.model.TokenDef;
 import yajco.model.TokenPart;
 import yajco.model.pattern.ConceptPattern;
 import yajco.model.pattern.NotationPartPattern;
+import yajco.model.pattern.NotationPattern;
 import yajco.model.pattern.Pattern;
 import yajco.model.pattern.PropertyPattern;
+import yajco.model.pattern.impl.Factory;
 import yajco.model.pattern.impl.Identifier;
 import yajco.model.pattern.impl.Operator;
 import yajco.model.pattern.impl.Parentheses;
@@ -114,10 +116,10 @@ public class ClassGenerator implements FilesGenerator {
 
     private void generatePackageInfo(Writer writer) {
         try {
-            writer.write("@"+yajco.annotation.config.Parser.class.getSimpleName());
+            writer.write("@" + yajco.annotation.config.Parser.class.getSimpleName());
             writer.write("(\n");
-            writer.write("    className = \""+Utilities.getLanguagePackageName(actualLanguage)+".parser.Parser\",\n");
-            writer.write("    mainNode = \""+Utilities.getFullConceptClassName(actualLanguage, actualLanguage.getConcepts().get(0))+"\",\n");
+            writer.write("    className = \"" + Utilities.getLanguagePackageName(actualLanguage) + ".parser.Parser\",\n");
+            writer.write("    mainNode = \"" + Utilities.getFullConceptClassName(actualLanguage, actualLanguage.getConcepts().get(0)) + "\",\n");
             //Tokens
             writer.write("    tokens = ");
             writer.write("{\n");
@@ -126,7 +128,7 @@ public class ClassGenerator implements FilesGenerator {
                 if (comma) {
                     writer.write(",\n");
                 }
-                writer.write("        @TokenDef(name = \""+tokenDef.getName()+"\", regexp = \""+tokenDef.getRegexp()+"\")");
+                writer.write("        @TokenDef(name = \"" + tokenDef.getName() + "\", regexp = \"" + tokenDef.getRegexp() + "\")");
                 comma = true;
             }
             writer.write("\n    },\n");
@@ -144,10 +146,10 @@ public class ClassGenerator implements FilesGenerator {
             writer.write("\n    }\n");
             writer.write(")\n");
             //Package + imports
-            writer.write("package "+Utilities.getLanguagePackageName(actualLanguage)+";\n\n");
-            writer.write("import "+yajco.annotation.config.Parser.class.getCanonicalName()+";\n");
-            writer.write("import "+yajco.annotation.config.TokenDef.class.getCanonicalName()+";\n");
-            writer.write("import "+yajco.annotation.config.Skip.class.getCanonicalName()+";\n");
+            writer.write("package " + Utilities.getLanguagePackageName(actualLanguage) + ";\n\n");
+            writer.write("import " + yajco.annotation.config.Parser.class.getCanonicalName() + ";\n");
+            writer.write("import " + yajco.annotation.config.TokenDef.class.getCanonicalName() + ";\n");
+            writer.write("import " + yajco.annotation.config.Skip.class.getCanonicalName() + ";\n");
 
             writer.flush();
         } catch (IOException ex) {
@@ -179,15 +181,14 @@ public class ClassGenerator implements FilesGenerator {
                             if (comma) {
                                 writer.write(", ");
                             }
-                            writer.write(((TokenPart)notationPart).getToken());
+                            writer.write(((TokenPart) notationPart).getToken());
                             comma = true;
                         }
                     }
                 }
                 writer.write("}");
                 return;
-            }
-            else if (!(conceptPattern instanceof Operator)) {  //Operator sa pise ku konstruktorom aktualne
+            } else if (!(conceptPattern instanceof Operator)) {  //Operator sa pise ku konstruktorom aktualne
                 writePattern(writer, conceptPattern);
             }
         }
@@ -203,11 +204,19 @@ public class ClassGenerator implements FilesGenerator {
     }
 
     private void writeConstructorBody(Writer writer, Notation notation) throws IOException {
+        Factory factory = (Factory) notation.getPattern(Factory.class);
         writer.write("{");
-        for (NotationPart notationPart : notation.getParts()) {
-            if (notationPart instanceof PropertyReferencePart) {
-                PropertyReferencePart part = (PropertyReferencePart) notationPart;
-                writer.write("this." + part.getProperty().getName() + " = " + part.getProperty().getName() + ";");
+        if (factory != null) {
+            //TODO: body not generated for factory method
+            System.err.println("YAJCo cannot automatically generate method body for factory method \""+factory.getName()+"\" !!!");
+            writer.write("\n//TODO: Implement factory method!!!\n");
+            writer.write("throw new UnsupportedOperationException(\"Factory method "+factory.getName()+" not implemented.\");");
+        } else { // classic constructor
+            for (NotationPart notationPart : notation.getParts()) {
+                if (notationPart instanceof PropertyReferencePart) {
+                    PropertyReferencePart part = (PropertyReferencePart) notationPart;
+                    writer.write("this." + part.getProperty().getName() + " = " + part.getProperty().getName() + ";");
+                }
             }
         }
         writer.write("}");
@@ -218,6 +227,8 @@ public class ClassGenerator implements FilesGenerator {
         if (operator != null) {
             writePattern(writer, operator);
         }
+        Factory factory = (Factory) notation.getPattern(Factory.class);
+
         List<String> list = new ArrayList<String>();
         boolean separate = false;
         for (NotationPart notationPart : notation.getParts()) {
@@ -233,7 +244,15 @@ public class ClassGenerator implements FilesGenerator {
             writer.write(")");
             list.clear();
         }
-        writer.write("public " + concept.getConceptName() + "(");
+        writer.write("public ");
+        if (factory == null) { // create classic constructor
+            writer.write(concept.getConceptName());
+        } else {    // create factory method
+            writer.write("static " + concept.getConceptName() + " " + factory.getName());
+        }
+
+        writer.write("(");
+
         for (NotationPart notationPart : notation.getParts()) {
             if (notationPart instanceof TokenPart) {
                 list.add(((TokenPart) notationPart).getToken());
@@ -324,9 +343,9 @@ public class ClassGenerator implements FilesGenerator {
 
     private void processTypeToConceptSet(Concept actualConcept, Type type, Set<Concept> conceptList) {
         if (type instanceof ComponentType) {
-            processTypeToConceptSet(actualConcept, ((ComponentType)type).getComponentType(), conceptList);
+            processTypeToConceptSet(actualConcept, ((ComponentType) type).getComponentType(), conceptList);
         } else if (type instanceof ReferenceType) {
-            Concept referencedConcept = ((ReferenceType)type).getConcept();
+            Concept referencedConcept = ((ReferenceType) type).getConcept();
             if (!referencedConcept.getSubPackage().equals(actualConcept.getSubPackage())) {
                 conceptList.add(referencedConcept);
             }
@@ -342,7 +361,7 @@ public class ClassGenerator implements FilesGenerator {
         if (concept.getSubPackage().isEmpty()) {
             packageName = Utilities.getLanguagePackageName(actualLanguage);
         } else {
-            packageName = Utilities.getLanguagePackageName(actualLanguage) + "." + concept.getSubPackage().substring(0, concept.getSubPackage().length()-1);
+            packageName = Utilities.getLanguagePackageName(actualLanguage) + "." + concept.getSubPackage().substring(0, concept.getSubPackage().length() - 1);
         }
         writer.write("package " + packageName + ";");
     }
@@ -410,9 +429,8 @@ public class ClassGenerator implements FilesGenerator {
         } else if (pattern instanceof NewLine) {
             writer.write("@NewLine");
         } else {
-            throw new GeneratorException("Not known pattern type: "+pattern.getClass().getCanonicalName());
+            throw new GeneratorException("Not known pattern type: " + pattern.getClass().getCanonicalName());
         }
         writer.write(" ");
     }
-
 }

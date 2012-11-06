@@ -806,7 +806,7 @@ public class JavaCCParserGenerator {
                         // Dominik: neiste riesenie problemu vytvarania napr. A ( A + A )*  ma byt  A ( + A ) *
                         // len to vrchne if(!=0) je moje
                         if (i!=0) {
-                            if (j == bindingNotationParts.size() - 1 && !hasPostfix(operatorConcept, subconcept.getConcreteSyntax().get(0))) {
+                            if (j == bindingNotationParts.size() && !hasPostfix(operatorConcept, subconcept.getConcreteSyntax().get(0))) {
                                 sExpansions.add(new NonTerminal(nonterminal, "_node" + index));
                             } else {
                                 sExpansions.add(new NonTerminal(highestPriorityNonterminal, "_node" + index));
