@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>sk.tuke.yajco</groupId>
+        <artifactId>yajco-modules</artifactId>
+        <version>0.5</version>
+    </parent>
+    <groupId>sk.tuke.yajco</groupId>
+    <artifactId>yajco-tools-module</artifactId>
+    <version>0.5</version>
+    <packaging>jar</packaging>
+    <name>yajco-tools-module</name>
+    <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - yajco helper tools</description>
+    <licenses>
+        <license>
+            <name>GNU General Public License (GPL) v3</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+        </license>
+    </licenses>
+    <url>http://code.google.com/p/yajco/</url>
+    <developers>
+        <developer>
+            <name>Jaroslav Porubän</name>
+            <email>jaroslav.poruban@tuke.sk</email>
+            <organization>Technical University of Košice</organization>
+        </developer>
+        <developer>
+            <name>Dominik Lakatoš</name>
+            <email>deel77@gmail.com</email>
+            <organization>Technical University of Košice</organization>
+        </developer>
+    </developers>
+    <scm>
+        <url>http://yajco.googlecode.com/svn/trunk/</url>
+        <connection>scm:svn:http://yajco.googlecode.com/svn/trunk/</connection>
+    </scm>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>junit</groupId>
+            <artifactId>junit</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>yajco-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+</project>
