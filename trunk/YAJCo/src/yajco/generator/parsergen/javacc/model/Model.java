@@ -63,7 +63,7 @@ public class Model {
 
         //Generate production code
         for (Production production : productions) {
-            sb.append(production.generate() + "\n");
+            sb.append(production.generate()).append("\n");
         }
 
         return sb.toString();
@@ -92,14 +92,14 @@ public class Model {
         //Toto je tu kvoli chybe v javacc ak je pouzity vlastny tokenmanager ale je tam konflikt
         //snazi sa to vypisat meno tokenu a spadne to - null pointer exception
         //ukazuje sa preto vhodne geenerovat vsetky lex. jedntotky aj ked pise, ze ich ignoruje
-        code.format("TOKEN :\n{\n");
-        boolean separator = false;
-        for (Map.Entry<String, String> token : tokens.entrySet()) {
-            printSeparator(code, separator, "| ", "  ");
-            separator = true;
-            code.format("<%s : \"%<s\">\n", Utilities.encodeStringIntoTokenName(token.getKey()));
-        }
-        code.format("}\n\n");
+//        code.format("TOKEN :\n{\n");
+//        boolean separator = false;
+//        for (Map.Entry<String, String> token : tokens.entrySet()) {
+//            printSeparator(code, separator, "| ", "  ");
+//            separator = true;
+//            code.format("<%s : \"%<s\">\n", Utilities.encodeStringIntoTokenName(token.getKey()));
+//        }
+//        code.format("}\n\n");
 
 //        //SKIP definition
 //        if (skips.size() > 0) {

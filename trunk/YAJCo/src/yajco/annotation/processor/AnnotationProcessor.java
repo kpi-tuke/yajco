@@ -389,7 +389,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                     concept.addProperty(property);
                 }
                 //if names of notationPart and referenced property are identical, no need to fill property data to References pattern
-                if (property.getName().toString().equals(paramName)) {
+                if (property.getName().equals(paramName)) {
                     property = null;
                 }
                 part.addPattern(new yajco.model.pattern.impl.References(referencedConcept, property, references));
@@ -421,7 +421,7 @@ public class AnnotationProcessor extends AbstractProcessor {
     private Property findReferencedProperty(VariableElement paramElement, Concept referencedConcept, String proposedName) {
         Element element = paramElement;
         //Go up on tree until you find class element
-        while (!element.getKind().isClass() && element != null) {
+        while (element != null && !element.getKind().isClass()) {
             element = element.getEnclosingElement();
         }
         // Class element found

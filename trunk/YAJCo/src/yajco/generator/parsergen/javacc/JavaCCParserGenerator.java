@@ -3,17 +3,14 @@ package yajco.generator.parsergen.javacc;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.Writer;
 import java.net.URI;
 import java.util.*;
-import java.util.regex.Pattern;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
-import javax.tools.ToolProvider;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import org.javacc.parser.Main;
@@ -75,7 +72,7 @@ public class JavaCCParserGenerator {
         this.language = language;
         this.processingEnv = processingEnvironment;
     }
-    
+
     public JavaCCParserGenerator(ProcessingEnvironment processingEnvironment, Language language, String parserClassName) {
         this.language = language;
         this.processingEnv = processingEnvironment;
@@ -84,16 +81,16 @@ public class JavaCCParserGenerator {
 
     public void generate() throws IOException {
         try {
-            
+
             String parserClassName;
             String parserPackageName;
             String parserJavaCCPackageName;
             String parserMainParserPackageName;
             if (providedParserClassName != null && !providedParserClassName.isEmpty()) {
-                parserClassName = providedParserClassName.substring(providedParserClassName.lastIndexOf(".")+1);
+                parserClassName = providedParserClassName.substring(providedParserClassName.lastIndexOf(".") + 1);
                 parserMainParserPackageName = providedParserClassName.substring(0, providedParserClassName.lastIndexOf("."));
                 parserJavaCCPackageName = parserMainParserPackageName + ".javacc";
-                
+
             } else {
                 parserClassName = PARSER_CLASS_NAME;
                 parserPackageName = language.getName();
@@ -101,17 +98,17 @@ public class JavaCCParserGenerator {
                 parserMainParserPackageName = parserJavaCCPackageName.substring(0, parserJavaCCPackageName.lastIndexOf("."));
             }
 
-            for (TokenDef token : language.getTokens()) {
+            for (TokenDef token : language.getUsedTokens()) {
                 definedTokens.put(token.getName(), token.getRegexp());
             }
 
             Concept concept = language.getConcepts().get(0);
             processMainConcept(concept, 0);
-
-            Model model = new Model(parserJavaCCPackageName, parserClassName != null ? parserClassName.trim() : "",
-                    language.getSkips().toArray(new SkipDef[]{}), definedTokens, new Option[]{}, productions.get(getNonterminal(concept, 0)),
-                    productions.values().toArray(new Production[]{}));
             
+            Model model = new Model(parserJavaCCPackageName, parserClassName != null ? parserClassName.trim() : "",
+                    language.getSkips().toArray(new SkipDef[language.getSkips().size()]), definedTokens, new Option[]{}, productions.get(getNonterminal(concept, 0)),
+                    productions.values().toArray(new Production[productions.values().size()]));
+
             //generate ebnf grammar file
             String ebnfGrammarName = "grammar.ebnf";
             FileObject fo = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, parserJavaCCPackageName, ebnfGrammarName);
@@ -145,7 +142,7 @@ public class JavaCCParserGenerator {
             //generate parser class
             fo = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, parserMainParserPackageName, parserClassName + ".java");
             writer = fo.openWriter();
-            writer.write(generateParserClass(parserClassName, parserMainParserPackageName, parserJavaCCPackageName, language.getName()+"."+language.getConcepts().get(0).getName()));
+            writer.write(generateParserClass(parserClassName, parserMainParserPackageName, parserJavaCCPackageName, language.getName() + "." + language.getConcepts().get(0).getName()));
             writer.flush();
             writer.close();
 
@@ -164,7 +161,6 @@ public class JavaCCParserGenerator {
 //            int compileResult = ToolProvider.getSystemJavaCompiler().run(null, null, null, file.getParentFile().list());
 //            System.out.println(">>COMPILE RESULT: "+compileResult);
         } catch (Throwable e) {
-            e.printStackTrace();
             processingEnv.getMessager().printMessage(Kind.ERROR, e.getMessage());
         }
     }
@@ -178,16 +174,16 @@ public class JavaCCParserGenerator {
         context.put("parserJavaCCPackageName", parserJavaCCPackageName);
         context.put("mainElementName", mainElementName);
 
-        velocityEngine.evaluate(context, writer, "", new InputStreamReader(getClass().getResourceAsStream(JAVACC_PARSER_CLASS_TEMPLATE), "utf-8"));
+        velocityEngine.evaluate(context, writer, "", new InputStreamReader(JavaCCParserGenerator.class.getResourceAsStream(JAVACC_PARSER_CLASS_TEMPLATE), "utf-8"));
 
         return writer.toString();
     }
 
     private String generateTokenManagerClass(String parserClassName, String parserPackageName, String parserJavaCCPackageName, SkipDef[] skips) throws IOException {
-        Map<String,String> orderedDefinedTokens = new LinkedHashMap<String,String>();
-        orderedDefinedTokens.putAll(RegexUtil.filterMap(definedTokens, false));
-        orderedDefinedTokens.putAll(RegexUtil.filterMap(definedTokens, true));
-        
+        Map<String, String> orderedDefinedTokens = new LinkedHashMap<String, String>();
+        orderedDefinedTokens.putAll(RegexUtil.filterMap(definedTokens, false)); // non-cyclic regex
+        orderedDefinedTokens.putAll(RegexUtil.filterMap(definedTokens, true)); // cyclic regex
+
         StringWriter writer = new StringWriter();
 
         VelocityContext context = new VelocityContext();
@@ -237,7 +233,7 @@ public class JavaCCParserGenerator {
     private Expansion processEnumConcept(Concept concept) {
         List<Expansion> expansions = new ArrayList<Expansion>();
         List<Notation> notations = concept.getConcreteSyntax();
-        TokenPart token = null;
+        TokenPart token;
         for (Notation notation : notations) {
             token = (TokenPart) notation.getParts().get(0);
 
@@ -256,7 +252,7 @@ public class JavaCCParserGenerator {
                     null));
         }
 
-        return new Choice(expansions.toArray(new Expansion[]{}));
+        return new Choice(expansions.toArray(new Expansion[expansions.size()]));
     }
 
     private Expansion processAbstractConcept(Concept concept, int paramNumber) {
@@ -264,8 +260,8 @@ public class JavaCCParserGenerator {
         Map<Integer, List<Concept>> priorityMap = findOperatorsInSubconcepts(concept, null);
 
         // Process priority map for abstract concept
-        if (priorityMap != null) {
-            //Add to operator concepts with the lowest priority
+        if (priorityMap != null) { 
+           //Add to operator concepts with the lowest priority
             operatorConcepts.put(concept, priorityMap.keySet());
             processPriorityMap(concept, priorityMap, paramNumber);
         }
@@ -294,13 +290,13 @@ public class JavaCCParserGenerator {
                 "  " + getFullName(concept.getName()) + " _value = null;\n",
                 "return _value;",
                 lookahead,
-                expansions.toArray(new Expansion[]{}));
+                expansions.toArray(new Expansion[expansions.size()]));
     }
 
     private Expansion processConcept(Concept concept) {
         List<Expansion> sequences = new ArrayList<Expansion>();
         List<Notation> alternatives = concept.getConcreteSyntax();
-        
+
 
         int paramNumber = 0;
         for (Notation alternative : alternatives) {
@@ -319,7 +315,7 @@ public class JavaCCParserGenerator {
                 if (separator) {
                     code.append(", ");
                 }
-                code.append(notationPartToName((BindingNotationPart) part) + "_" + paramNumber);
+                code.append(notationPartToName((BindingNotationPart) part)).append("_").append(paramNumber);
                 separator = true;
             }
 
@@ -332,7 +328,7 @@ public class JavaCCParserGenerator {
 
             String referenceResolverAction;
             if (alternative.getPattern(Factory.class) == null) { // je to konstruktor
-                referenceResolverAction = "return yajco.ReferenceResolver.getInstance().register(new " + getFullName(concept.getName()) + "( " + code.toString() + ")"+ argsCode + ");";
+                referenceResolverAction = "return yajco.ReferenceResolver.getInstance().register(new " + getFullName(concept.getName()) + "( " + code.toString() + ")" + argsCode + ");";
             } else { // je to tovarenska metoda
                 Factory factoryPattern = (Factory) alternative.getPattern(Factory.class);
                 String factoryMethodName = factoryPattern.getName();
@@ -342,7 +338,7 @@ public class JavaCCParserGenerator {
             Sequence sequence = new Sequence(
                     null,
                     referenceResolverAction,
-                    expansions.toArray(new Expansion[]{}));
+                    expansions.toArray(new Expansion[expansions.size()]));
             sequences.add(sequence);
         }
 
@@ -380,7 +376,7 @@ public class JavaCCParserGenerator {
         }
 
         //Optional annotation
-        Expansion expansion = new Sequence(expansions.toArray(new Expansion[]{}));
+        Expansion expansion = new Sequence(expansions.toArray(new Expansion[expansions.size()]));
         // TODO: Optional pattern
 //		if (paramElement.getAnnotation(Optional.class) != null) {
 //			expansion = new ZeroOrOne(expansion);
@@ -395,26 +391,26 @@ public class JavaCCParserGenerator {
         String separator = "";
         ComponentType type = (ComponentType) bindingPartToType(bindingPart);
         Type baseComponentType = type.getComponentType();
-        String componentType = null;
+        String componentType;
         boolean isArray = bindingPartToType(bindingPart) instanceof ArrayType;
         boolean isList = bindingPartToType(bindingPart) instanceof ListType;
         boolean isSet = bindingPartToType(bindingPart) instanceof SetType;
-        boolean isPrimitive = false;
+        boolean isPrimitive;
 
-        if (isArray) {
-            isPrimitive = baseComponentType instanceof PrimitiveType;
-            if (isPrimitive) {
-                componentType = primitiveTypeToBoxedTypeString((PrimitiveType) baseComponentType);
-            } else {
-                componentType = typeToString(baseComponentType);
-            }
+//        if (isArray) { // same commands for both - Dominik commented it out
+        isPrimitive = baseComponentType instanceof PrimitiveType;
+        if (isPrimitive) {
+            componentType = primitiveTypeToBoxedTypeString((PrimitiveType) baseComponentType);
         } else {
-            if (baseComponentType instanceof PrimitiveType) {
-                componentType = primitiveTypeToBoxedTypeString((PrimitiveType) baseComponentType);
-            } else {
-                componentType = typeToString(baseComponentType);
-            }
+            componentType = typeToString(baseComponentType);
         }
+//        } else {
+//            if (baseComponentType instanceof PrimitiveType) {
+//                componentType = primitiveTypeToBoxedTypeString((PrimitiveType) baseComponentType);
+//            } else {
+//                componentType = typeToString(baseComponentType);
+//            }
+//        }
 
         if (bindingPart.getPattern(Range.class) != null) {
             Range rangePattern = (Range) bindingPart.getPattern(Range.class);
@@ -428,27 +424,27 @@ public class JavaCCParserGenerator {
         StringBuilder decl = new StringBuilder();
         String variableName = notationPartToName(bindingPart) + "_" + paramNumber;
         if (isArray) {
-            decl.append("  " + typeToString(baseComponentType) + "[] " + variableName + " = null;\n");
+            decl.append("  ").append(typeToString(baseComponentType)).append("[] ").append(variableName).append(" = null;\n");
         } else if (isList) {
-            decl.append("  java.util.List<" + componentType + "> " + variableName + " = null;\n");
+            decl.append("  java.util.List<").append(componentType).append("> ").append(variableName).append(" = null;\n");
         } else {
-            decl.append("  java.util.Set<" + componentType + "> " + variableName + " = null;\n");
+            decl.append("  java.util.Set<").append(componentType).append("> ").append(variableName).append(" = null;\n");
         }
 
         if (isArray || isList) {
-            decl.append("  java.util.List<" + componentType + "> _list" + variableName + " = new java.util.ArrayList<" + componentType + ">();\n");
+            decl.append("  java.util.List<").append(componentType).append("> _list").append(variableName).append(" = new java.util.ArrayList<").append(componentType).append(">();\n");
         } else {
-            decl.append("  java.util.Set<" + componentType + "> _list" + variableName + " = new java.util.HashSet<" + componentType + ">();\n");
+            decl.append("  java.util.Set<").append(componentType).append("> _list").append(variableName).append(" = new java.util.HashSet<").append(componentType).append(">();\n");
         }
         StringBuilder code = new StringBuilder();
-        code.append("_list" + variableName + ".add(_item" + variableName + ");");
+        code.append("_list").append(variableName).append(".add(_item").append(variableName).append(");");
         StringBuilder ccode = new StringBuilder();
         if (isArray && isPrimitive) {
-            ccode.append(variableName + " = new " + typeToString(baseComponentType) + "[_list" + variableName + ".size()]; for (int i = 0; i < _list" + variableName + ".size(); i++) { " + variableName + "[i] = _list" + variableName + ".get(i); }");
+            ccode.append(variableName).append(" = new ").append(typeToString(baseComponentType)).append("[_list").append(variableName).append(".size()]; for (int i = 0; i < _list").append(variableName).append(".size(); i++) { ").append(variableName).append("[i] = _list").append(variableName).append(".get(i); }");
         } else if (isArray && !isPrimitive) {
-            ccode.append(variableName + " = _list" + variableName + ".toArray(new " + componentType + "[] {});");
+            ccode.append(variableName).append(" = _list").append(variableName).append(".toArray(new ").append(componentType).append("[] {});");
         } else {
-            ccode.append(variableName + " = _list" + variableName + ";");
+            ccode.append(variableName).append(" = _list").append(variableName).append(";");
         }
 
         Expansion separatorTerminal = "".equals(separator) ? null : new Terminal(createTerminal(separator));
@@ -457,11 +453,8 @@ public class JavaCCParserGenerator {
         sexpansion.setDecl(null);
 
         //Lookahead
-        // TODO: Lookahead pattern
+        // TODO: Lookahead pattern - WE GENERATE GENERIC LOOKAHEAD, dont need it now
         String lookahead = null;
-//		if (paramElement.getAnnotation(Lookahead.class) != null) {
-//			lookahead = paramElement.getAnnotation(Lookahead.class).value();
-//		}
 
         if (from == 0 && to == Range.INFINITY && !"".equals(separator)) {
             return new ZeroOrOne(
@@ -510,7 +503,7 @@ public class JavaCCParserGenerator {
             return new Sequence(
                     decl.toString(),
                     ccode.toString(),
-                    expansions.toArray(new Expansion[]{}));
+                    expansions.toArray(new Expansion[expansions.size()]));
         }
     }
 
@@ -625,13 +618,13 @@ public class JavaCCParserGenerator {
                             associativity = Associativity.LEFT;
                         }
                     } /* else {
-                    if (associativity == Associativity.RIGHT && prefixed) {
-                    throw new GeneratorException("Nary right-associative operator of type " + subclassElement + " should not be prefixed");
-                    }
-                    if (associativity == Associativity.LEFT && postfixed) {
-                    throw new GeneratorException("N-ary left-associative operator of type " + subclassElement + " should not be postfixed");
-                    }
-                    } */
+                     if (associativity == Associativity.RIGHT && prefixed) {
+                     throw new GeneratorException("Nary right-associative operator of type " + subclassElement + " should not be prefixed");
+                     }
+                     if (associativity == Associativity.LEFT && postfixed) {
+                     throw new GeneratorException("N-ary left-associative operator of type " + subclassElement + " should not be postfixed");
+                     }
+                     } */
                 }
 
             }
@@ -644,7 +637,7 @@ public class JavaCCParserGenerator {
             //Declarations
             StringBuilder decl = new StringBuilder();
             for (int i = 1; i <= arity; i++) {
-                decl.append("  " + getFullName(operatorConcept.getName()) + " _node" + i + " = null;\n");
+                decl.append("  ").append(getFullName(operatorConcept.getName())).append(" _node").append(i).append(" = null;\n");
             }
 
             String highestPriorityNonterminal = getNonterminal(operatorConcept, paramNumber);
@@ -714,7 +707,7 @@ public class JavaCCParserGenerator {
                 List<Expansion> sExpansions = new ArrayList<Expansion>();
                 type++;
                 StringBuilder params = new StringBuilder();
-                code.append("case " + type + ": _node1 = yajco.ReferenceResolver.getInstance().register(new " + getFullName(subconcept.getName()) + "(");
+                code.append("case ").append(type).append(": _node1 = yajco.ReferenceResolver.getInstance().register(new ").append(getFullName(subconcept.getName())).append("(");
                 boolean separator = false;
                 int index = 0;
                 List<NotationPart> notationParts = subconcept.getConcreteSyntax().get(0).getParts();
@@ -734,9 +727,9 @@ public class JavaCCParserGenerator {
                         index++;
                         // pridajme pretipovanie, ak je nutne
                         if (isSameConcept(operatorConcept, bindingPartToConcept((BindingNotationPart) notationPart))) {
-                            params.append("_node" + index);
+                            params.append("_node").append(index);
                         } else {
-                            params.append("(" + getFullName(bindingPartToConcept((BindingNotationPart) notationPart).getName()) + ")" + "_node" + index);
+                            params.append("(").append(getFullName(bindingPartToConcept((BindingNotationPart) notationPart).getName())).append(")" + "_node").append(index);
                         }
                     } else {
                         sExpansions.add(processBindingNotation((BindingNotationPart) notationPart, paramNumber));
@@ -744,10 +737,10 @@ public class JavaCCParserGenerator {
                     }
                 }
 
-                code.append(params + "), (Object)" + params);
+                code.append(params).append("), (Object)").append(params);
                 code.append("); break; ");
 
-                oExpansions.add(new Sequence(null, "_type = " + type + ";", sExpansions.toArray(new Expansion[]{})));
+                oExpansions.add(new Sequence(null, "_type = " + type + ";", sExpansions.toArray(new Expansion[sExpansions.size()])));
             }
         }
 
@@ -776,7 +769,7 @@ public class JavaCCParserGenerator {
                 List<Expansion> sExpansions = new ArrayList<Expansion>();
                 StringBuilder code = new StringBuilder();
                 StringBuilder params = new StringBuilder();
-                code.append("_node1 = yajco.ReferenceResolver.getInstance().register(new " + getFullName(subconcept.getName()) + "(");
+                code.append("_node1 = yajco.ReferenceResolver.getInstance().register(new ").append(getFullName(subconcept.getName())).append("(");
                 boolean separator = false;
                 int index = 0;
                 List<NotationPart> notationParts = subconcept.getConcreteSyntax().get(0).getParts();
@@ -787,7 +780,7 @@ public class JavaCCParserGenerator {
                         sExpansions.add(new Terminal(createTerminal(((TokenPart) notationPart).getToken())));
                         continue;
                     }
-                    
+
                     j++;
                     if (separator) {
                         params.append(", ");
@@ -797,15 +790,15 @@ public class JavaCCParserGenerator {
                     if (isOperatorType(operatorConcept, notationPart)) {
                         //TODO: Spracovat ak je to subclass a nie priamo trieda operatora
 						/*if (!isSameOperatorType(classElement, paramElement)) {
-                        //						System.out.println("------>> Postfix - spracuvavam triedu: " + getTypeElementFrom(paramElement.asType()));
-                        processTypeElement(getTypeElementFrom(paramElement.asType()));
-                        }*/
+                         //						System.out.println("------>> Postfix - spracuvavam triedu: " + getTypeElementFrom(paramElement.asType()));
+                         processTypeElement(getTypeElementFrom(paramElement.asType()));
+                         }*/
                         //System.out.println(">>>>>>>>>>>>>>>> " + paramElement.asType());
                         index++;
-                        
+
                         // Dominik: neiste riesenie problemu vytvarania napr. A ( A + A )*  ma byt  A ( + A ) *
                         // len to vrchne if(!=0) je moje
-                        if (i!=0) {
+                        if (i != 0) {
                             if (j == bindingNotationParts.size() && !hasPostfix(operatorConcept, subconcept.getConcreteSyntax().get(0))) {
                                 sExpansions.add(new NonTerminal(nonterminal, "_node" + index));
                             } else {
@@ -815,9 +808,9 @@ public class JavaCCParserGenerator {
 
                         // add type casting if necessary
                         if (isSameConcept(operatorConcept, bindingPartToConcept((BindingNotationPart) notationPart))) {
-                            params.append("_node" + index);
+                            params.append("_node").append(index);
                         } else {
-                            params.append("(" + getFullName(bindingPartToConcept((BindingNotationPart) notationPart).getName()) + ")" + "_node" + index);
+                            params.append("(").append(getFullName(bindingPartToConcept((BindingNotationPart) notationPart).getName())).append(")" + "_node").append(index);
                             //params.append("(" + getFullName(notationPartToName(notationPart)) + ")" + "_node" + index);
                         }
                     } else {
@@ -826,9 +819,9 @@ public class JavaCCParserGenerator {
                     }
                 }
 
-                code.append(params + "), (Object)" + params);
+                code.append(params).append("), (Object)").append(params);
                 code.append(");");
-                oExpansions.add(new Sequence(null, code.toString(), sExpansions.toArray(new Expansion[]{})));
+                oExpansions.add(new Sequence(null, code.toString(), sExpansions.toArray(new Expansion[sExpansions.size()])));
             }
         }
 
@@ -886,25 +879,18 @@ public class JavaCCParserGenerator {
     }
 
     private Terminal generateTeminal(BindingNotationPart bindingPart, String type, String variableName, String code) {
-        String token = "";
-        // TODO: Token pattern
-//		if (paramElement.getAnnotation(Token.class) != null) {
-//			token = paramElement.getAnnotation(Token.class).value();
-//		}
-        if ("".equals(token)) {
-            String partName = notationPartToName(bindingPart);
-            token = toUpperCaseNotation(partName);
-            if (!definedTokens.containsValue(token) && partName.endsWith("s")) {
-                token = toUpperCaseNotation(partName.substring(0, partName.length() - 1));
-            }
+        String partName = notationPartToName(bindingPart);
+        String token = toUpperCaseNotation(partName);
+        if (!definedTokens.containsValue(token) && partName.endsWith("s")) {
+            token = toUpperCaseNotation(partName.substring(0, partName.length() - 1));
         }
 
         if (stringConversions.containsConversion(type)) {
             String conversion = stringConversions.getConversion(type);
             String defaultValue = stringConversions.getDefaultValue(type);
             Formatter decl = new Formatter();
-            decl.format("  %s %s = %s;\n", type, variableName, defaultValue);
-            decl.format("  Token _token%s = null;\n", variableName);
+            decl.format("  %s %s = %s;%n", type, variableName, defaultValue);
+            decl.format("  Token _token%s = null;%n", variableName);
 
             Formatter codet = new Formatter();
             codet.format("%s = ", variableName);
@@ -915,7 +901,7 @@ public class JavaCCParserGenerator {
             return new Terminal(decl.toString(), codet.toString(), token, "_token" + variableName);
         } else {
             throw new GeneratorException("Unsuported parameter '" + notationPartToName(bindingPart) + " : " + type +/*
-                    "' in element '" + paramElement.getEnclosingElement().getEnclosingElement() + */ "'");
+                     "' in element '" + paramElement.getEnclosingElement().getEnclosingElement() + */ "'");
         }
     }
 
@@ -1067,7 +1053,7 @@ public class JavaCCParserGenerator {
     }
 
     private boolean isAbstractConcept(Concept concept) {
-        return concept.getAbstractSyntax().size() == 0 && concept.getConcreteSyntax().size() == 0;
+        return concept.getAbstractSyntax().isEmpty() && concept.getConcreteSyntax().isEmpty();
     }
 
     private List<BindingNotationPart> getBindingNotationParts(Notation notation) {

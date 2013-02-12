@@ -297,7 +297,7 @@ public class Utilities {
 		}
 		Collections.sort(localList);
 		for (ValuedObject<Notation> valuedObject : localList) {
-			list.add(new Integer(concept.getConcreteSyntax().indexOf(valuedObject.object)));
+			list.add(Integer.valueOf(concept.getConcreteSyntax().indexOf(valuedObject.object)));
 		}
 		return list;
 	}
@@ -354,7 +354,7 @@ public class Utilities {
         return str.toString();
     }
 
-    private static Jalopy getJalopy() {
+    private synchronized static Jalopy getJalopy() {
         if (jalopy == null) {
             jalopy = new Jalopy();
         }

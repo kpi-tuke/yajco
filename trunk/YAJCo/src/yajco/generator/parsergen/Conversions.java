@@ -27,13 +27,13 @@ public class Conversions {
 		Properties properties = new Properties();
 		try {
 			String propertiesFile = System.getProperty(PROPERTIES_FILE_PROPERTY, PROPERTIES_FILE);
-			properties.load(getClass().getResourceAsStream(propertiesFile));
+                        properties.load(Conversion.class.getResourceAsStream(propertiesFile));
 			for (String type : properties.stringPropertyNames()) {
 				putConversion(new Conversion(type, properties.getProperty(type)));
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
-			new GeneratorException("Cannot load " + PROPERTIES_FILE, e);
+			//e.printStackTrace();
+			throw new GeneratorException("Cannot load " + PROPERTIES_FILE, e);
 		}
 	}
 

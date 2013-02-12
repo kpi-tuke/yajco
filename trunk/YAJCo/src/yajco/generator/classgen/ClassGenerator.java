@@ -53,6 +53,8 @@ public class ClassGenerator implements FilesGenerator {
     public void generateFiles(Language language, File directory) {
         if (directory == null || !directory.isDirectory()) {
             throw new GeneratorException("Supplied parameter is not directory.");
+        } else if (language == null) {
+            throw new GeneratorException("Parameter language is NULL.");
         }
         actualLanguage = language;
 
