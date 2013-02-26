@@ -4,11 +4,11 @@
     <parent>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco</artifactId>
-        <version>0.5-SNAPSHOT</version>
+        <version>0.5</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-modules</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5</version>
     <name>yajco-modules</name>
     <packaging>pom</packaging>
     <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - modules subproject</description>
@@ -32,8 +32,8 @@
         </developer>
     </developers>
     <scm>
-        <url>http://yajco.googlecode.com/svn/trunk/</url>
-        <connection>scm:svn:http://yajco.googlecode.com/svn/trunk/</connection>
+        <url>http://yajco.googlecode.com/svn/tags/yajco-0.5/trunk</url>
+        <connection>scm:svn:http://yajco.googlecode.com/svn/tags/yajco-0.5/trunk</connection>
     </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
