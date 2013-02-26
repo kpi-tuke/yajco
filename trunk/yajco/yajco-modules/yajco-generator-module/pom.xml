@@ -4,11 +4,11 @@
     <parent>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco-modules</artifactId>
-        <version>0.5.1-SNAPSHOT</version>
+        <version>0.5-SNAPSHOT</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-generator-module</artifactId>
-    <version>0.5.1-SNAPSHOT</version>
+    <version>0.5-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>yajco-generator-module</name>
     <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - generator module with interfaces</description>
@@ -44,10 +44,6 @@
             <groupId>${project.groupId}</groupId>
             <artifactId>yajco-model</artifactId>
             <version>${project.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
         </dependency>
         <dependency>
             <groupId>jalopy</groupId>

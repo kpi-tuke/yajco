@@ -4,11 +4,11 @@
     <parent>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco-prototype-modules</artifactId>
-        <version>0.5.1-SNAPSHOT</version>
+        <version>0.5-SNAPSHOT</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-lisa-parser-generator-module</artifactId>
-    <version>0.1.1-SNAPSHOT</version>
+    <version>0.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>yajco-lisa-parser-generator-module</name>
     <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - LISA parser generator</description>
@@ -34,25 +34,21 @@
     <scm>
         <url>http://yajco.googlecode.com/svn/trunk/</url>
         <connection>scm:svn:http://yajco.googlecode.com/svn/trunk/</connection>
-      <developerConnection>scm:svn:https://yajco.googlecode.com/svn/trunk/yajco-prototype-modules/yajco-lisa-parser-generator-module/</developerConnection>
-  </scm>
+        <developerConnection>scm:svn:https://yajco.googlecode.com/svn/trunk/yajco-prototype-modules/yajco-lisa-parser-generator-module/</developerConnection>
+    </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>yajco-generator-module</artifactId>
-            <version>0.5.1-SNAPSHOT</version>
+            <version>0.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>yajco-grammar-module</artifactId>
-            <version>0.5.1-SNAPSHOT</version>
+            <version>0.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.apache.velocity</groupId>
@@ -62,6 +58,37 @@
             <groupId>lisa</groupId>
             <artifactId>lisa</artifactId>
             <version>2.1</version>
+            <scope>system</scope>
+            <systemPath>${project.basedir}/lib/Lisa.jar</systemPath>
         </dependency>
     </dependencies>
+    <build>
+        <plugins>
+            <!--            <plugin>
+                <artifactId>maven-assembly-plugin</artifactId>
+                <version>2.3</version>
+                <executions>
+                    <execution>
+                        <id>create-executable-jar</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>single</goal>
+                        </goals>
+                        <configuration>
+                            <descriptorRefs>
+                                <descriptorRef>
+                                    jar-with-dependencies
+                                </descriptorRef>
+                            </descriptorRefs>
+                            <archive>
+                                <manifest>
+                                    <mainClass>yajco.Main</mainClass>
+                                </manifest>
+                            </archive>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>-->
+        </plugins>
+    </build>
 </project>
