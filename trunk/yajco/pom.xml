@@ -4,7 +4,7 @@
 
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco</artifactId>
-    <version>0.5</version>
+    <version>0.5.1-SNAPSHOT</version>
     <packaging>pom</packaging>
     
     <parent>
@@ -35,9 +35,9 @@
         </developer>
     </developers>
     <scm>
-        <url>http://yajco.googlecode.com/svn/tags/yajco-0.5</url>
-        <connection>scm:svn:http://yajco.googlecode.com/svn/tags/yajco-0.5</connection>
-        <developerConnection>scm:svn:https://yajco.googlecode.com/svn/tags/yajco-0.5</developerConnection>
+        <url>http://yajco.googlecode.com/svn/trunk/</url>
+        <connection>scm:svn:http://yajco.googlecode.com/svn/trunk/</connection>
+        <developerConnection>scm:svn:https://yajco.googlecode.com/svn/trunk/</developerConnection>
     </scm>
 
     <properties>

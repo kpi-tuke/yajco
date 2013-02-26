@@ -4,11 +4,11 @@
     <parent>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco</artifactId>
-        <version>0.5</version>
+        <version>0.5.1-SNAPSHOT</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-annotations</artifactId>
-    <version>0.5</version>
+    <version>0.5.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>yajco-annotations</name>
     <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - annotations module</description>
@@ -32,9 +32,10 @@
         </developer>
     </developers>
     <scm>
-        <url>http://yajco.googlecode.com/svn/tags/yajco-0.5/trunk</url>
-        <connection>scm:svn:http://yajco.googlecode.com/svn/tags/yajco-0.5/trunk</connection>
-    </scm>
+        <url>http://yajco.googlecode.com/svn/trunk/</url>
+        <connection>scm:svn:http://yajco.googlecode.com/svn/trunk/</connection>
+      <developerConnection>scm:svn:https://yajco.googlecode.com/svn/trunk/yajco-annotations/</developerConnection>
+  </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
