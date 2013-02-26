@@ -5,11 +5,11 @@
     <parent>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco</artifactId>
-        <version>0.5</version>
+        <version>0.5-SNAPSHOT</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-annotation-processor</artifactId>
-    <version>0.5</version>
+    <version>0.5-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>yajco-annotation-processor</name>
     

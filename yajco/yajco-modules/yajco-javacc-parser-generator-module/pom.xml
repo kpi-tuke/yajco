@@ -5,11 +5,11 @@
     <parent>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco-modules</artifactId>
-        <version>0.5</version>
+        <version>0.5-SNAPSHOT</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-javacc-parser-generator-module</artifactId>
-    <version>0.5</version>
+    <version>0.5-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>yajco-javacc-parser-generator-module</name>
     <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - javacc parser generator</description>

@@ -5,11 +5,11 @@
     <parent>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco</artifactId>
-        <version>0.5</version>
+        <version>0.5-SNAPSHOT</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-model</artifactId>
-    <version>0.5</version>
+    <version>0.5-SNAPSHOT</version>
     <name>yajco-model</name>
     <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - basic language representation model</description>
     <licenses>

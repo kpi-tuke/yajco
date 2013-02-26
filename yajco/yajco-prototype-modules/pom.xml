@@ -4,11 +4,11 @@
     <parent>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco</artifactId>
-        <version>0.5</version>
+        <version>0.5-SNAPSHOT</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-prototype-modules</artifactId>
-    <version>0.5</version>
+    <version>0.5-SNAPSHOT</version>
     <name>yajco-prototype-modules</name>
     <packaging>pom</packaging>
         <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - subpackage for testing not completed modules</description>
