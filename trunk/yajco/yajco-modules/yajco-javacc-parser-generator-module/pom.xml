@@ -1,15 +1,14 @@
 <?xml version="1.0"?>
-<project xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd" xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco-modules</artifactId>
-        <version>0.5-SNAPSHOT</version>
+        <version>0.5</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-javacc-parser-generator-module</artifactId>
-    <version>0.5-SNAPSHOT</version>
+    <version>0.5</version>
     <packaging>jar</packaging>
     <name>yajco-javacc-parser-generator-module</name>
     <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - javacc parser generator</description>
@@ -33,8 +32,8 @@
         </developer>
     </developers>
     <scm>
-        <url>http://yajco.googlecode.com/svn/trunk/</url>
-        <connection>scm:svn:http://yajco.googlecode.com/svn/trunk/</connection>
+        <url>http://yajco.googlecode.com/svn/tags/yajco-0.5/svn/trunk</url>
+        <connection>scm:svn:http://yajco.googlecode.com/svn/tags/yajco-0.5/svn/trunk</connection>
     </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
