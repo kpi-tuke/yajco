@@ -4,11 +4,11 @@
     <parent>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco-modules</artifactId>
-        <version>0.5.1-SNAPSHOT</version>
+        <version>0.5-SNAPSHOT</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-javacc-parser-generator-module</artifactId>
-    <version>0.5.1-SNAPSHOT</version>
+    <version>0.5-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>yajco-javacc-parser-generator-module</name>
     <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - javacc parser generator</description>
@@ -40,10 +40,6 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
     <dependencies>
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>yajco-generator-module</artifactId>

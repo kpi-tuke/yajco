@@ -4,11 +4,11 @@
     <parent>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco-prototype-modules</artifactId>
-        <version>0.5.1-SNAPSHOT</version>
+        <version>0.5-SNAPSHOT</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-aspectj-reference-registrator-generator-module</artifactId>
-    <version>0.3-SNAPSHOT</version>
+    <version>0.2-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>yajco-aspectj-reference-registrator-generator-module</name>
     <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - registration of entities with AspectJ</description>
@@ -41,13 +41,9 @@
     </properties>
     <dependencies>
         <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-        </dependency>
-        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>yajco-generator-module</artifactId>
-            <version>0.5.1-SNAPSHOT</version>
+            <version>0.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
