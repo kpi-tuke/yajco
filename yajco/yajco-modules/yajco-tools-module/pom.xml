@@ -4,11 +4,11 @@
     <parent>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco-modules</artifactId>
-        <version>0.5</version>
+        <version>0.5.1-SNAPSHOT</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-tools-module</artifactId>
-    <version>0.5</version>
+    <version>0.5.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>yajco-tools-module</name>
     <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - yajco helper tools</description>
@@ -32,9 +32,10 @@
         </developer>
     </developers>
     <scm>
-        <url>http://yajco.googlecode.com/svn/tags/yajco-0.5/svn/trunk</url>
-        <connection>scm:svn:http://yajco.googlecode.com/svn/tags/yajco-0.5/svn/trunk</connection>
-    </scm>
+        <url>http://yajco.googlecode.com/svn/trunk/</url>
+        <connection>scm:svn:http://yajco.googlecode.com/svn/trunk/</connection>
+      <developerConnection>scm:svn:https://yajco.googlecode.com/svn/trunk/yajco-modules/yajco-tools-module/</developerConnection>
+  </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
