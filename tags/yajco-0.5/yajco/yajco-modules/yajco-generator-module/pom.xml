@@ -1,0 +1,53 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>sk.tuke.yajco</groupId>
+        <artifactId>yajco-modules</artifactId>
+        <version>0.5</version>
+    </parent>
+    <groupId>sk.tuke.yajco</groupId>
+    <artifactId>yajco-generator-module</artifactId>
+    <version>0.5</version>
+    <packaging>jar</packaging>
+    <name>yajco-generator-module</name>
+    <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - generator module with interfaces</description>
+    <licenses>
+        <license>
+            <name>GNU General Public License (GPL) v3</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+        </license>
+    </licenses>
+    <url>http://code.google.com/p/yajco/</url>
+    <developers>
+        <developer>
+            <name>Jaroslav Porubän</name>
+            <email>jaroslav.poruban@tuke.sk</email>
+            <organization>Technical University of Košice</organization>
+        </developer>
+        <developer>
+            <name>Dominik Lakatoš</name>
+            <email>deel77@gmail.com</email>
+            <organization>Technical University of Košice</organization>
+        </developer>
+    </developers>
+    <scm>
+        <url>http://yajco.googlecode.com/svn/tags/yajco-0.5/svn/trunk</url>
+        <connection>scm:svn:http://yajco.googlecode.com/svn/tags/yajco-0.5/svn/trunk</connection>
+      <developerConnection>scm:svn:https://yajco.googlecode.com/svn/tags/yajco-0.5/yajco-modules/yajco-generator-module</developerConnection>
+  </scm>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>yajco-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>jalopy</groupId>
+            <artifactId>jalopy</artifactId>
+        </dependency>
+    </dependencies>
+</project>
