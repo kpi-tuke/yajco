@@ -26,8 +26,8 @@ public class YajcoParserScanner extends Scanner {
 		tokens.put(Terminals.SYMBOLSEPARATOR, Pattern.compile("Separator"));
 		tokens.put(Terminals.SYMBOLPROPERTY, Pattern.compile("property"));
 		tokens.put(Terminals.SYMBOL_58, Pattern.compile("[:]"));
-		tokens.put(Terminals.SYMBOLOPERATOR, Pattern.compile("Operator"));
 		tokens.put(Terminals.SYMBOL_46__46, Pattern.compile("[.][.]"));
+		tokens.put(Terminals.SYMBOLOPERATOR, Pattern.compile("Operator"));
 		tokens.put(Terminals.SYMBOLPRIORITY, Pattern.compile("priority"));
 		tokens.put(Terminals.SYMBOLCS, Pattern.compile("CS"));
 		tokens.put(Terminals.SYMBOLNONE, Pattern.compile("NONE"));
@@ -67,7 +67,7 @@ public class YajcoParserScanner extends Scanner {
 		tokens.put(Terminals.STRING, Pattern.compile("string"));
 		tokens.put(Terminals.NAME, Pattern.compile("(?:[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*)|\\[([a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*)\\]"));
 		tokens.put(Terminals.INT_VALUE, Pattern.compile("[0-9]+"));
-		tokens.put(Terminals.STRING_VALUE, Pattern.compile("\"([^\"]*)\""));
+		tokens.put(Terminals.STRING_VALUE, Pattern.compile("\"((?:[^\"\\\\]|\\.)*)\""));
 
 		skips.add(Pattern.compile(" "));
 		skips.add(Pattern.compile("\\t"));
