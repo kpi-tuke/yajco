@@ -33,7 +33,7 @@ import yajco.model.type.Type;
 import yajco.printer.Printer;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
-@SupportedAnnotationTypes("yajco.annotation.config.Parser")
+@SupportedAnnotationTypes({"yajco.annotation.config.Parser","yajco.annotation.Exclude"})
 //TODO - anotacia @Optional nie je funkcna, malo by generovat vyskytu @Optional generovat vsetky moznosti v pripade
 //Ak pocet pouziti @Optional je x, potom pocet moznosti je: (x nad 0)+(x nad 1)+...+(x nad x-1)+(x nad x)
 // (x nad y) = ( x! / ( (x-y)! * y! ) )
@@ -59,6 +59,8 @@ public class AnnotationProcessor extends AbstractProcessor {
      */
     private RoundEnvironment roundEnv;
     private Properties properties;
+    
+    private Set<String> excludes = new HashSet<String>();
     /**
      * Builded language.
      */
@@ -68,6 +70,23 @@ public class AnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        
+        Iterator<? extends TypeElement> iterator = annotations.iterator();
+        
+        while(iterator.hasNext()) {
+            TypeElement typeElement = iterator.next();
+            if (typeElement.getQualifiedName().contentEquals(yajco.annotation.Exclude.class.getName())) {
+                iterator.remove(); // leave only Parser annotation for later processing
+            }
+        }
+        for (Element element : roundEnv.getElementsAnnotatedWith(yajco.annotation.Exclude.class)) {
+            Exclude exclude = element.getAnnotation(yajco.annotation.Exclude.class);
+            excludes.addAll(Arrays.asList(exclude.concept()));
+        }
+
+        for (String string : excludes) {
+            System.out.println("====exclude---> " + string);
+        }
 
         properties = new Properties();
         // disable class generating - annotation processor works on classes, don't generate new ones
@@ -85,6 +104,7 @@ public class AnnotationProcessor extends AbstractProcessor {
         }
         
         if ("false".equalsIgnoreCase(properties.getProperty("yajco"))) {
+            logger.info("Property 'yajco' set to false - terminating YAJCo tool !");
             return false;
         }
 
@@ -209,7 +229,11 @@ public class AnnotationProcessor extends AbstractProcessor {
             }
         } catch (Throwable e) {
             //e.printStackTrace();
-            processingEnv.getMessager().printMessage(Kind.ERROR, e.getMessage());
+            // asi CHYBA v MAVEN ze nevie dostat Messager
+            //processingEnv.getMessager().printMessage(Kind.ERROR, e.getMessage());
+            
+            logger.error(e.getMessage(),e);
+            throw new RuntimeException(e);
 
         }
         return false;
@@ -222,6 +246,11 @@ public class AnnotationProcessor extends AbstractProcessor {
     private Concept processTypeElement(TypeElement typeElement, Concept superConcept) {
         //String name = typeElement.getSimpleName().toString();
         String name = typeElement.getQualifiedName().toString();
+        //System.out.println("---->>> Name: "+name);
+        if (excludes.contains(name)) {
+            //System.out.println("---->> NACHADZA SA V EXCLUDE TAK HO RUSIM !!!!");
+            return null;
+        }
         if (language.getName() != null && !language.getName().isEmpty() && name.startsWith(language.getName())) {
             name = name.substring(language.getName().length() + 1); // +1 because of dot after package name '.'
         }
@@ -569,7 +598,8 @@ public class AnnotationProcessor extends AbstractProcessor {
      * @return true if superElement is the direct super class of the element.
      */
     private boolean isDirectSubtype(TypeElement superElement, Element element) {
-        if (element.getAnnotation(Exclude.class) == null) {
+        Exclude excludeAnnotation = element.getAnnotation(Exclude.class);
+        if (excludeAnnotation == null || excludeAnnotation.concept().length > 0) {
             if (element.getKind().isClass() || element.getKind().isInterface()) {
                 TypeMirror superType = superElement.asType();
                 TypeElement typeElement = (TypeElement) element;
