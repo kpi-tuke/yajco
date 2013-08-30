@@ -83,8 +83,20 @@ public class ParserHelper {
     
     public Language parseAndGenerate(String destinationDir, boolean generateCompiler) {
         Language language = parse();
-        System.out.println("Properties: "+properties);
-        
+        generate(destinationDir, language, generateCompiler);
+        return language;
+    }
+    
+    public void generate(Language language) {
+        generate(null, language, true);
+    }
+    
+    public void generate(String destinationDir, Language language) {
+        generate(destinationDir, language, true);
+    }
+    
+    public void generate(String destinationDir, Language language, boolean generateCompiler) {
+        //System.out.println("Properties: "+properties);
         Filer filer = new MySimpleFiler(destinationDir);
 
         if (generateCompiler) {
@@ -98,11 +110,9 @@ public class ParserHelper {
         for (FilesGenerator filesGenerator : filesGenerators) {
             filesGenerator.generateFiles(language, filer, properties);
         }
-
-        return language;
     }
 
-    class MySimpleFiler implements Filer {
+    public class MySimpleFiler implements Filer {
         
         String parentDir = null;
 

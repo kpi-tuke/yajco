@@ -62,46 +62,46 @@ public class YajcoParser extends Parser {
 	}
 
 	static final ParsingTables PARSING_TABLES = new ParsingTables(
-		"U9ozbWTq5KKKXlzDGaW2A291f8X8LP5YAA7dHK8FI0jWH4GK0QM8NL6m5wpOiI0A8eXOG3h" +
-		"Ix5sm5q0HkzYmb#ktao5ibdZ4OzbtljlcpftPtPbz8mMJr43xQgdsLsqTe3gggtggJwoHck" +
-		"XGDTI1EaW7s$VAK8sICJKcgsIl3FLKjrXMirsoQjbjMXxBQgxaMDPPwguUwgAkEbjjr8egl" +
-		"PGQooaJgrAopwIOVqVCdn7pPyVykJ5$GSnV5F5Ru$THNwNeKKrKF$NN01Lee0RfJ5NMNXgc" +
-		"5Xgh96Lgi8Pej4vpJsgOBYTw0JrsHFlg75scMqjKQ5iyIdbLqhsgg9gwN$TfFqtMUJfVr#i" +
-		"6tQYRD9sMkwYu1nMBMfQuKTAek4ItQB7MgftorH6hWqOfHwThWevrEJSxUPkkviraEdkYax" +
-		"Dq2bQc5cecQoJXOW$g8QTTddsdPPglrIghTDv$ELNGdjf7UqCLLLDLLTSXQafBbbegM#rrc" +
-		"7ALfqxghDuwN8KwGaVgA0tLqJf6mtMSZjS8ZTI96gypT8B6Q9nEraawLUVI#q9Tf4iqHHVh" +
-		"KatL5RfELzgZkifMwbfReMjikQOnxkratWbtOz#3dWFpz03UmrYFm0gjr2hclOOv1woj9FV" +
-		"#sl9qslDaEX8hpttimPrKvDrLahYVZ5Yi5LabU#rD9Ealinfpp$7wksOruParOsLdiJDQyE" +
-		"J2MTQ8vUJ6giJx$Bz#1gkqEhzizcduPiFTq8ze3bHbfrPZZwQnSlTJBNPn#AIgyaQgyUt9B" +
-		"evs9wysFQ8LTewIp4ugmxePICLqraqFrb##s$UDM6DXIsKgfbEng2NXHkb4nGGjNR7IgP61" +
-		"LS0#7OINoOp2d1GdopYlA9Bj8$Mnqj0vU0rSB0Slr4LvOXzKviqSnXZX#mzOsm6Z1FGBH#l" +
-		"FBgX2InNiikpeXdp30dP92grT63yLAzND88pNzMtXTwABRqlXIvVYUeTvISWq$C5y1LDSRg" +
-		"RNTLnMu3ABs6ddbV3AKIMNUOTpbjPDbhkkW5oOultMNeTNfI8xg8TOZwwFtkJRPtkzbdW3Q" +
-		"8Wz7tsGxtEmSQ7h#hoCKFyJg5KDaUxjweWQtgw9QEBjPWZc6pH6B$DZVx6pXhR5QXuAUq8J" +
-		"o8PMVpw#jaDVShAyFsqtvjmQ3eHstcyBET3H#nsW4yOFw0EWFNI6l4YDBj0Lkdk$6xI4HZY" +
-		"Ve7lwUA$OV6ULCf$34U5xoO$5UqD$w0C3e23I5jvp6#W7FGZyZcOD1GEn5w47#xn26093OP" +
-		"YF3OSH4Dh70NidE0QEXpGu5aR1YP0E9q0v60bZ81D6#$jv2Ri2Z8UJeJ9CW7rX79m2DU2aK" +
-		"kvxB9mHyLEzvYiVr0fjbkl6oBCBrzVhi1dcmPRItw#smDHORBpNstV4gFsCZxqDvvTMw#z2" +
-		"pQqH#yV8#EKYjjyZ6klr3A$VWvd$P7okcbv$3uN$nZtz5$1#oo0c$iazjFmNnqdwwnnT5h4" +
-		"xHEpE4Nj3nEuLiGlyE8SWfaVYRqJieoBsYDsOS$XzoYhQtvpltFT7w#GlOyVPwywQ3hJR4k" +
-		"DBPJ$QWoww53vprdQx2$cjtMtFsJBMu#$sc$rglzZFzfDzRK$Q4$QuFUOoFt7o8oTlT$9#U" +
-		"DfMsJhx7EiBMssRLNpPJ9jXTzhpTg$DjbduxzWpo7VjMVlGjje7jiNUj$ViLPVxck#pHYKk" +
-		"Uz5UyDQSI7G3hBUFNRrxRAqzPP#w#5pxohwqRVPMSUQRzhPskMnJiRNHoOLEpdFoOISVS7A" +
-		"naulSarlWxFkSVCJ9#VQ6tM7VsClEUsNdC#SQxiw8EsWDRIBayO#UHrOX$#w5d4#o#P$Fvg" +
-		"JGbRQsq3d207BvhdEEIOQ0isGofwo04sKovw#WL0eWdvDJFZMREP8vOGMSiq9IEKaa0MjKA" +
-		"H1mjaZc$p7LaUjE6#8ybmOfdEG2Jd01vviaOD#H6vvlsyLeGNiBT6$wD7S4d7fASWGac5U2" +
-		"zWJr4znxWlDDWkTGP8SwAUA7EHLydpId#z0tYpeXJR6ReWSnx$xqut#GysVWwEJEaW7dxcG" +
-		"T#GTPNqOr");
+		"U9ozbmTq5KKKXl$tyaX8Oa4WY114kdGG0Y509A44wOAX1GL1iD7iYXqhWWqxqei8KaIA65I" +
+		"QlLSiA23sNX4hupVpXh1Po17qwBxptRPtxipEpcmcKkHoLTFXUaH7gggEKYrLLmtL95PRTT" +
+		"L0ZTL4JNMC#LafgbGyfgF9AjugHLrqN2Yh$bvPLSnKhGbbDL92AEj2vQcpEggJBbAcCgZIJ" +
+		"OcXd5AXAiNRN1hoPuNykI5$OSXV7F8V3Fch0dvB$9xgfPWUrpWThzxgenEKhxwwG6Lrg0Qh" +
+		"cKvJLENKJsUfG6FTJ0tMTKIlfCNkQ2zTh3irlLY5LaMztAKoMg93L5dtwY2bwp9ThYjqgoR" +
+		"hDjsk1xYpZ8htK35#PxNhfJGLLskU7jO6PQchscArqL1bwpoDr32NSuSAbQJPcgGPpY$dvF" +
+		"sCRBItnscgZjLyPrkMQuNFN6Dsi7wIbQg3bQR3eBoEK0KrLslbgABgg9vQi3PIr4xjbQk6w" +
+		"guEMgSUwg#16g0JDKX3T99ErWYTgjCrN6TebCRe79shitM#Bj4fj3zJutMLhj7LkbxNQe9k" +
+		"q8swMRUOnyrZcgYRpADcZUxM57gVHlPCpS6wJuzg0TuYhTLIz4EG1eLQYNnCwnbrX7SNPOw" +
+		"p66qRvYQRfummkmSpcuSotuVn$iHJfeHYBSagtgeSaUZVPZNYFOVhxvsrUqKtOnOp6AiTPN" +
+		"ee9pTK9Tpc$$Njtg$CBvFtQdT2V0NRTvx26YZ5rwCkAx6Aty5sfYhotQd4IiaiYdOXhnejW" +
+		"XNsz9B0kYh5BkX7nMHMJbU#2DrPM$Nv0ZHqTyfJCPcAyJivhfSELCpXJcUiP6gaOFLbd$R7" +
+		"IsD4DYV6EcvFXT9W$NYq52EhxUrCAjHXPDQsj0ja2ctxwWW9aCc#JU2NpnSocNrGWPrLZby" +
+		"YzrBnakaldJsTY4wZRQAp8lnYMAd4OloYpikZJatQryAEklviRdMoQh1pOkwNXXTp5U8ZI7" +
+		"AzMolLUxbU9n5Dubcj5UM9SnZxnYlahacG2nEztyfhUvMDsv4QYDTyVBxN6uZNX5hOIz1rV" +
+		"ExHXWjTs#UbM7qWqBOI8jdRbH7ftgwEQ5n2cxe8nXAfZoxqVN#zvxw#2UKtXaHe01dGekJn" +
+		"w2VeJKuJxq$PZsTe2VKWo$kj8HkEzNuRQ8#nq$iDeIrqW5mVupr5caCZdC$HdNmyBz1FP#W" +
+		"2nmN6EsyVu#cEiE#bQoZU0$f0JpW1ydtSFcycz89k17QXMq4$x5NeWJwl00R1O1WIg7iAOg" +
+		"iVpojosoKo74P054w591WAfq4Ad0vdm9bG6aP26HW5ew42Z86nK17EWhFXV3WSBe1qE7SVp" +
+		"pyCnWNygbuV1TMipRBT4fX3k#uAOJqiWkt5wsaRJ0x5ndhz$UuODP$piKqmFZok$O4Q7mVi" +
+		"NmBzfPRKHaLxHgEzdkNrsp3tdumZKBkArpkWuD$K#Y#9ho5TKi8pbBZV3x2Fs07aLaFC28n" +
+		"XGi3E3jYT0lQcWDqZOFSDs2S5xCq1UyH#ZAc99mjdMVmRf8tobs7dchUSDGEMcvt8Nyn25r" +
+		"aANphh9pCR#QEPOrumXQpHNUPFyxtvtVncVZL$k8pFdVpKoMdcQVEKUT8yuRn7u5cppcmqN" +
+		"s5zRTQQRIgwp5mpoymqzvlvvcLp7$vxvZda##Pvyudvs7naFZJRpGVcJPUxoRTPuFLBHLLU" +
+		"35Hy7LupdtbllQitpsmmpvWlN6IP#SvyQxunxnQrU4TxNMPhaRN5R4OkSJFpW8iiSdAramy" +
+		"w#P2JgvnSuUJ3JgvqSh5vsqmtFvXNdVV6dZdd6kREYBjf3La1ElBNl2DP1VnTBt3dbWH8vA" +
+		"HZpvKHJaPxo2StdznsvDZpJ5jqRtGskWjwN$I5RfoSx7zWJHq9dAyYdBCiYPmax6c2TQaOH" +
+		"Dm9utZYbbpksND5C#Bs$wDUd67wOUSHpoFUWbnxlcqJ8eFx6UW#j6cEReuUW0uo478uvUHm" +
+		"3ixXkNCOOrmdGTJhqZvkTIpW9xdSdiIEeOwbYSEU3HCvmqM1SmOnImTtbenmxaxGeBy0RF5" +
+		"54m==");
 
 	private final Action[] actions;
 
 	public YajcoParser() {
 		super(PARSING_TABLES);
 		actions = new Action[] {
-			new Action() {	// [0] Type = PrimitiveType.val
+			new Action() {	// [0] Type = ReferenceType.val
 				public Symbol reduce(Symbol[] _symbols, int offset) {
 					final Symbol _symbol_val = _symbols[offset + 1];
-					final yajco.parser.beaver.SymbolWrapper<yajco.model.type.PrimitiveType> val = (yajco.parser.beaver.SymbolWrapper<yajco.model.type.PrimitiveType>) _symbol_val.value;
+					final yajco.parser.beaver.SymbolWrapper<yajco.model.type.ReferenceType> val = (yajco.parser.beaver.SymbolWrapper<yajco.model.type.ReferenceType>) _symbol_val.value;
 					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
 				}
 			},
@@ -112,10 +112,10 @@ public class YajcoParser extends Parser {
 					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
 				}
 			},
-			new Action() {	// [2] Type = ReferenceType.val
+			new Action() {	// [2] Type = PrimitiveType.val
 				public Symbol reduce(Symbol[] _symbols, int offset) {
 					final Symbol _symbol_val = _symbols[offset + 1];
-					final yajco.parser.beaver.SymbolWrapper<yajco.model.type.ReferenceType> val = (yajco.parser.beaver.SymbolWrapper<yajco.model.type.ReferenceType>) _symbol_val.value;
+					final yajco.parser.beaver.SymbolWrapper<yajco.model.type.PrimitiveType> val = (yajco.parser.beaver.SymbolWrapper<yajco.model.type.PrimitiveType>) _symbol_val.value;
 					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
 				}
 			},
@@ -226,17 +226,17 @@ public class YajcoParser extends Parser {
 					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
 				}
 			},
-			new Action() {	// [16] ConceptPattern = Enum.val
-				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_val = _symbols[offset + 1];
-					final yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.Enum> val = (yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.Enum>) _symbol_val.value;
-					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
-				}
-			},
-			new Action() {	// [17] ConceptPattern = Operator.val
+			new Action() {	// [16] ConceptPattern = Operator.val
 				public Symbol reduce(Symbol[] _symbols, int offset) {
 					final Symbol _symbol_val = _symbols[offset + 1];
 					final yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.Operator> val = (yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.Operator>) _symbol_val.value;
+					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
+				}
+			},
+			new Action() {	// [17] ConceptPattern = Enum.val
+				public Symbol reduce(Symbol[] _symbols, int offset) {
+					final Symbol _symbol_val = _symbols[offset + 1];
+					final yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.Enum> val = (yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.Enum>) _symbol_val.value;
 					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
 				}
 			},
@@ -296,10 +296,10 @@ public class YajcoParser extends Parser {
 					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
 				}
 			},
-			new Action() {	// [26] NotationPartPattern = Separator.val
+			new Action() {	// [26] NotationPartPattern = Token.val
 				public Symbol reduce(Symbol[] _symbols, int offset) {
 					final Symbol _symbol_val = _symbols[offset + 1];
-					final yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.Separator> val = (yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.Separator>) _symbol_val.value;
+					final yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.Token> val = (yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.Token>) _symbol_val.value;
 					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
 				}
 			},
@@ -310,24 +310,24 @@ public class YajcoParser extends Parser {
 					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
 				}
 			},
-			new Action() {	// [28] NotationPartPattern = Token.val
-				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_val = _symbols[offset + 1];
-					final yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.Token> val = (yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.Token>) _symbol_val.value;
-					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
-				}
-			},
-			new Action() {	// [29] NotationPartPattern = Range.val
+			new Action() {	// [28] NotationPartPattern = Range.val
 				public Symbol reduce(Symbol[] _symbols, int offset) {
 					final Symbol _symbol_val = _symbols[offset + 1];
 					final yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.Range> val = (yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.Range>) _symbol_val.value;
 					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
 				}
 			},
-			new Action() {	// [30] NotationPartPattern = NewLine.val
+			new Action() {	// [29] NotationPartPattern = NewLine.val
 				public Symbol reduce(Symbol[] _symbols, int offset) {
 					final Symbol _symbol_val = _symbols[offset + 1];
 					final yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.printer.NewLine> val = (yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.printer.NewLine>) _symbol_val.value;
+					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
+				}
+			},
+			new Action() {	// [30] NotationPartPattern = Separator.val
+				public Symbol reduce(Symbol[] _symbols, int offset) {
+					final Symbol _symbol_val = _symbols[offset + 1];
+					final yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.Separator> val = (yajco.parser.beaver.SymbolWrapper<yajco.model.pattern.impl.Separator>) _symbol_val.value;
 					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
 				}
 			},
@@ -458,13 +458,11 @@ public class YajcoParser extends Parser {
 					 return (Symbol) new SymbolWrapper(new SymbolListImpl<yajco.model.TokenDef>());
 				}
 			},
-			new Action() {	// [48] References = SYMBOLREFERENCES SYMBOL_40 NAME.name SYMBOL_44 SYMBOLPROPERTY SYMBOL_61 NAME.property SYMBOL_41
+			new Action() {	// [48] TokenPart = STRING_VALUE.stringValue
 				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_name = _symbols[offset + 3];
-					final java.lang.String name = (java.lang.String) _symbol_name.value;
-					final Symbol _symbol_property = _symbols[offset + 7];
-					final java.lang.String property = (java.lang.String) _symbol_property.value;
-					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.References(name, property), (Object)name, property));
+					final Symbol _symbol_stringValue = _symbols[offset + 1];
+					final java.lang.String stringValue = (java.lang.String) _symbol_stringValue.value;
+					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.TokenPart(stringValue), (Object)stringValue));
 				}
 			},
 			new Action() {	// [49] References = SYMBOLREFERENCES SYMBOL_40 NAME.name SYMBOL_41
@@ -474,11 +472,13 @@ public class YajcoParser extends Parser {
 					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.References(name), (Object)name));
 				}
 			},
-			new Action() {	// [50] TokenPart = STRING_VALUE.stringValue
+			new Action() {	// [50] References = SYMBOLREFERENCES SYMBOL_40 NAME.name SYMBOL_44 SYMBOLPROPERTY SYMBOL_61 NAME.property SYMBOL_41
 				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_stringValue = _symbols[offset + 1];
-					final java.lang.String stringValue = (java.lang.String) _symbol_stringValue.value;
-					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.TokenPart(stringValue), (Object)stringValue));
+					final Symbol _symbol_name = _symbols[offset + 3];
+					final java.lang.String name = (java.lang.String) _symbol_name.value;
+					final Symbol _symbol_property = _symbols[offset + 7];
+					final java.lang.String property = (java.lang.String) _symbol_property.value;
+					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.References(name, property), (Object)name, property));
 				}
 			},
 			new Action() {	// [51] PropertyPattern = Identifier.val
@@ -561,20 +561,20 @@ public class YajcoParser extends Parser {
 					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Separator(stringValue), (Object)stringValue));
 				}
 			},
-			new Action() {	// [63] Notation = NotationPartArray8.parts SYMBOL_123 NotationPatternArray9.patterns SYMBOL_125
+			new Action() {	// [63] Notation = NotationPartArray8.parts
+				public Symbol reduce(Symbol[] _symbols, int offset) {
+					final Symbol _symbol_parts = _symbols[offset + 1];
+					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.NotationPart>> parts = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.NotationPart>>) _symbol_parts.value;
+					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Notation(parts.getWrappedObject().toArray(new yajco.model.NotationPart[]{})), (Object)parts.getWrappedObject().toArray(new yajco.model.NotationPart[]{})));
+				}
+			},
+			new Action() {	// [64] Notation = NotationPartArray8.parts SYMBOL_123 NotationPatternArray9.patterns SYMBOL_125
 				public Symbol reduce(Symbol[] _symbols, int offset) {
 					final Symbol _symbol_parts = _symbols[offset + 1];
 					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.NotationPart>> parts = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.NotationPart>>) _symbol_parts.value;
 					final Symbol _symbol_patterns = _symbols[offset + 3];
 					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.NotationPattern>> patterns = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.NotationPattern>>) _symbol_patterns.value;
 					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Notation(parts.getWrappedObject().toArray(new yajco.model.NotationPart[]{}), patterns.getWrappedObject().toArray(new yajco.model.pattern.NotationPattern[]{})), (Object)parts.getWrappedObject().toArray(new yajco.model.NotationPart[]{}), patterns.getWrappedObject().toArray(new yajco.model.pattern.NotationPattern[]{})));
-				}
-			},
-			new Action() {	// [64] Notation = NotationPartArray8.parts
-				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_parts = _symbols[offset + 1];
-					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.NotationPart>> parts = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.NotationPart>>) _symbol_parts.value;
-					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Notation(parts.getWrappedObject().toArray(new yajco.model.NotationPart[]{})), (Object)parts.getWrappedObject().toArray(new yajco.model.NotationPart[]{})));
 				}
 			},
 			new Action() {	// [65] Associativity = SYMBOLLEFT
@@ -602,49 +602,7 @@ public class YajcoParser extends Parser {
 					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.pattern.impl.Identifier()));
 				}
 			},
-			new Action() {	// [70] Concept = SYMBOLCONCEPT NAME.name SYMBOL_58 NAME.parent SYMBOL_123 ConceptPatternArray4.patterns SYMBOL_125 SYMBOLAS SYMBOL_58 PropertyArray5.abstractSyntax
-				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_name = _symbols[offset + 2];
-					final java.lang.String name = (java.lang.String) _symbol_name.value;
-					final Symbol _symbol_parent = _symbols[offset + 4];
-					final java.lang.String parent = (java.lang.String) _symbol_parent.value;
-					final Symbol _symbol_patterns = _symbols[offset + 6];
-					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>> patterns = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>>) _symbol_patterns.value;
-					final Symbol _symbol_abstractSyntax = _symbols[offset + 10];
-					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>> abstractSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>>) _symbol_abstractSyntax.value;
-					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, parent, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{})), (Object)name, parent, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{})));
-				}
-			},
-			new Action() {	// [71] Concept = SYMBOLCONCEPT NAME.name SYMBOL_58 NAME.parent
-				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_name = _symbols[offset + 2];
-					final java.lang.String name = (java.lang.String) _symbol_name.value;
-					final Symbol _symbol_parent = _symbols[offset + 4];
-					final java.lang.String parent = (java.lang.String) _symbol_parent.value;
-					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, parent), (Object)name, parent));
-				}
-			},
-			new Action() {	// [72] Concept = SYMBOLCONCEPT NAME.name SYMBOLAS SYMBOL_58 PropertyArray5.abstractSyntax SYMBOLCS SYMBOL_58 NotationArray6.concreteSyntax
-				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_name = _symbols[offset + 2];
-					final java.lang.String name = (java.lang.String) _symbol_name.value;
-					final Symbol _symbol_abstractSyntax = _symbols[offset + 5];
-					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>> abstractSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>>) _symbol_abstractSyntax.value;
-					final Symbol _symbol_concreteSyntax = _symbols[offset + 8];
-					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>> concreteSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>>) _symbol_concreteSyntax.value;
-					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{}), concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})), (Object)name, abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{}), concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})));
-				}
-			},
-			new Action() {	// [73] Concept = SYMBOLCONCEPT NAME.name SYMBOLCS SYMBOL_58 NotationArray6.concreteSyntax
-				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_name = _symbols[offset + 2];
-					final java.lang.String name = (java.lang.String) _symbol_name.value;
-					final Symbol _symbol_concreteSyntax = _symbols[offset + 5];
-					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>> concreteSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>>) _symbol_concreteSyntax.value;
-					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})), (Object)name, concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})));
-				}
-			},
-			new Action() {	// [74] Concept = SYMBOLCONCEPT NAME.name SYMBOL_123 ConceptPatternArray4.patterns SYMBOL_125 SYMBOLAS SYMBOL_58 PropertyArray5.abstractSyntax SYMBOLCS SYMBOL_58 NotationArray6.concreteSyntax
+			new Action() {	// [70] Concept = SYMBOLCONCEPT NAME.name SYMBOL_123 ConceptPatternArray4.patterns SYMBOL_125 SYMBOLAS SYMBOL_58 PropertyArray5.abstractSyntax SYMBOLCS SYMBOL_58 NotationArray6.concreteSyntax
 				public Symbol reduce(Symbol[] _symbols, int offset) {
 					final Symbol _symbol_name = _symbols[offset + 2];
 					final java.lang.String name = (java.lang.String) _symbol_name.value;
@@ -657,76 +615,7 @@ public class YajcoParser extends Parser {
 					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{}), concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})), (Object)name, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{}), concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})));
 				}
 			},
-			new Action() {	// [75] Concept = SYMBOLCONCEPT NAME.name SYMBOL_58 NAME.parent SYMBOLAS SYMBOL_58 PropertyArray5.abstractSyntax
-				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_name = _symbols[offset + 2];
-					final java.lang.String name = (java.lang.String) _symbol_name.value;
-					final Symbol _symbol_parent = _symbols[offset + 4];
-					final java.lang.String parent = (java.lang.String) _symbol_parent.value;
-					final Symbol _symbol_abstractSyntax = _symbols[offset + 7];
-					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>> abstractSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>>) _symbol_abstractSyntax.value;
-					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, parent, abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{})), (Object)name, parent, abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{})));
-				}
-			},
-			new Action() {	// [76] Concept = SYMBOLCONCEPT NAME.name SYMBOL_123 ConceptPatternArray4.patterns SYMBOL_125
-				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_name = _symbols[offset + 2];
-					final java.lang.String name = (java.lang.String) _symbol_name.value;
-					final Symbol _symbol_patterns = _symbols[offset + 4];
-					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>> patterns = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>>) _symbol_patterns.value;
-					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{})), (Object)name, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{})));
-				}
-			},
-			new Action() {	// [77] Concept = SYMBOLCONCEPT NAME.name SYMBOL_58 NAME.parent SYMBOLCS SYMBOL_58 NotationArray6.concreteSyntax
-				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_name = _symbols[offset + 2];
-					final java.lang.String name = (java.lang.String) _symbol_name.value;
-					final Symbol _symbol_parent = _symbols[offset + 4];
-					final java.lang.String parent = (java.lang.String) _symbol_parent.value;
-					final Symbol _symbol_concreteSyntax = _symbols[offset + 7];
-					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>> concreteSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>>) _symbol_concreteSyntax.value;
-					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, parent, concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})), (Object)name, parent, concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})));
-				}
-			},
-			new Action() {	// [78] Concept = SYMBOLCONCEPT NAME.name
-				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_name = _symbols[offset + 2];
-					final java.lang.String name = (java.lang.String) _symbol_name.value;
-					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name), (Object)name));
-				}
-			},
-			new Action() {	// [79] Concept = SYMBOLCONCEPT NAME.name SYMBOL_58 NAME.parent SYMBOL_123 ConceptPatternArray4.patterns SYMBOL_125
-				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_name = _symbols[offset + 2];
-					final java.lang.String name = (java.lang.String) _symbol_name.value;
-					final Symbol _symbol_parent = _symbols[offset + 4];
-					final java.lang.String parent = (java.lang.String) _symbol_parent.value;
-					final Symbol _symbol_patterns = _symbols[offset + 6];
-					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>> patterns = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>>) _symbol_patterns.value;
-					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, parent, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{})), (Object)name, parent, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{})));
-				}
-			},
-			new Action() {	// [80] Concept = SYMBOLCONCEPT NAME.name SYMBOLAS SYMBOL_58 PropertyArray5.abstractSyntax
-				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_name = _symbols[offset + 2];
-					final java.lang.String name = (java.lang.String) _symbol_name.value;
-					final Symbol _symbol_abstractSyntax = _symbols[offset + 5];
-					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>> abstractSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>>) _symbol_abstractSyntax.value;
-					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{})), (Object)name, abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{})));
-				}
-			},
-			new Action() {	// [81] Concept = SYMBOLCONCEPT NAME.name SYMBOL_123 ConceptPatternArray4.patterns SYMBOL_125 SYMBOLCS SYMBOL_58 NotationArray6.concreteSyntax
-				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_name = _symbols[offset + 2];
-					final java.lang.String name = (java.lang.String) _symbol_name.value;
-					final Symbol _symbol_patterns = _symbols[offset + 4];
-					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>> patterns = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>>) _symbol_patterns.value;
-					final Symbol _symbol_concreteSyntax = _symbols[offset + 8];
-					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>> concreteSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>>) _symbol_concreteSyntax.value;
-					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})), (Object)name, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})));
-				}
-			},
-			new Action() {	// [82] Concept = SYMBOLCONCEPT NAME.name SYMBOL_58 NAME.parent SYMBOL_123 ConceptPatternArray4.patterns SYMBOL_125 SYMBOLAS SYMBOL_58 PropertyArray5.abstractSyntax SYMBOLCS SYMBOL_58 NotationArray6.concreteSyntax
+			new Action() {	// [71] Concept = SYMBOLCONCEPT NAME.name SYMBOL_58 NAME.parent SYMBOL_123 ConceptPatternArray4.patterns SYMBOL_125 SYMBOLAS SYMBOL_58 PropertyArray5.abstractSyntax SYMBOLCS SYMBOL_58 NotationArray6.concreteSyntax
 				public Symbol reduce(Symbol[] _symbols, int offset) {
 					final Symbol _symbol_name = _symbols[offset + 2];
 					final java.lang.String name = (java.lang.String) _symbol_name.value;
@@ -741,7 +630,16 @@ public class YajcoParser extends Parser {
 					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, parent, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{}), concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})), (Object)name, parent, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{}), concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})));
 				}
 			},
-			new Action() {	// [83] Concept = SYMBOLCONCEPT NAME.name SYMBOL_58 NAME.parent SYMBOLAS SYMBOL_58 PropertyArray5.abstractSyntax SYMBOLCS SYMBOL_58 NotationArray6.concreteSyntax
+			new Action() {	// [72] Concept = SYMBOLCONCEPT NAME.name SYMBOLCS SYMBOL_58 NotationArray6.concreteSyntax
+				public Symbol reduce(Symbol[] _symbols, int offset) {
+					final Symbol _symbol_name = _symbols[offset + 2];
+					final java.lang.String name = (java.lang.String) _symbol_name.value;
+					final Symbol _symbol_concreteSyntax = _symbols[offset + 5];
+					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>> concreteSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>>) _symbol_concreteSyntax.value;
+					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})), (Object)name, concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})));
+				}
+			},
+			new Action() {	// [73] Concept = SYMBOLCONCEPT NAME.name SYMBOL_58 NAME.parent SYMBOLAS SYMBOL_58 PropertyArray5.abstractSyntax SYMBOLCS SYMBOL_58 NotationArray6.concreteSyntax
 				public Symbol reduce(Symbol[] _symbols, int offset) {
 					final Symbol _symbol_name = _symbols[offset + 2];
 					final java.lang.String name = (java.lang.String) _symbol_name.value;
@@ -754,18 +652,56 @@ public class YajcoParser extends Parser {
 					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, parent, abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{}), concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})), (Object)name, parent, abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{}), concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})));
 				}
 			},
-			new Action() {	// [84] Concept = SYMBOLCONCEPT NAME.name SYMBOL_123 ConceptPatternArray4.patterns SYMBOL_125 SYMBOLAS SYMBOL_58 PropertyArray5.abstractSyntax
+			new Action() {	// [74] Concept = SYMBOLCONCEPT NAME.name SYMBOLAS SYMBOL_58 PropertyArray5.abstractSyntax
+				public Symbol reduce(Symbol[] _symbols, int offset) {
+					final Symbol _symbol_name = _symbols[offset + 2];
+					final java.lang.String name = (java.lang.String) _symbol_name.value;
+					final Symbol _symbol_abstractSyntax = _symbols[offset + 5];
+					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>> abstractSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>>) _symbol_abstractSyntax.value;
+					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{})), (Object)name, abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{})));
+				}
+			},
+			new Action() {	// [75] Concept = SYMBOLCONCEPT NAME.name SYMBOL_58 NAME.parent SYMBOLCS SYMBOL_58 NotationArray6.concreteSyntax
+				public Symbol reduce(Symbol[] _symbols, int offset) {
+					final Symbol _symbol_name = _symbols[offset + 2];
+					final java.lang.String name = (java.lang.String) _symbol_name.value;
+					final Symbol _symbol_parent = _symbols[offset + 4];
+					final java.lang.String parent = (java.lang.String) _symbol_parent.value;
+					final Symbol _symbol_concreteSyntax = _symbols[offset + 7];
+					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>> concreteSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>>) _symbol_concreteSyntax.value;
+					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, parent, concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})), (Object)name, parent, concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})));
+				}
+			},
+			new Action() {	// [76] Concept = SYMBOLCONCEPT NAME.name
+				public Symbol reduce(Symbol[] _symbols, int offset) {
+					final Symbol _symbol_name = _symbols[offset + 2];
+					final java.lang.String name = (java.lang.String) _symbol_name.value;
+					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name), (Object)name));
+				}
+			},
+			new Action() {	// [77] Concept = SYMBOLCONCEPT NAME.name SYMBOL_58 NAME.parent SYMBOLAS SYMBOL_58 PropertyArray5.abstractSyntax
+				public Symbol reduce(Symbol[] _symbols, int offset) {
+					final Symbol _symbol_name = _symbols[offset + 2];
+					final java.lang.String name = (java.lang.String) _symbol_name.value;
+					final Symbol _symbol_parent = _symbols[offset + 4];
+					final java.lang.String parent = (java.lang.String) _symbol_parent.value;
+					final Symbol _symbol_abstractSyntax = _symbols[offset + 7];
+					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>> abstractSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>>) _symbol_abstractSyntax.value;
+					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, parent, abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{})), (Object)name, parent, abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{})));
+				}
+			},
+			new Action() {	// [78] Concept = SYMBOLCONCEPT NAME.name SYMBOL_123 ConceptPatternArray4.patterns SYMBOL_125 SYMBOLCS SYMBOL_58 NotationArray6.concreteSyntax
 				public Symbol reduce(Symbol[] _symbols, int offset) {
 					final Symbol _symbol_name = _symbols[offset + 2];
 					final java.lang.String name = (java.lang.String) _symbol_name.value;
 					final Symbol _symbol_patterns = _symbols[offset + 4];
 					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>> patterns = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>>) _symbol_patterns.value;
-					final Symbol _symbol_abstractSyntax = _symbols[offset + 8];
-					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>> abstractSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>>) _symbol_abstractSyntax.value;
-					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{})), (Object)name, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{})));
+					final Symbol _symbol_concreteSyntax = _symbols[offset + 8];
+					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>> concreteSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>>) _symbol_concreteSyntax.value;
+					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})), (Object)name, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})));
 				}
 			},
-			new Action() {	// [85] Concept = SYMBOLCONCEPT NAME.name SYMBOL_58 NAME.parent SYMBOL_123 ConceptPatternArray4.patterns SYMBOL_125 SYMBOLCS SYMBOL_58 NotationArray6.concreteSyntax
+			new Action() {	// [79] Concept = SYMBOLCONCEPT NAME.name SYMBOL_58 NAME.parent SYMBOL_123 ConceptPatternArray4.patterns SYMBOL_125 SYMBOLCS SYMBOL_58 NotationArray6.concreteSyntax
 				public Symbol reduce(Symbol[] _symbols, int offset) {
 					final Symbol _symbol_name = _symbols[offset + 2];
 					final java.lang.String name = (java.lang.String) _symbol_name.value;
@@ -776,6 +712,70 @@ public class YajcoParser extends Parser {
 					final Symbol _symbol_concreteSyntax = _symbols[offset + 10];
 					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>> concreteSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>>) _symbol_concreteSyntax.value;
 					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, parent, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})), (Object)name, parent, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})));
+				}
+			},
+			new Action() {	// [80] Concept = SYMBOLCONCEPT NAME.name SYMBOL_123 ConceptPatternArray4.patterns SYMBOL_125 SYMBOLAS SYMBOL_58 PropertyArray5.abstractSyntax
+				public Symbol reduce(Symbol[] _symbols, int offset) {
+					final Symbol _symbol_name = _symbols[offset + 2];
+					final java.lang.String name = (java.lang.String) _symbol_name.value;
+					final Symbol _symbol_patterns = _symbols[offset + 4];
+					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>> patterns = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>>) _symbol_patterns.value;
+					final Symbol _symbol_abstractSyntax = _symbols[offset + 8];
+					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>> abstractSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>>) _symbol_abstractSyntax.value;
+					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{})), (Object)name, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{})));
+				}
+			},
+			new Action() {	// [81] Concept = SYMBOLCONCEPT NAME.name SYMBOL_58 NAME.parent
+				public Symbol reduce(Symbol[] _symbols, int offset) {
+					final Symbol _symbol_name = _symbols[offset + 2];
+					final java.lang.String name = (java.lang.String) _symbol_name.value;
+					final Symbol _symbol_parent = _symbols[offset + 4];
+					final java.lang.String parent = (java.lang.String) _symbol_parent.value;
+					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, parent), (Object)name, parent));
+				}
+			},
+			new Action() {	// [82] Concept = SYMBOLCONCEPT NAME.name SYMBOLAS SYMBOL_58 PropertyArray5.abstractSyntax SYMBOLCS SYMBOL_58 NotationArray6.concreteSyntax
+				public Symbol reduce(Symbol[] _symbols, int offset) {
+					final Symbol _symbol_name = _symbols[offset + 2];
+					final java.lang.String name = (java.lang.String) _symbol_name.value;
+					final Symbol _symbol_abstractSyntax = _symbols[offset + 5];
+					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>> abstractSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>>) _symbol_abstractSyntax.value;
+					final Symbol _symbol_concreteSyntax = _symbols[offset + 8];
+					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>> concreteSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Notation>>) _symbol_concreteSyntax.value;
+					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{}), concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})), (Object)name, abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{}), concreteSyntax.getWrappedObject().toArray(new yajco.model.Notation[]{})));
+				}
+			},
+			new Action() {	// [83] Concept = SYMBOLCONCEPT NAME.name SYMBOL_58 NAME.parent SYMBOL_123 ConceptPatternArray4.patterns SYMBOL_125 SYMBOLAS SYMBOL_58 PropertyArray5.abstractSyntax
+				public Symbol reduce(Symbol[] _symbols, int offset) {
+					final Symbol _symbol_name = _symbols[offset + 2];
+					final java.lang.String name = (java.lang.String) _symbol_name.value;
+					final Symbol _symbol_parent = _symbols[offset + 4];
+					final java.lang.String parent = (java.lang.String) _symbol_parent.value;
+					final Symbol _symbol_patterns = _symbols[offset + 6];
+					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>> patterns = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>>) _symbol_patterns.value;
+					final Symbol _symbol_abstractSyntax = _symbols[offset + 10];
+					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>> abstractSyntax = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.Property>>) _symbol_abstractSyntax.value;
+					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, parent, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{})), (Object)name, parent, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{}), abstractSyntax.getWrappedObject().toArray(new yajco.model.Property[]{})));
+				}
+			},
+			new Action() {	// [84] Concept = SYMBOLCONCEPT NAME.name SYMBOL_58 NAME.parent SYMBOL_123 ConceptPatternArray4.patterns SYMBOL_125
+				public Symbol reduce(Symbol[] _symbols, int offset) {
+					final Symbol _symbol_name = _symbols[offset + 2];
+					final java.lang.String name = (java.lang.String) _symbol_name.value;
+					final Symbol _symbol_parent = _symbols[offset + 4];
+					final java.lang.String parent = (java.lang.String) _symbol_parent.value;
+					final Symbol _symbol_patterns = _symbols[offset + 6];
+					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>> patterns = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>>) _symbol_patterns.value;
+					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, parent, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{})), (Object)name, parent, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{})));
+				}
+			},
+			new Action() {	// [85] Concept = SYMBOLCONCEPT NAME.name SYMBOL_123 ConceptPatternArray4.patterns SYMBOL_125
+				public Symbol reduce(Symbol[] _symbols, int offset) {
+					final Symbol _symbol_name = _symbols[offset + 2];
+					final java.lang.String name = (java.lang.String) _symbol_name.value;
+					final Symbol _symbol_patterns = _symbols[offset + 4];
+					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>> patterns = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.ConceptPattern>>) _symbol_patterns.value;
+					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.Concept(name, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{})), (Object)name, patterns.getWrappedObject().toArray(new yajco.model.pattern.ConceptPattern[]{})));
 				}
 			},
 			new Action() {	// [86] Token = SYMBOLTOKEN SYMBOL_40 STRING_VALUE.name SYMBOL_41
@@ -799,20 +799,20 @@ public class YajcoParser extends Parser {
 					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
 				}
 			},
-			new Action() {	// [89] PropertyReferencePart = NAME.name SYMBOL_123 NotationPartPatternArray10.patterns SYMBOL_125
+			new Action() {	// [89] PropertyReferencePart = NAME.name
+				public Symbol reduce(Symbol[] _symbols, int offset) {
+					final Symbol _symbol_name = _symbols[offset + 1];
+					final java.lang.String name = (java.lang.String) _symbol_name.value;
+					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.PropertyReferencePart(name), (Object)name));
+				}
+			},
+			new Action() {	// [90] PropertyReferencePart = NAME.name SYMBOL_123 NotationPartPatternArray10.patterns SYMBOL_125
 				public Symbol reduce(Symbol[] _symbols, int offset) {
 					final Symbol _symbol_name = _symbols[offset + 1];
 					final java.lang.String name = (java.lang.String) _symbol_name.value;
 					final Symbol _symbol_patterns = _symbols[offset + 3];
 					final yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.NotationPartPattern>> patterns = (yajco.parser.beaver.SymbolWrapper<yajco.parser.beaver.SymbolListImpl<yajco.model.pattern.NotationPartPattern>>) _symbol_patterns.value;
 					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.PropertyReferencePart(name, patterns.getWrappedObject().toArray(new yajco.model.pattern.NotationPartPattern[]{})), (Object)name, patterns.getWrappedObject().toArray(new yajco.model.pattern.NotationPartPattern[]{})));
-				}
-			},
-			new Action() {	// [90] PropertyReferencePart = NAME.name
-				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_name = _symbols[offset + 1];
-					final java.lang.String name = (java.lang.String) _symbol_name.value;
-					 return (Symbol) new SymbolWrapper(yajco.ReferenceResolver.getInstance().register(new yajco.model.PropertyReferencePart(name), (Object)name));
 				}
 			},
 			new Action() {	// [91] Factory = SYMBOLFACTORY SYMBOL_40 SYMBOLMETHOD SYMBOL_61 NAME.name SYMBOL_41
@@ -836,17 +836,17 @@ public class YajcoParser extends Parser {
 					 return (Symbol) new SymbolWrapper(new SymbolListImpl<yajco.model.pattern.PropertyPattern>());
 				}
 			},
-			new Action() {	// [94] NotationPart = TokenPart.val
-				public Symbol reduce(Symbol[] _symbols, int offset) {
-					final Symbol _symbol_val = _symbols[offset + 1];
-					final yajco.parser.beaver.SymbolWrapper<yajco.model.TokenPart> val = (yajco.parser.beaver.SymbolWrapper<yajco.model.TokenPart>) _symbol_val.value;
-					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
-				}
-			},
-			new Action() {	// [95] NotationPart = BindingNotationPart.val
+			new Action() {	// [94] NotationPart = BindingNotationPart.val
 				public Symbol reduce(Symbol[] _symbols, int offset) {
 					final Symbol _symbol_val = _symbols[offset + 1];
 					final yajco.parser.beaver.SymbolWrapper<yajco.model.BindingNotationPart> val = (yajco.parser.beaver.SymbolWrapper<yajco.model.BindingNotationPart>) _symbol_val.value;
+					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
+				}
+			},
+			new Action() {	// [95] NotationPart = TokenPart.val
+				public Symbol reduce(Symbol[] _symbols, int offset) {
+					final Symbol _symbol_val = _symbols[offset + 1];
+					final yajco.parser.beaver.SymbolWrapper<yajco.model.TokenPart> val = (yajco.parser.beaver.SymbolWrapper<yajco.model.TokenPart>) _symbol_val.value;
 					 return (Symbol) new SymbolWrapper(val.getWrappedObject());
 				}
 			},

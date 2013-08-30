@@ -92,7 +92,7 @@ public class Printer {
 		writer.print("   ");
 		writer.print(tokenDef.getName());
 		writer.print(" = ");
-		writer.print("\"" + tokenDef.getRegexp() + "\"\n");
+		writer.print("\"" + tokenDef.getRegexp().replaceAll("\"", "\\\"") + "\"\n");
 	}
 
 	private void printType(PrintWriter writer, Type type) {
