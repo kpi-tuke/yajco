@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.Writer;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -38,6 +40,7 @@ import yajco.model.pattern.impl.Parentheses;
 import yajco.model.pattern.impl.Range;
 import yajco.model.pattern.impl.References;
 import yajco.model.pattern.impl.Separator;
+import yajco.model.pattern.impl.Token;
 import yajco.model.pattern.impl.printer.Indent;
 import yajco.model.pattern.impl.printer.NewLine;
 import yajco.model.type.ComponentType;
@@ -86,7 +89,12 @@ public class ClassGenerator implements FilesGenerator {
                 
                 writer = fileObject.openWriter();
                 generate(concept, writer);
-                Utilities.formatCode(new File(fileObject.toUri()));
+                try {
+                    Utilities.formatCode(new File(new URI("file:///").resolve(fileObject.toUri())));
+                } catch (URISyntaxException e) {
+                    System.err.println("Cannot create absolute path for file "+fileObject.toUri().toString());
+                    throw new GeneratorException("Cannot create absolute URI for file "+fileObject.toUri().toString(), e);
+                }
                 System.out.println("Success generating file: " + filePath);
             } catch (IOException ex) {
                 throw new GeneratorException("Problem writing file for concept " + concept.getConceptName(), ex);
@@ -442,6 +450,9 @@ public class ClassGenerator implements FilesGenerator {
             writer.write("@Indent");
         } else if (pattern instanceof NewLine) {
             writer.write("@NewLine");
+        } else if(pattern instanceof Token) {
+            Token token = (Token)pattern;
+            writer.write("@Token(\"" + token.getName() + "\")");
         } else {
             throw new GeneratorException("Not known pattern type: " + pattern.getClass().getCanonicalName());
         }
