@@ -1,0 +1,50 @@
+##
+## Input - parserClassName
+## Input - parserPackageName
+## Input - packageClassPackageName
+## Input - mainElementClassName
+## Input - scannerClassName
+## Input - referenceResolverClassName
+package $parserClassPackageName;
+
+import ${parserPackageName}.$scannerClassName;
+
+public class $parserClassName {
+	private static ${parserPackageName}.$parserClassName parser;
+
+	public $mainElementClassName parse(String input) throws LALRParseException {
+		$scannerClassName scanner = new ${scannerClassName}(input);
+		if (parser == null) {
+			parser = new ${parserPackageName}.${parserClassName}();
+		}
+
+		try {
+			${referenceResolverClassName} referenceResolver = ${referenceResolverClassName}.createInstance();
+			$mainElementClassName root = ((${parserPackageName}.SymbolWrapper<${mainElementClassName}>) parser.parse(scanner)).getWrappedObject();
+			referenceResolver.resolveReferences();
+			return root;
+		} catch (java.io.IOException e) {
+			throw new LALRParseException("Problem parsing source code ", e);
+		} catch (${parserPackageName}.${parserClassName}.Exception e) {
+			throw new LALRParseException("Problem parsing source code ", e);
+		}
+	}
+
+	public $mainElementClassName parse(java.io.Reader reader) throws LALRParseException {
+		try {
+			return parse(readAsString(reader));
+		} catch(java.io.IOException e) {
+			throw new LALRParseException("Problem reading input file", e);
+		}
+	}
+
+	private String readAsString(java.io.Reader r) throws java.io.IOException {
+		StringBuilder sb = new StringBuilder();
+		java.io.BufferedReader br = new java.io.BufferedReader(r);
+		String line;
+		while ((line = br.readLine()) != null) {
+			sb.append(line + "\n");
+		}
+		return sb.toString();
+	}
+}
