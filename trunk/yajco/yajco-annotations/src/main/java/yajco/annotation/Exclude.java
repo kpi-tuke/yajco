@@ -12,5 +12,5 @@ public @interface Exclude {
      * Use to exclude some specific concepts from a language.
      * @return 
      */
-    String[] concept() default {};
+    Class[] value() default {};
 }

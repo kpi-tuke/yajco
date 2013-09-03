@@ -5,6 +5,7 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.logging.Level;
 import javax.annotation.processing.*;
 import javax.lang.model.*;
 import javax.lang.model.element.*;
@@ -81,11 +82,17 @@ public class AnnotationProcessor extends AbstractProcessor {
         }
         for (Element element : roundEnv.getElementsAnnotatedWith(yajco.annotation.Exclude.class)) {
             Exclude exclude = element.getAnnotation(yajco.annotation.Exclude.class);
-            excludes.addAll(Arrays.asList(exclude.concept()));
+            try {
+                exclude.value();
+            } catch (MirroredTypesException e) {
+                for (TypeMirror type : e.getTypeMirrors()) {
+                    excludes.add(type.toString());
+                }
+            }
         }
 
-        for (String string : excludes) {
-            System.out.println("====exclude---> " + string);
+        for (String clazz : excludes) {
+            System.out.println("====exclude---> " + clazz);
         }
 
         properties = new Properties();
@@ -185,6 +192,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                 language = new Language(mainElement);
                 //add main package name == language name
                 String languageName = mainElementName.substring(0, mainElementName.lastIndexOf('.'));
+                System.out.println("---- mainElementName: "+mainElementName+ " == languageName: "+languageName);
                 if (!languageName.isEmpty()) {
                     language.setName(languageName);
                 }
@@ -599,7 +607,13 @@ public class AnnotationProcessor extends AbstractProcessor {
      */
     private boolean isDirectSubtype(TypeElement superElement, Element element) {
         Exclude excludeAnnotation = element.getAnnotation(Exclude.class);
-        if (excludeAnnotation == null || excludeAnnotation.concept().length > 0) {
+        int excludeAnnotationsLength = 0;
+        try {
+            if (excludeAnnotation != null) excludeAnnotation.value();
+        } catch (MirroredTypesException e) {
+            excludeAnnotationsLength = e.getTypeMirrors().size();
+        }
+        if (excludeAnnotation == null || excludeAnnotationsLength > 0) {
             if (element.getKind().isClass() || element.getKind().isInterface()) {
                 TypeMirror superType = superElement.asType();
                 TypeElement typeElement = (TypeElement) element;
