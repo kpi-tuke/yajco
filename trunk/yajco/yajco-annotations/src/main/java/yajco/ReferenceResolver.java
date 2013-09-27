@@ -294,7 +294,11 @@ public class ReferenceResolver {
             if ("".equals(ri.references.path())) {
                 expr = "//" + ri.referencedClass.getName() + "[" + IDENT_ELEMENT_NAME + "/text()='" + ri.referencingValue.toString() + "']";
             } else {
-                expr = ri.references.path() + "[" + IDENT_ELEMENT_NAME + "/text()='" + ri.referencingValue.toString() + "']";
+                if (ri.references.path().contains("##cmp##")) {
+                    expr = ri.references.path().replace("##cmp##", IDENT_ELEMENT_NAME + "/text()='" + ri.referencingValue.toString()+"'");
+                } else {
+                    expr = ri.references.path() + "[" + IDENT_ELEMENT_NAME + "/text()='" + ri.referencingValue.toString() + "']";
+                }
             }
 
             //System.out.println("Evaluating XPath: " + expr);

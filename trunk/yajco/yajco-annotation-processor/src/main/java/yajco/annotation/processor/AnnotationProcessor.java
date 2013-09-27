@@ -83,7 +83,7 @@ public class AnnotationProcessor extends AbstractProcessor {
         for (Element element : roundEnv.getElementsAnnotatedWith(yajco.annotation.Exclude.class)) {
             Exclude exclude = element.getAnnotation(yajco.annotation.Exclude.class);
             try {
-                exclude.value();
+                exclude.value(); // sposob ako sa dostat k nazvom Class, prv potrebne vyvolat vynimku
             } catch (MirroredTypesException e) {
                 for (TypeMirror type : e.getTypeMirrors()) {
                     excludes.add(type.toString());
@@ -141,6 +141,13 @@ public class AnnotationProcessor extends AbstractProcessor {
                 // Extract options from @Parser anntotation
                 for (Option option : parserAnnotation.options()) {
                     properties.setProperty(option.name(), option.value());
+                }
+                
+                if (!parserAnnotation.className().isEmpty()) {
+                    properties.setProperty("yajco.className", parserAnnotation.className());
+                }
+                if (!parserAnnotation.mainNode().isEmpty()) {
+                    properties.setProperty("yajco.mainNode", parserAnnotation.mainNode());
                 }
 
 
@@ -211,6 +218,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                 }
                 language.setTokens(tokens);
                 language.setSkips(skips);
+                language.setSettings(LanguageSetting.convertToLanguageSetting(properties));
 
                 //Print recognized language to output
                 Printer printer = new Printer();
@@ -252,7 +260,6 @@ public class AnnotationProcessor extends AbstractProcessor {
     }
 
     private Concept processTypeElement(TypeElement typeElement, Concept superConcept) {
-        //String name = typeElement.getSimpleName().toString();
         String name = typeElement.getQualifiedName().toString();
         //System.out.println("---->>> Name: "+name);
         if (excludes.contains(name)) {

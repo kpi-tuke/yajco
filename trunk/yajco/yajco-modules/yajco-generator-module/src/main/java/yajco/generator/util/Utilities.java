@@ -236,13 +236,23 @@ public class Utilities {
         if ("TOKEN".equals(s.toUpperCase())) {
             return "_TOKEN";
         }
+        boolean change = true;
         for (int i = 0; i < s.length(); i++) {
             char c = s.charAt(i);
-            if (Character.isLetterOrDigit(c) || c == '_') {
+
+            if (Character.isLetterOrDigit(c)) {
+                change = !change && Character.isUpperCase(c);
+                if (change) {
+                    sb.append('_');
+                }
+                change = Character.isUpperCase(c);
+                sb.append(c);
+            } else if (c == '_') {
                 sb.append(c);
             } else {
-                sb.append("_" + ((int) c));
+                sb.append('_').append(((int) c));
             }
+            
         }
         return sb.toString().toUpperCase();
     }

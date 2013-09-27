@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.Set;
 import yajco.annotation.Before;
 import yajco.annotation.Exclude;
@@ -17,6 +18,7 @@ public class Language extends YajcoModelElement {
     private List<Concept> concepts;
     private List<TokenDef> tokens;
     private List<SkipDef> skips;
+    private Properties settings = new Properties();
 
     public Language(
             @Before("tokens") @Range(minOccurs = 0) List<TokenDef> tokens,
@@ -26,6 +28,18 @@ public class Language extends YajcoModelElement {
         this.tokens = tokens;
         this.skips = skips;
         this.concepts = concepts;
+    }
+    
+    public Language(
+            @Before("tokens") @Range(minOccurs = 0) List<TokenDef> tokens,
+            @Before("skips") @Range(minOccurs = 0) List<SkipDef> skips,
+            @Range(minOccurs = 1) List<Concept> concepts,
+            @Before("settings") @Range(minOccurs = 0) Set<LanguageSetting> settings) {
+        super(null);
+        this.tokens = tokens;
+        this.skips = skips;
+        this.concepts = concepts;
+        this.settings = LanguageSetting.convertToJavaProperties(settings);
     }
 
     public Language(
@@ -38,6 +52,20 @@ public class Language extends YajcoModelElement {
         this.tokens = tokens;
         this.skips = skips;
         this.concepts = concepts;
+    }
+    
+        public Language(
+            @Before("language") String name,
+            @Before("tokens") @Range(minOccurs = 0) List<TokenDef> tokens,
+            @Before("skips") @Range(minOccurs = 0) List<SkipDef> skips,
+            @Range(minOccurs = 1) List<Concept> concepts,
+            @Before("settings") @Range(minOccurs = 0) Set<LanguageSetting> settings) {
+        super(null);
+        this.name = name;
+        this.tokens = tokens;
+        this.skips = skips;
+        this.concepts = concepts;
+        this.settings = LanguageSetting.convertToJavaProperties(settings);
     }
 
     @Exclude
@@ -96,6 +124,45 @@ public class Language extends YajcoModelElement {
         this.name = name;
     }
 
+    /**
+     * Returns Set of LanguageSetting, which is not standalone instance and will
+     * not be synced back to the Language instance. In order for changes to occur
+     * in the Language instance it is needed to use setSettings method.
+     * 
+     * @return standalone Set of LanguageSetting
+     */
+    public Set<LanguageSetting> getSettings() {
+        return LanguageSetting.convertToLanguageSetting(settings);
+    }
+    
+    /**
+     * Returns same data as method getSettings but in java.lang.Properties format.
+     * The object returned is actual object used in the Language instance, therefore
+     * any changes made to it will be automatically present in the Language settings.
+     * This is the difference with getSettings method, which creates a clone (not connected) Set.
+     * 
+     * @return Properties of the language
+     */
+    public Properties getSettingsProperties() {
+        return settings;
+    }
+
+    public void setSettings(Set<LanguageSetting> settings) {
+        this.settings = LanguageSetting.convertToJavaProperties(settings);
+    }
+    
+    public void setSettings(Properties settings) {
+        this.settings = settings;
+    }
+    
+    public String getSetting(String name) {
+        return settings.getProperty(name);
+    }
+    
+    public void setSetting(String name, String value) {
+        settings.setProperty(name, value);
+    }
+    
     public List<TokenDef> getUsedTokens() {
         Set<TokenDef> usedTokens = new HashSet<TokenDef>();
         Map<String, TokenDef> mapTokens = new HashMap<String, TokenDef>();

@@ -5,6 +5,7 @@ import yajco.model.type.Type;
 import yajco.model.type.ReferenceType;
 import java.io.PrintWriter;
 import java.util.List;
+import java.util.Set;
 import yajco.model.pattern.impl.Associativity;
 import yajco.model.*;
 import yajco.model.pattern.*;
@@ -15,7 +16,10 @@ import yajco.model.type.ArrayType;
 import yajco.model.type.ListType;
 import yajco.model.type.SetType;
 
-/*TOTO BY MALO BYT GENEROVANE DOMINIKOVYM PRINTER GENERATOROM*/
+/*  TOTO BY MALO BYT GENEROVANE DOMINIKOVYM PRINTER GENERATOROM
+ * 
+ *  napokon to ale bolo rucne upravovane pre niektore specificke veci
+ */
 public class Printer {
 
 	public void printLanguage(PrintWriter writer, Language language) {
@@ -26,10 +30,16 @@ public class Printer {
 			printTokens(writer, language.getTokens());
 			printSkips(writer, language.getSkips());
 			printConcepts(writer, language.getConcepts());
+                        if (!language.getSettings().isEmpty()) {
+                            printSettings(writer, language.getSettings());
+                        }
 		} else {
 			printTokens(writer, language.getTokens());
 			printSkips(writer, language.getSkips());
 			printConcepts(writer, language.getConcepts());
+                        if (!language.getSettings().isEmpty()) {
+                            printSettings(writer, language.getSettings());
+                        }
 		}
             } finally {
 		writer.flush();
@@ -346,7 +356,7 @@ public class Printer {
 	private void printSkips(PrintWriter writer, List<SkipDef> skips) {
 		writer.print("skips\n");
 		for (SkipDef skip : skips) {
-			writer.print("   \"" + skip.getRegexp() + "\"\n");
+			writer.print("   \"" + skip.getRegexp().replaceAll("\"", "\\\"") + "\"\n");
 		}
 		writer.println();
 	}
@@ -356,5 +366,20 @@ public class Printer {
         writer.print("method = \"" + factory.getName() + "\"");
         writer.print(")");
     }
+
+    private void printSettings(PrintWriter writer, Set<LanguageSetting> settings) {
+        writer.print("settings\n");
+        for (LanguageSetting languageSetting : settings) {
+            printLanguageSetting(writer, languageSetting);
+        }
+        writer.println();
+    }
+    
+    private void printLanguageSetting(PrintWriter writer, LanguageSetting languageSetting) {
+		writer.print("   ");
+		writer.print(languageSetting.getName());
+		writer.print(" = ");
+		writer.print("\"" + languageSetting.getValue().replaceAll("\"", "\\\"") + "\"\n");
+	}
 
 }
