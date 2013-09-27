@@ -38,16 +38,16 @@ public class YajcoParserScanner extends Scanner {
 		tokens.put(Terminals.SYMBOLLANGUAGE, Pattern.compile("language"));
 		tokens.put(Terminals.SYMBOL_123, Pattern.compile("[{]"));
 		tokens.put(Terminals.SYMBOLPARENTHESES, Pattern.compile("Parentheses"));
-		tokens.put(Terminals.SYMBOLTOKENS, Pattern.compile("tokens"));
 		tokens.put(Terminals.SYMBOLINDENT, Pattern.compile("Indent"));
+		tokens.put(Terminals.SYMBOLTOKENS, Pattern.compile("tokens"));
 		tokens.put(Terminals.SYMBOL_41, Pattern.compile("[)]"));
 		tokens.put(Terminals.SYMBOLAS, Pattern.compile("AS"));
 		tokens.put(Terminals.SYMBOL_42, Pattern.compile("[*]"));
 		tokens.put(Terminals.SYMBOLSKIPS, Pattern.compile("skips"));
 		tokens.put(Terminals.SYMBOLASSOCIATIVITY, Pattern.compile("associativity"));
 		tokens.put(Terminals.SYMBOL_61, Pattern.compile("[=]"));
-		tokens.put(Terminals.SYMBOLOF, Pattern.compile("of"));
 		tokens.put(Terminals.SYMBOL_44, Pattern.compile("[,]"));
+		tokens.put(Terminals.SYMBOLOF, Pattern.compile("of"));
 		tokens.put(Terminals.SYMBOLTOKEN, Pattern.compile("Token"));
 		tokens.put(Terminals.SYMBOL_40, Pattern.compile("[(]"));
 		tokens.put(Terminals.SYMBOLRIGHT, Pattern.compile("RIGHT"));
@@ -56,9 +56,10 @@ public class YajcoParserScanner extends Scanner {
 		tokens.put(Terminals.SYMBOLLIST, Pattern.compile("list"));
 		tokens.put(Terminals.SYMBOLENUM, Pattern.compile("Enum"));
 		tokens.put(Terminals.SYMBOLSET, Pattern.compile("set"));
+		tokens.put(Terminals.SYMBOLSETTINGS, Pattern.compile("settings"));
 		tokens.put(Terminals.SYMBOLARRAY, Pattern.compile("array"));
-		tokens.put(Terminals.SYMBOLNEWLINE, Pattern.compile("NewLine"));
 		tokens.put(Terminals.SYMBOLRANGE, Pattern.compile("Range"));
+		tokens.put(Terminals.SYMBOLNEWLINE, Pattern.compile("NewLine"));
 		tokens.put(Terminals.SYMBOLFACTORY, Pattern.compile("Factory"));
 
 		tokens.put(Terminals.INTEGER, Pattern.compile("int"));

@@ -39,7 +39,7 @@ public class SemLangToJavaTranslator {
 	}
 
 	public void translateActions(List<Action> actions, Language language, PrintStream writer) {
-		if (actions == null || actions.size() == 0) {
+		if (actions == null || actions.isEmpty()) {
 			return;
 		}
 		if (writer == null) {
@@ -159,13 +159,13 @@ public class SemLangToJavaTranslator {
 			writer.print(typeToString(action.getResultCollectionInnerType()));
 			writer.print("[]{})");
 		} else if (action.getResultCollectionType() instanceof ListType) {
-			writer.print("new ArrayList<");
+			writer.print("new java.util.ArrayList<");
 			writer.print(typeToString(action.getResultCollectionInnerType()));
 			writer.print(">(");
 			translateRValue(action.getRValue(), writer);
 			writer.print(")");
 		} else if (action.getResultCollectionType() instanceof SetType) {
-			writer.print("new HashSet<");
+			writer.print("new java.util.HashSet<");
 			writer.print(typeToString(action.getResultCollectionInnerType()));
 			writer.print(">(");
 			translateRValue(action.getRValue(), writer);
