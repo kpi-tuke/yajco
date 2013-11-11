@@ -68,7 +68,7 @@ public class YajcoParserScanner extends Scanner {
 		tokens.put(Terminals.STRING, Pattern.compile("string"));
 		tokens.put(Terminals.NAME, Pattern.compile("(?:[a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*)|\\[([a-zA-Z_][a-zA-Z0-9_]*(?:\\.[a-zA-Z_][a-zA-Z0-9_]*)*)\\]"));
 		tokens.put(Terminals.INT_VALUE, Pattern.compile("[0-9]+"));
-		tokens.put(Terminals.STRING_VALUE, Pattern.compile("\"((?:[^\"\\\\]|\\.)*)\""));
+		tokens.put(Terminals.STRING_VALUE, Pattern.compile("\"((?:[^\"\\\\]|\\\\.)*)\""));
 
 		skips.add(Pattern.compile(" "));
 		skips.add(Pattern.compile("\\t"));
