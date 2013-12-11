@@ -4,6 +4,7 @@ import java.util.HashSet;
 import java.util.Properties;
 import java.util.Set;
 import yajco.annotation.Before;
+import yajco.annotation.Exclude;
 import yajco.annotation.Token;
 import yajco.annotation.printer.NewLine;
 
@@ -21,6 +22,12 @@ public class LanguageSetting {
     public LanguageSetting(String name, @Before("=") @Token("STRING_VALUE") String value) {
         this.name = name;
         this.value = value;
+    }
+    
+    //needed for XML binding
+    @Exclude
+    private LanguageSetting() {
+        
     }
 
     public String getName() {

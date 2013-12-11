@@ -5,13 +5,11 @@ import java.io.*;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
-import java.util.logging.Level;
 import javax.annotation.processing.*;
 import javax.lang.model.*;
 import javax.lang.model.element.*;
 import javax.lang.model.type.*;
 import javax.lang.model.util.*;
-import javax.tools.Diagnostic.Kind;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import org.slf4j.Logger;
@@ -31,10 +29,11 @@ import yajco.model.type.ListType;
 import yajco.model.type.PrimitiveTypeConst;
 import yajco.model.type.SetType;
 import yajco.model.type.Type;
+import yajco.model.utilities.XMLLanguageFormatHelper;
 import yajco.printer.Printer;
 
 @SupportedSourceVersion(SourceVersion.RELEASE_6)
-@SupportedAnnotationTypes({"yajco.annotation.config.Parser","yajco.annotation.Exclude"})
+@SupportedAnnotationTypes({"yajco.annotation.config.Parser", "yajco.annotation.Exclude"})
 //TODO - anotacia @Optional nie je funkcna, malo by generovat vyskytu @Optional generovat vsetky moznosti v pripade
 //Ak pocet pouziti @Optional je x, potom pocet moznosti je: (x nad 0)+(x nad 1)+...+(x nad x-1)+(x nad x)
 // (x nad y) = ( x! / ( (x-y)! * y! ) )
@@ -52,7 +51,7 @@ public class AnnotationProcessor extends AbstractProcessor {
     /**
      * Version string.
      */
-    private static final String VERSION = "0.5";
+    private static final String VERSION = "0.5.1";
     private static final String PROPERTY_SETTINGS_FILE = "/yajco.properties";
     private static final Logger logger = LoggerFactory.getLogger("YAJCO Annotation Processor");
     /**
@@ -60,7 +59,6 @@ public class AnnotationProcessor extends AbstractProcessor {
      */
     private RoundEnvironment roundEnv;
     private Properties properties;
-    
     private Set<String> excludes = new HashSet<String>();
     /**
      * Builded language.
@@ -71,10 +69,10 @@ public class AnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
-        
+
         Iterator<? extends TypeElement> iterator = annotations.iterator();
-        
-        while(iterator.hasNext()) {
+
+        while (iterator.hasNext()) {
             TypeElement typeElement = iterator.next();
             if (typeElement.getQualifiedName().contentEquals(yajco.annotation.Exclude.class.getName())) {
                 iterator.remove(); // leave only Parser annotation for later processing
@@ -98,18 +96,18 @@ public class AnnotationProcessor extends AbstractProcessor {
         properties = new Properties();
         // disable class generating - annotation processor works on classes, don't generate new ones
         properties.setProperty("yajco.generator.classgen.ClassGenerator", "false");
-        
+
         try {
             InputStream inputStream = getClass().getResourceAsStream(PROPERTY_SETTINGS_FILE);
             properties.load(inputStream);
-            logger.debug("Loaded config from file: {}",properties);
+            logger.debug("Loaded config from file: {}", properties);
         } catch (Exception e) {
             // LOG but don't do anything, it is not error
             logger.info("Cannot find or load {} file in classpath. Will use only @Parser options.", PROPERTY_SETTINGS_FILE);
-            logger.debug("Loading config file: {}",e.getLocalizedMessage());
+            logger.debug("Loading config file: {}", e.getLocalizedMessage());
             //throw new GeneratorException("Cannot load " + PROPERTY_SETTINGS_FILE, e);
         }
-        
+
         if ("false".equalsIgnoreCase(properties.getProperty("yajco"))) {
             logger.info("Property 'yajco' set to false - terminating YAJCo tool !");
             return false;
@@ -124,11 +122,11 @@ public class AnnotationProcessor extends AbstractProcessor {
                 //There is only one supported annotation type @Parser
                 TypeElement annotationType = annotations.iterator().next();
                 Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(annotationType);
-                
+
                 //find directory for saving generated files
                 FileObject fo = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "", "temp.java");
                 //targetDirectory = new File(fo.toUri()).getParentFile();
-                
+
                 //Parser generator works only with one @Parser annotation
                 if (elements.size() > 1) {
                     //TODO: vypisat co vsetko anotoval aby to vedel odstranit
@@ -142,7 +140,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                 for (Option option : parserAnnotation.options()) {
                     properties.setProperty(option.name(), option.value());
                 }
-                
+
                 if (!parserAnnotation.className().isEmpty()) {
                     properties.setProperty("yajco.className", parserAnnotation.className());
                 }
@@ -199,12 +197,23 @@ public class AnnotationProcessor extends AbstractProcessor {
                 language = new Language(mainElement);
                 //add main package name == language name
                 String languageName = mainElementName.substring(0, mainElementName.lastIndexOf('.'));
-                System.out.println("---- mainElementName: "+mainElementName+ " == languageName: "+languageName);
+                System.out.println("---- mainElementName: " + mainElementName + " == languageName: " + languageName);
                 if (!languageName.isEmpty()) {
                     language.setName(languageName);
                 }
+                //add language concepts from included JARs
+                List<Language> includedLanguages = XMLLanguageFormatHelper.getAllLanguagesFromXML();
+                System.out.println("Loaded external language specifications: "+includedLanguages.size());
+                for (Language incLang : includedLanguages) {
+                    System.out.println("Loaded from JAR: "+incLang.getConcepts());
+                    addToListAsSet(language.getSkips(), incLang.getSkips(), true);
+                    addToListAsSet(language.getTokens(), incLang.getTokens(), true);
+                    language.getConcepts().addAll(incLang.getConcepts());
+                }
+                
 
                 //Start processing with the main element
+                System.out.println(" ? mainElement ? : "+mainElement);
                 processTypeElement(mainElement);
 
                 // add tokens and skips into language
@@ -216,8 +225,8 @@ public class AnnotationProcessor extends AbstractProcessor {
                 for (Skip skip : parserAnnotation.skips()) {
                     skips.add(new SkipDef(skip.value(), skip));
                 }
-                language.setTokens(tokens);
-                language.setSkips(skips);
+                addToListAsSet(language.getSkips(), skips, true);
+                addToListAsSet(language.getTokens(), tokens, true);
                 language.setSettings(LanguageSetting.convertToLanguageSetting(properties));
 
                 //Print recognized language to output
@@ -225,7 +234,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                 System.out.println("--------------------------------------------------------------------------------------------------------");
                 printer.printLanguage(new PrintWriter(System.out), language);
                 System.out.println("--------------------------------------------------------------------------------------------------------");
-                
+
                 //generate compiler
                 String parserClassName = parserAnnotation.className();
                 generateCompiler(parserClassName);
@@ -235,20 +244,20 @@ public class AnnotationProcessor extends AbstractProcessor {
 //                if (properties.containsKey("generateTools") && "true".equals(properties.getProperty("generateTools"))) {
 //                    generatorHelper.generateAllExceptModelClassFiles();
 //                }
-                
+
                 //generate all tools
                 Set<FilesGenerator> tools = ServiceFinder.findFilesGenerators(properties);
                 for (FilesGenerator filesGenerator : tools) {
                     filesGenerator.generateFiles(language, processingEnv.getFiler(), properties);
                 }
-                
+
             }
         } catch (Throwable e) {
             //e.printStackTrace();
             // asi CHYBA v MAVEN ze nevie dostat Messager
             //processingEnv.getMessager().printMessage(Kind.ERROR, e.getMessage());
-            
-            logger.error(e.getMessage(),e);
+
+            logger.error(e.getMessage(), e);
             throw new RuntimeException(e);
 
         }
@@ -261,7 +270,7 @@ public class AnnotationProcessor extends AbstractProcessor {
 
     private Concept processTypeElement(TypeElement typeElement, Concept superConcept) {
         String name = typeElement.getQualifiedName().toString();
-        //System.out.println("---->>> Name: "+name);
+        System.out.println("---->>> Name: "+name);
         if (excludes.contains(name)) {
             //System.out.println("---->> NACHADZA SA V EXCLUDE TAK HO RUSIM !!!!");
             return null;
@@ -274,6 +283,8 @@ public class AnnotationProcessor extends AbstractProcessor {
             if (superConcept != null) { //Set parent
                 concept.setParent(superConcept);
             }
+            //TODO:toto som tu doplnil len docasne na vyskusanie pre podporu kompozicie jazykov, treba to cele prehodnotit, lebo sa to nachadza aj na konci metody
+            processDirectSubclasses(typeElement, concept);
             return concept;
         }
 
@@ -298,11 +309,7 @@ public class AnnotationProcessor extends AbstractProcessor {
 
         //Add concept pattern from annotations (ConceptPattern)
         addPatternsFromAnnotations(typeElement, concept, ConceptPattern.class);
-
-        //Process direct subclasses
-        for (TypeElement subtypeElement : getDirectSubtypes(typeElement)) {
-            processTypeElement(subtypeElement, concept);
-        }
+        processDirectSubclasses(typeElement, concept);
         return concept;
     }
 
@@ -541,11 +548,12 @@ public class AnnotationProcessor extends AbstractProcessor {
             return new yajco.model.type.PrimitiveType(PrimitiveTypeConst.STRING, type);
         } else if (type.getKind() == TypeKind.DECLARED) {
             TypeElement referencedTypeElement = (TypeElement) processingEnv.getTypeUtils().asElement(type);
+            System.out.println("getSimpleType(): referencedTypeElement: "+referencedTypeElement);
             if (referencedTypeElement != null && isKnownClass(referencedTypeElement)) {
                 return new yajco.model.type.ReferenceType(processTypeElement(referencedTypeElement), referencedTypeElement);
             }
         }
-        throw new GeneratorException("Unsupported simple type " + type + " ["+type.getKind()+"]");
+        throw new GeneratorException("Unsupported simple type " + type + " [" + type.getKind() + "]");
     }
 
 //    private yajco.model.pattern.impl.Range getRange(VariableElement paramElement, TypeMirror type) {
@@ -616,7 +624,9 @@ public class AnnotationProcessor extends AbstractProcessor {
         Exclude excludeAnnotation = element.getAnnotation(Exclude.class);
         int excludeAnnotationsLength = 0;
         try {
-            if (excludeAnnotation != null) excludeAnnotation.value();
+            if (excludeAnnotation != null) {
+                excludeAnnotation.value();
+            }
         } catch (MirroredTypesException e) {
             excludeAnnotationsLength = e.getTypeMirrors().size();
         }
@@ -719,54 +729,30 @@ public class AnnotationProcessor extends AbstractProcessor {
             throw new GeneratorException("No compiler generator in class path. Include service implementation of " + CompilerGenerator.class.getName() + " in your classpath. (see java.util.ServiceLoader javadoc for details)");
         }
     }
-    
-//    private Set<FilesGenerator> findFilesGenerators() {
-//        Map<String,FilesGenerator> generators = new HashMap<String,FilesGenerator>();
-//        ServiceLoader<FilesGenerator> compilerServiceLoader = ServiceLoader.load(FilesGenerator.class, this.getClass().getClassLoader());
-//        for (FilesGenerator filesGenerator : compilerServiceLoader) {
-//            String className = filesGenerator.getClass().getCanonicalName();
-//            if ("true".equalsIgnoreCase(properties.getProperty(className, "true"))) {
-//                generators.put(className, filesGenerator);
-//            }
-//        }
-//        
-//        for (FilesGenerator filesGenerator : generators.values()) {
-//            DependsOn dependsOn = filesGenerator.getClass().getAnnotation(DependsOn.class);
-//            if (dependsOn != null) {
-//                for (String name : dependsOn.value()) {
-//                    if (!generators.containsKey(name)) {
-//                        throw new GeneratorException("Required generator "+name+" is not included in project. Required by "+filesGenerator.getClass().getCanonicalName());
-//                    }
-//                }
-//            }
-//        }
-//        
-//        return new HashSet<FilesGenerator>(generators.values());
-//    }
 
-//    private CompilerGenerator findCompilerGenerator() {
-//        ServiceLoader<CompilerGenerator> compilerServiceLoader = ServiceLoader.load(CompilerGenerator.class, this.getClass().getClassLoader());
-//        CompilerGenerator compilerGenerator = null;
-//        int count = 0;
-//        for (CompilerGenerator compGen : compilerServiceLoader) {
-//            count++;
-//            //LOG name
-//            System.out.println("Found compiler generator: " + compGen.getClass().getName() + " [" + compGen.getClass().getClassLoader().getResource(compGen.getClass().getName().replace('.', '/') + ".class") + "]");
-//            
-//            if (compilerGenerator == null) {
-//                compilerGenerator = compGen;
-//            }
-//        }
-//        if (count > 0) {
-//            if (count > 1) {
-//                // LOG WARNING
-//                System.out.println("WARNING: Found more than 1 compiler generator!!!! Will use only one.");
-//            }
-//            System.out.println("Selected compiler generator: " + compilerGenerator.getClass().getName());
-//        } else {
-//            //LOG ERROR
-//            throw new GeneratorException("No compiler generator in class path. Include service implementation of "+CompilerGenerator.class.getName()+" in your classpath.");
-//        }
-//        return compilerGenerator;
-//    }
+    private void processDirectSubclasses(TypeElement typeElement, Concept concept) {
+        //Process direct subclasses
+        System.out.print("DirectSubtypes of "+typeElement.getSimpleName()+" are: ");
+        for (TypeElement subtypeElement : getDirectSubtypes(typeElement)) {
+            System.out.print(subtypeElement.getSimpleName()+ "  ");
+            processTypeElement(subtypeElement, concept);
+        }
+        System.out.println();
+    }
+    
+    private <T> void addToListAsSet(List<T> originalList, List<T> newItems, boolean overwrite) {
+        for (T item : newItems) {
+            if (originalList.contains(item)) {
+                if (overwrite) {
+                    // dolezite je to, aby item.equals fungoval spravne
+                    originalList.remove(item); // odstrani povodny
+                    originalList.add(item); // vlozi novy
+                }
+            } else {
+                originalList.add(item);
+            }
+        }
+    }
+
+
 }

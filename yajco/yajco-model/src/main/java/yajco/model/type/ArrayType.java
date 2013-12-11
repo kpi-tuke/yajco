@@ -14,4 +14,10 @@ public class ArrayType extends ComponentType {
     public ArrayType(Type componentType, Object sourceElement) {
         super(componentType, sourceElement);
     }
+    
+    //needed for XML binding
+    @Exclude
+    private ArrayType() {
+        super(null);
+    }
 }

@@ -17,8 +17,28 @@ public class SkipDef extends YajcoModelElement {
         super(sourceElement);
         this.regexp = regexp;
     }
+    
+    //needed for XML binding
+    @Exclude
+    private SkipDef() {
+        super(null);
+    }
 
     public String getRegexp() {
         return regexp;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof SkipDef)) {
+            return false;
+        }
+        SkipDef that = (SkipDef) obj;
+        if (this.regexp == null && that.regexp == null) {
+            return true;
+        }
+        return this.regexp.equals(that.regexp);
+    }
+    
+    
 }

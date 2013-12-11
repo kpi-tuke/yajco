@@ -4,7 +4,7 @@ import yajco.annotation.Exclude;
 
 public class TokenPart extends YajcoModelElement implements NotationPart {
 
-    private final String token;
+    private String token;
 
     public TokenPart(String stringValue) {
         super(null);
@@ -15,6 +15,12 @@ public class TokenPart extends YajcoModelElement implements NotationPart {
     public TokenPart(String token, Object sourceElement) {
         super(sourceElement);
         this.token = token;
+    }
+    
+    //needed for XML binding
+    @Exclude
+    private TokenPart() {
+        super(null);
     }
 
     public String getToken() {

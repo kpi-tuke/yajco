@@ -6,8 +6,8 @@ import yajco.annotation.Token;
 
 public class TokenDef extends YajcoModelElement {
 
-    private final String name;
-    private final String regexp;
+    private String name;
+    private String regexp;
 
     public TokenDef(String name, @Before("=") @Token("STRING_VALUE") String regexp) {
         super(null);
@@ -21,6 +21,12 @@ public class TokenDef extends YajcoModelElement {
         this.name = name;
         this.regexp = regexp;
     }
+    
+    //needed for XML binding
+    @Exclude
+    private TokenDef() {
+        super(null);
+    }
 
     public String getName() {
         return name;
@@ -29,4 +35,24 @@ public class TokenDef extends YajcoModelElement {
     public String getRegexp() {
         return regexp;
     }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null || !(obj instanceof TokenDef)) {
+            return false;
+        }
+        TokenDef that = (TokenDef) obj;
+        if (this.name == null && that.name == null) {
+            return true;
+        }
+        return this.name.equalsIgnoreCase(that.name);
+    }
+
+    @Override
+    public int hashCode() {
+        int hash = 3;
+        hash = 67 * hash + (this.name != null ? this.name.hashCode() : 0);
+        return hash;
+    }
+    
 }

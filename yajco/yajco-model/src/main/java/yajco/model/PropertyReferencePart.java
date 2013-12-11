@@ -29,6 +29,12 @@ public class PropertyReferencePart extends BindingNotationPart {
         super(sourceElement);
         this.property = property;
     }
+    
+    //needed for XML binding
+    @Exclude
+    private PropertyReferencePart() {
+        super(null);
+    }
 
     public Property getProperty() {
         return property;

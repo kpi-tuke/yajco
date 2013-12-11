@@ -14,4 +14,10 @@ public class ListType extends ComponentType {
     public ListType(Type componentType, Object sourceElement) {
         super(componentType, sourceElement);
     }
+    
+    //needed for XML binding
+    @Exclude
+    private ListType() {
+        super(null);
+    }
 }

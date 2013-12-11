@@ -38,6 +38,12 @@ public class References extends NotationPartPattern {
         this.concept = concept;
         this.property = property;
     }
+    
+    //needed for XML binding
+    @Exclude
+    private References() {
+        super(null);
+    }
 
     public Concept getConcept() {
         return concept;
