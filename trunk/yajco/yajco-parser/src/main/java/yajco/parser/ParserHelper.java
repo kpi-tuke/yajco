@@ -10,6 +10,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.Reader;
 import java.net.URI;
+import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 import javax.annotation.processing.Filer;
@@ -23,6 +24,7 @@ import yajco.generator.FilesGenerator;
 import yajco.generator.parsergen.CompilerGenerator;
 import yajco.generator.util.ServiceFinder;
 import yajco.model.Language;
+import yajco.model.utilities.XMLLanguageFormatHelper;
 
 public class ParserHelper {
 
@@ -31,17 +33,21 @@ public class ParserHelper {
     private Properties properties;
 
     public ParserHelper(Reader reader, Properties properties) {
+        this(properties);
         this.reader = reader;
+    }
+
+    public ParserHelper(File file, Properties properties) throws IOException {
+        this(new FileReader(file), properties);
+    }
+
+    public ParserHelper(Properties properties) {
         if (properties == null) {
             this.properties = new Properties();
         } else {
             this.properties = properties;
         }
         loadProperties();
-    }
-
-    public ParserHelper(File file, Properties properties) throws IOException {
-        this(new FileReader(file), properties);
     }
 
     private void loadProperties() {
@@ -64,37 +70,53 @@ public class ParserHelper {
     }
 
     public Language parse() {
-        try {
-            YajcoParser parser = new YajcoParser();
-            Language language = parser.parse(reader);
-            return language;
-        } catch (LALRParseException ex) {
-            throw new RuntimeException(ex);
+        if (reader == null) {
+            List<Language> languages = XMLLanguageFormatHelper.getAllLanguagesFromXML();
+            if (languages.size() > 0) {
+                System.out.println("Loaded external language specifications: "+languages.size());
+                Language composedLanguage = new Language(null);
+                for (Language incLang : languages) {
+                    
+                    addToListAsSet(composedLanguage.getSkips(), incLang.getSkips(), true);
+                    addToListAsSet(composedLanguage.getTokens(), incLang.getTokens(), true);
+                    composedLanguage.getConcepts().addAll(incLang.getConcepts());
+                }
+                return composedLanguage;
+            }
+        } else {
+            try {
+                YajcoParser parser = new YajcoParser();
+                Language language = parser.parse(reader);
+                return language;
+            } catch (LALRParseException ex) {
+                throw new RuntimeException(ex);
+            }
         }
+        throw new IllegalStateException("Parsing needs proper input or included JAR with Yajco language XML file");
     }
-    
+
     public Language parseAndGenerate() {
         return parseAndGenerate(null, true);
     }
-    
+
     public Language parseAndGenerate(boolean generateCompiler) {
         return parseAndGenerate(null, generateCompiler);
     }
-    
+
     public Language parseAndGenerate(String destinationDir, boolean generateCompiler) {
         Language language = parse();
         generate(destinationDir, language, generateCompiler);
         return language;
     }
-    
+
     public void generate(Language language) {
         generate(null, language, true);
     }
-    
+
     public void generate(String destinationDir, Language language) {
         generate(destinationDir, language, true);
     }
-    
+
     public void generate(String destinationDir, Language language, boolean generateCompiler) {
         //System.out.println("Properties: "+properties);
         Filer filer = new MySimpleFiler(destinationDir);
@@ -105,7 +127,7 @@ public class ParserHelper {
                 compilerGenerator.generateFiles(language, filer, properties);
             }
         }
-        
+
         Set<FilesGenerator> filesGenerators = ServiceFinder.findFilesGenerators(properties);
         for (FilesGenerator filesGenerator : filesGenerators) {
             filesGenerator.generateFiles(language, filer, properties);
@@ -113,7 +135,7 @@ public class ParserHelper {
     }
 
     public class MySimpleFiler implements Filer {
-        
+
         String parentDir = null;
 
         public MySimpleFiler() {
@@ -210,6 +232,20 @@ public class ParserHelper {
         @Override
         public Reader openReader(boolean ignoreEncodingErrors) throws IOException {
             return new FileReader(file);
+        }
+    }
+
+    private <T> void addToListAsSet(List<T> originalList, List<T> newItems, boolean overwrite) {
+        for (T item : newItems) {
+            if (originalList.contains(item)) {
+                if (overwrite) {
+                    // dolezite je to, aby item.equals fungoval spravne
+                    originalList.remove(item); // odstrani povodny
+                    originalList.add(item); // vlozi novy
+                }
+            } else {
+                originalList.add(item);
+            }
         }
     }
 }

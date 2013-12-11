@@ -17,7 +17,7 @@ import yajco.model.utilities.Utilities;
 public class Concept extends PatternSupport<ConceptPattern> {
 
     @Identifier
-    private final String name;
+    private String name;
     //TODO: mnozina superconceptov
     private Concept parent;
     private List<Property> abstractSyntax = new ArrayList<Property>();
@@ -173,6 +173,12 @@ public class Concept extends PatternSupport<ConceptPattern> {
         this.name = name;
         this.abstractSyntax = new ArrayList<Property>();
         this.concreteSyntax = new ArrayList<Notation>();
+    }
+    
+    //needed for XML binding
+    @Exclude
+    private Concept(){
+        super(null);
     }
 
     public String getName() {

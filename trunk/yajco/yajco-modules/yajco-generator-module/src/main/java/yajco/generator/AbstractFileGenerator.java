@@ -12,6 +12,8 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.processing.Filer;
 import javax.tools.FileObject;
+import javax.tools.JavaFileManager;
+import javax.tools.StandardLocation;
 import yajco.generator.util.Utilities;
 import yajco.model.Language;
 
@@ -34,7 +36,8 @@ public abstract class AbstractFileGenerator implements FilesGenerator {
         this.properties = properties;
 
         if (shouldGenerate()) {
-            File file = getFileToWrite(language, filer, getPackageName(), getClassName());
+            boolean isJavaSource = getClassName() != null && !getClassName().isEmpty();
+            File file = getFileToWrite(language, filer, getPackageName(), isJavaSource?getClassName():getFileName(), isJavaSource);
             generate(language, file);
         }
     }
@@ -44,7 +47,9 @@ public abstract class AbstractFileGenerator implements FilesGenerator {
         try {
             writer = new OutputStreamWriter(new FileOutputStream(file), Charset.forName("UTF-8"));
             generate(language, writer);
-            Utilities.formatCode(file);
+            if (file.getName().toLowerCase().endsWith(".class")) {
+                Utilities.formatCode(file);
+            }
         } catch (IOException ex) {
             throw new GeneratorException("Cannot write to file " + file.getAbsolutePath() + " (" + ex.getMessage() + ")", ex);
         } finally {
@@ -59,6 +64,10 @@ public abstract class AbstractFileGenerator implements FilesGenerator {
     }
 
     protected File getFileToWrite(Language language, Filer filer, String packageName, String fileName) {
+        return getFileToWrite(language, filer, packageName, fileName, true);
+    }
+    
+    protected File getFileToWrite(Language language, Filer filer, String packageName, String fileName, boolean isSource) {
 //        if (!directory.isDirectory()) {
 //            throw new GeneratorException("Supplied file argument is not directory: " + directory.getAbsolutePath());
 //        }
@@ -67,7 +76,14 @@ public abstract class AbstractFileGenerator implements FilesGenerator {
         //Utilities.createDirectories(file, false);
         FileObject fileObject;
         try {
-            fileObject = filer.createSourceFile(yajco.model.utilities.Utilities.getLanguagePackageName(language) + "." + packageName + "." + fileName);
+            boolean usePackageName = packageName != null && !packageName.isEmpty();
+            String fullPackage = usePackageName ? yajco.model.utilities.Utilities.getLanguagePackageName(language) + "." + packageName : yajco.model.utilities.Utilities.getLanguagePackageName(language);
+            if (isSource) {
+                fileObject = filer.createSourceFile(fullPackage + "." + fileName);
+            } else {
+                
+                fileObject = filer.createResource(StandardLocation.CLASS_OUTPUT,fullPackage,fileName);
+            }
             fileObject.openWriter().close();
         } catch (IOException ex) {
             throw new GeneratorException("cannot create file " + packageName + "." + fileName, ex);

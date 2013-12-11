@@ -7,22 +7,28 @@ import yajco.model.pattern.NotationPartPattern;
 
 public class Token extends NotationPartPattern {
 
-	private final String name;
+    private String name;
 
-	@Before({"Token", "("})
-	@After(")")
-	public Token(@yajco.annotation.Token("STRING_VALUE") String name) {
-		super(null);
-		this.name = name;
-	}
+    @Before({"Token", "("})
+    @After(")")
+    public Token(@yajco.annotation.Token("STRING_VALUE") String name) {
+        super(null);
+        this.name = name;
+    }
 
-	@Exclude
-	public Token(String name, Object sourceElement) {
-		super(sourceElement);
-		this.name = name;
-	}
+    @Exclude
+    public Token(String name, Object sourceElement) {
+        super(sourceElement);
+        this.name = name;
+    }
 
-	public String getName() {
-		return name;
-	}
+    //needed for XML binding
+    @Exclude
+    private Token() {
+        super(null);
+    }
+
+    public String getName() {
+        return name;
+    }
 }

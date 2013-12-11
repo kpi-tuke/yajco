@@ -34,6 +34,12 @@ public class Notation extends PatternSupport<NotationPattern> {
         super(sourceElement);
         parts = new ArrayList<NotationPart>();
     }
+    
+    //needed for XML binding
+    @Exclude
+    private Notation() {
+        super(null);
+    }
 
     public List<NotationPart> getParts() {
         return parts;

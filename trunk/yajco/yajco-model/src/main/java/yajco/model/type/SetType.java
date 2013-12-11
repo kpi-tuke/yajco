@@ -14,4 +14,10 @@ public class SetType extends ComponentType {
     public SetType(Type componentType, Object sourceElement) {
         super(componentType, sourceElement);
     }
+    
+    //needed for XML binding
+    @Exclude
+    private SetType() {
+        super(null);
+    }
 }

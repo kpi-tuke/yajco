@@ -16,8 +16,8 @@ import yajco.model.pattern.PropertyPattern;
 public class Property extends PatternSupport<PropertyPattern> {
 
     @Identifier(unique = "../yajco.model.Concept")
-    private final String name;
-    private final Type type;
+    private String name;
+    private Type type;
 
     public Property(
             String name,
@@ -41,6 +41,12 @@ public class Property extends PatternSupport<PropertyPattern> {
         super(sourceElement);
         this.name = name;
         this.type = type;
+    }
+    
+    //needed for XML binding
+    @Exclude
+    private Property() {
+        super(null);
     }
 
     public String getName() {

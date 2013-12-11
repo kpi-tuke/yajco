@@ -15,9 +15,9 @@ import yajco.model.pattern.impl.Token;
 public class Language extends YajcoModelElement {
 
     private String name;
-    private List<Concept> concepts;
-    private List<TokenDef> tokens;
-    private List<SkipDef> skips;
+    private List<Concept> concepts = new ArrayList<Concept>();
+    private List<TokenDef> tokens = new ArrayList<TokenDef>();
+    private List<SkipDef> skips = new ArrayList<SkipDef>();
     private Properties settings = new Properties();
 
     public Language(
@@ -72,6 +72,12 @@ public class Language extends YajcoModelElement {
     public Language(Object sourceElement) {
         super(sourceElement);
         concepts = new ArrayList<Concept>();
+    }
+    
+    //needed for XML binding
+    @Exclude
+    private Language(){
+        super(null);
     }
 
     public String getName() {

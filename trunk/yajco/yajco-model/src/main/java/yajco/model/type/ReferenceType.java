@@ -17,6 +17,12 @@ public class ReferenceType extends Type {
         super(sourceElement);
         this.concept = concept;
     }
+    
+    //needed for XML binding
+    @Exclude
+    private ReferenceType() {
+        super(null);
+    }
 
     public Concept getConcept() {
         return concept;

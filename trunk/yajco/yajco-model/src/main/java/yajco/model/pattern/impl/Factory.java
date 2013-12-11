@@ -7,22 +7,28 @@ import yajco.model.pattern.NotationPattern;
 
 public class Factory extends NotationPattern {
 
-	private final String name;
+    private String name;
 
-	@Before({"Factory", "("})
-	@After(")")
-	public Factory(@Before({"method", "="}) String name) {
-		super(null);
-		this.name = name;
-	}
+    @Before({"Factory", "("})
+    @After(")")
+    public Factory(@Before({"method", "="}) String name) {
+        super(null);
+        this.name = name;
+    }
 
-	@Exclude
-	public Factory(String name, Object sourceElement) {
-		super(sourceElement);
-		this.name = name;
-	}
+    @Exclude
+    public Factory(String name, Object sourceElement) {
+        super(sourceElement);
+        this.name = name;
+    }
 
-	public String getName() {
-		return name;
-	}
+    //needed for XML binding
+    @Exclude
+    private Factory() {
+        super(null);
+    }
+
+    public String getName() {
+        return name;
+    }
 }

@@ -11,8 +11,8 @@ import yajco.model.pattern.NotationPartPattern;
 
 public class LocalVariablePart extends BindingNotationPart {
 
-    private final String name;
-    private final Type type;
+    private String name;
+    private Type type;
 
     public LocalVariablePart(
             String name,
@@ -36,6 +36,12 @@ public class LocalVariablePart extends BindingNotationPart {
         super(sourceElement);
         this.name = name;
         this.type = type;
+    }
+    
+    //needed for XML binding
+    @Exclude
+    private LocalVariablePart() {
+        super(null);
     }
 
     public String getName() {
