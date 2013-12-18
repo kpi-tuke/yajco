@@ -1,8 +1,10 @@
 package yajco.model;
 
-public abstract class YajcoModelElement {
+import java.io.Serializable;
 
-    private Object sourceElement;
+public abstract class YajcoModelElement implements Serializable{
+
+    private final Object sourceElement;
 
     public YajcoModelElement(Object sourceElement) {
         this.sourceElement = sourceElement;
