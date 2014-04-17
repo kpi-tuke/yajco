@@ -15,7 +15,7 @@ import yajco.model.pattern.PropertyPattern;
 //Dodat tu este Range
 public class Property extends PatternSupport<PropertyPattern> {
 
-    @Identifier(unique = "../yajco.model.Concept")
+    @Identifier(unique = "../yajco.model.Property")
     private String name;
     private Type type;
 
