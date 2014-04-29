@@ -33,8 +33,8 @@ public class PrettyPrinterGenerator extends AbstractFileGenerator {
 
     private static final String PROPERTY_ENABLER = "printer";
     protected static final String TEMPLATE_PACKAGE = "templates";
-    protected static final String PRINTER_PACKAGE = "printer";
-    protected static final String PRINTER_CLASS_NAME = "Printer";
+    public static final String PRINTER_PACKAGE = "printer";
+    public static final String PRINTER_CLASS_NAME = "Printer";
     private final String template;
     protected final VelocityEngine velocityEngine = new VelocityEngine();
 
@@ -85,6 +85,8 @@ public class PrettyPrinterGenerator extends AbstractFileGenerator {
             context.put("enumPatternClassName", yajco.model.pattern.impl.Enum.class.getCanonicalName());
             context.put("backslash", "\\");
             context.put("doubleBackslash", "\\\\");
+            context.put("quote","\"");
+            context.put("escapedQuote","\\\"");
 
             velocityEngine.evaluate(context, writer, "", reader);
 
