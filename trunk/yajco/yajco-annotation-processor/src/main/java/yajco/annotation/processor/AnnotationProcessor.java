@@ -67,6 +67,8 @@ public class AnnotationProcessor extends AbstractProcessor {
              * = new Language()
              */;
 
+    private Set<Concept> conceptsToProcess = new HashSet<Concept>(); // set for concepts imported from previous JARs and needed for full analysis
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
 
@@ -148,7 +150,6 @@ public class AnnotationProcessor extends AbstractProcessor {
                     properties.setProperty("yajco.mainNode", parserAnnotation.mainNode());
                 }
 
-
                 //Extract the main element, package or type can be annotated with @Parser
                 ElementKind parserAnnotationElemKind = parserAnnotationElement.getKind();
                 TypeElement mainElement;
@@ -193,7 +194,6 @@ public class AnnotationProcessor extends AbstractProcessor {
 //                long endPosition = sc.getEndPosition(cut, tree);
 //                System.out.println("uri=" + cut.getSourceFile().toUri());
 //                System.out.printf("Position (%d,%d) to (%d,%d)\n", lm.getLineNumber(startPosition), lm.getColumnNumber(startPosition), lm.getLineNumber(endPosition), lm.getColumnNumber(endPosition));
-
                 language = new Language(mainElement);
                 //add main package name == language name
                 String languageName = mainElementName.substring(0, mainElementName.lastIndexOf('.'));
@@ -203,17 +203,22 @@ public class AnnotationProcessor extends AbstractProcessor {
                 }
                 //add language concepts from included JARs
                 List<Language> includedLanguages = XMLLanguageFormatHelper.getAllLanguagesFromXML();
-                System.out.println("Loaded external language specifications: "+includedLanguages.size());
+                System.out.println("Loaded external language specifications: " + includedLanguages.size());
                 for (Language incLang : includedLanguages) {
-                    System.out.println("Loaded from JAR: "+incLang.getConcepts());
+                    System.out.print("Loaded from JAR: ");
+                    for (Concept concept : incLang.getConcepts()) {
+                        System.out.print(concept.getName() + ", ");
+                    }
+                    System.out.println();
+
                     addToListAsSet(language.getSkips(), incLang.getSkips(), true);
                     addToListAsSet(language.getTokens(), incLang.getTokens(), true);
+                    conceptsToProcess.addAll(incLang.getConcepts());
                     language.getConcepts().addAll(incLang.getConcepts());
                 }
-                
 
                 //Start processing with the main element
-                System.out.println(" ? mainElement ? : "+mainElement);
+                System.out.println(" ? mainElement ? : " + mainElement);
                 processTypeElement(mainElement);
 
                 // add tokens and skips into language
@@ -236,15 +241,16 @@ public class AnnotationProcessor extends AbstractProcessor {
                 System.out.println("--------------------------------------------------------------------------------------------------------");
 
                 //generate compiler
-                String parserClassName = parserAnnotation.className();
-                generateCompiler(parserClassName);
+                if (!("false".equalsIgnoreCase(properties.getProperty("yajco.generateParser")))) {
+                    String parserClassName = parserAnnotation.className();
+                    generateCompiler(parserClassName);
+                }
 
                 // generates all new files
 //                GeneratorHelper generatorHelper = new GeneratorHelper(language, targetDirectory, properties);
 //                if (properties.containsKey("generateTools") && "true".equals(properties.getProperty("generateTools"))) {
 //                    generatorHelper.generateAllExceptModelClassFiles();
 //                }
-
                 //generate all tools
                 Set<FilesGenerator> tools = ServiceFinder.findFilesGenerators(properties);
                 for (FilesGenerator filesGenerator : tools) {
@@ -270,7 +276,7 @@ public class AnnotationProcessor extends AbstractProcessor {
 
     private Concept processTypeElement(TypeElement typeElement, Concept superConcept) {
         String name = typeElement.getQualifiedName().toString();
-        System.out.println("---->>> Name: "+name);
+        System.out.println("---->>> Name: " + name + " [kind:" + typeElement.getKind() + "]");
         if (excludes.contains(name)) {
             //System.out.println("---->> NACHADZA SA V EXCLUDE TAK HO RUSIM !!!!");
             return null;
@@ -284,18 +290,23 @@ public class AnnotationProcessor extends AbstractProcessor {
                 concept.setParent(superConcept);
             }
             //TODO:toto som tu doplnil len docasne na vyskusanie pre podporu kompozicie jazykov, treba to cele prehodnotit, lebo sa to nachadza aj na konci metody
-            processDirectSubclasses(typeElement, concept);
-            return concept;
+            //processDirectSubclasses(typeElement, concept);
+            if (conceptsToProcess.contains(concept)) {
+                conceptsToProcess.remove(concept);
+            } else {
+                return concept;
+            }
+        } else {
+            //Create concept
+            concept = new Concept(name, typeElement);
+            concept.setParent(superConcept); //Set parent
+            language.addConcept(concept);
         }
-
-        //Create concept
-        concept = new Concept(name, typeElement);
-        concept.setParent(superConcept); //Set parent
-        language.addConcept(concept);
 
         if (typeElement.getKind() == ElementKind.ENUM) { //Enum type
             processEnum(concept, typeElement);
         } else if (typeElement.getKind() == ElementKind.CLASS) { //Class
+            System.out.println(" modifiers: " + typeElement.getModifiers());
             if (typeElement.getModifiers().contains(Modifier.ABSTRACT)) { //Abstract class
                 processAbstractClass(concept, typeElement);
             } else {  //Concrete class
@@ -335,7 +346,9 @@ public class AnnotationProcessor extends AbstractProcessor {
 
     private void processConcreteClass(Concept concept, TypeElement classElement) {
         //Abstract syntax
+        System.out.println("starting ProcessConcreteClass method");
         for (Element element : classElement.getEnclosedElements()) {
+            System.out.println("- enclosedElement: " + element.getSimpleName().toString() + "[" + element.getKind() + "]");
             if (element.getKind().isField()) {
                 System.out.println("+++ " + classElement.toString() + "> " + element.toString());
                 VariableElement fieldElement = (VariableElement) element;
@@ -548,7 +561,7 @@ public class AnnotationProcessor extends AbstractProcessor {
             return new yajco.model.type.PrimitiveType(PrimitiveTypeConst.STRING, type);
         } else if (type.getKind() == TypeKind.DECLARED) {
             TypeElement referencedTypeElement = (TypeElement) processingEnv.getTypeUtils().asElement(type);
-            System.out.println("getSimpleType(): referencedTypeElement: "+referencedTypeElement);
+            System.out.println("getSimpleType(): referencedTypeElement: " + referencedTypeElement);
             if (referencedTypeElement != null && isKnownClass(referencedTypeElement)) {
                 return new yajco.model.type.ReferenceType(processTypeElement(referencedTypeElement), referencedTypeElement);
             }
@@ -586,6 +599,9 @@ public class AnnotationProcessor extends AbstractProcessor {
 
     private boolean isKnownClass(Element element) {
         if (element.getKind().isClass() || element.getKind().isInterface()) {
+            if (language.getConcept(((TypeElement) element).getQualifiedName().toString()) != null) {
+                return true;
+            }
             for (Element elem : roundEnv.getRootElements()) {
                 if ((elem.getKind().isClass() || elem.getKind().isInterface()) && elem.equals(element)) {
                     return true;
@@ -732,14 +748,14 @@ public class AnnotationProcessor extends AbstractProcessor {
 
     private void processDirectSubclasses(TypeElement typeElement, Concept concept) {
         //Process direct subclasses
-        System.out.print("DirectSubtypes of "+typeElement.getSimpleName()+" are: ");
+        System.out.print("DirectSubtypes of " + typeElement.getSimpleName() + " are: ");
         for (TypeElement subtypeElement : getDirectSubtypes(typeElement)) {
-            System.out.print(subtypeElement.getSimpleName()+ "  ");
+            System.out.print(subtypeElement.getSimpleName() + "  ");
             processTypeElement(subtypeElement, concept);
         }
         System.out.println();
     }
-    
+
     private <T> void addToListAsSet(List<T> originalList, List<T> newItems, boolean overwrite) {
         for (T item : newItems) {
             if (originalList.contains(item)) {
@@ -753,6 +769,5 @@ public class AnnotationProcessor extends AbstractProcessor {
             }
         }
     }
-
 
 }
