@@ -36,8 +36,20 @@ public class $className extends ${visitorClassName}<PrintWriter> {
     protected void visit${Utilities.getMethodPartName($nameMap, $concept)}(${Utilities.getClassName($nameMap, $concept)} ${Utilities.toLowerCaseIdent($concept.conceptName)}, PrintWriter p) {
  #set( $conceptPatterns = ${concept.patterns} )
  #set( $hasEnumPattern = ${Utilities.hasClassInList(${conceptPatterns},${enumPatternClassName})} )
+ #set( $hasClassIndentPattern = ${Utilities.hasClassInList(${conceptPatterns},${indentPatternClassName})} )
+ #set( $classIndentPattern = ${Utilities.getObjectFromList(${conceptPatterns},${indentPatternClassName})} )
+ #set( $hasClassNewLinePattern = ${Utilities.hasClassInList(${conceptPatterns},${newLinePatternClassName})} )
+#if( $hasClassIndentPattern )
+        increaseIndent(${classIndentPattern.level});
+#end
+#if( $hasClassNewLinePattern )
+        newLine(p);
+#end
 #if ( $hasEnumPattern )
         printLiteral(${Utilities.toLowerCaseIdent($concept.conceptName)}.name(), p);
+ #if( $hasClassIndentPattern )
+        decreaseIndent(${classIndentPattern.level});
+ #end
     }
 #else
  #set( $hasParenthesesPattern = ${Utilities.hasClassInList(${conceptPatterns},${parenthesesPatternClassName})} )
@@ -142,6 +154,9 @@ public class $className extends ${visitorClassName}<PrintWriter> {
  #if( $hasParenthesesPattern )
         printNonSpacedLiteral("${parenthesesPattern.right}", p);
  #end
+ #if( $hasClassIndentPattern )
+        decreaseIndent(${classIndentPattern.level});
+ #end
     }
 
  #if ( $notationCount > 1 )
@@ -187,6 +202,7 @@ public class $className extends ${visitorClassName}<PrintWriter> {
  #end
 #end
 #end
+##koniec
     protected void newLine(PrintWriter p) {
         p.println();
         for (int i = 0; i < indent; i++) {
@@ -291,7 +307,7 @@ public class $className extends ${visitorClassName}<PrintWriter> {
     private Map<String, String> tokens = new HashMap<String, String>();
     {
 #foreach( $token in $language.tokens)
-        tokens.put("${token.name}".toUpperCase(), "${token.regexp.replace($backslash, $doubleBackslash)}");
+        tokens.put("${token.name}".toUpperCase(), "${token.regexp.replace($backslash, $doubleBackslash).replace($quote, $escapedQuote)}");
 #end
     }
 }
