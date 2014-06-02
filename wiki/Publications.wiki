@@ -1,0 +1,13 @@
+#summary Summary of YAJCo
+#labels Featured
+
+=YAJCo=
+*YAJCo* (Yet Another Java Compiler compiler) is a *language parser generator based on annotated model*.
+
+==Our approach==
+Our goal was not to introduce new parsing methods. We have integrated existing methods into a tool that allows language developer to work on higher level of abstraction with language definition that is independent on parsing algorithm and based on abstract syntax.
+
+YAJCo relies on Java as a language for definition of language model and its semantics. Language model consists of annotated Java classes and relations between them. The model corresponds to abstract syntax of the language where each class represents a language concept.
+
+==Architecture==
+https://yajco.googlecode.com/svn/wiki/schema.png
