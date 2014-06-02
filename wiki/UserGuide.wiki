@@ -3,5 +3,4 @@
 
 = User Guide =
 
-*Work in progress - return on June 6 2014*
-
+*Recreating user guide* for new version of tool, please return on June 6 2014
