@@ -1,5 +1,5 @@
 #summary User guide for YAJCo tool.
-#labels guide,Featured
+#labels Phase-Deploy,Featured
 
 = User Guide =
 
