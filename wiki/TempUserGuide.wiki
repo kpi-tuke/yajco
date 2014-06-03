@@ -1,13 +1,57 @@
 #summary User Guide for YAJCo tool.
 
+<wiki:toc max_depth="3" />
+
 = User Guide =
 
-TEMPORARY USER GUIDE
+_TEMPORARY USER GUIDE_
 
-WORK IN PROGRESS
+_WORK IN PROGRESS_
 
+==Main annotations==
 
-===Restrictions===
+===@Before===
+text
+===@After===
+text
+===@Token===
+text
+===@Identifier===
+text
+===@References===
+text
+===@Separator===
+text
+===@Range===
+text
+===@Operator===
+text
+===@Exclude===
+text
+===@!FactoryMethod===
+text
+===@Parentheses===
+text
+
+==Config annotations==
+text
+===@Parser===
+text
+===@!TokenDef===
+text
+===@Skip===
+text
+===@Option===
+text
+
+==Printer annotations==
+text
+===@!NewLine===
+text
+===@Indent===
+text
+
+==Restrictions==
 
   * Language concept class must be inside a package. Default package classes are not permitted.
 {{{
