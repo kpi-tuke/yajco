@@ -495,8 +495,10 @@ public class ReferenceResolver {
     private void invokePostConstructMethods() {
         List<Object> toPostConstruct = new ArrayList<Object>(registeredObjects);
         toPostConstruct.removeAll(postConstructExecutedObjects);
-        toPostConstruct.removeAll(nodesToResolve);
-        
+        for (ReferenceItem ri : nodesToResolve) {
+            toPostConstruct.remove(ri.referencingObject);
+        }
+
         for (Object o : toPostConstruct) {
             Class<?> clazz = o.getClass();
             List<Method> methods;
