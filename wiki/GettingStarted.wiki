@@ -75,7 +75,7 @@ mvn package
 and you get your parser generated instantly. You can check directory `target/generated-sources/annotations` in your project directory for generated parser.
 
 ===Running parser===
-It's not fun having a parser such promtly and not being able to use it. Let's create a main class for actual parsing of some textual input.
+It's not fun having a parser such promtly and not being able to use it. Let's create a main class for actual parsing of some textual input. Generated parser is accessible through class *`LALRSimpleIdentifierParser`*, as it has default name created using root concept name (`SimpleIdentifier`).
 
 {{{
 import mylang.SimpleIdentifier;
@@ -83,7 +83,7 @@ import mylang.parser.*;
 
 public class MainClass {
 
-    public static void main(String[] args) throws ParseException{
+    public static void main(String[] args) throws ParseException {
         String input = "id superman";
         System.out.println("Going to parse: '"+input+"'");
 
@@ -94,3 +94,20 @@ public class MainClass {
     }
 }
 }}}
+
+It is possible to finally run the example using maven command:
+
+{{{
+mvn exec:java -Dexec.mainClass="MainClass"
+}}}
+
+You should be able to see results in standard output:
+
+{{{
+Going to parse: 'id superman'
+Parsed identifier: superman
+}}}
+
+_*Congratulations*, you have created your first simple language using nothing else, just plain Java classes._
+
+You can download a [https://yajco.googlecode.com/svn/examples/yajco-example-gettingStarted.zip complete source code of getting started example] and you can have a look at a [Examples more complex examples].
