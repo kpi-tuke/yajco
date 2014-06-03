@@ -7,9 +7,16 @@ TEMPORARY USER GUIDE
 WORK IN PROGRESS
 
 
-Restrictions:
+===Restrictions===
 
   * Language concept class must be inside a package. Default package classes are not permitted.
+{{{
+OK:
+  yajco.example.Concept
+
+NOT OK:
+  ConceptWithoutPackage
+}}}
   * Each language concept class must be in the same package as main (root) language concept or in subpackages. It is not possible to have classes representing language concepts in completely different packages.
 {{{
 OK:
