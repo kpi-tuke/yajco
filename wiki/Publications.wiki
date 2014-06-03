@@ -3,7 +3,7 @@
 
 =Publications=
 
-Published publications about YAJCo tool
+Published papers concerning YAJCo tool
 
   * Chodarev, S.; Lakatoš, D.; Porubän, J.; Kollár, J., *Language Composition based on the Composition of Concepts*, Proceedings of the Twelfth International Conference on Informatics: Informatics’2013, Spišská Nová Ves, Slovakia, November 5-7, 2013, pp. 133-138.
   * Porubän, J., Forgáč, M., Sabo, M., Běhálek, M.: *Annotation Based Parser Generator*. Computer Science and Information Systems, Vol. 7, No. 2,pp. 291-307. (2010).
