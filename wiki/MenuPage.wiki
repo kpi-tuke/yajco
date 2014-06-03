@@ -1,5 +1,6 @@
  * [Home Home]
  * [GettingStarted Getting started]
+ * [Download Download]
  * [UserGuide User Guide]
  * [Publications Publications]
  * [ContactUs Contact us]
