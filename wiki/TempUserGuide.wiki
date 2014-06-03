@@ -74,4 +74,15 @@ NOT OK:
   yajco.special.DifferentConcept
   com.google.SearchConcept
 }}}
- 
+
+==IDE how-to==
+Using Maven project with YAJCo in most common IDE can provide a lot faster programming, but there are also some possible problems.
+
+===Netbeans===
+text
+
+===IntelliJ IDEA===
+text
+
+===Eclipse===
+text 
