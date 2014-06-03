@@ -1,0 +1,14 @@
+#summary Getting started with YAJCo
+
+= Getting started =
+
+You can start using YAJCo parser generator tool by following the steps descibed below. If you prefer to use some existing examples follow instructions in [Examples examples] page.
+
+== Maven builds ==
+
+*Recommended way of using YAJCo is with Maven project.* YAJCo tool consists of plenty modules and dependencies, which can be bothersome to include in project otherwise.
+
+Add your content here.  Format your content with:
+  * Text in *bold* or _italic_
+  * Headings, paragraphs, and lists
+  * Automatic links to other wiki pages
