@@ -8,24 +8,27 @@ You can start using YAJCo parser generator tool by following the steps descibed 
 
 *Recommended way of using YAJCo is within Maven project.* YAJCo tool consists of plenty modules and dependencies, which can be bothersome to include in project otherwise. If you have not used Maven builds in Java, you need to [http://maven.apache.org/ download and install Maven] and we recommend to get to know a little about how Maven works.
 
+=== Prepare Java Maven project ===
   # Create simple Java Maven project. You can use following command or use any of your prefered IDE.
 {{{
 mvn archetype:create 
-  -DgroupId=[your project's group id]
-  -DartifactId=[your project's artifact id]
+  -DgroupId=sk.tuke.yajco.example
+  -DartifactId=yourExampleName
   -DarchetypeArtifactId=maven-archetype-quickstart
 }}}
-  # Add following dependencies to project `pom.xml`
+  # Add following maven dependencies to project `pom.xml`
+    * `sk.tuke.yajco:yajco-annotation-processor:0.5.9`
+    * `sk.tuke.yajco:yajco-beaver-parser-generator-module:0.5.9`
 {{{
 <dependencies>
     <dependency>
         <groupId>sk.tuke.yajco</groupId>
-        <artifactId>yajco-beaver-parser-generator-module</artifactId>
+        <artifactId>yajco-annotation-processor</artifactId>
         <version>0.5.9</version>
     </dependency>
     <dependency>
         <groupId>sk.tuke.yajco</groupId>
-        <artifactId>yajco-annotation-processor</artifactId>
+        <artifactId>yajco-beaver-parser-generator-module</artifactId>
         <version>0.5.9</version>
     </dependency>
 </dependencies>
@@ -37,5 +40,25 @@ mvn archetype:create
     <maven.compiler.target>1.6</maven.compiler.target>
 </properties>
 }}}
-  # next
-test
+
+=== Create a language model ===
+The following class defines a very simple YAJCo language specification. We will create a language, which starts with `id` keyword followed by identifier consisting of small latin characters. This is a valid language sentence:
+{{{
+id superman
+}}}
+Language will consists of one language concept called *`SimpleIdentifier`*. We will implement it as a Java class with the same name. In order to specify main (root) concept of language, it is needed to mark it with `@Parser` annotation. Each constructor represents concrete syntax of a language. Annotation `@Before` serves for specifying a keyword `id` as a required word before identifier. Identifier consists of small latin characters, which is specified by regular expression inside `@Token` annotation.
+{{{
+import yajco.annotation.*
+import yajco.annotation.config.*
+
+@Parser
+public class SimpleIdentifier {
+
+    private String identifier;
+
+    @Before("id")
+    public SimpleIdentifier( @Token("[a-z]") String identifier) {
+        this.identifier = identifier;
+    }
+}
+}}}
