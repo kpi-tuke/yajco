@@ -4,11 +4,11 @@
     <parent>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco</artifactId>
-        <version>0.5.1-SNAPSHOT</version>
+        <version>0.5.9</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-parser</artifactId>
-    <version>0.5.1-SNAPSHOT</version>
+    <version>0.5.9</version>
     <packaging>jar</packaging>
     <name>yajco-parser</name>
         <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - yajco parser</description>

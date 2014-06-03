@@ -4,13 +4,13 @@
 
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco</artifactId>
-    <version>0.5.1-SNAPSHOT</version>
+    <version>0.5.9</version>
     <packaging>pom</packaging>
     
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
-        <version>7</version>
+        <version>9</version>
     </parent>
 
     <name>yajco</name>

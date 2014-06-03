@@ -29,9 +29,9 @@ public class $parserClassName {
 			referenceResolver.resolveReferences();
 			return root;
 		} catch (java.io.IOException e) {
-			throw new LALRParseException("Problem parsing source code ", e);
+			throw new ParseException("Problem parsing source code ", e);
 		} catch (${parserPackageName}.${parserClassName}.Exception e) {
-			throw new LALRParseException("Problem parsing source code ", e);
+			throw new ParseException("Problem parsing source code ", e);
 		}
 	}
 }

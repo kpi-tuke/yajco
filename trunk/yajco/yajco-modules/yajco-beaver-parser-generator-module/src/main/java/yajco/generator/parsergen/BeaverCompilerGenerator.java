@@ -58,7 +58,7 @@ public class BeaverCompilerGenerator implements CompilerGenerator {
         try {
             generateBeaverCompiler();
         } catch (IOException iOException) {
-            throw new GeneratorException("Cannot generate Beaver parser.",iOException);
+            throw new GeneratorException("Cannot generate Beaver parser ("+iOException.getMessage()+")",iOException);
         }
     }
 
@@ -117,7 +117,7 @@ public class BeaverCompilerGenerator implements CompilerGenerator {
 
         // trieda vynimky parsera
         //file = Utilities.createFile(filer, parserClassPackageName, "LALRParseException.java");
-        fileObject = filer.createSourceFile(parserClassPackageName + "." + "LALRParseException");
+        fileObject = filer.createSourceFile(parserClassPackageName + "." + "ParseException");
         writer = fileObject.openWriter(); //new FileWriter(file);
         writer.write(generateBeaverParseExceptionClass(parserClassPackageName));
         writer.flush();
