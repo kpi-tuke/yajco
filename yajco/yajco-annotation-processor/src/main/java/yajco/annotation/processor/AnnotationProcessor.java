@@ -104,7 +104,7 @@ public class AnnotationProcessor extends AbstractProcessor {
             properties.load(inputStream);
             logger.debug("Loaded config from file: {}", properties);
         } catch (Exception e) {
-            // LOG but don't do anything, it is not error
+            // LOG it but don't do anything, it is not an error
             logger.info("Cannot find or load {} file in classpath. Will use only @Parser options.", PROPERTY_SETTINGS_FILE);
             logger.debug("Loading config file: {}", e.getLocalizedMessage());
             //throw new GeneratorException("Cannot load " + PROPERTY_SETTINGS_FILE, e);
@@ -168,6 +168,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                 } else if (parserAnnotationElemKind == ElementKind.CLASS || parserAnnotationElemKind == ElementKind.INTERFACE || parserAnnotationElemKind == ElementKind.ENUM) {
                     mainElement = (TypeElement) parserAnnotationElement;
                     mainElementName = mainElement.asType().toString();
+                    properties.setProperty("yajco.mainNode", mainElementName);
                 } else {
                     //TODO: vypisat co bolo anotovane
                     throw new GeneratorException("Annotation @Parser should annotate only with package, class, interface or enum.");
@@ -229,6 +230,10 @@ public class AnnotationProcessor extends AbstractProcessor {
                 }
                 for (Skip skip : parserAnnotation.skips()) {
                     skips.add(new SkipDef(skip.value(), skip));
+                }
+                // add default white space for skips if empty
+                if (skips.isEmpty()) {
+                    skips.add(new SkipDef("\\s"));
                 }
                 addToListAsSet(language.getSkips(), skips, true);
                 addToListAsSet(language.getTokens(), tokens, true);

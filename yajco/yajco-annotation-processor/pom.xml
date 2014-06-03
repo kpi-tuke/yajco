@@ -4,11 +4,11 @@
     <parent>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco</artifactId>
-        <version>0.5.1-SNAPSHOT</version>
+        <version>0.5.9</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-annotation-processor</artifactId>
-    <version>0.5.1-SNAPSHOT</version>
+    <version>0.5.9</version>
     <packaging>jar</packaging>
     <name>yajco-annotation-processor</name>
     
@@ -35,8 +35,8 @@
     <scm>
         <url>http://yajco.googlecode.com/svn/trunk/</url>
         <connection>scm:svn:http://yajco.googlecode.com/svn/trunk/</connection>
-      <developerConnection>scm:svn:https://yajco.googlecode.com/svn/trunk/yajco-annotation-processor/</developerConnection>
-  </scm>
+        <developerConnection>scm:svn:https://yajco.googlecode.com/svn/trunk/yajco-annotation-processor/</developerConnection>
+    </scm>
     
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -89,12 +89,12 @@
             <scope>system</scope>
             <systemPath>${toolsjar}</systemPath>
         </dependency>
-<!--        <dependency>
+        <!--        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>yajco-javacc-parser-generator-module</artifactId>
             <version>${project.version}</version>
         </dependency>-->
-<!--        <dependency>
+        <!--        <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>yajco-beaver-parser-generator-module</artifactId>
             <version>${project.version}</version>

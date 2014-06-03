@@ -4,7 +4,7 @@
     <parent>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco-prototype-modules</artifactId>
-        <version>0.5.1-SNAPSHOT</version>
+        <version>0.5.9</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-metalexer-lexer-generator-module</artifactId>
@@ -43,7 +43,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>yajco-generator-module</artifactId>
-            <version>0.5.1-SNAPSHOT</version>
+            <version>0.5.9</version>
         </dependency>
         <dependency>
             <groupId>metalexer</groupId>
@@ -59,7 +59,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>yajco-grammar-module</artifactId>
-            <version>0.5.1-SNAPSHOT</version>
+            <version>0.5.9</version>
         </dependency>
         <dependency>
             <groupId>de.jflex</groupId>

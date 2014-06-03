@@ -1,6 +1,5 @@
 package yajco.generator;
 
-import java.io.File;
 import java.util.Properties;
 import javax.annotation.processing.Filer;
 import yajco.model.Language;

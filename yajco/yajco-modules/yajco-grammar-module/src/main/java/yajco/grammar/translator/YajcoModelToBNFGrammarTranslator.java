@@ -52,7 +52,7 @@ public class YajcoModelToBNFGrammarTranslator {
 
     public Grammar translate(Language language) {
         if (language == null) {
-            throw new NullPointerException("Parameter 'language' cann't be null!");
+            throw new IllegalArgumentException("Parameter 'language' cannot be null!");
         }
 
         this.language = language;
