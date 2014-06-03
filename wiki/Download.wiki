@@ -35,8 +35,8 @@ instead of `yajco-beaver-parser-generator-module`.
 ==Uber JAR==
 In case you are not _a friend_ with Maven, we have prepared special archived JAR with all dependencies included for you. Downfall is that such code is not actively supported, it can get old over time and not all possibilities and tools are included.
 || *Type* || *Download* ||
-|| YAJCo annotation processor + Beaver generator 0.5.9|| TODO:file ||
-|| YAJCo annotation processor + JavaCC generator 0.5.9|| TODO:file ||
+|| YAJCo annotation processor + Beaver generator 0.5.9|| [https://yajco.googlecode.com/svn/uber-jar/yajco-annotation-processor-beaver-generator-0.5.9.jar JAR] ||
+|| YAJCo annotation processor + JavaCC generator 0.5.9|| [https://yajco.googlecode.com/svn/uber-jar/yajco-annotation-processor-javacc-generator-0.5.9.jar JAR] ||
 
 ==Source code==
 Source code of all project is accesible on this site in section [https://code.google.com/p/yajco/source/checkout Source].
