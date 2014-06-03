@@ -2,5 +2,6 @@
  * [GettingStarted Getting started]
  * [Download Download]
  * [UserGuide User Guide]
+ * [Examples Examples]
  * [Publications Publications]
  * [ContactUs Contact us]
