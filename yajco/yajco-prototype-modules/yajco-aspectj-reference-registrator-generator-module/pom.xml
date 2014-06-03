@@ -4,11 +4,11 @@
     <parent>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco-prototype-modules</artifactId>
-        <version>0.5.9</version>
+        <version>0.5.10-SNAPSHOT</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-aspectj-reference-registrator-generator-module</artifactId>
-    <version>0.2.1</version>
+    <version>0.2.2-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>yajco-aspectj-reference-registrator-generator-module</name>
     <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - registration of entities with AspectJ</description>
@@ -32,9 +32,9 @@
         </developer>
     </developers>
     <scm>
-        <url>http://yajco.googlecode.com/svn/tags/yajco-0.5.9/svn/trunk</url>
-        <connection>scm:svn:http://yajco.googlecode.com/svn/tags/yajco-0.5.9/svn/trunk</connection>
-      <developerConnection>scm:svn:https://yajco.googlecode.com/svn/tags/yajco-0.5.9/yajco-prototype-modules/yajco-aspectj-reference-registrator-generator-module</developerConnection>
+        <url>http://yajco.googlecode.com/svn/trunk/</url>
+        <connection>scm:svn:http://yajco.googlecode.com/svn/trunk/</connection>
+      <developerConnection>scm:svn:https://yajco.googlecode.com/svn/trunk/yajco-prototype-modules/yajco-aspectj-reference-registrator-generator-module/</developerConnection>
   </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -43,7 +43,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>yajco-generator-module</artifactId>
-            <version>0.5.9</version>
+            <version>0.5.10-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>org.aspectj</groupId>
