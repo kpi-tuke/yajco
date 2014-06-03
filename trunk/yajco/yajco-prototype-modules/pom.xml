@@ -4,11 +4,11 @@
     <parent>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco</artifactId>
-        <version>0.5.9</version>
+        <version>0.5.10-SNAPSHOT</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-prototype-modules</artifactId>
-    <version>0.5.9</version>
+    <version>0.5.10-SNAPSHOT</version>
     <name>yajco-prototype-modules</name>
     <packaging>pom</packaging>
         <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - subpackage for testing not completed modules</description>
@@ -32,9 +32,9 @@
         </developer>
     </developers>
     <scm>
-        <url>http://yajco.googlecode.com/svn/tags/yajco-0.5.9/trunk</url>
-        <connection>scm:svn:http://yajco.googlecode.com/svn/tags/yajco-0.5.9/trunk</connection>
-      <developerConnection>scm:svn:https://yajco.googlecode.com/svn/tags/yajco-0.5.9/yajco-prototype-modules</developerConnection>
+        <url>http://yajco.googlecode.com/svn/trunk/</url>
+        <connection>scm:svn:http://yajco.googlecode.com/svn/trunk/</connection>
+      <developerConnection>scm:svn:https://yajco.googlecode.com/svn/trunk/yajco-prototype-modules/</developerConnection>
   </scm>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
