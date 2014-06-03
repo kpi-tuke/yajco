@@ -6,9 +6,36 @@ You can start using YAJCo parser generator tool by following the steps descibed 
 
 == Maven builds ==
 
-*Recommended way of using YAJCo is with Maven project.* YAJCo tool consists of plenty modules and dependencies, which can be bothersome to include in project otherwise.
+*Recommended way of using YAJCo is within Maven project.* YAJCo tool consists of plenty modules and dependencies, which can be bothersome to include in project otherwise. If you have not used Maven builds in Java, you need to [http://maven.apache.org/ download and install Maven] and we recommend to get to know a little about how Maven works.
 
-Add your content here.  Format your content with:
-  * Text in *bold* or _italic_
-  * Headings, paragraphs, and lists
-  * Automatic links to other wiki pages
+  # Create simple Java Maven project. You can use following command or use any of your prefered IDE.
+{{{
+mvn archetype:create 
+  -DgroupId=[your project's group id]
+  -DartifactId=[your project's artifact id]
+  -DarchetypeArtifactId=maven-archetype-quickstart
+}}}
+  # Add following dependencies to project `pom.xml`
+{{{
+<dependencies>
+    <dependency>
+        <groupId>sk.tuke.yajco</groupId>
+        <artifactId>yajco-beaver-parser-generator-module</artifactId>
+        <version>0.5.9</version>
+    </dependency>
+    <dependency>
+        <groupId>sk.tuke.yajco</groupId>
+        <artifactId>yajco-annotation-processor</artifactId>
+        <version>0.5.9</version>
+    </dependency>
+</dependencies>
+}}}
+  # Make sure project uses at least Java 1.6 for compilation. File `pom.xml` should contain following.
+{{{
+<properties>
+    <maven.compiler.source>1.6</maven.compiler.source>
+    <maven.compiler.target>1.6</maven.compiler.target>
+</properties>
+}}}
+  # next
+test
