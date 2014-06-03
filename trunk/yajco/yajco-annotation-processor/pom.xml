@@ -33,9 +33,9 @@
         </developer>
     </developers>
     <scm>
-        <url>http://yajco.googlecode.com/svn/trunk/</url>
-        <connection>scm:svn:http://yajco.googlecode.com/svn/trunk/</connection>
-        <developerConnection>scm:svn:https://yajco.googlecode.com/svn/trunk/yajco-annotation-processor/</developerConnection>
+        <url>http://yajco.googlecode.com/svn/tags/yajco-0.5.9/trunk</url>
+        <connection>scm:svn:http://yajco.googlecode.com/svn/tags/yajco-0.5.9/trunk</connection>
+        <developerConnection>scm:svn:https://yajco.googlecode.com/svn/tags/yajco-0.5.9/yajco-annotation-processor</developerConnection>
     </scm>
     
     <properties>
