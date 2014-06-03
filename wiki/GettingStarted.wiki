@@ -43,22 +43,36 @@ mvn archetype:create
 
 === Create a language model ===
 The following class defines a very simple YAJCo language specification. We will create a language, which starts with `id` keyword followed by identifier consisting of small latin characters. This is a valid language sentence:
-{{{
-id superman
-}}}
-Language will consists of one language concept called *`SimpleIdentifier`*. We will implement it as a Java class with the same name. In order to specify main (root) concept of language, it is needed to mark it with `@Parser` annotation. Each constructor represents concrete syntax of a language. Annotation `@Before` serves for specifying a keyword `id` as a required word before identifier. Identifier consists of small latin characters, which is specified by regular expression inside `@Token` annotation.
-{{{
-import yajco.annotation.*
-import yajco.annotation.config.*
 
-@Parser
+`id superman`
+
+Language will consists of one language concept called *`SimpleIdentifier`*. We will implement it as a Java class with the same name. In order to specify main (root) concept of language, it is needed to mark it with *`@Parser`* annotation. Each constructor represents concrete syntax of a language. Annotation `@Before` serves for specifying a keyword `id` as a required word before identifier. Identifier consists of small latin characters, which is specified by regular expression inside *`@TokenDef`* annotation defined inside `@Parser` annotation. Parameter name is automatically maped to corresponding `TokenDef` name.
+{{{
+package mylang;
+
+import yajco.annotation.*;
+import yajco.annotation.config.*;
+
+@Parser(tokens = @TokenDef(name = "ident", regexp = "[a-z]"))
 public class SimpleIdentifier {
 
     private String identifier;
 
     @Before("id")
-    public SimpleIdentifier( @Token("[a-z]") String identifier) {
-        this.identifier = identifier;
+    public SimpleIdentifier(String ident) {
+        identifier = ident;
+    }
+
+    public String getIdentifier() {
+        return identifier;
     }
 }
 }}}
+We have created *`getIdentifier()`* method for easy access to identifier name, which we will use later. After creating project with *`SimpleIdentifier`* class you have succesfully specified your new language. Just build it with Maven:
+{{{
+mvn package
+}}}
+and you get your parser generated instantly. You can check directory `target/generated-sources/annotations` in your project directory for generated parser.
+
+===Running parser===
+It's not fun having a parser such promtly and not being able to use it. Let's create a main class for actual parsing of some textual input.
