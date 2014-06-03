@@ -1,0 +1,14 @@
+#summary Contact info for development team
+
+= Contact us =
+
+For inquiries about the YAJCo tool, please, feel free to contact any of our team members.
+
+Comments and suggestions for improvements will be welcome :-)
+
+
+== YAJCo development team ==
+
+  * Dominik Lakatoš ([mailto:dominik.lakatos@tuke.sk dominik.lakatos@tuke.sk])
+  * Jaroslav Porubän ([mailto:jaroslav.poruban@tuke.sk jaroslav.poruban@tuke.sk])
+  * Sergej Chodarev ([mailto:sergej.chodarev@tuke.sk sergej.chodarev@tuke.sk])
