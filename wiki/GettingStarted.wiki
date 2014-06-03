@@ -3,7 +3,7 @@
 
 = Getting started =
 
-You can start using YAJCo parser generator tool by following the steps descibed below. If you prefer to use some existing examples follow instructions in [Examples examples] page.
+You can start using YAJCo parser generator tool by following the steps descibed below. If you prefer to use existing more complex examples follow instructions in the [Examples examples page].
 
 == Maven builds ==
 
