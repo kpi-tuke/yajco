@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<actions>
+        <action>
+            <actionName>CUSTOM-Deploy Snapshot</actionName>
+            <displayName>Deploy Snapshot</displayName>
+            <goals>
+                <goal>clean</goal>
+                <goal>deploy</goal>
+            </goals>
+        </action>
+        <action>
+            <actionName>CUSTOM-Draw dependency graphs</actionName>
+            <displayName>Draw dependency graphs</displayName>
+            <goals>
+                <goal>graph:dependencies</goal>
+            </goals>
+        </action>
+        <action>
+            <actionName>CUSTOM-Update versions for each project in module</actionName>
+            <displayName>Update versions for each project in module</displayName>
+            <goals>
+                <goal>release:update-versions</goal>
+            </goals>
+        </action>
+    </actions>

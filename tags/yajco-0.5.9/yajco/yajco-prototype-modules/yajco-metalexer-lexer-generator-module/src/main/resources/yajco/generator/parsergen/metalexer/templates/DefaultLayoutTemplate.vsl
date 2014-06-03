@@ -1,0 +1,28 @@
+## Input - parserPackage
+## Input - parserName
+## Velocity Template.
+#set( $className = $parserName + "MetaLexerScanner" )
+package $parserPackage;
+%%
+
+import ${parserPackage}.${parserName}.Terminals;
+%%
+
+%layout $parserName
+%option class "%class ${className}"
+%option public "%public"
+
+%component $parserName
+
+%start $parserName
+
+%%
+
+%%inherit beaver
+##
+##%%embed
+##%name robot_command
+##%host robot
+##%guest command
+##%start [LEFT RIGHT DOWN UP]
+##%end END
