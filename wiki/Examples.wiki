@@ -1,5 +1,16 @@
 #summary YAJCo examples
 
-= Examples =
+We have created few example languages with YAJCo.
 
+<wiki:toc max_depth="2" />
 ...here add existing examples...
+
+=SimpleRobotKarel=
+
+text
+
+=RobotKarel=
+
+text
+
+=MathExpression=
