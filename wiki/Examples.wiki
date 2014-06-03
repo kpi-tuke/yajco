@@ -1,16 +1,38 @@
 #summary YAJCo examples
 
-We have created few example languages with YAJCo.
+We have created few example languages with YAJCo for you to try out.
 
 <wiki:toc max_depth="2" />
-...here add existing examples...
 
-=SimpleRobotKarel=
-
-text
-
-=RobotKarel=
+----
+==Simple Robot Karel language==
 
 text
 
-=MathExpression=
+==Robot Karel language==
+
+text
+
+==Math Expression language==
+
+text
+
+==Extended Math Expression language==
+
+text
+
+==State Machine language==
+
+text
+
+==Nielsen's Desk language==
+
+text
+
+==JSON language==
+
+text
+
+==Imperative programming language==
+
+text
