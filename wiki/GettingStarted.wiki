@@ -53,7 +53,7 @@ package mylang;
 import yajco.annotation.*;
 import yajco.annotation.config.*;
 
-@Parser(tokens = @TokenDef(name = "ident", regexp = "[a-z]"))
+@Parser(tokens = @TokenDef(name = "ident", regexp = "[a-z]+"))
 public class SimpleIdentifier {
 
     private String identifier;
@@ -76,3 +76,21 @@ and you get your parser generated instantly. You can check directory `target/gen
 
 ===Running parser===
 It's not fun having a parser such promtly and not being able to use it. Let's create a main class for actual parsing of some textual input.
+
+{{{
+import mylang.SimpleIdentifier;
+import mylang.parser.*;
+
+public class MainClass {
+
+    public static void main(String[] args) throws ParseException{
+        String input = "id superman";
+        System.out.println("Going to parse: '"+input+"'");
+
+        LALRSimpleIdentifierParser parser = new LALRSimpleIdentifierParser();
+        SimpleIdentifier simpleIdentifier = parser.parse(input);
+
+        System.out.println("Parsed identifier: "+simpleIdentifier.getIdentifier());
+    }
+}
+}}}
