@@ -29,6 +29,7 @@ Execution of each command is displayed with message to standard output.
 This language example serves as simple example of multiple language concepts with simple concrete syntax and semantics. It is possible to use abstract classes and interfaces as points of extensions as is uses class `Command`.
 
 _*Model (class diagram):*_
+
 https://yajco.googlecode.com/svn/examples/images/simpleRobot-diagram.png	
 
 _*Sentence example:*_
@@ -60,6 +61,7 @@ Overview of all classes used for language specification is displayed in next ima
 Result of execution is actual evaluation of instructions in provided world. Before each evaluation of instruction state of the world and robot is displayed in console.
 
 _*Model (class diagram):*_
+
 https://yajco.googlecode.com/svn/examples/images/robotKarel-diagram.png
 
 _*Sentence example:*_
@@ -194,6 +196,7 @@ Language for writing simple mathematical expressions consisting of:
 Result of each sentence of this language is evaluation of mathematical expression and it provides result. Such language could be used as module for any other language requiring support of mathematical expression.
 
 _*Model (class diagram):*_
+
 https://yajco.googlecode.com/svn/examples/images/mathExpression-diagram.png
 
 _*Sentence example:*_
@@ -217,6 +220,7 @@ Language similar to previous language of mathematical expressions. Contains more
 Result of execution is evaluation of expression in form of mathematical value. As result we also print parsed sentence with automatically generated printer. Language supports parenthesis, therefore printer uses parenthesis in all possible places (of course, it would be nice to make printer more sophisticated :-))
 
 _*Model (class diagram):*_
+
 https://yajco.googlecode.com/svn/examples/images/extMathExpression-diagram.png
 
 _*Sentence example:*_
@@ -243,6 +247,7 @@ State machine is common in computer science. We have created language to describ
 Result of execution of a language sentence is summary of described state machine with information about incoming and outcoming transitions for each state.
 
 _*Model (class diagram):*_
+
 https://yajco.googlecode.com/svn/examples/images/stateMachine-diagram.png
 
 _*Sentence example:*_
@@ -278,6 +283,7 @@ Language for description of simple expressions with constants.
 Result of execution is transformation to instruction set and once again we display automatically generated printer output.
 
 _*Model (class diagram):*_
+
 https://yajco.googlecode.com/svn/examples/images/deskNielsen-diagram.png
 
 _*Sentence example:*_
@@ -309,6 +315,7 @@ _Directory:_ `yajco-example-json`
 Parser for JSON format. Created by one of our bachelor student as part of YAJCo usage study.
 
 _*Model (class diagram):*_
+
 https://yajco.googlecode.com/svn/examples/images/json-diagram.png
 
 _*Sentence example:*_
@@ -336,6 +343,7 @@ Generic imperative programming language with support for named functions, blocks
 Result of execution can be almost anything written in sentence. It is possible to evaluate mathematical or logical expression, write strings, call functions.
 
 _*Model (class diagram):*_
+
 https://yajco.googlecode.com/svn/examples/images/imperLang-diagram.png
 
 _*Sentence example:*_
