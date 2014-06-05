@@ -2,11 +2,11 @@
 
 <wiki:toc max_depth="3" />
 
-= User Guide =
-
 _TEMPORARY USER GUIDE_
 
 _WORK IN PROGRESS_
+
+= YAJCo annotations =
 
 ==Main annotations==
 
@@ -333,7 +333,7 @@ text
 ===`@Indent`===
 text
 
-==Restrictions==
+= Restrictions =
   * Do not use `long` or `float` Java primitives as types for YAJCo language specification constructors. They are not supported, yet.
   * Language concept class must be inside a package. Default package classes are not permitted.
 {{{
@@ -357,14 +357,14 @@ NOT OK:
   com.google.SearchConcept
 }}}
 
-==IDEs how-to==
+=IDEs how-to=
 Using Maven project with YAJCo in most common IDE can provide a lot faster programming, but there are also some possible problems.
 
-===Netbeans===
+==Netbeans==
 _TODO_
 
-===IntelliJ IDEA===
+==IntelliJ IDEA==
 _TODO_
 
-===Eclipse===
+==Eclipse==
 _TODO_
