@@ -15,4 +15,5 @@
 
 ==Submitted papers==
   * Lakatoš, D.; Porubän J., *Iterative Domain-Specific Language Development with YAJCo Parser Generator*, SCLIT 2014: Symposium on Computer Languages, Implementations and Tools, September 22-28,2014, Rhodes, Greece, _accepted_
+  * Chodarev, S.; Lakatoš, D.; Porubän, J.; Kollár, J., *Language Composition based on Abstract Syntax*, Central European Journal of Computer Science, _submitted_
   * Porubän J.; Chodarev S.; Lakatoš, D., *YAJCo: Annotated Model Driven Parser Generator*, 7th International Conference on Software Language Engineering (SLE 2014), tool paper, _submitted_
