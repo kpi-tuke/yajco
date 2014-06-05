@@ -85,21 +85,45 @@ Program(                       |
     @Range(minOccurs = 1)      |  Program ::= Statement+
     Statement[] stmts) {...}   |
 }}}
+`@Range` can be used on `array`, `List` or `Set` typed parameters of constructors and factory methods only.
 
 ===`@Identifier`===
 text
 ===`@References`===
 text
 
-
 ===`@Operator`===
+Parameters:
+  * `int priority() default 1;`
+    * defines priority for operator notation, higher number means higher priority
+  * `Associativity associativity() default Associativity.AUTO;`
+    * defines associativity for operator notation, allowed values are `LEFT`, `RIGHT`, `NONE`, `AUTO` (actually translates to `LEFT`)
+Operators represent a type of language constructs that benefits from special treatment. Otherwise they would require more complex definition of concept relations to express rules of priority and associativity.
+In YAJCo it is possible to mark concept using `@Operator` annotation and
+define its priority and associativity. 
+
+It can be used on constructors.
+
+For better practical understanding, see [Examples#Math_Expression_language Math expression language] in examples or any other more complex example language.
+
+===`@Parentheses`===
+Parameters:
+  * `String left() default "(";`
+    * defines token used for left parentheses, can be specified also as configured named token
+  * `String right() default ")";`
+    * defines token used for right parentheses, can be specified also as configured named token
+
+Annotation `@Parentheses` can be used to indicate the possibility to use parentheses to explicitly express priority of operators. Usually annotations `@Operator` and `@Parentheses` are used in same language. In practical approach annotation `@Parentheses` is mostly used on abstract classes, which serve as parent for other more specific classes (language concepts).
+
+It can be used on classes.
+
+For better practical understanding, see [Examples#Math_Expression_language Math expression language] in examples or any other more complex example language.
+
+===`@FactoryMethod`===
 text
 ===`@Exclude`===
 text
-===`@FactoryMethod`===
-text
-===`@Parentheses`===
-text
+
 
 ==Config annotations==
 text
