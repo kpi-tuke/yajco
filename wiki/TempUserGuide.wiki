@@ -10,45 +10,88 @@ _WORK IN PROGRESS_
 
 ==Main annotations==
 
-===@Before===
+===`@Before` and `@After`===
+Parameter:
+  * `String[] value();`
+    * set of actual strings or names of defined tokens
+    * main parameter => does not need to be named in code
+
+Describes placement of language tokens in concrete syntax of language. Can be used as annotation on _constructor_, _factory method_ and _parameters_ in constructors and factory methods. Specified tokens in `value` parameter can be:
+  * actual textual representation of required tokens
+  * names of regex tokens defined with `@TokenDef` inside `@Parser` configuration
+
+{{{
+Java:                          |  EBNF:
+                               |
+@Before("move")                |  Move ::= <move>
+Move() {}                      |                       
+}}}
+
+{{{
+Java:                          |  EBNF:
+@Before("iterate")             |  
+@After("end")                  |  Iteration ::= <iterate> Expression <times> Statement <end>
+Iteration(Expression expr,     |
+    @Before("times")           |
+    Statement statement) {...} |
+}}}
+===`@Separator`===
+Parameter:
+  * `String value();`
+    * one string or name of defined tokens to be used as separator in list of elements
+    * main parameter => does not need to be named in code
+
+In case you need to specify token for separation of elements used in array or list, this is the annotation you would need.
+
+Use only on parameters of types:
+    * array - `Type[]`
+    * `List`
+    * `Set`
+
+{{{
+Java:                          |  EBNF:
+@Before("define")              |  
+Definition(String ident,       |  Definition ::= <define> IDENT <as> Statement (<;> Statement)*
+    @Before("as")              |
+    @Range(minOccurs = 1)      |
+    @Separator(";")            |
+    Statement[] stmts) {...}   |
+}}}
+
+===`@Token`===
 text
-===@After===
+===`@Identifier`===
 text
-===@Token===
+===`@References`===
 text
-===@Identifier===
+
+===`@Range`===
 text
-===@References===
+===`@Operator`===
 text
-===@Separator===
+===`@Exclude`===
 text
-===@Range===
+===`@FactoryMethod`===
 text
-===@Operator===
-text
-===@Exclude===
-text
-===@!FactoryMethod===
-text
-===@Parentheses===
+===`@Parentheses`===
 text
 
 ==Config annotations==
 text
-===@Parser===
+===`@Parser`===
 text
-===@!TokenDef===
+===`@TokenDef`===
 text
-===@Skip===
+===`@Skip`===
 text
-===@Option===
+===`@Option`===
 text
 
 ==Printer annotations==
 text
-===@!NewLine===
+===`@NewLine`===
 text
-===@Indent===
+===`@Indent`===
 text
 
 ==Restrictions==
