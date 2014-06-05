@@ -265,15 +265,66 @@ public class NotImportant extends Statement {
 
 
 ==Config annotations==
-text
 ===`@Parser`===
-text
+Parameters:
+  * `String className() default "";`
+    * defines class name for generated parser
+  * `String mainNode() default "";`
+    * defines name of root language concept, can be in form of full class name or in simple class name in case class is in the same package; if annotation `@Parser` is used on class, this parameter is not needed
+  * `TokenDef[] tokens() default {};`
+    * contains list of named lexical symbols (tokens)
+  * `Skip[] skips() default {};`
+    * contains list of ignored (whitespace) characters of regular expressions; if left empty, YAJCo automatically includes `\s` regular expression for whitespaces
+  * `Option[] options() default {};`
+    * provides way for configuration of YAJCo and modules
+
+`@Parser` annotation is main configuration element of YAJCo tool. It is required to use this annotation once in project in order to start YAJCo tool. `@Parser` annotation can be included on class or on package (using `package-info.java` file).
+
+Its parameters allow to specify root concept of the language, name of the generated parser class. There is also specication of lexical analyzer including denition of named tokens and regular expressions for substring that should be ignored (white-space, comments). And it is one of few input points for configurations of YAJCo and any YAJCo module.
+
+{{{
+@Parser(className = "yajco.exemple.sml.parser.StateMachineParser",
+        mainNode = "StateMachine",
+        tokens = {
+                @TokenDef(name = "ID", regexp = "[a-zA-Z][a-zA-Z0-9]*")
+        },
+        skips = {
+                @Skip("#.*\\n"), //comment
+                @Skip(" "),
+                @Skip("\\t"),
+                @Skip("\\n"),
+                @Skip("\\r")
+        }) package yajco.example.sml.model;
+
+import yajco.annotation.config.Parser;
+import yajco.annotation.config.Skip;
+import yajco.annotation.config.TokenDef;
+}}}
+
 ===`@TokenDef`===
-text
+Parameters:
+  * `String name();`
+    * defines name of lexical symbol (token)
+  * `String regexp();`
+    * defines regular expression for token
+
+Used as part of configuration in `@Parser` annotation parameter `tokens`.
+
 ===`@Skip`===
-text
+Parameters:
+  * `String value();`
+    * defines character set or regular expression to be skipped during parsing
+
+Used as part of configuration in `@Parser` annotation parameter `skips`.
+
 ===`@Option`===
-text
+Parameters:
+  * `String name();`
+    * defines name of configuration option
+  * `String value();`
+    * defines value of configuration option
+
+Used as part of configuration in `@Parser` annotation parameter `options`.
 
 ==Printer annotations==
 text
@@ -283,7 +334,7 @@ text
 text
 
 ==Restrictions==
-  * Do not use `long` and `float` Java primitives as types for YAJCo language specification constructors. They are not supported, yet.
+  * Do not use `long` or `float` Java primitives as types for YAJCo language specification constructors. They are not supported, yet.
   * Language concept class must be inside a package. Default package classes are not permitted.
 {{{
 OK:
@@ -306,7 +357,7 @@ NOT OK:
   com.google.SearchConcept
 }}}
 
-==IDE how-to==
+==IDEs how-to==
 Using Maven project with YAJCo in most common IDE can provide a lot faster programming, but there are also some possible problems.
 
 ===Netbeans===
