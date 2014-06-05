@@ -67,6 +67,8 @@ Since language concepts can contain not only other concepts, but also primitive 
 
 In addition, if constructor has parameters of primitive Java types like int or double, YAJCo automatically convert matched strings to appropriate type.
 
+Annotation `@Token` is not required in case that name of parameter and name of configured token is same (case-insensitive), it that case configured token is automatically maped to parameter.
+
 `@Token` can be used on parameters of constructors and factory methods only.
 
 ===`@Range`===
@@ -87,11 +89,6 @@ Program(                       |
 }}}
 `@Range` can be used on `array`, `List` or `Set` typed parameters of constructors and factory methods only.
 
-===`@Identifier`===
-text
-===`@References`===
-text
-
 ===`@Operator`===
 Parameters:
   * `int priority() default 1;`
@@ -102,7 +99,15 @@ Operators represent a type of language constructs that benefits from special tr
 In YAJCo it is possible to mark concept using `@Operator` annotation and
 define its priority and associativity. 
 
-It can be used on constructors.
+`@Operator` can be used on constructors.
+
+{{{
+    @Operator(priority = 1, associativity=Associativity.LEFT)
+    public Add(Expression expression1, @Before("PLUS") Expression expression2) {
+        this.expression1 = expression1;
+        this.expression2 = expression2;
+    }
+}}}
 
 For better practical understanding, see [Examples#Math_Expression_language Math expression language] in examples or any other more complex example language.
 
@@ -115,9 +120,96 @@ Parameters:
 
 Annotation `@Parentheses` can be used to indicate the possibility to use parentheses to explicitly express priority of operators. Usually annotations `@Operator` and `@Parentheses` are used in same language. In practical approach annotation `@Parentheses` is mostly used on abstract classes, which serve as parent for other more specific classes (language concepts).
 
-It can be used on classes.
+`@Parentheses` can be used on classes.
+
+{{{
+@Parentheses
+public abstract class Expression {
+
+    public abstract long eval();
+
+}
+}}}
 
 For better practical understanding, see [Examples#Math_Expression_language Math expression language] in examples or any other more complex example language.
+
+===`@Identifier`===
+Parameter:
+  * `String unique() default "";`
+    * used to define scope of uniqueness of marked identifier field, scope is defined using XPath expression
+
+YAJCo annotation `@Identifier` serves for easy specification of referencable identifiers in language concepts (classes). Most of languages uses some sort of referencable names (identifiers). It is possible to mark field of language concept with `@Identifier` annotation. Strings inputed to such field will be automatically checked for uniqueness during parsing of sentence. Standard behavious is checking uniqueness in global scope of a language sentence, but it is possible to specify own scope for uniqueness check using `unique` parameter.
+
+{{{
+public class Function {
+    @Identifier
+    private final String name;
+...
+}
+}}}
+
+{{{
+public class Parameter {
+    @Identifier(unique = "../yajco.example.imperative.model.function.Parameter")
+    private final String name;
+...
+}
+}}}
+
+Simple example of identifiers and references is provided in [Examples#Nielsen's_DESK_language Nielsen's DESK language]. For more information about this feature, you can check our paper _[http://www.mendeley.com/download/public/27880491/6466511164/71085fd9b9fa436cefae3e71ed71111fcc8f2b06/dl.pdf Declarative specification of references in DSLs]_
+
+===`@References`===
+Parameters:
+  * `Class value();`
+    * defines class of referenced language element
+  * `String field() default "";`
+    * defines name of class field in which should be injected referenced element
+  * `String path() default "";`
+    * defines scope for searching referenced element in, scope is defined in form of XPath expression
+  * `boolean create() default false;`
+    * states if YAJCo should create element if referenced identifier is not found _(actually not implemented)_
+
+`@References` annotation is used to mark *`String`* parameters of _constructors_ or _factory methods_. Such parameters represents places for referencing existing language structures.
+
+During parsing YAJCo would inject proper references into the fields of objects using Java reflection mechanism. Reference resolution can be restricted using XPath expression specifying nodes in constructed object tree that would be searched for referred objects. This allows to specify scoping rules and namespaces.
+
+It is required to specify type of referencing class using `value` parameter. YAJCo automaticaly searches for field with specified type. If there are more types, it is needed to use `field` parameter to exactly specify targeted field for injection with referenced language structure. Thanks to YAJCo automatic injection it is not required to do anything with actual value of annotated parameter in constructor (as it is possible to see in examples below), value of _String_ parameter is stored internally in YAJCo during parsing phase.
+
+{{{
+...
+private Function function;
+
+public FunctionCall(
+        @References(Function.class) String functionIdent,
+        @Before("(") @After(")")
+        @Separator(",") Expression[] expressions) {
+    this.expressions = expressions;
+}
+...
+}}}
+
+{{{
+...
+private State source;
+
+private State target;
+
+@Before("trans")
+@After(";")
+public Transition(
+       @Token("ID") String label,
+       @Before(":")
+       @Token("ID")
+       @References(value = State.class, field = "source") String sourceLabel,
+       @Before("->")
+       @Token("ID")
+       @References(value = State.class, field = "target") String targetLabel) {
+  this.label = label;
+}
+...
+}}}
+
+Simple example of identifiers and references is provided in [Examples#Nielsen's_DESK_language Nielsen's DESK language]. For more information about this feature, you can check our paper _[http://www.mendeley.com/download/public/27880491/6466511164/71085fd9b9fa436cefae3e71ed71111fcc8f2b06/dl.pdf Declarative specification of references in DSLs]_
 
 ===`@FactoryMethod`===
 text
@@ -144,7 +236,7 @@ text
 text
 
 ==Restrictions==
-
+  * Do not use `long` and `float` Java primitives as types for YAJCo language specification constructors. They are not supported, yet.
   * Language concept class must be inside a package. Default package classes are not permitted.
 {{{
 OK:
@@ -171,10 +263,10 @@ NOT OK:
 Using Maven project with YAJCo in most common IDE can provide a lot faster programming, but there are also some possible problems.
 
 ===Netbeans===
-text
+_TODO_
 
 ===IntelliJ IDEA===
-text
+_TODO_
 
 ===Eclipse===
-text 
+_TODO_
