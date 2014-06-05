@@ -333,13 +333,14 @@ Used as part of configuration in `@Parser` annotation parameter `options`.
 YAJCo allows generating printer for specified language. Printer allows to print model of language sentence in form of concrete syntax. In order to specify formatting of printed text, we have introduced new annotations.
 
 ===`@NewLine`===
-text
+Specifies place where should be put a new line in printer output. New line is put before annotated construct.
 
 ===`@Indent`===
 Parameters:
   * `int level() default 1;`
     * defines level of indentation
 
+Specifies indentation of annotatated element. Mostly it should be used in combination with `@NewLine`. Annotated element is indented specified number of levels to right in printer output. Indentation is inherited for all subelements of indented element.
 
 = Restrictions =
   * Do not use `long` or `float` Java primitives as types for YAJCo language specification constructors. They are not supported, yet.
@@ -366,10 +367,10 @@ NOT OK:
 }}}
 
 =IDEs how-to=
-Using Maven project with YAJCo in most common IDE can provide a lot faster programming, but there are also some possible problems.
+Using Maven project with YAJCo in most common IDEs can provide better language specification experience, but there are also some possible problems.
 
 ==Netbeans==
-_TODO_
+Netbeans has problems with generated sources during compile time and sometimes cannot index them as existing sources, therefore it does not provide them for error checking. Even when build and run is working OK with Maven in Netbeans, project report fictious Netbeans' errors. It is pretty problematic, when you are trying to use generated parser in main class as it shows errors, but compile and run is OK. Netbeans is OK editor for YAJCo projects, just ignore errors concerning generated classes.
 
 ==IntelliJ IDEA==
 _TODO_
