@@ -71,6 +71,20 @@ Annotation `@Token` is not required in case that name of parameter and name of c
 
 `@Token` can be used on parameters of constructors and factory methods only.
 
+{{{
+    @Before("state")
+    @After(";")
+    public State(@Token("ID") String id) {
+        this.label = id;
+    }
+-----------------------or----------------------
+    @Before("state")
+    @After(";")
+    public State(String id) { //parameter name identical with token name, @Token annotation not needed
+        this.label = id;
+    }
+}}}
+
 ===`@Range`===
 Parameters:
   * `int minOccurs() default 0;`
@@ -212,9 +226,42 @@ public Transition(
 Simple example of identifiers and references is provided in [Examples#Nielsen's_DESK_language Nielsen's DESK language]. For more information about this feature, you can check our paper _[http://www.mendeley.com/download/public/27880491/6466511164/71085fd9b9fa436cefae3e71ed71111fcc8f2b06/dl.pdf Declarative specification of references in DSLs]_
 
 ===`@FactoryMethod`===
-text
+Serves as marking annotation for specifying static methods, which will be included in creation of abstract syntax. Standard behaviour of YAJCo is to take all constructors as representation of concrete syntax for language concept (class). There can sometimes be problems with specification of all wanted concrete syntax notations with constructors, as they do not allow to have same signature even when annotations are different. Therefore it is sometimes required to create factory methods and mark them with our annotation.
+
+{{{
+
+@FactoryMethod
+@Before("noop")
+public static Statement createNoopStatement() {
+...
+}
+
+@FactoryMethod
+@Before("exit")
+public static Statement createExitStatement() {
+...
+}
+
+}}}
+
 ===`@Exclude`===
-text
+Annotation `@Exclude` serves to mark constructor as excluded from abstract syntax specification. Any marked constructor will not be included in language specification.
+
+{{{
+...
+@Exclude
+public Statement() {}
+...
+}}}
+
+Annotation `@Exclude` can be used also on class. Such class will be excluded from YAJCo language specification. It is needed when you don't want some class, which is in hierarchy of language concepts to appear in language specification.
+
+{{{
+@Exclude
+public class NotImportant extends Statement {
+...
+}
+}}}
 
 
 ==Config annotations==
