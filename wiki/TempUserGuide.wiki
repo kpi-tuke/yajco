@@ -59,14 +59,39 @@ Definition(String ident,       |  Definition ::= <define> IDENT <as> Statement (
 }}}
 
 ===`@Token`===
-text
+Parameter:
+  * `String value();`
+    * one name of defined token to be used as regular expression to parse value for annotated parameter
+    * main parameter => does not need to be named in code
+Since language concepts can contain not only other concepts, but also primitive values, like numbers and strings, it is needed to specify their concrete notation. This is done by attaching `@Token` annotation with a name of a regular expression as a parameter to the parameter of the constructor. Regular expression have to be specified inside `@TokenDef` in `@Parser` configuration annotation. A string that matches the regular expression is then provided as a value of the parameter.
+
+In addition, if constructor has parameters of primitive Java types like int or double, YAJCo automatically convert matched strings to appropriate type.
+
+`@Token` can be used on parameters of constructors and factory methods only.
+
+===`@Range`===
+Parameters:
+  * `int minOccurs() default 0;`
+    * defines minimal number of occurence of elements in annotated list
+  * `int maxOccurs() default -1;`
+    * defines maximal number of occurence of elements in annotated list
+    * value `-1` is used for _infinity_
+
+A concept can contain multiple instances of subconcepts. This is automatically inferred from the use of array or one of the standard Java collection types. The multiplicity can be restricted using `@Range` annotation.
+
+{{{
+Java:                          |  EBNF:
+Program(                       |
+    @Range(minOccurs = 1)      |  Program ::= Statement+
+    Statement[] stmts) {...}   |
+}}}
+
 ===`@Identifier`===
 text
 ===`@References`===
 text
 
-===`@Range`===
-text
+
 ===`@Operator`===
 text
 ===`@Exclude`===
