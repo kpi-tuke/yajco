@@ -12,6 +12,8 @@ _WORK IN PROGRESS_
 = Overview =
 *YAJCo is tool for simple specification of languages* and generation of language parser and language supporting tools using only annotated Java classes. Each class represents one language concept and is equivalent to abstract syntax definition. Class can contain methods representing language semantics and annotations for specification of concrete syntax.
 
+Each YAJCo project needs to have one [#@Parser @Parser] annotation for specification of root concept and other options.
+
 = Abstract Syntax Definition =
 
 Abstract syntax of the language consists of definition of language concepts and relations between them. In YAJCo language concepts correspond to classes and therefore, each for class corresponding non-terminal in the grammar is defined.
@@ -58,6 +60,50 @@ A concept instance description can also contain a reference to instance of anoth
 In the object model this relation can be expressed using aggregation. YAJCo again uses constructor parameters as a place, where the relation is described. In this case, parameter is an identifier string marked with [#@References @References] annotation. YAJCo would automatically resolve the reference and inject actual object instance into field with the same type so constructor can actually ignore received identifier.
 
 Simple example of identifiers and references is provided in [Examples#Nielsen's_DESK_language Nielsen's DESK language]. For more information about this feature, you can check our paper _[http://www.mendeley.com/download/public/27880491/6466511164/71085fd9b9fa436cefae3e71ed71111fcc8f2b06/dl.pdf Declarative specification of references in DSLs]_
+
+= Concrete Syntax Definition =
+
+Concrete syntax (notation) for each language concept is specified in a form of annotations attached to class constructors (and factory methods). Constructors allow to describe how an object can be constructed from some input, so it is appropriate to use them also for constructing concept instances from the textual input of language sentence.
+
+The annotations allow to specify tokens, that would be used in concepts' concrete representation. Most of described annotations expect token specification as a parameter. Named tokens are defined in [#@Parser @Parser] annotation in [@#TokenDef @TokenDef] option part. If token would be used only once, it can be specified directly in annotation. If specified string does not represents existing named token, it is taken as exact character sequence to be used in concrete syntax.
+
+== Keywords and symbols ==
+
+The simplest form of concrete syntax annotations is a definition of keywords and symbols that must be part of concept concrete representation. These tokens can be placed before or after concept description using [#@Before @Before] and [#@After @After] annotations associated with concept constructor. Tokens can be also placed between description of subconcepts by using the same annotations on constructor parameters.
+
+In a case of composition multiplicity it is possible to specify tokens that must be placed between each instance of subelement. This can be done with [#@Separator @Separator] annotation.
+
+== Alternative notations ==
+
+It may be possible to describe instances of the same concept using different notations and even with different combinations of subconcepts. This is allowed by the way of using multiple constructors
+
+{{{
+JAVA:
+@Before("ITERATE")
+Iteration(Expression expr, @Before("TIMES") Statement statement) {...}
+    
+@Before("ITERATE")
+Iteration(Expression expr,
+    @Before("TIMES") @After("END") Statement[] statement) {...}
+
+
+EBNF:
+Iteration ::= <ITERATE> Expression <TIMES> Statement
+Iteration ::= <ITERATE> Expression <TIMES> Statement* <END>
+}}}
+
+Constructors that should not become part of language definition can be marked using [#@Exclude @Exclude] annotation.
+
+== Operator definition ==
+Operators represent a type of language constructs that benefits from special treatment. Otherwise they would require more complex definition of concept relations to express rules of priority and assiciativity.
+
+In YAJCo it is possible to mark concept using [#@Operator @Operator] annotation and define its priority and associativity. Annotation [#@Parentheses @Parentheses] can be used to indicate the possibility to use parentheses to explicitly express priority.
+
+== Tokens with value ==
+
+Since language concepts can contain not only other concepts, but also primitive values, like numbers and strings, it is needed to specify their concrete notation. This is done by attaching [#@Token @Token] annotation with a regular expression as a parameter to the parameter of the constructor. A string that matches the regular expression is then provided as a value of the parameter.
+
+Examples of `@Token` are in all provided [Examples examples] as it is common task to mark parameters as input values.
 
 = YAJCo annotations =
 In next section we will describe each annotation usable in YAJCo language specification.
