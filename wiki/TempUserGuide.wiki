@@ -1,10 +1,13 @@
 #summary User Guide for YAJCo tool.
 
+*Table of contents*
 <wiki:toc max_depth="3" />
 
-_TEMPORARY USER GUIDE_
+----
 
 _WORK IN PROGRESS_
+
+----
 
 = YAJCo annotations =
 
@@ -327,11 +330,16 @@ Parameters:
 Used as part of configuration in `@Parser` annotation parameter `options`.
 
 ==Printer annotations==
-text
+YAJCo allows generating printer for specified language. Printer allows to print model of language sentence in form of concrete syntax. In order to specify formatting of printed text, we have introduced new annotations.
+
 ===`@NewLine`===
 text
+
 ===`@Indent`===
-text
+Parameters:
+  * `int level() default 1;`
+    * defines level of indentation
+
 
 = Restrictions =
   * Do not use `long` or `float` Java primitives as types for YAJCo language specification constructors. They are not supported, yet.
