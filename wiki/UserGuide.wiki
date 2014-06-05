@@ -52,6 +52,13 @@ YAJCo supports multiplicity with following types:
   * `java.util.List`
   * `java.util.Set`
 
+== Referencing (agregation) ==
+A concept instance description can also contain a reference to instance of another concept that is described elsewhere in the input sentence. In this case only some identifier (marked with [#@Identifier @Identifier] annotation) of referred instance is provided as a part of concept instance definition. 
+
+In the object model this relation can be expressed using aggregation. YAJCo again uses constructor parameters as a place, where the relation is described. In this case, parameter is an identifier string marked with [#@References @References] annotation. YAJCo would automatically resolve the reference and inject actual object instance into field with the same type so constructor can actually ignore received identifier.
+
+Simple example of identifiers and references is provided in [Examples#Nielsen's_DESK_language Nielsen's DESK language]. For more information about this feature, you can check our paper _[http://www.mendeley.com/download/public/27880491/6466511164/71085fd9b9fa436cefae3e71ed71111fcc8f2b06/dl.pdf Declarative specification of references in DSLs]_
+
 = YAJCo annotations =
 In next section we will describe each annotation usable in YAJCo language specification.
 
