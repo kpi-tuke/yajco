@@ -167,6 +167,7 @@ Parameter:
   * `String value();`
     * one name of defined token to be used as regular expression to parse value for annotated parameter
     * main parameter => does not need to be named in code
+
 Since language concepts can contain not only other concepts, but also primitive values, like numbers and strings, it is needed to specify their concrete notation. This is done by attaching `@Token` annotation with a name of a regular expression as a parameter to the parameter of the constructor. Regular expression have to be specified inside `@TokenDef` in `@Parser` configuration annotation. A string that matches the regular expression is then provided as a value of the parameter.
 
 In addition, if constructor has parameters of primitive Java types like int or double, YAJCo automatically convert matched strings to appropriate type.
@@ -213,6 +214,7 @@ Parameters:
     * defines priority for operator notation, higher number means higher priority
   * `Associativity associativity() default Associativity.AUTO;`
     * defines associativity for operator notation, allowed values are `LEFT`, `RIGHT`, `NONE`, `AUTO` (actually translates to `LEFT`)
+
 Operators represent a type of language constructs that benefits from special treatment. Otherwise they would require more complex definition of concept relations to express rules of priority and associativity.
 In YAJCo it is possible to mark concept using `@Operator` annotation and
 define its priority and associativity. 
