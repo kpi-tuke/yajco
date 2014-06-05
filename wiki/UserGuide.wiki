@@ -1,18 +1,20 @@
 #summary User Guide for YAJCo tool.
 #labels Phase-Deploy,Featured
-
-*Table of contents*
-<wiki:toc max_depth="3" />
-
 ----
 
 _WORK IN PROGRESS_
 
 ----
+
+*Table of contents*
+<wiki:toc max_depth="3" />
+
 = Overview =
 *YAJCo is tool for simple specification of languages* and generation of language parser and language supporting tools using only annotated Java classes. Each class represents one language concept and is equivalent to abstract syntax definition. Class can contain methods representing language semantics and annotations for specification of concrete syntax.
 
 Each YAJCo project needs to have one [#@Parser @Parser] annotation for specification of root concept and other options.
+
+In next lines you can find out a little more about our great YAJCo tool, or you can go straight to [Examples examples] page and play with them and then return to this user guide. Either way, if you feel like something is not right or missing from this user guide, please [ContactUs let us know].
 
 = Abstract Syntax Definition =
 
@@ -103,7 +105,9 @@ In YAJCo it is possible to mark concept using [#@Operator @Operator] annotation 
 
 Since language concepts can contain not only other concepts, but also primitive values, like numbers and strings, it is needed to specify their concrete notation. This is done by attaching [#@Token @Token] annotation with a regular expression as a parameter to the parameter of the constructor. A string that matches the regular expression is then provided as a value of the parameter.
 
-Examples of `@Token` are in all provided [Examples examples] as it is common task to mark parameters as input values.
+If you do not use `@Token` annotation YAJCo derives names of tokens from names o parameters. There are no preddefined tokens in YAJCo, so every token needs to be defined in [#@Parser @Parser] annotation or with annotations inside concept classes.
+
+Examples of usage of `@Token` annotation are in all provided [Examples examples] as it is common task to mark parameters as input values.
 
 = YAJCo annotations =
 In next section we will describe each annotation usable in YAJCo language specification.
