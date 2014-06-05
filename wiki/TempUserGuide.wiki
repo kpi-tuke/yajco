@@ -8,8 +8,51 @@
 _WORK IN PROGRESS_
 
 ----
+= Overview =
+*YAJCo is tool for simple specification of languages* and generation of language parser and language supporting tools using only annotated Java classes. Each class represents one language concept and is equivalent to abstract syntax definition. Class can contain methods representing language semantics and annotations for specification of concrete syntax.
+
+= Abstract Syntax Definition =
+
+Abstract syntax of the language consists of definition of language concepts and relations between them. In YAJCo language concepts correspond to classes and therefore, each for class corresponding non-terminal in the grammar is defined.
+
+== Inheritance relation 'is-a' ==
+Inheritance or implementation of the interface indicates that one concepts is a special case of its parent concepts, i.e. it can be used in all places where the parent concept is expected. YAJCo automatically uses inheritance relation between classes to construct appropriate grammar rules.
+
+|| https://yajco.googlecode.com/svn/wiki/images/inheritance.png || EBNF:<br>`Statement::= Move | TurnLeft` ||
+
+{{{
+public abstract class Statement {...}
+
+public class Move extends Statement {...}
+
+public class TurnLeft extends Statement {...}
+}}}
+
+== Composition relation 'has-a' ==
+
+A concept is composed from other concepts when description of concept instance in an input sentence includes description of its subconcepts. In the grammar it is represented by the occurrence of non-terminals of subconcepts on the right-hand side of the rule corresponding to the composed concept.
+
+|| https://yajco.googlecode.com/svn/wiki/images/composition.png || EBNF:<br>`Iteration ::= Expression Statement` ||
+
+In object-oriented language this relation can be expressed using class fields that contain instances of subconcept classes. Not all fields, however, correspond to composition relation. Because of this YAJCo uses parameters of *class constructor* (or factory methods) for the specification of subconcepts. This also provides more flexibility for definition of concrete syntax as it defines also ordering of subconcepts.
+
+{{{
+Iteration(Expression expression, Statement statement) {...}
+}}}
+
+In addition definition of composition on constructors allows to do some preprocessing and store subconcepts in different form.
+
+== Composition multiplicity ==
+
+A concept can contain multiple instances of subconcepts. This is automatically inferred from the use of array or one of the standard Java collection types. The multiplicity can be restricted using [UserGuide#@Range @Range] annotation.
+
+YAJCo supports multiplicity with following types:
+  * Java arrays
+  * `java.util.List`
+  * `java.util.Set`
 
 = YAJCo annotations =
+In next section we will describe each annotation usable in YAJCo language specification.
 
 ==Main annotations==
 
