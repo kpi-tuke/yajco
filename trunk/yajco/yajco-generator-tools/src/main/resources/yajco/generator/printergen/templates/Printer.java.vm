@@ -180,6 +180,7 @@ public class $className extends ${visitorClassName}<PrintWriter> {
     @Override
     protected void visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}(#writeSpecifiedType($type ${Utilities.getClassName($nameMap, $type.componentType.concept)}) ${Utilities.toLowerCaseIdent($property.name)}, PrintWriter p) {
     #set( $patterns = ${ModelUtilities.getAllPatterns(${property},${concept})} )
+    #set( $separator = false )
     #set( $separator = ${Utilities.getObjectFromList(${patterns},${separatorPatternClassName})} )
     #if( $separator )
         boolean separate = false;
