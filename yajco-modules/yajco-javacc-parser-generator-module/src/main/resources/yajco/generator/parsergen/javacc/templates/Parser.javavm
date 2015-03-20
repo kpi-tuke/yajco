@@ -1,0 +1,43 @@
+#set( $parserJavaCCClassName = $parserJavaCCPackageName + "." + $parserClassName) 
+#set( $tokenManagerClassName = $parserJavaCCPackageName + "." + $parserClassName + "TokenManager")
+package $parserPackageName;
+
+public class $parserClassName {
+  private static $parserJavaCCClassName _parser;
+
+  public $mainElementName parse(String input) throws ParseException {
+    $tokenManagerClassName tm = new $tokenManagerClassName(input);
+    if (_parser == null) {
+      _parser = new $parserJavaCCClassName(tm);
+    } else {
+      _parser.ReInit(tm);
+    }
+
+    try {
+      yajco.ReferenceResolver referenceResolver = yajco.ReferenceResolver.createInstance();
+      $mainElementName root = ${parserJavaCCClassName}.parse();
+      referenceResolver.resolveReferences();
+      return root;
+    } catch (${parserJavaCCPackageName}.ParseException e) {
+      throw new ParseException("Problem parsing source code ", e);
+    }
+  }
+
+  public $mainElementName parse(java.io.Reader reader) throws ParseException {
+    try {
+      return parse(readAsString(reader));
+    } catch(java.io.IOException e) {
+      throw new ParseException("Problem reading input file", e);
+    }
+  }
+
+  private String readAsString(java.io.Reader r) throws java.io.IOException {
+    StringBuilder sb = new StringBuilder();
+    java.io.BufferedReader br = new java.io.BufferedReader(r);
+    String line;
+    while ((line = br.readLine()) != null) {
+      sb.append(line + "\n");
+    }
+    return sb.toString();
+  }
+}

@@ -1,0 +1,8 @@
+##Input - parserClassPackageName
+package $parserClassPackageName;
+
+public class LisaParseException extends Exception {
+	public LisaParseException(String message, Throwable cause) {
+		super(message, cause);
+	}
+}

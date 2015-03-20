@@ -1,0 +1,109 @@
+## TODO: componentny typ... napriklad ak by bolo "array of array of array of NIECO"
+##
+#set( $nameMap = ${Utilities.createConceptUniqueNames($language)} )
+package ${ModelUtilities.getLanguagePackageName($language)}.$package;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import yajco.visitor.VisitorException;
+#foreach( $concept in ${Utilities.getConceptsNeededForImport($nameMap)} )
+import ${ModelUtilities.getFullConceptClassName($language, $concept)};
+#end
+
+public class ${className}<P> {
+    protected Set<Object> visited = new HashSet<Object>();
+
+    public void visit(Object o, P p) {
+#set( $ifToken = "if" )
+#foreach( $concept in $language.concepts )
+        $ifToken (o instanceof ${Utilities.getClassName($nameMap, $concept)}) {
+            enterVisit(o);
+            visit${Utilities.getMethodPartName($nameMap, $concept)}((${Utilities.getClassName($nameMap, $concept)}) o, p);
+            exitVisit(o);
+        }
+#set( $ifToken = "else if" )
+#end
+#if( !$language.concepts.isEmpty() )
+        else {
+            throw new VisitorException("Not supported type " + o.getClass());
+        }
+#end
+    }
+#foreach( $concept in $language.concepts )
+    protected void visit${Utilities.getMethodPartName($nameMap, $concept)}(${Utilities.getClassName($nameMap, $concept)} ${Utilities.toLowerCaseIdent($concept.conceptName)}, P p) {
+        if (${Utilities.toLowerCaseIdent($concept.conceptName)} != null) {
+#foreach( $property in $concept.abstractSyntax )
+#set( $type = $property.type )
+#set( $className = ${Utilities.getClassName($type)} )
+#if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
+#if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
+        visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
+#end
+#elseif( $className == $primitiveTypeClassName )
+## pri primitovnom type sa aktualne dalej nevnarame, cize sa nerobi nic
+#elseif( $className == $referenceTypeClassName )
+        if (${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null && enterVisit(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}())) {
+            visit${Utilities.getMethodPartName($nameMap, $type.concept)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
+            exitVisit(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}());
+        }
+#else
+            $Utilities.throwGeneratorException("Not known type for ${property.name}")
+        // not known type for ${property.name}
+#end
+#end
+##
+## Volanie viac specifickych metod ak niektory koncept dedi od aktualneho
+#set( $descendants = ${ModelUtilities.getDirectDescendantConcepts(${concept}, ${language})} )
+#if( !$descendants.isEmpty() )
+#set( $ifToken = "if" )
+#foreach( $descendant in $descendants )
+        $ifToken (${Utilities.toLowerCaseIdent($concept.conceptName)} instanceof ${Utilities.getClassName($nameMap, $descendant)}) {
+            visit${Utilities.getMethodPartName($nameMap, $descendant)}((${Utilities.getClassName($nameMap, $descendant)}) ${Utilities.toLowerCaseIdent($concept.conceptName)}, p);
+        }
+#set( $ifToken = "else if" )
+#end
+#end
+        }
+    }
+
+#foreach( $property in $concept.abstractSyntax )
+#set( $type = $property.type )
+#set( $className = ${Utilities.getClassName($type)} )
+#if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
+#if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
+    protected void visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}(#writeSpecifiedType($type ${Utilities.getClassName($nameMap, $type.componentType.concept)}) ${Utilities.toLowerCaseIdent($property.name)}, P p) {
+        for (${Utilities.getClassName($nameMap, $type.componentType.concept)} ${Utilities.toLowerCaseIdent($type.componentType.concept.conceptName)} : ${Utilities.toLowerCaseIdent($property.name)}) {
+            if (enterVisit(${Utilities.toLowerCaseIdent($type.componentType.concept.conceptName)})) {
+                visit${Utilities.getMethodPartName($nameMap, $type.componentType.concept)}(${Utilities.toLowerCaseIdent($type.componentType.concept.conceptName)}, p);
+                exitVisit(${Utilities.toLowerCaseIdent($type.componentType.concept.conceptName)});
+        }
+    }
+    }
+#end
+#end
+#end
+
+#end
+
+    protected boolean enterVisit(Object o) {
+        return visited.add(o);
+    }
+
+    protected boolean exitVisit(Object o) {
+        return visited.remove(o);
+    }
+}
+##
+##
+##
+#macro(writeSpecifiedType $type $conceptName )
+#set( $className = ${Utilities.getClassName($type)} )
+#if ( $className == $arrayTypeClassName )
+${conceptName}[]
+#elseif ( $className == $listTypeClassName )
+List<${conceptName}>
+#elseif ( $className == $setTypeClassName )
+Set<${conceptName}>
+#end
+#end

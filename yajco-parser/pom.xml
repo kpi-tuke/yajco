@@ -1,0 +1,59 @@
+<?xml version="1.0"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>sk.tuke.yajco</groupId>
+        <artifactId>yajco</artifactId>
+        <version>0.5.10-SNAPSHOT</version>
+    </parent>
+    <groupId>sk.tuke.yajco</groupId>
+    <artifactId>yajco-parser</artifactId>
+    <version>0.5.10-SNAPSHOT</version>
+    <packaging>jar</packaging>
+    <name>yajco-parser</name>
+        <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - yajco parser</description>
+    <licenses>
+        <license>
+            <name>GNU General Public License (GPL) v3</name>
+            <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+        </license>
+    </licenses>
+    <url>http://code.google.com/p/yajco/</url>
+    <developers>
+        <developer>
+            <name>Jaroslav Porubän</name>
+            <email>jaroslav.poruban@tuke.sk</email>
+            <organization>Technical University of Košice</organization>
+        </developer>
+        <developer>
+            <name>Dominik Lakatoš</name>
+            <email>deel77@gmail.com</email>
+            <organization>Technical University of Košice</organization>
+        </developer>
+    </developers>
+    <scm>
+        <url>http://yajco.googlecode.com/svn/trunk/</url>
+        <connection>scm:svn:http://yajco.googlecode.com/svn/trunk/</connection>
+      <developerConnection>scm:svn:https://yajco.googlecode.com/svn/trunk/yajco-parser/</developerConnection>
+  </scm>
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>yajco-model</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+         <dependency>
+            <groupId>sk.tuke.yajco</groupId>
+            <artifactId>yajco-generator-module</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>net.sf.beaver</groupId>
+            <artifactId>beaver-cc</artifactId>
+            <version>0.9.11</version>
+        </dependency>
+    </dependencies>
+</project>

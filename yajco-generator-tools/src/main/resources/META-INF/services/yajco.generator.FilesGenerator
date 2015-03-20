@@ -1,0 +1,5 @@
+yajco.generator.classgen.ClassGenerator
+yajco.generator.visitorgen.VisitorGenerator
+yajco.generator.printergen.PrettyPrinterGenerator
+yajco.printer.service.PrinterService
+yajco.generator.xmlserializer.XMLserializer

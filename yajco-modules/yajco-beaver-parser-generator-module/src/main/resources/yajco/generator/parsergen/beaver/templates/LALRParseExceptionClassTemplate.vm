@@ -1,0 +1,9 @@
+##
+##Input - parserClassPackageName
+package $parserClassPackageName;
+
+public class ParseException extends Exception {
+	public ParseException(String message, Throwable cause) {
+		super(message, cause);
+	}
+}
