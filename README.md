@@ -1,6 +1,6 @@
 # Getting started #
 
-You can start using YAJCo parser generator tool by following the steps descibed below. If you prefer to use existing more complex examples follow instructions in the [examples page](Examples.md).
+You can start using YAJCo parser generator tool by following the steps descibed below. If you prefer to use existing more complex examples follow instructions in the [examples page](https://github.com/kpi-fei-tuke-sk/yajco/blob/wiki/Examples.md).
 
 ## Maven builds ##
 
@@ -108,4 +108,4 @@ Parsed identifier: superman
 
 _**Congratulations**, you have created your first simple language using nothing else, just plain Java classes._
 
-You can download a [complete source code of getting started example](https://yajco.googlecode.com/svn/examples/yajco-example-gettingStarted.zip) and you can have a look at a [more complex examples](Examples.md).
+You can download a [complete source code of getting started example](https://yajco.googlecode.com/svn/examples/yajco-example-gettingStarted.zip) and you can have a look at a [more complex examples](https://github.com/kpi-fei-tuke-sk/yajco/blob/wiki/Examples.md).
