@@ -12,6 +12,10 @@ import yajco.annotation.reference.Identifier;
 import yajco.model.utilities.Utilities;
 import yajco.model.pattern.PropertyPattern;
 
+/**
+ * Properties su vlastnosti konceptu, mozu ale nemusia sa vykytnut v pravej casti pravidla.
+ * Mozu mat aj patterns.
+ */
 //Dodat tu este Range
 public class Property extends PatternSupport<PropertyPattern> {
 

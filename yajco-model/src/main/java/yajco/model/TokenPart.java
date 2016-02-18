@@ -2,6 +2,10 @@ package yajco.model;
 
 import yajco.annotation.Exclude;
 
+/**
+ * Toto sa v zapise (notation) vytvara na zaklade anotacii,
+ * napr. @Before, @After
+ */
 public class TokenPart extends YajcoModelElement implements NotationPart {
 
     private String token;

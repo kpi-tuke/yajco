@@ -12,6 +12,10 @@ import yajco.model.utilities.Utilities;
 import yajco.model.pattern.NotationPattern;
 import yajco.model.pattern.PatternSupport;
 
+/**
+ * Reprezentuje zapis jedneho konceptu (teda pravu stranu pravidla).
+ * Sklada sa z notation part.
+ */
 public class Notation extends PatternSupport<NotationPattern> {
 
     private List<NotationPart> parts;

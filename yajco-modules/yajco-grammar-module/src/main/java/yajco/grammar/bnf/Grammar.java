@@ -197,4 +197,14 @@ public class Grammar extends PatternSupport {
 			return toString().equals(other.toString());
 		}
 	}
+
+	@Override
+	public String toString() {
+		final StringBuilder sb = new StringBuilder("Grammar \n");
+		sb.append("Start symbol: ").append(startSymbol).append("\n");
+		for(Production pr : productions.values()) {
+			sb.append(pr).append("\n");
+		}
+		return sb.toString();
+	}
 }
