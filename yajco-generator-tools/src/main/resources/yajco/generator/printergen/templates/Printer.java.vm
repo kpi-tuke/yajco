@@ -82,9 +82,8 @@ public class $className extends ${visitorClassName}<PrintWriter> {
   #set( $notationValuedList = ${Utilities.getValuedNotationList(${concept})} )
   #set( $ifBranchToken = "if" )
   #foreach( $notationRank in $notationValuedList )
-        $ifBranchToken (
+        $ifBranchToken (true
    #set( $notation = $concept.concreteSyntax.get(${notationRank}) )
-   #set( $logicalAndOperator = "" )
    #foreach( $notationPart in $notation.parts )
     #if( ${ModelUtilities.getPropertyFromNotationPart(${notationPart},${concept})} )
      #set( $property = ${ModelUtilities.getPropertyFromNotationPart(${notationPart},${concept})} )
@@ -94,7 +93,7 @@ public class $className extends ${visitorClassName}<PrintWriter> {
       #set( $hasRangePattern = ${Utilities.hasClassInList(${notationPart.patterns},${rangePatternClassName})} )
       #set( $rangePattern = ${Utilities.getObjectFromList(${notationPart.patterns},${rangePatternClassName})} )
       #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
-          $logicalAndOperator ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null
+          && ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null
        #if( $hasRangePattern )
          #if( $className == $arrayTypeClassName )
           && ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}().length >= ${rangePattern.minOccurs}
@@ -118,16 +117,15 @@ public class $className extends ${visitorClassName}<PrintWriter> {
       #end
      #elseif( $className == $primitiveTypeClassName )
       #if( ${ModelUtilities.isStringType(${type})} )
-          $logicalAndOperator ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null
+          && ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null
       #end
       ## stale to musi mat nejaku hodnotu pri int, real, boolean, cize netreba dalej kontrolovat
      #elseif( $className == $referenceTypeClassName )
-           $logicalAndOperator ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null
+           && ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null
      #else
         $Utilities.throwGeneratorException("Not known type for ${property.name}")
         // not known type for ${property.name}
      #end
-     #set( $logicalAndOperator = "&&" )
     #end
    #end
         ) { print${Utilities.getMethodPartName($nameMap, $concept)}Notation${notationRank}(${Utilities.toLowerCaseIdent($concept.conceptName)}, p); }
