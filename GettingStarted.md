@@ -108,4 +108,4 @@ Parsed identifier: superman
 
 _**Congratulations**, you have created your first simple language using nothing else, just plain Java classes._
 
-You can download a [complete source code of getting started example](https://yajco.googlecode.com/svn/examples/yajco-example-gettingStarted.zip) and you can have a look at a [more complex examples](Examples.md).
+You can download a [complete source code of getting started example](https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/yajco_examples.zip) (look in yajco-example-gettingStarted directory) and you can have a look at a [more complex examples](Examples.md).

@@ -14,7 +14,7 @@ _WORK IN PROGRESS_
 # Overview #
 **YAJCo is tool for simple specification of languages** and generation of language parser and language supporting tools using only annotated Java classes. Each class represents one language concept and is equivalent to abstract syntax definition. Class can contain methods representing language semantics and annotations for specification of concrete syntax.
 
-Each YAJCo project needs to have one [@Parser](#@Parser.md) annotation for specification of root concept and other options.
+Each YAJCo project needs to have one `@Parser` annotation for specification of root concept and other options.
 
 In next lines you can find out a little more about our great YAJCo tool, or you can go straight to [examples](Examples.md) page and play with them and then return to this user guide. Either way, if you feel like something is not right or missing from this user guide, please [let us know](ContactUs.md).
 
@@ -49,7 +49,7 @@ In addition definition of composition on constructors allows to do some preproce
 <br>
 <h2>Composition multiplicity ##
 
-A concept can contain multiple instances of subconcepts. This is automatically inferred from the use of array or one of the standard Java collection types. The multiplicity can be restricted using [@Range](UserGuide#@Range.md) annotation.
+A concept can contain multiple instances of subconcepts. This is automatically inferred from the use of array or one of the standard Java collection types. The multiplicity can be restricted using [@Range](#range) annotation.
 
 YAJCo supports multiplicity with following types:
   * Java arrays
@@ -57,23 +57,23 @@ YAJCo supports multiplicity with following types:
   * `java.util.Set`
 
 ## Referencing (agregation) ##
-A concept instance description can also contain a reference to instance of another concept that is described elsewhere in the input sentence. In this case only some identifier (marked with [@Identifier](#@Identifier.md) annotation) of referred instance is provided as a part of concept instance definition.
+A concept instance description can also contain a reference to instance of another concept that is described elsewhere in the input sentence. In this case only some identifier (marked with [`@Identifier`](#identifier) annotation) of referred instance is provided as a part of concept instance definition.
 
-In the object model this relation can be expressed using aggregation. YAJCo again uses constructor parameters as a place, where the relation is described. In this case, parameter is an identifier string marked with [@References](#@References.md) annotation. YAJCo would automatically resolve the reference and inject actual object instance into field with the same type so constructor can actually ignore received identifier.
+In the object model this relation can be expressed using aggregation. YAJCo again uses constructor parameters as a place, where the relation is described. In this case, parameter is an identifier string marked with [`@References`](#references) annotation. YAJCo would automatically resolve the reference and inject actual object instance into field with the same type so constructor can actually ignore received identifier.
 
-Simple example of identifiers and references is provided in [Nielsen's DESK language](Examples#Nielsen's_DESK_language.md). For more information about this feature, you can check our paper _[Declarative specification of references in DSLs](http://www.mendeley.com/download/public/27880491/6466511164/71085fd9b9fa436cefae3e71ed71111fcc8f2b06/dl.pdf)_
+Simple example of identifiers and references is provided in [Nielsen's DESK language](Examples.md#nielsens-desk-language). For more information about this feature, you can check our paper _[Declarative specification of references in DSLs](http://www.mendeley.com/download/public/27880491/6466511164/71085fd9b9fa436cefae3e71ed71111fcc8f2b06/dl.pdf)_
 
 # Concrete Syntax Definition #
 
 Concrete syntax (notation) for each language concept is specified in a form of annotations attached to class constructors (and factory methods). Constructors allow to describe how an object can be constructed from some input, so it is appropriate to use them also for constructing concept instances from the textual input of language sentence.
 
-The annotations allow to specify tokens, that would be used in concepts' concrete representation. Most of described annotations expect token specification as a parameter. Named tokens are defined in [@Parser](#@Parser.md) annotation in [@#TokenDef @TokenDef] option part. If token would be used only once, it can be specified directly in annotation. If specified string does not represents existing named token, it is taken as exact character sequence to be used in concrete syntax.
+The annotations allow to specify tokens, that would be used in concepts' concrete representation. Most of described annotations expect token specification as a parameter. Named tokens are defined in [`@Parser`](#parser) annotation in [@#TokenDef @TokenDef] option part. If token would be used only once, it can be specified directly in annotation. If specified string does not represents existing named token, it is taken as exact character sequence to be used in concrete syntax.
 
 ## Keywords and symbols ##
 
-The simplest form of concrete syntax annotations is a definition of keywords and symbols that must be part of concept concrete representation. These tokens can be placed before or after concept description using [@Before](#@Before.md) and [@After](#@After.md) annotations associated with concept constructor. Tokens can be also placed between description of subconcepts by using the same annotations on constructor parameters.
+The simplest form of concrete syntax annotations is a definition of keywords and symbols that must be part of concept concrete representation. These tokens can be placed before or after concept description using [`@Before`](#before) and [`@After`](#after) annotations associated with concept constructor. Tokens can be also placed between description of subconcepts by using the same annotations on constructor parameters.
 
-In a case of composition multiplicity it is possible to specify tokens that must be placed between each instance of subelement. This can be done with [@Separator](#@Separator.md) annotation.
+In a case of composition multiplicity it is possible to specify tokens that must be placed between each instance of subelement. This can be done with [`@Separator`](#separator) annotation.
 
 ## Alternative notations ##
 
@@ -94,18 +94,18 @@ Iteration ::= <ITERATE> Expression <TIMES> Statement
 Iteration ::= <ITERATE> Expression <TIMES> Statement* <END>
 ```
 
-Constructors that should not become part of language definition can be marked using [@Exclude](#@Exclude.md) annotation.
+Constructors that should not become part of language definition can be marked using [`@Exclude`](#exclude) annotation.
 
 ## Operator definition ##
 Operators represent a type of language constructs that benefits from special treatment. Otherwise they would require more complex definition of concept relations to express rules of priority and assiciativity.
 
-In YAJCo it is possible to mark concept using [@Operator](#@Operator.md) annotation and define its priority and associativity. Annotation [@Parentheses](#@Parentheses.md) can be used to indicate the possibility to use parentheses to explicitly express priority.
+In YAJCo it is possible to mark concept using [`@Operator`](#operator) annotation and define its priority and associativity. Annotation [`@Parentheses`](#parentheses) can be used to indicate the possibility to use parentheses to explicitly express priority.
 
 ## Tokens with value ##
 
-Since language concepts can contain not only other concepts, but also primitive values, like numbers and strings, it is needed to specify their concrete notation. This is done by attaching [@Token](#@Token.md) annotation with a regular expression as a parameter to the parameter of the constructor. A string that matches the regular expression is then provided as a value of the parameter.
+Since language concepts can contain not only other concepts, but also primitive values, like numbers and strings, it is needed to specify their concrete notation. This is done by attaching [`@Token`](#token) annotation with a regular expression as a parameter to the parameter of the constructor. A string that matches the regular expression is then provided as a value of the parameter.
 
-If you do not use `@Token` annotation YAJCo derives names of tokens from names o parameters. There are no preddefined tokens in YAJCo, so every token needs to be defined in [@Parser](#@Parser.md) annotation or with annotations inside concept classes.
+If you do not use [`@Token`](#token) annotation YAJCo derives names of tokens from names o parameters. There are no preddefined tokens in YAJCo, so every token needs to be defined in [`@Parser`](#parser) annotation or with annotations inside concept classes.
 
 Examples of usage of `@Token` annotation are in all provided [examples](Examples.md) as it is common task to mark parameters as input values.
 
@@ -229,7 +229,7 @@ define its priority and associativity.
     }
 ```
 
-For better practical understanding, see [Math expression language](Examples#Math_Expression_language.md) in examples or any other more complex example language.
+For better practical understanding, see [Math expression language](Examples.md#math-expression-language) in examples or any other more complex example language.
 
 ### `@Parentheses` ###
 Parameters:
@@ -251,7 +251,7 @@ public abstract class Expression {
 }
 ```
 
-For better practical understanding, see [Math expression language](Examples#Math_Expression_language.md) in examples or any other more complex example language.
+For better practical understanding, see [Math expression language](Examples.md#math-expression-language) in examples or any other more complex example language.
 
 ### `@Identifier` ###
 Parameter:
@@ -276,7 +276,7 @@ public class Parameter {
 }
 ```
 
-Simple example of identifiers and references is provided in [Nielsen's DESK language](Examples#Nielsen's_DESK_language.md). For more information about this feature, you can check our paper _[Declarative specification of references in DSLs](http://www.mendeley.com/download/public/27880491/6466511164/71085fd9b9fa436cefae3e71ed71111fcc8f2b06/dl.pdf)_
+Simple example of identifiers and references is provided in [Nielsen's DESK language](Examples.md#nielsens-desk-language). For more information about this feature, you can check our paper _[Declarative specification of references in DSLs](http://www.mendeley.com/download/public/27880491/6466511164/71085fd9b9fa436cefae3e71ed71111fcc8f2b06/dl.pdf)_
 
 ### `@References` ###
 Parameters:
@@ -329,7 +329,7 @@ public Transition(
 ...
 ```
 
-Simple example of identifiers and references is provided in [Nielsen's DESK language](Examples#Nielsen's_DESK_language.md). For more information about this feature, you can check our paper _[Declarative specification of references in DSLs](http://www.mendeley.com/download/public/27880491/6466511164/71085fd9b9fa436cefae3e71ed71111fcc8f2b06/dl.pdf)_
+Simple example of identifiers and references is provided in [Nielsen's DESK language](Examples.md#nielsens-desk-language). For more information about this feature, you can check our paper _[Declarative specification of references in DSLs](http://www.mendeley.com/download/public/27880491/6466511164/71085fd9b9fa436cefae3e71ed71111fcc8f2b06/dl.pdf)_
 
 ### `@FactoryMethod` ###
 Serves as marking annotation for specifying static methods, which will be included in creation of abstract syntax. Standard behaviour of YAJCo is to take all constructors as representation of concrete syntax for language concept (class). There can sometimes be problems with specification of all wanted concrete syntax notations with constructors, as they do not allow to have same signature even when annotations are different. Therefore it is sometimes required to create factory methods and mark them with our annotation.

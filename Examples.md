@@ -2,7 +2,7 @@ We want to provide you a few examples of languages created with YAJCo. You can d
 
 
 
-**Download all examples: https://yajco.googlecode.com/svn/examples/yajco_examples.zip**
+**Download all examples: https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/yajco_examples.zip**
 
 You can use any Java IDE with support for Maven. Examples have been tested in
   * IntelliJ IDEA
@@ -30,7 +30,7 @@ This language example serves as simple example of multiple language concepts wit
 
 _**Model (class diagram):**_
 
-![https://yajco.googlecode.com/svn/examples/images/simpleRobot-diagram.png](https://yajco.googlecode.com/svn/examples/images/simpleRobot-diagram.png)
+![https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/images/simpleRobot-diagram.png](https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/images/simpleRobot-diagram.png)
 
 _**Sentence example:**_
 ```
@@ -64,7 +64,7 @@ Result of execution is actual evaluation of instructions in provided world. Befo
 
 _**Model (class diagram):**_
 
-![https://yajco.googlecode.com/svn/examples/images/robotKarel-diagram.png](https://yajco.googlecode.com/svn/examples/images/robotKarel-diagram.png)
+![https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/images/robotKarel-diagram.png](https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/images/robotKarel-diagram.png)
 
 _**Sentence example:**_
   * map
@@ -201,7 +201,7 @@ Result of each sentence of this language is evaluation of mathematical expressio
 
 _**Model (class diagram):**_
 
-![https://yajco.googlecode.com/svn/examples/images/mathExpression-diagram.png](https://yajco.googlecode.com/svn/examples/images/mathExpression-diagram.png)
+![https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/images/mathExpression-diagram.png](https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/images/mathExpression-diagram.png)
 
 _**Sentence example:**_
 ```
@@ -227,7 +227,7 @@ Result of execution is evaluation of expression in form of mathematical value. A
 
 _**Model (class diagram):**_
 
-![https://yajco.googlecode.com/svn/examples/images/extMathExpression-diagram.png](https://yajco.googlecode.com/svn/examples/images/extMathExpression-diagram.png)
+![https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/images/extMathExpression-diagram.png](https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/images/extMathExpression-diagram.png)
 
 _**Sentence example:**_
 ```
@@ -256,7 +256,7 @@ Result of execution of a language sentence is summary of described state machine
 
 _**Model (class diagram):**_
 
-![https://yajco.googlecode.com/svn/examples/images/stateMachine-diagram.png](https://yajco.googlecode.com/svn/examples/images/stateMachine-diagram.png)
+![https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/images/stateMachine-diagram.png](https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/images/stateMachine-diagram.png)
 
 _**Sentence example:**_
 ```
@@ -294,7 +294,7 @@ Result of execution is transformation to instruction set and once again we displ
 
 _**Model (class diagram):**_
 
-![https://yajco.googlecode.com/svn/examples/images/deskNielsen-diagram.png](https://yajco.googlecode.com/svn/examples/images/deskNielsen-diagram.png)
+![https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/images/deskNielsen-diagram.png](https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/images/deskNielsen-diagram.png)
 
 _**Sentence example:**_
 ```
@@ -328,7 +328,7 @@ Parser for JSON format. Created by one of our bachelor student as part of YAJCo 
 
 _**Model (class diagram):**_
 
-![https://yajco.googlecode.com/svn/examples/images/json-diagram.png](https://yajco.googlecode.com/svn/examples/images/json-diagram.png)
+![https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/images/json-diagram.png](https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/images/json-diagram.png)
 
 _**Sentence example:**_
 ```
@@ -358,7 +358,7 @@ Result of execution can be almost anything written in sentence. It is possible t
 
 _**Model (class diagram):**_
 
-![https://yajco.googlecode.com/svn/examples/images/imperLang-diagram.png](https://yajco.googlecode.com/svn/examples/images/imperLang-diagram.png)
+![https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/images/imperLang-diagram.png](https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/examples/images/imperLang-diagram.png)
 
 _**Sentence example:**_
 ```
