@@ -20,3 +20,11 @@ buildNumber.properties
 
 # Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
 !/.mvn/wrapper/maven-wrapper.jar
+
+yajco-annotation-processor/
+yajco-annotations/
+yajco-generator-tools/
+yajco-model/
+yajco-modules/
+yajco-parser/
+yajco-prototype-modules/
