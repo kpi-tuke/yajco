@@ -9,7 +9,7 @@ YAJCo relies on Java as a language for definition of language model and its sema
 ## Architecture ##
 The tool contains Java annotation processor that collects metadata attached to classes and their elements and constructs an internal model of language definition used to generate a parser. YAJCo is able to extract relations between classes of the language model and infer part of language syntax based on that. Missing information about concrete syntax is determined from annotations.
 
-![https://yajco.googlecode.com/svn/wiki/images/schema.png](https://yajco.googlecode.com/svn/wiki/images/schema.png)
+![https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/images/schema.png](https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/images/schema.png)
 
 This definition is used by YAJCo to generate parser specification for one of the existing parser generators. Currently JavaCC and Beaver are supported as backends making it possible to choose parsing algorithm depending on the current needs.
 

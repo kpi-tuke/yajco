@@ -32,6 +32,7 @@ instead of `yajco-beaver-parser-generator-module`.
 
 ## Uber JAR ##
 In case you are not _a friend_ with Maven, we have prepared special archived JAR with all dependencies included for you. Downfall is that such code is not actively supported, it can get old over time and not all possibilities and tools are included.
+
 | **Type** | **Download** |
 |:---------|:-------------|
 | YAJCo annotation processor + Beaver generator 0.5.9| [JAR](https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/uber-jar/yajco-annotation-processor-beaver-generator-0.5.9.jar) |

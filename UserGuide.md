@@ -25,7 +25,7 @@ Abstract syntax of the language consists of definition of language concepts and 
 ## Inheritance relation 'is-a' ##
 Inheritance or implementation of the interface indicates that one concepts is a special case of its parent concepts, i.e. it can be used in all places where the parent concept is expected. YAJCo automatically uses inheritance relation between classes to construct appropriate grammar rules.
 
-| ![https://yajco.googlecode.com/svn/wiki/images/inheritance.png](https://yajco.googlecode.com/svn/wiki/images/inheritance.png) | EBNF:<br><code>Statement::= Move | TurnLeft</code> </tbody></table>
+| ![https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/images/inheritance.png](https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/images/inheritance.png) | EBNF:<br><code>Statement::= Move | TurnLeft</code> </tbody></table>
 
 <pre><code>public abstract class Statement {...}<br>
 <br>
@@ -34,11 +34,11 @@ public class Move extends Statement {...}<br>
 public class TurnLeft extends Statement {...}<br>
 </code></pre>
 
-<h2>Composition relation 'has-a' ##
+## Composition relation 'has-a' ##
 
 A concept is composed from other concepts when description of concept instance in an input sentence includes description of its subconcepts. In the grammar it is represented by the occurrence of non-terminals of subconcepts on the right-hand side of the rule corresponding to the composed concept.
 
-| ![https://yajco.googlecode.com/svn/wiki/images/composition.png](https://yajco.googlecode.com/svn/wiki/images/composition.png) | EBNF:<br><code>Iteration ::= Expression Statement</code> </tbody></table>
+| ![https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/images/composition.png](https://raw.githubusercontent.com/kpi-tuke/yajco/wiki/images/composition.png) | EBNF:<br><code>Iteration ::= Expression Statement</code> </tbody></table>
 
 In object-oriented language this relation can be expressed using class fields that contain instances of subconcept classes. Not all fields, however, correspond to composition relation. Because of this YAJCo uses parameters of <b>class constructor</b> (or factory methods) for the specification of subconcepts. This also provides more flexibility for definition of concrete syntax as it defines also ordering of subconcepts.<br>
 <br>
@@ -47,7 +47,7 @@ In object-oriented language this relation can be expressed using class fields th
 
 In addition definition of composition on constructors allows to do some preprocessing and store subconcepts in different form.<br>
 <br>
-<h2>Composition multiplicity ##
+## Composition multiplicity ##
 
 A concept can contain multiple instances of subconcepts. This is automatically inferred from the use of array or one of the standard Java collection types. The multiplicity can be restricted using [@Range](#range) annotation.
 
