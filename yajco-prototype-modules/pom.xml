@@ -43,5 +43,6 @@
         <module>yajco-aspectj-reference-registrator-generator-module</module>
         <module>yajco-lisa-parser-generator-module</module>
         <module>yajco-metalexer-lexer-generator-module</module>
+        <module>yajco-antlr4-parser-generator-module</module>
     </modules>
 </project>

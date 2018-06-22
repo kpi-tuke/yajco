@@ -1,0 +1,19 @@
+#set( $parserAntlr4LexerClassName = $parserAntlr4PackageName + "." + $parserClassName + "Lexer")
+#set( $parserAntlr4ParserClassName = $parserAntlr4PackageName + "." + $parserClassName + "Parser")
+package $parserPackageName;
+
+import org.antlr.v4.runtime.Lexer;
+import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CommonTokenStream;
+
+public class $parserClassName {
+    public $mainElementClassName parse(String input) {
+        Lexer lexer = new ${parserAntlr4LexerClassName}(new ANTLRInputStream(input));
+        ${parserAntlr4ParserClassName} parser = new ${parserAntlr4ParserClassName}(new CommonTokenStream(lexer));
+
+        yajco.ReferenceResolver referenceResolver = yajco.ReferenceResolver.createInstance();
+        $mainElementClassName root = parser.main().${returnVarName};
+        referenceResolver.resolveReferences();
+        return root;
+    }
+}
