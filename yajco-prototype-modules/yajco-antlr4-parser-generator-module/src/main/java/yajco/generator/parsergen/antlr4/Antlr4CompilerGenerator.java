@@ -49,18 +49,18 @@ public class Antlr4CompilerGenerator implements CompilerGenerator {
             final int lastDotPos = parserFullClassName.lastIndexOf(".");
             final String parserClassName = parserFullClassName.substring(lastDotPos + 1);
             final String parserPackageName = parserFullClassName.substring(0, lastDotPos);
-            final String parserANTLRPackageName = parserPackageName + ".antlr4";
-            final String parserANTLRClassName = parserClassName + "Parser";
-            final String lexerANTLRClassName = parserClassName + "Lexer";
+            final String ANTLRParserPackageName = parserPackageName + ".antlr4";
+            final String ANTLRParserClassName = parserClassName + "Parser";
+            final String ANTLRLexerClassName = parserClassName + "Lexer";
 
             final String grammarName = parserClassName;
             final String grammarFileName = grammarName + ".g4";
 
             // Create ANTLR4 grammar specification
             FileObject fileObject = filer.createResource(
-                    StandardLocation.SOURCE_OUTPUT, parserANTLRPackageName, grammarFileName);
+                    StandardLocation.SOURCE_OUTPUT, ANTLRParserPackageName, grammarFileName);
             try (Writer writer = fileObject.openWriter()) {
-                ModelTranslator translator = new ModelTranslator(language, grammarName, parserANTLRPackageName);
+                ModelTranslator translator = new ModelTranslator(language, grammarName, ANTLRParserPackageName);
                 Grammar grammar = translator.translate();
                 System.out.println("\nGenerated ANTLR4 grammar:");
                 System.out.println("--------------------------------------------------------------------------------------------------------");
@@ -80,9 +80,9 @@ public class Antlr4CompilerGenerator implements CompilerGenerator {
 
             // These will be later overwritten when we run the ANTLR tool. We have to do this so they
             // are registered for compilation.
-            try (Writer writer = filer.createSourceFile(parserANTLRPackageName + "." + parserANTLRClassName).openWriter()) {
+            try (Writer writer = filer.createSourceFile(ANTLRParserPackageName + "." + ANTLRParserClassName).openWriter()) {
             }
-            try (Writer writer = filer.createSourceFile(parserANTLRPackageName + "." + lexerANTLRClassName).openWriter()) {
+            try (Writer writer = filer.createSourceFile(ANTLRParserPackageName + "." + ANTLRLexerClassName).openWriter()) {
             }
 
             // Run the ANTLR tool.
@@ -114,7 +114,8 @@ public class Antlr4CompilerGenerator implements CompilerGenerator {
             // Create parser class wrapping the ANTLR-generated one.
             try (Writer writer = filer.createSourceFile(parserFullClassName).openWriter()) {
                 writer.write(generateParserWrapper(
-                    parserANTLRPackageName,
+                    ANTLRParserPackageName + "." + ANTLRParserClassName,
+                    ANTLRParserPackageName + "." + ANTLRLexerClassName,
                     parserPackageName,
                     parserClassName,
                     yajco.model.utilities.Utilities.getFullConceptClassName(language, language.getConcepts().get(0))
@@ -126,9 +127,12 @@ public class Antlr4CompilerGenerator implements CompilerGenerator {
         }
     }
 
-    private String generateParserWrapper(String parserAntlr4PackageName, String parserPackageName, String parserClassName, String mainElementClassName) throws IOException {
+    private String generateParserWrapper(String ANTLRParserFullClassName, String ANTLRLexerFullClassName,
+                                         String parserPackageName, String parserClassName,
+                                         String mainElementClassName) throws IOException {
         VelocityContext context = new VelocityContext();
-        context.put("parserAntlr4PackageName", parserAntlr4PackageName);
+        context.put("ANTLRParserFullClassName", ANTLRParserFullClassName);
+        context.put("ANTLRLexerFullClassName", ANTLRLexerFullClassName);
         context.put("parserPackageName", parserPackageName);
         context.put("parserClassName", parserClassName);
         context.put("mainElementClassName", mainElementClassName);

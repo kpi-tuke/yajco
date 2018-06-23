@@ -41,10 +41,6 @@ public class ModelTranslator {
         List<ParserRule> parserRules = translateProductions();
         List<LexicalRule> lexicalRules = translateTokens();
 
-        System.out.println("Productions: " + this.bnfGrammar.getProductions());
-        System.out.println("Terminal pool: " + this.bnfGrammar.getTerminalPool());
-        System.out.println("Terminals: " + this.bnfGrammar.getTerminals());
-
         return new Grammar(
                 this.parserClassName,
                 "package " + this.parserPackageName + ";",
@@ -53,7 +49,7 @@ public class ModelTranslator {
     }
 
     private String convertProductionName(String name) {
-        // ANTLR parser rule names must be lowercase
+        // ANTLR parser rule names must begin with a lowercase letter
         return name.toLowerCase();
     }
 
