@@ -382,7 +382,7 @@ public class ModelTranslator {
             char ch = regex.charAt(i);
             if (state != STATE_BRACKETS
                     && ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9')
-                    || ch == '\\' || ch == '_'))
+                    || ch == '\\' || ch == '_' || ch == ' '))
             {
                 if (state != STATE_LITERAL)
                     ret.append('\'');
