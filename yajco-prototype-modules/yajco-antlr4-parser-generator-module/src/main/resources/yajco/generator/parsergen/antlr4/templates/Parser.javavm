@@ -3,15 +3,22 @@ package $parserPackageName;
 import org.antlr.v4.runtime.Lexer;
 import org.antlr.v4.runtime.ANTLRInputStream;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
 
 public class $parserClassName {
-    public $mainElementClassName parse(String input) {
+    public $mainElementClassName parse(String input) throws ParseException {
         Lexer lexer = new ${ANTLRLexerFullClassName}(new ANTLRInputStream(input));
         ${ANTLRParserFullClassName} parser = new ${ANTLRParserFullClassName}(new CommonTokenStream(lexer));
+        parser.setErrorHandler(new BailErrorStrategy());
 
-        yajco.ReferenceResolver referenceResolver = yajco.ReferenceResolver.createInstance();
-        $mainElementClassName root = parser.main().${returnVarName};
-        referenceResolver.resolveReferences();
-        return root;
+        try {
+            yajco.ReferenceResolver referenceResolver = yajco.ReferenceResolver.createInstance();
+            $mainElementClassName root = parser.main().${returnVarName};
+            referenceResolver.resolveReferences();
+            return root;
+        } catch (ParseCancellationException e) {
+            throw new ParseException("Failed to parse input", e);
+        }
     }
 }

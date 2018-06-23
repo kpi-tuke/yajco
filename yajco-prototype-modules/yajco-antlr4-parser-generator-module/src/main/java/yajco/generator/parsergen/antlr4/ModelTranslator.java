@@ -14,6 +14,7 @@ import yajco.model.SkipDef;
 import yajco.model.type.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -59,7 +60,12 @@ public class ModelTranslator {
 
     private ParserRule makeMainRule() {
         String name = convertProductionName(this.bnfGrammar.getStartSymbol().getName());
-        RulePart part = new RulePart(name);
+        SequencePart part = new SequencePart(new ArrayList<>(Arrays.asList(
+            new RulePart(name),
+            // Include explicit EOF so the parser is not allowed to match a subset of the input
+            // without reporting an error.
+            new RulePart("EOF")
+        )));
         part.setCodeAfter("$" + RETURN_VAR_NAME + " = $" + name + ".ctx." + RETURN_VAR_NAME + ";");
         return new ParserRule("main",
                 makeReturnRule(this.bnfGrammar.getStartSymbol()),

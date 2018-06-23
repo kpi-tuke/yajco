@@ -19,6 +19,7 @@ import java.util.Properties;
 
 public class Antlr4CompilerGenerator implements CompilerGenerator {
     static final private String ANTLR4_PARSER_CLASS_TEMPLATE = "/yajco/generator/parsergen/antlr4/templates/Parser.javavm";
+    static final private String ANTLR4_PARSE_EXCEPTION_CLASS_TEMPLATE = "/yajco/generator/parsergen/antlr4/templates/ParseException.javavm";
     private VelocityEngine velocityEngine;
 
     // TODO: Remove this hack later.
@@ -121,6 +122,11 @@ public class Antlr4CompilerGenerator implements CompilerGenerator {
                     yajco.model.utilities.Utilities.getFullConceptClassName(language, language.getConcepts().get(0))
                 ));
             }
+
+            // Create parse exception
+            try (Writer writer = filer.createSourceFile(parserPackageName + ".ParseException").openWriter()) {
+                writer.write(generateParseException(parserPackageName));
+            }
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("ANTLR4 Compiler Generator reports an error: " + e.getMessage());
@@ -141,6 +147,16 @@ public class Antlr4CompilerGenerator implements CompilerGenerator {
         StringWriter writer = new StringWriter();
         this.velocityEngine.evaluate(context, writer, "",
                 new InputStreamReader(getClass().getResourceAsStream(ANTLR4_PARSER_CLASS_TEMPLATE)));
+        return writer.toString();
+    }
+
+    private String generateParseException(String parserPackageName) throws IOException {
+        VelocityContext context = new VelocityContext();
+        context.put("parserPackageName", parserPackageName);
+
+        StringWriter writer = new StringWriter();
+        this.velocityEngine.evaluate(context, writer, "",
+                new InputStreamReader(getClass().getResourceAsStream(ANTLR4_PARSE_EXCEPTION_CLASS_TEMPLATE)));
         return writer.toString();
     }
 }
