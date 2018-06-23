@@ -10,9 +10,9 @@ public class AlternativePart extends CompositePart {
     @Override
     protected String generatePart() {
         StringBuilder sb = new StringBuilder();
-        boolean parantheses = (!this.parts.isEmpty() && this.parent != null);
+        boolean parentheses = (!this.parts.isEmpty() && this.parent != null);
 
-        if (parantheses)
+        if (parentheses)
             sb.append("(\n");
 
         for (int i = 0; i < this.parts.size(); i++) {
@@ -24,7 +24,7 @@ public class AlternativePart extends CompositePart {
             }
         }
 
-        if (parantheses)
+        if (parentheses)
             sb.append("\n)");
 
         return sb.toString();
