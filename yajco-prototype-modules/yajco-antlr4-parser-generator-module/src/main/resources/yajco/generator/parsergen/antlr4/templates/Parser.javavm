@@ -21,4 +21,22 @@ public class $parserClassName {
             throw new ParseException("Failed to parse input", e);
         }
     }
+
+    public $mainElementClassName parse(java.io.Reader reader) throws ParseException {
+        try {
+            return parse(readAsString(reader));
+        } catch (java.io.IOException e) {
+            throw new ParseException("Failed to read input file", e);
+        }
+    }
+
+    private String readAsString(java.io.Reader r) throws java.io.IOException {
+        StringBuilder sb = new StringBuilder();
+        java.io.BufferedReader br = new java.io.BufferedReader(r);
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line + "\n");
+        }
+        return sb.toString();
+    }
 }
