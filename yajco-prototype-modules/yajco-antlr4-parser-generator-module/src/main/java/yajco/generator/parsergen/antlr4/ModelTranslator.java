@@ -383,42 +383,13 @@ public class ModelTranslator {
         return new LexicalRule(name, rule);
     }
 
-    /*
-    ANTLR lexical rules are notated differently than YAJCo regexes.
-    This method performs the necessary conversion, e.g.: aa[abc]+(bb|cc) is converted into 'aa'[abc]+('bb'|'cc')
-
-    FIXME: This conversion method is incomplete and will only work on basic regexes. It will be later removed
-    when we switch to a custom lexer.
-    */
     private String convertRegexIntoLexicalRule(String regex) {
-        final int STATE_NONE = 0, STATE_LITERAL = 1, STATE_BRACKETS = 2;
-        int state = STATE_NONE;
-        StringBuilder ret = new StringBuilder();
-        for (int i = 0; i < regex.length(); i++) {
-            char ch = regex.charAt(i);
-            if (state != STATE_BRACKETS
-                    && ((ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z') || (ch >= '0' && ch <= '9')
-                    || ch == '\\' || ch == '_' || ch == ' '))
-            {
-                if (state != STATE_LITERAL)
-                    ret.append('\'');
-                state = STATE_LITERAL;
-            } else if (ch == '[') {
-                if (state == STATE_LITERAL)
-                    ret.append('\'');
-                state = STATE_BRACKETS;
-            } else {
-                if (state == STATE_LITERAL) {
-                    ret.append('\'');
-                    state = STATE_NONE;
-                } else if (state == STATE_BRACKETS && ch == ']') {
-                    state = STATE_NONE;
-                }
-            }
-            ret.append(ch);
+        Regex2Antlr converter = new Regex2Antlr(regex);
+        try {
+            return converter.convert();
+        } catch (Regex2Antlr.ConvertException e) {
+            throw new RuntimeException(
+                    "Failed to convert regex " + regex + " into an ANTLR4 lexical rule: " + e.getMessage(), e);
         }
-        if (state == STATE_LITERAL)
-            ret.append('\'');
-        return ret.toString();
     }
 }
