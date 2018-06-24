@@ -2,6 +2,7 @@ package yajco.generator.parsergen.antlr4;
 
 import yajco.ReferenceResolver;
 import yajco.generator.parsergen.antlr4.model.*;
+import yajco.generator.util.RegexUtil;
 import yajco.grammar.NonterminalSymbol;
 import yajco.grammar.Symbol;
 import yajco.grammar.TerminalSymbol;
@@ -13,10 +14,7 @@ import yajco.model.Language;
 import yajco.model.SkipDef;
 import yajco.model.type.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * Translates YAJCo model to ANTLR4 grammar model
@@ -339,22 +337,23 @@ public class ModelTranslator {
     private List<LexicalRule> translateTokens() {
         List<LexicalRule> lexicalRules = new ArrayList<>();
 
+        Map<String, String> acyclicTerminals = new HashMap<>();
+        Map<String, String> cyclicTerminals = new HashMap<>();
+
         for (Map.Entry<TerminalSymbol, String> entry : this.bnfGrammar.getTerminalPool().entrySet()) {
-            String name = entry.getKey().getName();
-            String rule;
-
-            if (name.startsWith(YajcoModelToBNFGrammarTranslator.DEFAULT_SYMBOL_NAME)) {
-                // literal
-                String val = entry.getValue();
-                val = val.replace("\\", "\\\\");
-                val = val.replace("'", "\\'");
-                rule = "'" + val + "'";
+            if (RegexUtil.isCyclic(entry.getValue())) {
+                cyclicTerminals.put(entry.getKey().getName(), entry.getValue());
             } else {
-                // regex
-                rule = convertRegexIntoLexicalRule(entry.getValue());
+                acyclicTerminals.put(entry.getKey().getName(), entry.getValue());
             }
+        }
 
-            lexicalRules.add(new LexicalRule(name, rule));
+        for (Map.Entry<String, String> entry : acyclicTerminals.entrySet()) {
+            lexicalRules.add(translateTerminalDefinition(entry.getKey(), entry.getValue()));
+        }
+
+        for (Map.Entry<String, String> entry : cyclicTerminals.entrySet()) {
+            lexicalRules.add(translateTerminalDefinition(entry.getKey(), entry.getValue()));
         }
 
         int i = 0;
@@ -365,6 +364,23 @@ public class ModelTranslator {
         }
 
         return lexicalRules;
+    }
+
+    private LexicalRule translateTerminalDefinition(String name, String regex) {
+        String rule;
+
+        if (name.startsWith(YajcoModelToBNFGrammarTranslator.DEFAULT_SYMBOL_NAME)) {
+            // literal
+            String val = regex;
+            val = val.replace("\\", "\\\\");
+            val = val.replace("'", "\\'");
+            rule = "'" + val + "'";
+        } else {
+            // regex
+            rule = convertRegexIntoLexicalRule(regex);
+        }
+
+        return new LexicalRule(name, rule);
     }
 
     /*
