@@ -69,15 +69,26 @@ public class Regex2Antlr {
             } else {
                 ch = consume();
                 ret.append((char) ch);
-                if (ch == '[') { // leave character ranges as is
+                if (ch == '[') { // character range
+                    int startOfCharacterRange = ret.length() - 1;
+                    int i = 0;
                     while (true) {
                         ch = consume();
-                        ret.append((char) ch);
                         if (ch == ']') {
+                            ret.append((char) ch);
                             break;
-                        } else if (ch == '\\') { // ignore escape sequences within character ranges
+                        } else if (ch == '\\') {
+                            // Ignore escape sequences within character ranges.
+                            // This is mainly so we don't end on \]
+                            ret.append((char) ch);
                             ret.append((char) consume());
+                        } else if (ch == '^' && i == 0) {
+                            // ANTLR notates negation with a tilde before character range
+                            ret.insert(startOfCharacterRange, '~');
+                        } else {
+                            ret.append((char) ch);
                         }
+                        i++;
                     }
                 }
             }

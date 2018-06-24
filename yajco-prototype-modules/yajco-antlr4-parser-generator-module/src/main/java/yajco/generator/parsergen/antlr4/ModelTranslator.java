@@ -49,7 +49,9 @@ public class ModelTranslator {
 
     private String convertProductionName(String name) {
         // ANTLR parser rule names must begin with a lowercase letter
-        return name.toLowerCase();
+        // Also use a prefix to avoid clashes with Java keywords that
+        // occur due to lowercasing.
+        return "nt_" + name.toLowerCase();
     }
 
     private String makeReturnRule(NonterminalSymbol nonterminal) {
