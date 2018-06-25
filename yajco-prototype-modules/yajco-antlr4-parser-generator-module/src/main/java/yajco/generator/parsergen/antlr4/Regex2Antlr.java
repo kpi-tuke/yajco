@@ -24,11 +24,15 @@ public class Regex2Antlr {
         this.pos = -1;
     }
 
-    private int peek() {
-        if (this.pos + 1 >= regex.length()) {
+    private int peek(int i) {
+        if (this.pos + i >= regex.length()) {
             return EOF;
         }
-        return this.regex.charAt(this.pos + 1);
+        return this.regex.charAt(this.pos + i);
+    }
+
+    private int peek() {
+        return peek(1);
     }
 
     private int consume() throws ConvertException {
@@ -46,11 +50,40 @@ public class Regex2Antlr {
         return !isSpecialChar(ch) || ch == '\\';
     }
 
+    private boolean isCharacterClassAhead() {
+        return peek() == '\\' && "dDsSwW".indexOf((char) peek(2)) != -1;
+    }
+
     public String convert() throws ConvertException {
         StringBuilder ret = new StringBuilder();
         int ch;
         while ((ch = peek()) != EOF) {
-            if (isPartOfLiteral(ch)) { // literals must be enclosed in ''
+            if (isCharacterClassAhead()) {
+                consume();
+                ch = consume();
+                switch (ch) {
+                    case 'd':
+                        ret.append("[0-9]");
+                        break;
+                    case 'D':
+                        ret.append("~[0-9]");
+                        break;
+                    case 's':
+                        ret.append("[ \\t\\n\\u000B\\f\\r]");
+                        break;
+                    case 'S':
+                        ret.append("~[ \\t\\n\\u000B\\f\\r]");
+                        break;
+                    case 'w':
+                        ret.append("[a-zA-Z_0-9]");
+                        break;
+                    case 'W':
+                        ret.append("~[a-zA-Z_0-9]");
+                        break;
+                    default:
+                        throw new ConvertException("Unknown character range: " + (char) ch);
+                }
+            } else if (isPartOfLiteral(ch)) { // literals must be enclosed in ''
                 ret.append('\'');
                 do {
                     ch = consume();
@@ -68,7 +101,7 @@ public class Regex2Antlr {
                         }
                         ret.append((char) ch);
                     }
-                } while (peek() != EOF && isPartOfLiteral(peek()));
+                } while (peek() != EOF && isPartOfLiteral(peek()) && !isCharacterClassAhead());
                 ret.append('\'');
             } else {
                 ch = consume();
