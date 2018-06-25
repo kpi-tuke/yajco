@@ -81,7 +81,7 @@ public class Regex2Antlr {
                         ret.append("~[a-zA-Z_0-9]");
                         break;
                     default:
-                        throw new ConvertException("Unknown character range: " + (char) ch);
+                        throw new ConvertException("Unknown character class: " + (char) ch);
                 }
             } else if (isPartOfLiteral(ch)) { // literals must be enclosed in ''
                 ret.append('\'');
