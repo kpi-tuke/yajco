@@ -62,6 +62,10 @@ public class Regex2Antlr {
                         }
                         ret.append((char) ch);
                     } else {
+                        if (ch == '\'') {
+                            // apostrophes in ANTLR literals must be escaped
+                            ret.append('\\');
+                        }
                         ret.append((char) ch);
                     }
                 } while (peek() != EOF && isPartOfLiteral(peek()));
