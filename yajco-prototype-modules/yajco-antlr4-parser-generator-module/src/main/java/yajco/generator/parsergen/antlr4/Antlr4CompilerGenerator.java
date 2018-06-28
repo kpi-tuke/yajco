@@ -1,11 +1,14 @@
 package yajco.generator.parsergen.antlr4;
 
 import org.antlr.v4.Tool;
+import org.antlr.v4.runtime.Token;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import yajco.generator.parsergen.CompilerGenerator;
 import yajco.generator.parsergen.antlr4.model.Grammar;
+import yajco.generator.util.Utilities;
 import yajco.model.Language;
+import yajco.model.SkipDef;
 
 import javax.annotation.processing.Filer;
 import javax.tools.FileObject;
@@ -13,12 +16,11 @@ import javax.tools.StandardLocation;
 import java.io.*;
 import java.net.URI;
 import java.security.Permission;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Properties;
+import java.util.*;
 
 public class Antlr4CompilerGenerator implements CompilerGenerator {
     static final private String ANTLR4_PARSER_CLASS_TEMPLATE = "/yajco/generator/parsergen/antlr4/templates/Parser.javavm";
+    static final private String ANTLR4_LEXER_CLASS_TEMPLATE = "/yajco/generator/parsergen/antlr4/templates/Lexer.javavm";
     static final private String ANTLR4_PARSE_EXCEPTION_CLASS_TEMPLATE = "/yajco/generator/parsergen/antlr4/templates/ParseException.javavm";
     private VelocityEngine velocityEngine;
 
@@ -57,11 +59,12 @@ public class Antlr4CompilerGenerator implements CompilerGenerator {
             final String grammarName = parserClassName;
             final String grammarFileName = grammarName + ".g4";
 
+            ModelTranslator translator = new ModelTranslator(language, grammarName, ANTLRParserPackageName);
+
             // Create ANTLR4 grammar specification
             FileObject fileObject = filer.createResource(
                     StandardLocation.SOURCE_OUTPUT, ANTLRParserPackageName, grammarFileName);
             try (Writer writer = fileObject.openWriter()) {
-                ModelTranslator translator = new ModelTranslator(language, grammarName, ANTLRParserPackageName);
                 Grammar grammar = translator.translate();
                 System.out.println("\nGenerated ANTLR4 grammar:");
                 System.out.println("--------------------------------------------------------------------------------------------------------");
@@ -83,8 +86,7 @@ public class Antlr4CompilerGenerator implements CompilerGenerator {
             // are registered for compilation.
             try (Writer writer = filer.createSourceFile(ANTLRParserPackageName + "." + ANTLRParserClassName).openWriter()) {
             }
-            try (Writer writer = filer.createSourceFile(ANTLRParserPackageName + "." + ANTLRLexerClassName).openWriter()) {
-            }
+            FileObject lexerFileObject = filer.createSourceFile(ANTLRParserPackageName + "." + ANTLRLexerClassName);
 
             // Run the ANTLR tool.
             // FIXME: Is this part of the public API? Maybe there is a better way, less prone to compatibility breakage?
@@ -127,6 +129,12 @@ public class Antlr4CompilerGenerator implements CompilerGenerator {
             try (Writer writer = filer.createSourceFile(parserPackageName + ".ParseException").openWriter()) {
                 writer.write(generateParseException(parserPackageName));
             }
+
+            // Create lexer, overwriting the ANTLR generated one (which is empty anyway)
+            try (Writer writer = lexerFileObject.openWriter()) {
+                writer.write(generateLexer(ANTLRParserPackageName, ANTLRLexerClassName,
+                        translator.getOrderedTokens(), language.getSkips()));
+            }
         } catch (Exception e) {
             e.printStackTrace();
             throw new RuntimeException("ANTLR4 Compiler Generator reports an error: " + e.getMessage());
@@ -157,6 +165,20 @@ public class Antlr4CompilerGenerator implements CompilerGenerator {
         StringWriter writer = new StringWriter();
         this.velocityEngine.evaluate(context, writer, "",
                 new InputStreamReader(getClass().getResourceAsStream(ANTLR4_PARSE_EXCEPTION_CLASS_TEMPLATE)));
+        return writer.toString();
+    }
+
+    public String generateLexer(String lexerPackageName, String lexerClassName, Map<String, String> tokens, List<SkipDef> skips) {
+        VelocityContext context = new VelocityContext();
+        StringWriter writer = new StringWriter();
+        context.put("lexerPackageName", lexerPackageName);
+        context.put("lexerClassName", lexerClassName);
+        context.put("tokens", tokens);
+        context.put("skips", skips);
+        context.put("firstUserTokenType", Token.MIN_USER_TOKEN_TYPE);
+        context.put("Utilities", Utilities.class);
+        this.velocityEngine.evaluate(context, writer, "",
+                new InputStreamReader(getClass().getResourceAsStream(ANTLR4_LEXER_CLASS_TEMPLATE)));
         return writer.toString();
     }
 }

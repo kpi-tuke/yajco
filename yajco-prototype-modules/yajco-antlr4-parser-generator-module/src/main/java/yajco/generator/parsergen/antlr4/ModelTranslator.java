@@ -3,6 +3,7 @@ package yajco.generator.parsergen.antlr4;
 import yajco.ReferenceResolver;
 import yajco.generator.parsergen.antlr4.model.*;
 import yajco.generator.util.RegexUtil;
+import yajco.generator.util.Utilities;
 import yajco.grammar.NonterminalSymbol;
 import yajco.grammar.Symbol;
 import yajco.grammar.TerminalSymbol;
@@ -11,7 +12,6 @@ import yajco.grammar.bnf.Production;
 import yajco.grammar.semlang.*;
 import yajco.grammar.translator.YajcoModelToBNFGrammarTranslator;
 import yajco.model.Language;
-import yajco.model.SkipDef;
 import yajco.model.type.*;
 
 import java.util.*;
@@ -38,11 +38,19 @@ public class ModelTranslator {
 
     public Grammar translate() {
         List<ParserRule> parserRules = translateProductions();
-        List<LexicalRule> lexicalRules = translateTokens();
+        // Intentionally empty as we will use a custom lexer
+        List<LexicalRule> lexicalRules = new ArrayList<>();
+
+        // Forward declaration of tokens to silence ANTLR warnings
+        List<String> implicitTokens = new ArrayList<>();
+        for (Map.Entry<String, String> entry : getOrderedTokens().entrySet()) {
+            implicitTokens.add(entry.getKey());
+        }
 
         return new Grammar(
                 this.parserClassName,
                 "package " + this.parserPackageName + ";",
+                implicitTokens,
                 parserRules,
                 lexicalRules);
     }
@@ -76,7 +84,6 @@ public class ModelTranslator {
         List<ParserRule> parserRules = new ArrayList<>();
         parserRules.add(makeMainRule());
 
-        // TODO: Actions
         for (Map.Entry<NonterminalSymbol, Production> entry : this.bnfGrammar.getProductions().entrySet()) {
             NonterminalSymbol nonterminal = entry.getKey();
             Production production = entry.getValue();
@@ -336,62 +343,34 @@ public class ModelTranslator {
         return yajco.model.utilities.Utilities.getFullConceptClassName(language, referenceType.getConcept());
     }
 
-    private List<LexicalRule> translateTokens() {
-        List<LexicalRule> lexicalRules = new ArrayList<>();
+    public Map<String, String> getOrderedTokens() {
+        Map<String, String> acyclicTerminals = new LinkedHashMap<>();
+        Map<String, String> cyclicTerminals = new LinkedHashMap<>();
 
-        Map<String, String> acyclicTerminals = new HashMap<>();
-        Map<String, String> cyclicTerminals = new HashMap<>();
-
-        for (Map.Entry<TerminalSymbol, String> entry : this.bnfGrammar.getTerminalPool().entrySet()) {
-            if (RegexUtil.isCyclic(entry.getValue())) {
-                cyclicTerminals.put(entry.getKey().getName(), entry.getValue());
+        for (Map.Entry<String, TerminalSymbol> entry : this.bnfGrammar.getTerminals().entrySet()) {
+            String symbolName = entry.getKey();
+            String regexOrLiteral = this.bnfGrammar.getTerminalPool().get(entry.getValue());
+            String regex;
+            if (symbolName.startsWith(YajcoModelToBNFGrammarTranslator.DEFAULT_SYMBOL_NAME)) {
+                // literal
+                regex = Utilities.encodeStringIntoRegex(regexOrLiteral);
             } else {
-                acyclicTerminals.put(entry.getKey().getName(), entry.getValue());
+                // already regex
+                regex = regexOrLiteral;
+            }
+
+            if (RegexUtil.isCyclic(regex)) {
+                cyclicTerminals.put(symbolName, regex);
+            } else {
+                acyclicTerminals.put(symbolName, regex);
             }
         }
 
-        for (Map.Entry<String, String> entry : acyclicTerminals.entrySet()) {
-            lexicalRules.add(translateTerminalDefinition(entry.getKey(), entry.getValue()));
-        }
-
+        // combine maps together, in the order of acyclic to cyclic
         for (Map.Entry<String, String> entry : cyclicTerminals.entrySet()) {
-            lexicalRules.add(translateTerminalDefinition(entry.getKey(), entry.getValue()));
+            acyclicTerminals.put(entry.getKey(), entry.getValue());
         }
 
-        int i = 0;
-        for (SkipDef skipDef :this.language.getSkips()) {
-            lexicalRules.add(new LexicalRule(
-                    "SKIP" + i, convertRegexIntoLexicalRule(skipDef.getRegexp()), true));
-            i++;
-        }
-
-        return lexicalRules;
-    }
-
-    private LexicalRule translateTerminalDefinition(String name, String regex) {
-        String rule;
-
-        if (name.startsWith(YajcoModelToBNFGrammarTranslator.DEFAULT_SYMBOL_NAME)) {
-            // literal
-            String val = regex;
-            val = val.replace("\\", "\\\\");
-            val = val.replace("'", "\\'");
-            rule = "'" + val + "'";
-        } else {
-            // regex
-            rule = convertRegexIntoLexicalRule(regex);
-        }
-
-        return new LexicalRule(name, rule);
-    }
-
-    private String convertRegexIntoLexicalRule(String regex) {
-        Regex2Antlr converter = new Regex2Antlr(regex);
-        try {
-            return converter.convert();
-        } catch (Regex2Antlr.ConvertException e) {
-            throw new RuntimeException(
-                    "Failed to convert regex " + regex + " into an ANTLR4 lexical rule: " + e.getMessage(), e);
-        }
+        return acyclicTerminals;
     }
 }

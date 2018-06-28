@@ -1,0 +1,177 @@
+package ${lexerPackageName};
+
+import org.antlr.v4.runtime.*;
+import org.antlr.v4.runtime.misc.Interval;
+import org.antlr.v4.runtime.misc.Pair;
+
+import java.util.ArrayList;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class $lexerClassName implements TokenSource {
+    private TokenFactory<?> tokenFactory = new CommonTokenFactory();
+    private final CharStream inputStream;
+    private final String input;
+    private int position;
+    private int line = 1;
+    private int column = 1;
+
+    private static final Map<Integer, Pattern> tokens = new LinkedHashMap<Integer, Pattern>();
+    private static final List<Pattern> skips = new ArrayList<Pattern>();
+
+    static {
+#set ($type = $firstUserTokenType)
+#foreach ($regex in $tokens.values())
+        tokens.put($type, Pattern.compile("$Utilities.encodeStringToJavaLiteral($regex)"));
+#set ($type = $type + 1)
+#end
+
+#foreach ($skip in $skips)
+		skips.add(Pattern.compile("$Utilities.encodeStringToJavaLiteral($skip.getRegexp())"));
+#end
+    }
+
+    public $lexerClassName(CharStream inputStream) {
+        this.inputStream = inputStream;
+        this.input = inputStream.getText(new Interval(0, inputStream.size() - 1));
+        //this.inputStream.
+        this.position = 0;
+    }
+
+    private Token createToken(int type, String text, int start, int stop, int line, int charPositionInLine) {
+        return this.tokenFactory.create(
+            new Pair(this, this.inputStream),
+            type,
+            text,
+            Token.DEFAULT_CHANNEL,
+            start,
+            stop,
+            line,
+            charPositionInLine
+        );
+    }
+
+    @Override
+    public Token nextToken() {
+        skipWhiteSpaces();
+
+        if (input.length() == position) {
+            return createToken(Token.EOF, "", 0, 0, line, column);
+        }
+
+        return findToken();
+    }
+
+    private Token findToken() {
+        Matcher matcher = null;
+        int longest = 0;
+        Token token = null;
+        for (Map.Entry<Integer, Pattern> entry : tokens.entrySet()) {
+            if (matcher == null) {
+                matcher = entry.getValue().matcher(input);
+            } else {
+                matcher.usePattern(entry.getValue());
+            }
+            matcher.useTransparentBounds(true);
+            matcher.region(position, input.length());
+            if (matcher.lookingAt()) {
+                String group = matcher.group();
+                int start = matcher.start();
+                int end = matcher.end();
+                if (longest < group.length()) {
+                    longest = group.length();
+                    for (int i = 1; i <= matcher.groupCount(); i++) {
+                        if (matcher.group(i) != null) {
+                            group = matcher.group(i);
+                            start = matcher.start(i);
+                            end = matcher.end(i);
+                            break;
+                        }
+                    }
+
+                    //Create token
+                    token = createToken(entry.getKey(), group,
+                            start, end - 1,
+                            line, column);
+                }
+            }
+        }
+
+        //Return the longest matching token, consume it from input
+        if (token != null) {
+            consumeInput(longest);
+            return token;
+        }
+
+        throw new RuntimeException("Lexer failure");
+    }
+
+    private void skipWhiteSpaces() {
+        boolean matched;
+        do {
+            matched = false;
+            Matcher matcher = null;
+            for (Pattern skip : skips) {
+                if (matcher == null) {
+                    matcher = skip.matcher(input);
+                } else {
+                    matcher.usePattern(skip);
+                }
+                matcher.useTransparentBounds(true);
+                matcher.region(position, input.length());
+                if (matcher.lookingAt()) {
+                    //Consume the white space from the input
+                    consumeInput(matcher.group().length());
+                    matched = true;
+                    matcher = null;
+                    break;
+                }
+            }
+        } while (matched);
+    }
+
+    private void consumeInput(int length) {
+        for (int i = 0; i < length; i++) {
+            char c = input.charAt(position+i);
+            column++;
+            if (c == '\n') {
+                column = 1;
+                line++;
+            }
+        }
+        position = position + length;
+    }
+
+    @Override
+    public int getLine() {
+        return this.line;
+    }
+
+    @Override
+    public int getCharPositionInLine() {
+        return this.column;
+    }
+
+    @Override
+    public CharStream getInputStream() {
+        return this.inputStream;
+    }
+
+    @Override
+    public String getSourceName() {
+        return IntStream.UNKNOWN_SOURCE_NAME;
+    }
+
+    @Override
+    public void setTokenFactory(TokenFactory<?> tokenFactory) {
+        this.tokenFactory = tokenFactory;
+    }
+
+    @Override
+    public TokenFactory<?> getTokenFactory() {
+        return tokenFactory;
+    }
+}
