@@ -30,4 +30,8 @@ public class RulePart extends Part {
     public String getLabel() {
         return label;
     }
+
+    public boolean isTerminal() {
+        return this.name.equals(this.name.toUpperCase());
+    }
 }

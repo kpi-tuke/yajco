@@ -64,11 +64,7 @@ public class ModelTranslator {
         // Process concepts starting from top-level ones.
         for (Concept c : this.language.getConcepts()) {
             if (c.getParent() == null) {
-                if (c.getAbstractSyntax().isEmpty() && c.getConcreteSyntax().isEmpty()) {
-                    processAbstractConcept(c);
-                } else {
-                    processConcreteConcept(c);
-                }
+                processTopLevelConcept(c);
             }
         }
 
@@ -131,38 +127,28 @@ public class ModelTranslator {
         return parserRules;
     }
 
-    private void processAbstractConcept(Concept concept) {
-        Parentheses par = (Parentheses) concept.getPattern(Parentheses.class);
-        Alternative parAlt = null;
-        if (par != null) {
-            List<Part> parts = new ArrayList<>();
-            parts.add(new RulePart(addToken("LPAR",
-                    Utilities.encodeStringIntoRegex(par.getLeft()))));
-            parts.add(new RulePart(convertProductionName(concept.getName())));
-            parts.add(new RulePart(addToken("RPAR",
-                    Utilities.encodeStringIntoRegex(par.getRight()))));
-
-            parAlt = new Alternative();
-            parAlt.par = par;
-            parAlt.sequence = new SequencePart(parts);
-        }
-
+    private void processTopLevelConcept(Concept concept) {
         List<Alternative> unresolvedAlts = new ArrayList<>();
+        boolean isAbstract = (concept.getAbstractSyntax().isEmpty() && concept.getConcreteSyntax().isEmpty());
 
-        // Depth-first search for descendant leaves (concrete concepts).
-        Stack<Concept> conceptsToVisit = new Stack<>();
-        conceptsToVisit.push(concept);
-        while (!conceptsToVisit.isEmpty()) {
-            Concept c = conceptsToVisit.pop();
-            Set<Concept> subConcepts = getDirectSubconcepts(c);
-            if (subConcepts.isEmpty()) {
-                // Found a descendant leaf.
-                unresolvedAlts.addAll(processConcreteConcept(c));
-            } else {
-                for (Concept subConcept : subConcepts) {
-                    conceptsToVisit.push(subConcept);
+        if (isAbstract) {
+            // Depth-first search for descendant leaves (concrete concepts).
+            Stack<Concept> conceptsToVisit = new Stack<>();
+            conceptsToVisit.push(concept);
+            while (!conceptsToVisit.isEmpty()) {
+                Concept c = conceptsToVisit.pop();
+                Set<Concept> subConcepts = getDirectSubconcepts(c);
+                if (subConcepts.isEmpty()) {
+                    // Found a descendant leaf.
+                    unresolvedAlts.addAll(processConcreteConcept(c));
+                } else {
+                    for (Concept subConcept : subConcepts) {
+                        conceptsToVisit.push(subConcept);
+                    }
                 }
             }
+        } else {
+            unresolvedAlts = processConcreteConcept(concept);
         }
 
         // Group operator alternatives by priority.
@@ -179,9 +165,22 @@ public class ModelTranslator {
 
         // Prepare final list of alternatives.
         List<Alternative> alts = new ArrayList<>();
-        if (parAlt != null) {
+
+        Parentheses par = (Parentheses) concept.getPattern(Parentheses.class);
+        if (par != null) {
+            List<Part> parts = new ArrayList<>();
+            parts.add(new RulePart(addToken("LPAR",
+                    Utilities.encodeStringIntoRegex(par.getLeft()))));
+            parts.add(new RulePart(convertProductionName(concept.getName())));
+            parts.add(new RulePart(addToken("RPAR",
+                    Utilities.encodeStringIntoRegex(par.getRight()))));
+
+            Alternative parAlt = new Alternative();
+            parAlt.par = par;
+            parAlt.sequence = new SequencePart(parts);
             alts.add(parAlt);
         }
+
         alts.addAll(operatorAlts);
 
         List<Alternative> remainingAlts = unresolvedAlts.stream().filter(alt -> alt.op == null)
@@ -227,8 +226,7 @@ public class ModelTranslator {
                     RulePart rulePart = (RulePart) part;
                     String name = rulePart.getName();
 
-                    if (name.equals(name.toUpperCase())) {
-                        // Terminal part.
+                    if (rulePart.isTerminal()) {
                         parts.add(rulePart);
                     }
                 }
