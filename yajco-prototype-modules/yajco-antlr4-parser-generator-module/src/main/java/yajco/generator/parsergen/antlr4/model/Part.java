@@ -2,8 +2,15 @@ package yajco.generator.parsergen.antlr4.model;
 
 /* Part of the right-hand side of the production rule. */
 public abstract class Part implements Element {
+    public enum Associativity {
+        Unspecified,
+        Left,
+        Right
+    }
+
     protected String codeBefore = "";
     protected String codeAfter = "";
+    protected Associativity associativity = Associativity.Unspecified;
     protected Part parent = null;
 
     public void setCodeBefore(String codeBefore) {
@@ -12,6 +19,10 @@ public abstract class Part implements Element {
 
     public void setCodeAfter(String codeAfter) {
         this.codeAfter = codeAfter;
+    }
+
+    public void setAssociativity(Associativity associativity) {
+        this.associativity = associativity;
     }
 
     void setParent(Part parent) {
@@ -23,6 +34,16 @@ public abstract class Part implements Element {
         StringBuilder sb = new StringBuilder();
         if (!this.codeBefore.isEmpty()) {
             sb.append("{\n").append(Formatting.indent(this.codeBefore, 1)).append("\n}\n");
+        }
+        switch (this.associativity) {
+            case Left:
+                sb.append("<assoc=left>\n");
+                break;
+            case Right:
+                sb.append("<assoc=right>\n");
+                break;
+            default:
+                break;
         }
         sb.append(generatePart());
         if (!this.codeAfter.isEmpty()) {

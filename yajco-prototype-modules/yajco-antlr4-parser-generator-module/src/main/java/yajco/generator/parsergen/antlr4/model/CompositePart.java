@@ -12,4 +12,12 @@ public abstract class CompositePart extends Part {
             part.setParent(this);
         }
     }
+
+    public void addPart(Part part) {
+        this.parts.add(part);
+    }
+
+    public List<Part> getParts() {
+        return parts;
+    }
 }

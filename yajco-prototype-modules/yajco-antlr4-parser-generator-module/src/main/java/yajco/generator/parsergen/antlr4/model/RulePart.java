@@ -22,4 +22,12 @@ public class RulePart extends Part {
     protected String generatePart() {
         return (shouldGenerateLabel() ? this.label + "=" : "") + this.name;
     }
+
+    public String getName() {
+        return name;
+    }
+
+    public String getLabel() {
+        return label;
+    }
 }

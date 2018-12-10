@@ -1,4 +1,4 @@
-package yajco.generator.parsergen.antlr4;
+package yajco.generator.parsergen.antlr4.translator;
 
 import yajco.ReferenceResolver;
 import yajco.generator.parsergen.antlr4.model.*;
@@ -20,7 +20,7 @@ import java.util.*;
  * Translates YAJCo model to ANTLR4 grammar model
  * (yajco.model.Language -> yajco.generator.parsergen.antlr4.model.Grammar)
  */
-public class ModelTranslator {
+public class ModelTranslatorOld {
     private final Language language;
     private final yajco.grammar.bnf.Grammar bnfGrammar;
     private final String parserClassName;
@@ -29,7 +29,7 @@ public class ModelTranslator {
     public static final String RETURN_VAR_NAME = "_retval";
     private final static String REFERENCE_RESOLVER_CLASS_NAME = ReferenceResolver.class.getCanonicalName();
 
-    public ModelTranslator(Language language, String parserClassName, String parserPackageName) {
+    public ModelTranslatorOld(Language language, String parserClassName, String parserPackageName) {
         this.language = language;
         this.bnfGrammar = YajcoModelToBNFGrammarTranslator.getInstance().translate(language);
         this.parserClassName = parserClassName;

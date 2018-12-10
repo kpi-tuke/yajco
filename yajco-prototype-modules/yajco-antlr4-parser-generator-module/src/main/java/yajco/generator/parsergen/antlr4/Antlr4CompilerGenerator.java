@@ -5,6 +5,7 @@ import org.antlr.v4.runtime.Token;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
 import yajco.generator.parsergen.CompilerGenerator;
+import yajco.generator.parsergen.antlr4.translator.ModelTranslator;
 import yajco.generator.parsergen.antlr4.model.Grammar;
 import yajco.generator.util.Utilities;
 import yajco.model.Language;
