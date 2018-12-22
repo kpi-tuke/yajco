@@ -11,6 +11,7 @@ public abstract class Part implements Element {
     protected String codeBefore = "";
     protected String codeAfter = "";
     protected Associativity associativity = Associativity.Unspecified;
+    private String label = "";
     protected Part parent = null;
 
     public void setCodeBefore(String codeBefore) {
@@ -25,8 +26,28 @@ public abstract class Part implements Element {
         this.associativity = associativity;
     }
 
+    public void setLabel(String label) {
+        this.label = label;
+    }
+
     void setParent(Part parent) {
         this.parent = parent;
+    }
+
+    public String getCodeBefore() {
+        return codeBefore;
+    }
+
+    public String getCodeAfter() {
+        return codeAfter;
+    }
+
+    public Associativity getAssociativity() {
+        return associativity;
+    }
+
+    public String getLabel() {
+        return label;
     }
 
     @Override
@@ -44,6 +65,9 @@ public abstract class Part implements Element {
                 break;
             default:
                 break;
+        }
+        if (!this.label.isEmpty()) {
+            sb.append(this.label).append("=");
         }
         sb.append(generatePart());
         if (!this.codeAfter.isEmpty()) {

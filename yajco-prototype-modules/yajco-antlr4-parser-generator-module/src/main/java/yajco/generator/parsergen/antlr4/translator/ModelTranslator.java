@@ -1,12 +1,16 @@
 package yajco.generator.parsergen.antlr4.translator;
 
 import yajco.ReferenceResolver;
+import yajco.generator.GeneratorException;
+import yajco.generator.parsergen.Conversions;
 import yajco.generator.parsergen.antlr4.model.*;
 import yajco.generator.util.RegexUtil;
 import yajco.generator.util.Utilities;
 import yajco.model.*;
+import yajco.model.pattern.impl.Factory;
 import yajco.model.pattern.impl.Operator;
 import yajco.model.pattern.impl.Parentheses;
+import yajco.model.pattern.impl.Token;
 import yajco.model.type.*;
 
 import java.util.*;
@@ -19,6 +23,8 @@ import java.util.stream.Collectors;
 public class ModelTranslator {
     public static final String RETURN_VAR_NAME = "_retval";
     private final static String REFERENCE_RESOLVER_CLASS_NAME = ReferenceResolver.class.getCanonicalName();
+
+    private static final Conversions conversions = new Conversions();
 
     private final Language language;
     private final String parserClassName;
@@ -55,7 +61,7 @@ public class ModelTranslator {
                 for (NotationPart part : n.getParts()) {
                     if (part instanceof TokenPart) {
                         String tokenName = ((TokenPart) part).getToken();
-                        this.tokens.put(tokenName, Utilities.encodeStringIntoRegex(tokenName));
+                        this.tokens.putIfAbsent(tokenName, Utilities.encodeStringIntoRegex(tokenName));
                     }
                 }
             }
@@ -154,8 +160,8 @@ public class ModelTranslator {
         // Group operator alternatives by priority.
         Map<Integer, List<Alternative>> operatorGroups = unresolvedAlts.stream()
                 .filter(alt -> alt.op != null)
-                .sorted(Comparator.comparingInt(alt -> alt.op.getPriority()))
-                .collect(Collectors.groupingBy(alt -> alt.op.getPriority()));
+                .sorted(Comparator.comparingInt((Alternative alt) -> alt.op.getPriority()).reversed())
+                .collect(Collectors.groupingBy(alt -> alt.op.getPriority(), LinkedHashMap::new, Collectors.toList()));
 
         // Merge alternatives with the same priority.
         List<Alternative> operatorAlts = operatorGroups.entrySet().stream()
@@ -208,8 +214,10 @@ public class ModelTranslator {
         // Make sure all alternatives have the same number of parts.
         if (!alts.stream().allMatch(alt ->
                 alt.sequence.getParts().size() == primaryAlt.sequence.getParts().size())) {
-            throw new RuntimeException("Cannot merge alternatives");
+            throw new GeneratorException("Cannot merge alternatives");
         }
+
+        boolean mergedOnce = false;
 
         for (int i = 0; i < primaryAlt.sequence.getParts().size(); i++) {
             List<Part> parts = new ArrayList<>();
@@ -219,7 +227,7 @@ public class ModelTranslator {
                 Part primaryAltPart = primaryAlt.sequence.getParts().get(i);
 
                 if (!part.getClass().equals(primaryAltPart.getClass())) {
-                    throw new RuntimeException("Cannot merge alternatives");
+                    throw new GeneratorException("Cannot merge alternatives");
                 }
 
                 if (part instanceof RulePart) {
@@ -233,7 +241,23 @@ public class ModelTranslator {
             }
 
             if (!parts.isEmpty()) {
-                primaryAlt.sequence.getParts().set(i, new AlternativePart(parts));
+                if (mergedOnce) {
+                    throw new GeneratorException("Merging alternatives which differ in more than one terminal is not supported yet.");
+                }
+                AlternativePart newPart = new AlternativePart(parts);
+                newPart.setLabel("op");
+                primaryAlt.sequence.setPart(i, newPart);
+                mergedOnce = true;
+
+                // Construct merged switch action.
+                StringBuilder sb = new StringBuilder("switch ($ctx.op.getType()) {\n");
+                for (int j = 0; j < parts.size(); j++) {
+                    sb.append("case ").append(((RulePart) parts.get(j)).getName()).append(":\n");
+                    sb.append("    ").append(alts.get(j).sequence.getCodeAfter()).append("\n");
+                    sb.append("    ").append("break;\n");
+                }
+                sb.append("}\n");
+                primaryAlt.sequence.setCodeAfter(sb.toString());
             }
         }
 
@@ -246,6 +270,9 @@ public class ModelTranslator {
         for (Notation n : concept.getConcreteSyntax()) {
             List<Part> parts = new ArrayList<>();
 
+            Map<String, Integer> counters = new HashMap<>();
+            List<String> params = new ArrayList<>();
+
             for (NotationPart part : n.getParts()) {
                 if (part instanceof TokenPart) {
                     String tokenName = ((TokenPart) part).getToken();
@@ -256,14 +283,55 @@ public class ModelTranslator {
                         ReferenceType referenceType = (ReferenceType) localVariablePart.getType();
                         parts.add(new RulePart(convertProductionName(referenceType.getConcept().getName())));
                     }*/
+                    throw new GeneratorException("References are not supported yet!");
                 } else if (part instanceof PropertyReferencePart) {
                     // TODO
                     PropertyReferencePart propertyReferencePart = (PropertyReferencePart) part;
-                    if (propertyReferencePart.getProperty().getType() instanceof ReferenceType) {
+                    Type type = propertyReferencePart.getProperty().getType();
+                    String typeString = typeToString(type);
+
+                    if (type instanceof ReferenceType) {
                         ReferenceType referenceType = (ReferenceType) propertyReferencePart.getProperty().getType();
-                        parts.add(new RulePart(convertProductionName(referenceType.getConcept().getName())));
+                        String ruleName = convertProductionName(referenceType.getConcept().getName());
+
+                        if (counters.containsKey(ruleName)) {
+                            counters.put(ruleName, counters.get(ruleName) + 1);
+                        } else {
+                            counters.put(ruleName, 1);
+                        }
+
+                        RulePart rulePart = new RulePart(ruleName);
+                        rulePart.setLabel(ruleName + "_" + counters.get(ruleName));
+                        params.add("$ctx." + rulePart.getLabel() + "." + RETURN_VAR_NAME);
+                        parts.add(rulePart);
+                    } else if (type instanceof PrimitiveType) {
+                        if (conversions.containsConversion(typeString)) {
+                            String conversionExpr = conversions.getConversion(typeString).trim();
+
+                            Token tokenPattern = (Token) propertyReferencePart.getPattern(Token.class);
+                            if (tokenPattern != null) {
+                                // TODO
+                            } else {
+                                String ruleName = propertyReferencePart.getProperty().getName().toUpperCase();
+
+                                if (counters.containsKey(ruleName)) {
+                                    counters.put(ruleName, counters.get(ruleName) + 1);
+                                } else {
+                                    counters.put(ruleName, 1);
+                                }
+
+                                RulePart rulePart = new RulePart(ruleName);
+                                rulePart.setLabel(ruleName + "_" + counters.get(ruleName));
+                                params.add(String.format(conversionExpr, "$ctx." + rulePart.getLabel() + ".getText()"));
+                                parts.add(rulePart);
+                            }
+                        }
+                    } else if (type instanceof ComponentType) {
+                        // TODO
+                        throw new GeneratorException("Component types not supported yet!");
                     }
                 }
+
             }
 
             if (parts.isEmpty()) {
@@ -289,15 +357,39 @@ public class ModelTranslator {
                 }
             }
 
+            String action = "";
+            Factory factory = (Factory) n.getPattern(Factory.class);
+            if (factory == null) {
+                // Constructor.
+                action = "$" + RETURN_VAR_NAME + " = yajco.ReferenceResolver.getInstance().register(new "
+                    + getFullConceptClassName(concept) + "(" +
+                        params.stream()
+                                .collect(Collectors.joining(", ")) +
+                        ")" +
+                        params.stream()
+                                .map(s -> ", (Object) " + s)
+                                .collect(Collectors.joining()) +
+                        ");";
+            } else {
+                // Factory method.
+                // TODO
+                throw new GeneratorException("Factory methods are not supported yet!");
+            }
+
+            alt.sequence.setCodeAfter(action);
             alts.add(alt);
         }
 
         return alts;
     }
 
+    private String getFullConceptClassName(Concept c) {
+        return yajco.model.utilities.Utilities.getLanguagePackageName(this.language) + "." + c.getName();
+    }
+
     // Make ANTLR4 "returns" string for a concept.
     private String makeReturnsString(Concept c) {
-        return yajco.model.utilities.Utilities.getLanguagePackageName(this.language) + "." + c.getName() + " " + RETURN_VAR_NAME;
+        return getFullConceptClassName(c) + " " + RETURN_VAR_NAME;
     }
 
     private String convertProductionName(String name) {
@@ -366,7 +458,7 @@ public class ModelTranslator {
     }
 
     private String convertTokenName(String token) {
-        token = token.toUpperCase();
+        token = Utilities.encodeStringIntoTokenName(token);
         return token;
     }
 
