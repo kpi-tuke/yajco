@@ -7,10 +7,7 @@ import yajco.generator.parsergen.antlr4.model.*;
 import yajco.generator.util.RegexUtil;
 import yajco.generator.util.Utilities;
 import yajco.model.*;
-import yajco.model.pattern.impl.Factory;
-import yajco.model.pattern.impl.Operator;
-import yajco.model.pattern.impl.Parentheses;
-import yajco.model.pattern.impl.Token;
+import yajco.model.pattern.impl.*;
 import yajco.model.type.*;
 
 import java.util.*;
@@ -31,7 +28,7 @@ public class ModelTranslator {
     private final String parserPackageName;
 
     private class Production {
-        Concept concept;
+        String returns;
         List<Alternative> alternatives;
     }
 
@@ -126,8 +123,7 @@ public class ModelTranslator {
                     production.alternatives.stream()
                             .map(alt -> alt.sequence)
                             .collect(Collectors.toCollection(ArrayList::new)));
-            parserRules.add(new ParserRule(name,
-                    makeReturnsString(production.concept), altPart));
+            parserRules.add(new ParserRule(name, production.returns, altPart));
         }
 
         return parserRules;
@@ -195,7 +191,7 @@ public class ModelTranslator {
 
         Production p = new Production();
         p.alternatives = alts;
-        p.concept = concept;
+        p.returns = makeReturnsString(concept);
         this.productions.put(
                 convertProductionName(concept.getConceptName()), p);
     }
@@ -291,7 +287,7 @@ public class ModelTranslator {
                     String typeString = typeToString(type);
 
                     if (type instanceof ReferenceType) {
-                        ReferenceType referenceType = (ReferenceType) propertyReferencePart.getProperty().getType();
+                        ReferenceType referenceType = (ReferenceType) type;
                         String ruleName = convertProductionName(referenceType.getConcept().getName());
 
                         if (counters.containsKey(ruleName)) {
@@ -327,8 +323,72 @@ public class ModelTranslator {
                             }
                         }
                     } else if (type instanceof ComponentType) {
-                        // TODO
-                        throw new GeneratorException("Component types not supported yet!");
+                        ComponentType componentType = (ComponentType) type;
+                        Type innerType = componentType.getComponentType();
+
+                        String ruleName;
+
+                        if (innerType instanceof ReferenceType) {
+                            ruleName = convertProductionName(((ReferenceType) innerType).getConcept().getName());
+
+                        } else if (innerType instanceof PrimitiveType) {
+                            // TODO
+                            throw new GeneratorException("Component types of primitive types are not supported.");
+                        } else if (innerType instanceof ComponentType) {
+                            throw new GeneratorException("Component types of component types are not supported.");
+                        } else {
+                            throw new GeneratorException("Unknown type.");
+                        }
+
+                        String productionName = ruleName + "_list";
+                        while (this.productions.containsKey(productionName)) {
+                            productionName = productionName + "_";
+                        }
+
+                        Production p = new Production();
+                        p.returns = typeString + " " + RETURN_VAR_NAME;
+                        p.alternatives = new ArrayList<>();
+
+                        Alternative alt = new Alternative();
+                        Range range = (Range) propertyReferencePart.getPattern(Range.class);
+                        if (range == null) {
+                            range = new Range();
+                        }
+
+                        // TODO: Is separator value always a literal or could it be a reference to user-defined token?
+                        // For now the former is assumed.
+                        Separator separator = (Separator) propertyReferencePart.getPattern(Separator.class);
+                        alt.sequence = generateListGrammar(ruleName, range,
+                                (separator == null) ? "" :
+                                        addToken(convertTokenName(separator.getValue()),
+                                                Utilities.encodeStringIntoRegex(separator.getValue())));
+
+                        StringBuilder actionBuilder = new StringBuilder(
+                                "$" + RETURN_VAR_NAME + " = $" + ruleName + "().stream().map(elem -> elem." + RETURN_VAR_NAME + ")");
+                        if (type instanceof ArrayType) {
+                            actionBuilder.append(".toArray(" + typeString + "::new);");
+                        } else if (type instanceof ListType) {
+                            actionBuilder.append(".collect(Collectors.toList());");
+                        } else if (type instanceof SetType) {
+                            actionBuilder.append(".collect(Collectors.toSet());");
+                        } else {
+                            throw new GeneratorException("Unknown component type");
+                        }
+                        alt.sequence.setCodeAfter(actionBuilder.toString());
+
+                        p.alternatives.add(alt);
+                        this.productions.put(productionName, p);
+
+                        if (counters.containsKey(productionName)) {
+                            counters.put(productionName, counters.get(productionName) + 1);
+                        } else {
+                            counters.put(productionName, 1);
+                        }
+
+                        RulePart rulePart = new RulePart(productionName);
+                        rulePart.setLabel(productionName + "_" + counters.get(productionName));
+                        params.add("$ctx." + rulePart.getLabel() + "." + RETURN_VAR_NAME);
+                        parts.add(rulePart);
                     }
                 }
 
@@ -381,6 +441,96 @@ public class ModelTranslator {
         }
 
         return alts;
+    }
+
+    // Generates a grammar rule for a list of elements, which may be lexical or parser rules.
+    // The list is constrained by the given range, with elements separated by the given separator token.
+    // Note: No semantic actions are generated, only pure grammar.
+    private SequencePart generateListGrammar(String elemRule, Range range, String sepToken) {
+        List<Part> parts = new ArrayList<>();
+
+        if (sepToken.isEmpty()) { // No separator.
+            if (range.getMaxOccurs() == Range.INFINITY) {
+                if (range.getMinOccurs() == 0) {
+                    parts.add(new ZeroOrMorePart(new RulePart(elemRule)));
+                } else {
+                    for (int i = 0; i < (range.getMinOccurs() - 1); i++) {
+                        parts.add(new RulePart(elemRule));
+                    }
+                    parts.add(new OneOrMorePart(new RulePart(elemRule)));
+                }
+            } else {
+                for (int i = 0; i < range.getMinOccurs(); i++) {
+                    parts.add(new RulePart(elemRule));
+                }
+                for (int i = 0; i < (range.getMaxOccurs() - range.getMinOccurs()); i++) {
+                    parts.add(new ZeroOrOnePart(new RulePart(elemRule)));
+                }
+            }
+        } else { // With separator.
+            if (range.getMaxOccurs() == Range.INFINITY) {
+                if (range.getMinOccurs() == 0) {
+                    // ( elem ( SEP elem )* )?
+                    parts.add(
+                        new ZeroOrOnePart(
+                            new SequencePart(Arrays.asList(
+                                new RulePart(elemRule),
+                                new ZeroOrMorePart(
+                                    new SequencePart(Arrays.asList(
+                                        new RulePart(sepToken),
+                                        new RulePart(elemRule)
+                                    ))
+                                )
+                            ))
+                        )
+                    );
+                } else {
+                    parts.add(new RulePart(elemRule));
+                    for (int i = 0; i < (range.getMinOccurs() - 1); i++) {
+                        parts.add(
+                            new SequencePart(Arrays.asList(
+                                new RulePart(sepToken),
+                                new RulePart(elemRule)
+                            ))
+                        );
+                    }
+                    parts.add(
+                        new ZeroOrMorePart(
+                            new SequencePart(Arrays.asList(
+                                new RulePart(sepToken),
+                                new RulePart(elemRule)
+                            ))
+                        )
+                    );
+                }
+            } else {
+                parts.add(new RulePart(elemRule));
+                for (int i = 0; i < (range.getMinOccurs() - 1); i++) {
+                    parts.add(
+                        new SequencePart(Arrays.asList(
+                            new RulePart(sepToken),
+                            new RulePart(elemRule)
+                        ))
+                    );
+                }
+                for (int i = 0; i < (range.getMaxOccurs() - range.getMinOccurs()); i++) {
+                    parts.add(
+                        new ZeroOrOnePart(
+                            new SequencePart(Arrays.asList(
+                                new RulePart(sepToken),
+                                new RulePart(elemRule)
+                            ))
+                        )
+                    );
+                }
+
+                if (range.getMinOccurs() == 0) {
+                    parts = Arrays.asList(new ZeroOrOnePart(new SequencePart(parts)));
+                }
+            }
+        }
+
+        return new SequencePart(parts);
     }
 
     private String getFullConceptClassName(Concept c) {
