@@ -50,7 +50,7 @@ public class ModelTranslator {
 
     public Grammar translate() {
         for (TokenDef tokenDef : this.language.getUsedTokens()) {
-            this.tokens.put(tokenDef.getName(), tokenDef.getRegexp());
+            this.tokens.put(convertTokenName(tokenDef.getName()), tokenDef.getRegexp());
         }
 
         for (Concept c : this.language.getConcepts()) {
@@ -58,7 +58,7 @@ public class ModelTranslator {
                 for (NotationPart part : n.getParts()) {
                     if (part instanceof TokenPart) {
                         String tokenName = ((TokenPart) part).getToken();
-                        this.tokens.putIfAbsent(tokenName, Utilities.encodeStringIntoRegex(tokenName));
+                        this.tokens.putIfAbsent(convertTokenName(tokenName), Utilities.encodeStringIntoRegex(tokenName));
                     }
                 }
             }
@@ -68,6 +68,36 @@ public class ModelTranslator {
         for (Concept c : this.language.getConcepts()) {
             if (c.getParent() == null) {
                 processTopLevelConcept(c);
+            }
+        }
+
+        // In an IS-A relationship, we merge all subconcept rules into top-level rules to prevent potential indirect
+        // left recursion. However, sometimes the subconcept is also in a HAS-A relationship with another concept and
+        // then we need to create a new production rule for it.
+        for (Concept c : this.language.getConcepts()) {
+            for (Notation n : c.getConcreteSyntax()) {
+                for (NotationPart part : n.getParts()) {
+                    if (part instanceof PropertyReferencePart) {
+                        Type type = ((PropertyReferencePart) part).getProperty().getType();
+                        ReferenceType referenceType = null;
+
+                        if (type instanceof ReferenceType) {
+                            referenceType = (ReferenceType) type;
+                        } else if (type instanceof ComponentType) {
+                            Type innerType = ((ComponentType) type).getComponentType();
+                            if (innerType instanceof ReferenceType) {
+                                referenceType = (ReferenceType) innerType;
+                            }
+                        }
+
+                        if (referenceType != null) {
+                            if (!this.productions.containsKey(
+                                    convertProductionName(referenceType.getConcept().getName()))) {
+                                processTopLevelConcept(referenceType.getConcept());
+                            }
+                        }
+                    }
+                }
             }
         }
 
@@ -273,17 +303,18 @@ public class ModelTranslator {
                 if (part instanceof TokenPart) {
                     String tokenName = ((TokenPart) part).getToken();
                     parts.add(new RulePart(convertTokenName(tokenName)));
-                } else if (part instanceof LocalVariablePart) {
-                    /*LocalVariablePart localVariablePart = (LocalVariablePart) part;
-                    if (localVariablePart.getType() instanceof ReferenceType) {
-                        ReferenceType referenceType = (ReferenceType) localVariablePart.getType();
-                        parts.add(new RulePart(convertProductionName(referenceType.getConcept().getName())));
-                    }*/
-                    throw new GeneratorException("References are not supported yet!");
-                } else if (part instanceof PropertyReferencePart) {
+                } else if (part instanceof BindingNotationPart) {
                     // TODO
-                    PropertyReferencePart propertyReferencePart = (PropertyReferencePart) part;
-                    Type type = propertyReferencePart.getProperty().getType();
+                    BindingNotationPart bindingNotationPart = (BindingNotationPart) part;
+                    Type type;
+                    if (bindingNotationPart instanceof PropertyReferencePart) {
+                        type = ((PropertyReferencePart) bindingNotationPart).getProperty().getType();
+                    } else {
+                        type = ((LocalVariablePart) bindingNotationPart).getType();
+                        if (!(type instanceof PrimitiveType)) {
+                            throw new GeneratorException("Referring type must be primitive!");
+                        }
+                    }
                     String typeString = typeToString(type);
 
                     if (type instanceof ReferenceType) {
@@ -304,23 +335,28 @@ public class ModelTranslator {
                         if (conversions.containsConversion(typeString)) {
                             String conversionExpr = conversions.getConversion(typeString).trim();
 
-                            Token tokenPattern = (Token) propertyReferencePart.getPattern(Token.class);
+                            String ruleName;
+                            Token tokenPattern = (Token) bindingNotationPart.getPattern(Token.class);
                             if (tokenPattern != null) {
-                                // TODO
+                                ruleName = convertTokenName(tokenPattern.getName());
                             } else {
-                                String ruleName = propertyReferencePart.getProperty().getName().toUpperCase();
-
-                                if (counters.containsKey(ruleName)) {
-                                    counters.put(ruleName, counters.get(ruleName) + 1);
+                                if (bindingNotationPart instanceof PropertyReferencePart) {
+                                    ruleName = convertTokenName(((PropertyReferencePart) bindingNotationPart).getProperty().getName());
                                 } else {
-                                    counters.put(ruleName, 1);
+                                    ruleName = convertTokenName(((LocalVariablePart) bindingNotationPart).getName());
                                 }
-
-                                RulePart rulePart = new RulePart(ruleName);
-                                rulePart.setLabel(ruleName + "_" + counters.get(ruleName));
-                                params.add(String.format(conversionExpr, "$ctx." + rulePart.getLabel() + ".getText()"));
-                                parts.add(rulePart);
                             }
+
+                            if (counters.containsKey(ruleName)) {
+                                counters.put(ruleName, counters.get(ruleName) + 1);
+                            } else {
+                                counters.put(ruleName, 1);
+                            }
+
+                            RulePart rulePart = new RulePart(ruleName);
+                            rulePart.setLabel(ruleName + "_" + counters.get(ruleName));
+                            params.add(String.format(conversionExpr, "$ctx." + rulePart.getLabel() + ".getText()"));
+                            parts.add(rulePart);
                         }
                     } else if (type instanceof ComponentType) {
                         ComponentType componentType = (ComponentType) type;
@@ -350,27 +386,27 @@ public class ModelTranslator {
                         p.alternatives = new ArrayList<>();
 
                         Alternative alt = new Alternative();
-                        Range range = (Range) propertyReferencePart.getPattern(Range.class);
+                        Range range = (Range) bindingNotationPart.getPattern(Range.class);
                         if (range == null) {
                             range = new Range();
                         }
 
                         // TODO: Is separator value always a literal or could it be a reference to user-defined token?
                         // For now the former is assumed.
-                        Separator separator = (Separator) propertyReferencePart.getPattern(Separator.class);
+                        Separator separator = (Separator) bindingNotationPart.getPattern(Separator.class);
                         alt.sequence = generateListGrammar(ruleName, range,
                                 (separator == null) ? "" :
-                                        addToken(convertTokenName(separator.getValue()),
+                                        addToken(separator.getValue(),
                                                 Utilities.encodeStringIntoRegex(separator.getValue())));
 
                         StringBuilder actionBuilder = new StringBuilder(
-                                "$" + RETURN_VAR_NAME + " = $" + ruleName + "().stream().map(elem -> elem." + RETURN_VAR_NAME + ")");
+                                "$" + RETURN_VAR_NAME + " = $ctx." + ruleName + "().stream().map(elem -> elem." + RETURN_VAR_NAME + ")");
                         if (type instanceof ArrayType) {
                             actionBuilder.append(".toArray(" + typeString + "::new);");
                         } else if (type instanceof ListType) {
-                            actionBuilder.append(".collect(Collectors.toList());");
+                            actionBuilder.append(".collect(java.util.stream.Collectors.toList());");
                         } else if (type instanceof SetType) {
-                            actionBuilder.append(".collect(Collectors.toSet());");
+                            actionBuilder.append(".collect(java.util.stream.Collectors.toSet());");
                         } else {
                             throw new GeneratorException("Unknown component type");
                         }
@@ -608,7 +644,7 @@ public class ModelTranslator {
     }
 
     private String convertTokenName(String token) {
-        token = Utilities.encodeStringIntoTokenName(token);
+        token = "T_" + Utilities.encodeStringIntoTokenName(token);
         return token;
     }
 

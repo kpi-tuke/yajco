@@ -10,6 +10,6 @@ public class OneOrMorePart extends Part {
 
     @Override
     protected String generatePart() {
-        return this.part.generate() + "+";
+        return "( " + this.part.generate() + " )+";
     }
 }
