@@ -49,7 +49,7 @@ public class ModelTranslator {
     }
 
     public Grammar translate() {
-        for (TokenDef tokenDef : this.language.getUsedTokens()) {
+        for (TokenDef tokenDef : this.language.getTokens()) {
             this.tokens.put(convertTokenName(tokenDef.getName()), tokenDef.getRegexp());
         }
 
@@ -92,7 +92,7 @@ public class ModelTranslator {
 
                         if (referenceType != null) {
                             if (!this.productions.containsKey(
-                                    convertProductionName(referenceType.getConcept().getName()))) {
+                                    convertProductionName(referenceType.getConcept().getConceptName()))) {
                                 processTopLevelConcept(referenceType.getConcept());
                             }
                         }
@@ -201,11 +201,24 @@ public class ModelTranslator {
         Parentheses par = (Parentheses) concept.getPattern(Parentheses.class);
         if (par != null) {
             List<Part> parts = new ArrayList<>();
-            parts.add(new RulePart(addToken("LPAR",
-                    Utilities.encodeStringIntoRegex(par.getLeft()))));
-            parts.add(new RulePart(convertProductionName(concept.getName())));
-            parts.add(new RulePart(addToken("RPAR",
-                    Utilities.encodeStringIntoRegex(par.getRight()))));
+
+            String lparToken;
+            if (this.language.getToken(par.getLeft()) != null) {
+                lparToken = convertTokenName(par.getLeft());
+            } else {
+                lparToken = addToken(par.getLeft(), Utilities.encodeStringIntoRegex(par.getLeft()));
+            }
+
+            String rparToken;
+            if (this.language.getToken(par.getRight()) != null) {
+                rparToken = convertTokenName(par.getRight());
+            } else {
+                rparToken = addToken(par.getRight(), Utilities.encodeStringIntoRegex(par.getRight()));
+            }
+
+            parts.add(new RulePart(lparToken));
+            parts.add(new RulePart(convertProductionName(concept.getConceptName())));
+            parts.add(new RulePart(rparToken));
 
             Alternative parAlt = new Alternative();
             parAlt.par = par;
@@ -319,7 +332,7 @@ public class ModelTranslator {
 
                     if (type instanceof ReferenceType) {
                         ReferenceType referenceType = (ReferenceType) type;
-                        String ruleName = convertProductionName(referenceType.getConcept().getName());
+                        String ruleName = convertProductionName(referenceType.getConcept().getConceptName());
 
                         if (counters.containsKey(ruleName)) {
                             counters.put(ruleName, counters.get(ruleName) + 1);
@@ -365,7 +378,7 @@ public class ModelTranslator {
                         String ruleName;
 
                         if (innerType instanceof ReferenceType) {
-                            ruleName = convertProductionName(((ReferenceType) innerType).getConcept().getName());
+                            ruleName = convertProductionName(((ReferenceType) innerType).getConcept().getConceptName());
 
                         } else if (innerType instanceof PrimitiveType) {
                             // TODO
@@ -391,13 +404,17 @@ public class ModelTranslator {
                             range = new Range();
                         }
 
-                        // TODO: Is separator value always a literal or could it be a reference to user-defined token?
-                        // For now the former is assumed.
                         Separator separator = (Separator) bindingNotationPart.getPattern(Separator.class);
-                        alt.sequence = generateListGrammar(ruleName, range,
-                                (separator == null) ? "" :
-                                        addToken(separator.getValue(),
-                                                Utilities.encodeStringIntoRegex(separator.getValue())));
+                        String sepToken = "";
+                        if (separator != null) {
+                            if (this.language.getToken(separator.getValue()) != null) {
+                                sepToken = convertTokenName(separator.getValue());
+                            } else {
+                                sepToken = addToken(separator.getValue(), Utilities.encodeStringIntoRegex(separator.getValue()));
+                            }
+                        }
+
+                        alt.sequence = generateListGrammar(ruleName, range, sepToken);
 
                         StringBuilder actionBuilder = new StringBuilder(
                                 "$" + RETURN_VAR_NAME + " = $ctx." + ruleName + "().stream().map(elem -> elem." + RETURN_VAR_NAME + ")");
@@ -582,6 +599,7 @@ public class ModelTranslator {
         // ANTLR parser rule names must begin with a lowercase letter
         // Also use a prefix to avoid clashes with Java keywords that
         // occur due to lowercasing.
+        name = name.replace('.', '_');
         return "nt_" + name.toLowerCase();
     }
 
