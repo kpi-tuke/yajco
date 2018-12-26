@@ -672,8 +672,10 @@ public class ModelTranslator {
     private String addToken(String token, String regex) {
         String newName = convertTokenName(token);
 
-        if (regex.equals(this.tokens.get(newName))) {
-            return newName;
+        for (Map.Entry<String, String> entry : this.tokens.entrySet()) {
+            if (regex.equals(entry.getValue())) {
+                return entry.getKey();
+            }
         }
 
         // Make sure the token name is unique.
