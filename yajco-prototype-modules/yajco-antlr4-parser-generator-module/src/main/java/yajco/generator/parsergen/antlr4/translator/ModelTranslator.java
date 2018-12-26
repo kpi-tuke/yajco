@@ -320,7 +320,6 @@ public class ModelTranslator {
                     String tokenName = ((TokenPart) part).getToken();
                     parts.add(new RulePart(convertTokenName(tokenName)));
                 } else if (part instanceof BindingNotationPart) {
-                    // TODO
                     BindingNotationPart bindingNotationPart = (BindingNotationPart) part;
                     Type type;
                     if (bindingNotationPart instanceof PropertyReferencePart) {
@@ -473,26 +472,31 @@ public class ModelTranslator {
                 }
             }
 
-            String action = "";
             Factory factory = (Factory) n.getPattern(Factory.class);
-            if (factory == null) {
-                // Constructor.
-                action = "$" + RETURN_VAR_NAME + " = yajco.ReferenceResolver.getInstance().register(new "
-                    + getFullConceptClassName(concept) + "(" +
-                        params.stream()
-                                .collect(Collectors.joining(", ")) +
-                        ")" +
-                        params.stream()
-                                .map(s -> ", (Object) " + s)
-                                .collect(Collectors.joining()) +
-                        ");";
-            } else {
-                // Factory method.
-                // TODO
-                throw new GeneratorException("Factory methods are not supported yet!");
-            }
 
-            alt.sequence.setCodeAfter(action);
+            StringBuilder action = new StringBuilder();
+            action.append("$").append(RETURN_VAR_NAME).append(" = yajco.ReferenceResolver.getInstance().register(");
+            if (factory != null) {
+                // Factory method call.
+                action.append(getFullConceptClassName(concept)).append(".").append(factory.getName());
+            } else {
+                // Constructor call.
+                action.append("new ").append(getFullConceptClassName(concept));
+            }
+            action.append("(").append(
+                params.stream()
+                        .collect(Collectors.joining(", ")
+            )).append(")");
+            if (factory != null) {
+                action.append(", \"").append(factory.getName()).append("\"");
+            }
+            action.append(
+                params.stream()
+                        .map(s -> ", (Object) " + s)
+                        .collect(Collectors.joining())
+            ).append(");");
+
+            alt.sequence.setCodeAfter(action.toString());
             alts.add(alt);
         }
 
