@@ -1,14 +1,14 @@
 package $parserPackageName;
 
 import org.antlr.v4.runtime.TokenSource;
-import org.antlr.v4.runtime.ANTLRInputStream;
+import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 
 public class $parserClassName {
     public $mainElementClassName parse(String input) throws ParseException {
-        TokenSource lexer = new ${ANTLRLexerFullClassName}(new ANTLRInputStream(input));
+        TokenSource lexer = new ${ANTLRLexerFullClassName}(CharStreams.fromString(input));
         ${ANTLRParserFullClassName} parser = new ${ANTLRParserFullClassName}(new CommonTokenStream(lexer));
         parser.setErrorHandler(new BailErrorStrategy());
 
