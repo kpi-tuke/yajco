@@ -216,13 +216,16 @@ public class ModelTranslator {
                 rparToken = addToken(par.getRight(), Utilities.encodeStringIntoRegex(par.getRight()));
             }
 
+            String parRuleName = convertProductionName(concept.getConceptName());
+
             parts.add(new RulePart(lparToken));
-            parts.add(new RulePart(convertProductionName(concept.getConceptName())));
+            parts.add(new RulePart(parRuleName));
             parts.add(new RulePart(rparToken));
 
             Alternative parAlt = new Alternative();
             parAlt.par = par;
             parAlt.sequence = new SequencePart(parts);
+            parAlt.sequence.setCodeAfter("$" + RETURN_VAR_NAME + " = $" + parRuleName + "." + RETURN_VAR_NAME + ";");
             alts.add(parAlt);
         }
 
