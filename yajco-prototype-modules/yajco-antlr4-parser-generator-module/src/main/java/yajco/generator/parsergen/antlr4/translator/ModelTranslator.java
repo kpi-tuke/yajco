@@ -347,10 +347,50 @@ public class ModelTranslator {
                         params.add("$ctx." + rulePart.getLabel() + "." + RETURN_VAR_NAME);
                         parts.add(rulePart);
                     } else if (type instanceof PrimitiveType) {
-                        if (conversions.containsConversion(typeString)) {
-                            String conversionExpr = conversions.getConversion(typeString).trim();
+                        if (!conversions.containsConversion(typeString)) {
+                            throw new GeneratorException("Cannot handle type " + typeString);
+                        }
 
-                            String ruleName;
+                        String conversionExpr = conversions.getConversion(typeString).trim();
+
+                        String ruleName;
+                        Token tokenPattern = (Token) bindingNotationPart.getPattern(Token.class);
+                        if (tokenPattern != null) {
+                            ruleName = convertTokenName(tokenPattern.getName());
+                        } else {
+                            if (bindingNotationPart instanceof PropertyReferencePart) {
+                                ruleName = convertTokenName(((PropertyReferencePart) bindingNotationPart).getProperty().getName());
+                            } else {
+                                ruleName = convertTokenName(((LocalVariablePart) bindingNotationPart).getName());
+                            }
+                        }
+
+                        if (counters.containsKey(ruleName)) {
+                            counters.put(ruleName, counters.get(ruleName) + 1);
+                        } else {
+                            counters.put(ruleName, 1);
+                        }
+
+                        RulePart rulePart = new RulePart(ruleName);
+                        rulePart.setLabel(ruleName + "_" + counters.get(ruleName));
+                        params.add(String.format(conversionExpr, "$ctx." + rulePart.getLabel() + ".getText()"));
+                        parts.add(rulePart);
+                    } else if (type instanceof ComponentType) {
+                        ComponentType componentType = (ComponentType) type;
+                        Type innerType = componentType.getComponentType();
+                        String innerTypeString = typeToString(innerType);
+
+                        String ruleName; // Name of the terminal/non-terminal pertaining to the list's element.
+                        String productionName; // Name of the production rule to be created.
+
+                        if (innerType instanceof ReferenceType) {
+                            ruleName = convertProductionName(((ReferenceType) innerType).getConcept().getConceptName());
+                            productionName = ruleName + "_list";
+                        } else if (innerType instanceof PrimitiveType) {
+                            if (!conversions.containsConversion(innerTypeString)) {
+                                throw new GeneratorException("Cannot handle type " + innerTypeString + " in " + typeString);
+                            }
+
                             Token tokenPattern = (Token) bindingNotationPart.getPattern(Token.class);
                             if (tokenPattern != null) {
                                 ruleName = convertTokenName(tokenPattern.getName());
@@ -361,37 +401,15 @@ public class ModelTranslator {
                                     ruleName = convertTokenName(((LocalVariablePart) bindingNotationPart).getName());
                                 }
                             }
-
-                            if (counters.containsKey(ruleName)) {
-                                counters.put(ruleName, counters.get(ruleName) + 1);
-                            } else {
-                                counters.put(ruleName, 1);
-                            }
-
-                            RulePart rulePart = new RulePart(ruleName);
-                            rulePart.setLabel(ruleName + "_" + counters.get(ruleName));
-                            params.add(String.format(conversionExpr, "$ctx." + rulePart.getLabel() + ".getText()"));
-                            parts.add(rulePart);
-                        }
-                    } else if (type instanceof ComponentType) {
-                        ComponentType componentType = (ComponentType) type;
-                        Type innerType = componentType.getComponentType();
-
-                        String ruleName;
-
-                        if (innerType instanceof ReferenceType) {
-                            ruleName = convertProductionName(((ReferenceType) innerType).getConcept().getConceptName());
-
-                        } else if (innerType instanceof PrimitiveType) {
-                            // TODO
-                            throw new GeneratorException("Component types of primitive types are not supported.");
+                            // Token ruleName will be in all caps and a parser rule can't begin with a capital letter
+                            // so prefix it with "nt_".
+                            productionName = "nt_" + ruleName + "_list";
                         } else if (innerType instanceof ComponentType) {
                             throw new GeneratorException("Component types of component types are not supported.");
                         } else {
                             throw new GeneratorException("Unknown type.");
                         }
 
-                        String productionName = ruleName + "_list";
                         while (this.productions.containsKey(productionName)) {
                             productionName = productionName + "_";
                         }
@@ -418,18 +436,49 @@ public class ModelTranslator {
 
                         alt.sequence = generateListGrammar(ruleName, range, sepToken);
 
-                        StringBuilder actionBuilder = new StringBuilder(
-                                "$" + RETURN_VAR_NAME + " = $ctx." + ruleName + "().stream().map(elem -> elem." + RETURN_VAR_NAME + ")");
-                        if (type instanceof ArrayType) {
-                            actionBuilder.append(".toArray(" + typeString + "::new);");
-                        } else if (type instanceof ListType) {
-                            actionBuilder.append(".collect(java.util.stream.Collectors.toList());");
-                        } else if (type instanceof SetType) {
-                            actionBuilder.append(".collect(java.util.stream.Collectors.toSet());");
+                        StringBuilder action = new StringBuilder();
+
+                        // Streams of primitive types are not possible in Java. :-(
+                        boolean useStream =
+                                (!(innerType instanceof PrimitiveType)
+                                    || ((PrimitiveType) innerType).getPrimitiveTypeConst() == PrimitiveTypeConst.STRING);
+
+                        if (useStream) {
+                            action.append("$").append(RETURN_VAR_NAME).append(" = $ctx.").append(ruleName)
+                                    .append("().stream().map(elem -> ");
+                            if (innerType instanceof PrimitiveType) {
+                                String conversionExpr = conversions.getConversion(innerTypeString);
+                                action.append(String.format(conversionExpr, "elem.getSymbol().getText()"));
+                            } else {
+                                action.append("elem.").append(RETURN_VAR_NAME);
+                            }
+                            action.append(")");
+                            if (type instanceof ArrayType) {
+                                action.append(".toArray(" + typeString + "::new);");
+                            } else if (type instanceof ListType) {
+                                action.append(".collect(java.util.stream.Collectors.toList());");
+                            } else if (type instanceof SetType) {
+                                action.append(".collect(java.util.stream.Collectors.toSet());");
+                            } else {
+                                throw new GeneratorException("Unknown component type");
+                            }
                         } else {
-                            throw new GeneratorException("Unknown component type");
+                            assert type instanceof ArrayType;
+
+                            String conversionExpr = conversions.getConversion(innerTypeString);
+
+                            String boxedTypeString = primitiveTypeToBoxedTypeString((PrimitiveType) innerType);
+                            action.append("java.util.List<").append(boxedTypeString).append("> boxedList = ")
+                                    .append("$ctx.").append(ruleName).append("().stream().map(elem -> ")
+                                    .append(String.format(conversionExpr, "elem.getSymbol().getText()"))
+                                    .append(").collect(java.util.stream.Collectors.toList());\n");
+                            action.append("$").append(RETURN_VAR_NAME).append(" = new ")
+                                    .append(innerTypeString).append("[boxedList.size()];\n");
+                            action.append("for (int i = 0; i < boxedList.size(); i++) {\n    ")
+                                    .append("$").append(RETURN_VAR_NAME).append("[i] = boxedList.get(i);\n}");
                         }
-                        alt.sequence.setCodeAfter(actionBuilder.toString());
+
+                        alt.sequence.setCodeAfter(action.toString());
 
                         p.alternatives.add(alt);
                         this.productions.put(productionName, p);
@@ -638,6 +687,21 @@ public class ModelTranslator {
     }
 
     private String primitiveTypeToString(PrimitiveType primitiveType) {
+        switch (primitiveType.getPrimitiveTypeConst()) {
+            case BOOLEAN:
+                return "boolean";
+            case INTEGER:
+                return "int";
+            case REAL:
+                return "float";
+            case STRING:
+                return "java.lang.String";
+            default:
+                throw new IllegalArgumentException("Unknown primitive type detected: '" + primitiveType.toString() + "'!");
+        }
+    }
+
+    private String primitiveTypeToBoxedTypeString(PrimitiveType primitiveType) {
         switch (primitiveType.getPrimitiveTypeConst()) {
             case BOOLEAN:
                 return "java.lang.Boolean";
