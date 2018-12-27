@@ -8,6 +8,7 @@ import yajco.generator.util.RegexUtil;
 import yajco.generator.util.Utilities;
 import yajco.model.*;
 import yajco.model.pattern.impl.*;
+import yajco.model.pattern.impl.Enum;
 import yajco.model.type.*;
 
 import java.util.*;
@@ -308,6 +309,7 @@ public class ModelTranslator {
 
     private List<Alternative> processConcreteConcept(Concept concept) {
         List<Alternative> alts = new ArrayList<>();
+        Enum enumPattern = (Enum) concept.getPattern(Enum.class);
 
         for (Notation n : concept.getConcreteSyntax()) {
             List<Part> parts = new ArrayList<>();
@@ -521,29 +523,39 @@ public class ModelTranslator {
                 }
             }
 
-            Factory factory = (Factory) n.getPattern(Factory.class);
+            Factory factoryPattern = (Factory) n.getPattern(Factory.class);
 
             StringBuilder action = new StringBuilder();
-            action.append("$").append(RETURN_VAR_NAME).append(" = yajco.ReferenceResolver.getInstance().register(");
-            if (factory != null) {
-                // Factory method call.
-                action.append(getFullConceptClassName(concept)).append(".").append(factory.getName());
+            action.append("$").append(RETURN_VAR_NAME).append(" = ");
+            if (enumPattern == null) {
+                action.append("yajco.ReferenceResolver.getInstance().register(");
+                if (factoryPattern != null) {
+                    // Factory method call.
+                    action.append(getFullConceptClassName(concept)).append(".").append(factoryPattern.getName());
+                } else {
+                    // Constructor call.
+                    action.append("new ").append(getFullConceptClassName(concept));
+                }
+                action.append("(").append(
+                        params.stream()
+                                .collect(Collectors.joining(", ")
+                                )).append(")");
+                if (factoryPattern != null) {
+                    action.append(", \"").append(factoryPattern.getName()).append("\"");
+                }
+                action.append(
+                        params.stream()
+                                .map(s -> ", (Object) " + s)
+                                .collect(Collectors.joining())
+                ).append(")");
             } else {
-                // Constructor call.
-                action.append("new ").append(getFullConceptClassName(concept));
+                // Enum.
+                TokenPart part = (TokenPart) n.getParts().get(0);
+                if (enumPattern != null) {
+                    action.append(getFullConceptClassName(concept)).append(".").append(part.getToken());
+                }
             }
-            action.append("(").append(
-                params.stream()
-                        .collect(Collectors.joining(", ")
-            )).append(")");
-            if (factory != null) {
-                action.append(", \"").append(factory.getName()).append("\"");
-            }
-            action.append(
-                params.stream()
-                        .map(s -> ", (Object) " + s)
-                        .collect(Collectors.joining())
-            ).append(");");
+            action.append(";");
 
             alt.sequence.setCodeAfter(action.toString());
             alts.add(alt);
