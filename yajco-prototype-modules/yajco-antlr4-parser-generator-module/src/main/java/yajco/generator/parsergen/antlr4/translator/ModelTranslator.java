@@ -28,15 +28,28 @@ public class ModelTranslator {
     private final String parserClassName;
     private final String parserPackageName;
 
-    private class Production {
+    private static class Production {
         String returns;
         List<Alternative> alternatives;
     }
 
-    private class Alternative {
+    private static class Alternative {
         Parentheses par;
         Operator op;
         SequencePart sequence;
+    }
+
+    private static class LabelProvider {
+        private Map<String, Integer> counters = new HashMap<>();
+
+        public String createLabel(String ruleName) {
+            if (counters.containsKey(ruleName)) {
+                counters.put(ruleName, counters.get(ruleName) + 1);
+            } else {
+                counters.put(ruleName, 1);
+            }
+            return ruleName + "_" + counters.get(ruleName);
+        }
     }
 
     private final Map<String, Production> productions = new LinkedHashMap<>();
@@ -314,7 +327,7 @@ public class ModelTranslator {
         for (Notation n : concept.getConcreteSyntax()) {
             List<Part> parts = new ArrayList<>();
 
-            Map<String, Integer> counters = new HashMap<>();
+            LabelProvider labelProvider = new LabelProvider();
             List<String> params = new ArrayList<>();
 
             for (NotationPart part : n.getParts()) {
@@ -338,14 +351,8 @@ public class ModelTranslator {
                         ReferenceType referenceType = (ReferenceType) type;
                         String ruleName = convertProductionName(referenceType.getConcept().getConceptName());
 
-                        if (counters.containsKey(ruleName)) {
-                            counters.put(ruleName, counters.get(ruleName) + 1);
-                        } else {
-                            counters.put(ruleName, 1);
-                        }
-
                         RulePart rulePart = new RulePart(ruleName);
-                        rulePart.setLabel(ruleName + "_" + counters.get(ruleName));
+                        rulePart.setLabel(labelProvider.createLabel(ruleName));
                         params.add("$ctx." + rulePart.getLabel() + "." + RETURN_VAR_NAME);
                         parts.add(rulePart);
                     } else if (type instanceof PrimitiveType) {
@@ -367,14 +374,8 @@ public class ModelTranslator {
                             }
                         }
 
-                        if (counters.containsKey(ruleName)) {
-                            counters.put(ruleName, counters.get(ruleName) + 1);
-                        } else {
-                            counters.put(ruleName, 1);
-                        }
-
                         RulePart rulePart = new RulePart(ruleName);
-                        rulePart.setLabel(ruleName + "_" + counters.get(ruleName));
+                        rulePart.setLabel(labelProvider.createLabel(ruleName));
                         params.add(String.format(conversionExpr, "$ctx." + rulePart.getLabel() + ".getText()"));
                         parts.add(rulePart);
                     } else if (type instanceof ComponentType) {
@@ -485,14 +486,8 @@ public class ModelTranslator {
                         p.alternatives.add(alt);
                         this.productions.put(productionName, p);
 
-                        if (counters.containsKey(productionName)) {
-                            counters.put(productionName, counters.get(productionName) + 1);
-                        } else {
-                            counters.put(productionName, 1);
-                        }
-
                         RulePart rulePart = new RulePart(productionName);
-                        rulePart.setLabel(productionName + "_" + counters.get(productionName));
+                        rulePart.setLabel(labelProvider.createLabel(productionName));
                         params.add("$ctx." + rulePart.getLabel() + "." + RETURN_VAR_NAME);
                         parts.add(rulePart);
                     }
