@@ -34,7 +34,6 @@ public class ModelTranslator {
     }
 
     private static class Alternative {
-        Parentheses par;
         Operator op;
         SequencePart sequence;
     }
@@ -237,7 +236,6 @@ public class ModelTranslator {
             parts.add(new RulePart(rparToken));
 
             Alternative parAlt = new Alternative();
-            parAlt.par = par;
             parAlt.sequence = new SequencePart(parts);
             parAlt.sequence.setCodeAfter("$" + RETURN_VAR_NAME + " = $" + parRuleName + "." + RETURN_VAR_NAME + ";");
             alts.add(parAlt);
