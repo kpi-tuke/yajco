@@ -627,7 +627,7 @@ public class ModelTranslator {
                         ))
                     );
                 }
-                for (int i = 0; i < (range.getMaxOccurs() - range.getMinOccurs()); i++) {
+                for (int i = 0; i < (range.getMaxOccurs() - Math.max(range.getMinOccurs(), 1)); i++) {
                     parts.add(
                         new ZeroOrOnePart(
                             new SequencePart(Arrays.asList(
