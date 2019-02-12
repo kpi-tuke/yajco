@@ -4,6 +4,7 @@ import org.antlr.v4.Tool;
 import org.antlr.v4.runtime.Token;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
+import yajco.generator.GeneratorException;
 import yajco.generator.parsergen.CompilerGenerator;
 import yajco.generator.parsergen.antlr4.translator.ModelTranslator;
 import yajco.generator.parsergen.antlr4.model.Grammar;
@@ -40,7 +41,9 @@ public class Antlr4CompilerGenerator implements CompilerGenerator {
 
     @Override
     public void generateFiles(Language language, Filer filer, Properties properties) {
-        generateFiles(language, filer, properties, "UnnamedParser");
+        final String parserPackageName = (language.getName() != null) ? language.getName() + ".parser" : "parser";
+        final String mainConceptName = language.getConcepts().get(0).getConceptName();
+        generateFiles(language, filer, properties, parserPackageName + "." + mainConceptName + "Parser");
     }
 
     @Override
@@ -51,6 +54,9 @@ public class Antlr4CompilerGenerator implements CompilerGenerator {
 
         try {
             final int lastDotPos = parserFullClassName.lastIndexOf(".");
+            if (lastDotPos == -1) {
+                throw new GeneratorException("Provided parser class name lacks package");
+            }
             final String parserClassName = parserFullClassName.substring(lastDotPos + 1);
             final String parserPackageName = parserFullClassName.substring(0, lastDotPos);
             final String ANTLRParserPackageName = parserPackageName + ".antlr4";
