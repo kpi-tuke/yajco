@@ -493,10 +493,6 @@ public class ModelTranslator {
 
             }
 
-            if (parts.isEmpty()) {
-                continue;
-            }
-
             Alternative alt = new Alternative();
             alt.sequence = new SequencePart(parts);
             alt.op = (Operator) concept.getPattern(Operator.class);
