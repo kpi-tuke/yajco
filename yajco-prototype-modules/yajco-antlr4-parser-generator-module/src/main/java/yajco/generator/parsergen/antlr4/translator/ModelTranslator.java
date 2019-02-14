@@ -172,28 +172,26 @@ public class ModelTranslator {
         return parserRules;
     }
 
+    private boolean isConceptAbstract(Concept concept) {
+        return concept.getAbstractSyntax().isEmpty() && concept.getConcreteSyntax().isEmpty();
+    }
+
     private void processTopLevelConcept(Concept concept) {
         List<Alternative> unresolvedAlts = new ArrayList<>();
-        boolean isAbstract = (concept.getAbstractSyntax().isEmpty() && concept.getConcreteSyntax().isEmpty());
 
-        if (isAbstract) {
-            // Depth-first search for descendant leaves (concrete concepts).
-            Stack<Concept> conceptsToVisit = new Stack<>();
-            conceptsToVisit.push(concept);
-            while (!conceptsToVisit.isEmpty()) {
-                Concept c = conceptsToVisit.pop();
-                Set<Concept> subConcepts = getDirectSubconcepts(c);
-                if (subConcepts.isEmpty()) {
-                    // Found a descendant leaf.
-                    unresolvedAlts.addAll(processConcreteConcept(c));
-                } else {
-                    for (Concept subConcept : subConcepts) {
-                        conceptsToVisit.push(subConcept);
-                    }
-                }
+        // Depth-first search for concrete descendant concepts.
+        Stack<Concept> conceptsToVisit = new Stack<>();
+        conceptsToVisit.push(concept);
+        while (!conceptsToVisit.isEmpty()) {
+            Concept c = conceptsToVisit.pop();
+            List<Concept> subConcepts = getDirectSubconcepts(c);
+            if (!isConceptAbstract(c)) {
+                unresolvedAlts.addAll(processConcreteConcept(c));
             }
-        } else {
-            unresolvedAlts = processConcreteConcept(concept);
+            Collections.reverse(subConcepts);
+            for (Concept subConcept : subConcepts) {
+                conceptsToVisit.push(subConcept);
+            }
         }
 
         // Group operator alternatives by priority.
@@ -755,8 +753,8 @@ public class ModelTranslator {
         return newName;
     }
 
-    private Set<Concept> getDirectSubconcepts(Concept parent) {
-        Set<Concept> subconcepts = new HashSet<Concept>();
+    private List<Concept> getDirectSubconcepts(Concept parent) {
+        List<Concept> subconcepts = new ArrayList<>();
         for (Concept concept : this.language.getConcepts()) {
             if (concept.getParent() != null && concept.getParent().equals(parent)) {
                 subconcepts.add(concept);
