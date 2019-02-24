@@ -11,10 +11,7 @@ import yajco.generator.GeneratorException;
 import yajco.generator.annotation.DependsOn;
 import yajco.generator.util.Utilities;
 import yajco.generator.visitorgen.VisitorGenerator;
-import yajco.model.Language;
-import yajco.model.LocalVariablePart;
-import yajco.model.PropertyReferencePart;
-import yajco.model.TokenPart;
+import yajco.model.*;
 import yajco.model.pattern.PatternSupport;
 import yajco.model.pattern.impl.Parentheses;
 import yajco.model.pattern.impl.Range;
@@ -22,11 +19,7 @@ import yajco.model.pattern.impl.References;
 import yajco.model.pattern.impl.Separator;
 import yajco.model.pattern.impl.printer.Indent;
 import yajco.model.pattern.impl.printer.NewLine;
-import yajco.model.type.ArrayType;
-import yajco.model.type.ListType;
-import yajco.model.type.PrimitiveType;
-import yajco.model.type.ReferenceType;
-import yajco.model.type.SetType;
+import yajco.model.type.*;
 
 @DependsOn("yajco.generator.visitorgen.VisitorGenerator")
 public class PrettyPrinterGenerator extends AbstractFileGenerator {
@@ -69,8 +62,10 @@ public class PrettyPrinterGenerator extends AbstractFileGenerator {
             context.put("arrayTypeClassName", ArrayType.class.getCanonicalName());
             context.put("listTypeClassName", ListType.class.getCanonicalName());
             context.put("setTypeClassName", SetType.class.getCanonicalName());
+            context.put("optionalTypeClassName", OptionalType.class.getCanonicalName());
             context.put("referenceTypeClassName", ReferenceType.class.getCanonicalName());
             context.put("primitiveTypeClassName", PrimitiveType.class.getCanonicalName());
+            context.put("optionalPartClassName", OptionalPart.class.getCanonicalName());
             context.put("tokenPartClassName", TokenPart.class.getCanonicalName());
             context.put("propertyReferencePartClassName", PropertyReferencePart.class.getCanonicalName());
             context.put("localVariablePartClassName", LocalVariablePart.class.getCanonicalName());

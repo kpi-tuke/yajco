@@ -34,23 +34,21 @@ public class ${className}<P> {
         if (${Utilities.toLowerCaseIdent($concept.conceptName)} != null) {
     #foreach( $property in $concept.abstractSyntax )
         #set( $type = $property.type )
+        #if(${Utilities.getClassName($type)} == $optionalTypeClassName)
+            #set( $type = $type.componentType)
+        #end
         #set( $className = ${Utilities.getClassName($type)} )
         #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
             #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
-                    visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
+                visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
             #end
         #elseif( $className == $primitiveTypeClassName )
         ## pri primitovnom type sa aktualne dalej nevnarame, cize sa nerobi nic
         #elseif( $className == $referenceTypeClassName )
-                if (${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null && enterVisit(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}())) {
+            if (${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null && enterVisit(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}())) {
                 visit${Utilities.getMethodPartName($nameMap, $type.concept)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
                 exitVisit(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}());
-                }
-        #elseif ($className == $optionalTypeClassName )
-                if (${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null && enterVisit(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}())) {
-                visit${Utilities.toUpperCaseIdent($property.name)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
-                exitVisit(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}());
-                }
+            }
         #else
             $Utilities.throwGeneratorException("Not known type for ${property.name}")
         // not known type for ${property.name}
@@ -73,6 +71,9 @@ public class ${className}<P> {
 
 #foreach( $property in $concept.abstractSyntax )
 #set( $type = $property.type )
+#if(${Utilities.getClassName($type)} == $optionalTypeClassName)
+    #set( $type = $type.componentType)
+#end
 #set( $className = ${Utilities.getClassName($type)} )
 #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
 #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
