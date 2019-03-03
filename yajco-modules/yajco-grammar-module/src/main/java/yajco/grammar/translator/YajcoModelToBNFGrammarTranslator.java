@@ -238,10 +238,6 @@ public class YajcoModelToBNFGrammarTranslator {
                 name = token != null ? token.getName() : null;
             }
 
-            NonterminalSymbol conceptNonterminal = new NonterminalSymbol("Optional" + name + "_" +optionalID++,
-                    new OptionalType(cmpType.getComponentType()), DEFAULT_ELEMENT_NAME+optionalID);
-            grammar.addNonterminal(conceptNonterminal);
-
             List<Alternative> alternatives = new ArrayList<Alternative>();
 
             Alternative alternative1 = new Alternative();
@@ -270,8 +266,13 @@ public class YajcoModelToBNFGrammarTranslator {
             alternative2.addActions(SemLangFactory.createNewOptionalClassInstanceAndReturnActions(symbols));
             alternatives.add(alternative2);
 
-            grammar.addProduction(new Production(conceptNonterminal, alternatives, toPatternList(concept.getPatterns())));
-            return conceptNonterminal;
+            NonterminalSymbol conceptNonterminal = new NonterminalSymbol("Optional" + name + "_" +optionalID++,
+                    new OptionalType(cmpType.getComponentType()), DEFAULT_ELEMENT_NAME+optionalID);
+
+            Production production = new Production(conceptNonterminal, alternatives, toPatternList(concept.getPatterns()));
+            Production existingProduction = grammar.getExistingProductionForOptionalNonterminal(conceptNonterminal.getName(), production);
+
+            return addProductionAndGetNonterminal(conceptNonterminal, production, existingProduction);
         }
         return null;
     }
@@ -284,10 +285,6 @@ public class YajcoModelToBNFGrammarTranslator {
         Token tokenPattern = (Token) notationPart.getPattern(Token.class);
         TokenDef token = getDefinedToken(tokenPattern != null ? tokenPattern.getName() : notationPart.getName());
         TerminalSymbol terminal = null;
-
-        NonterminalSymbol conceptNonterminal = new NonterminalSymbol("Optional" + notationPart.getName() + "_" +optionalID++,
-                new OptionalType(notationPart.getType()), DEFAULT_ELEMENT_NAME+optionalID);
-        grammar.addNonterminal(conceptNonterminal);
 
         if (token != null) {
             terminal = new TerminalSymbol(token.getName(), notationPart.getType(), notationPart.getName(), toPatternList(notationPart.getPatterns()));
@@ -314,9 +311,29 @@ public class YajcoModelToBNFGrammarTranslator {
         alternative2.addActions(SemLangFactory.createNewOptionalClassInstanceAndReturnActions(symbols));
         alternatives.add(alternative2);
 
-        grammar.addProduction(new Production(conceptNonterminal, alternatives, toPatternList(concept.getPatterns())));
-        return conceptNonterminal;
+        NonterminalSymbol conceptNonterminal = new NonterminalSymbol("Optional" + notationPart.getName() + "_" +optionalID++,
+                new OptionalType(notationPart.getType()), DEFAULT_ELEMENT_NAME+optionalID);
+
+        Production production = new Production(conceptNonterminal, alternatives, toPatternList(concept.getPatterns()));
+        Production existingProduction = grammar.getExistingProductionForOptionalNonterminal(conceptNonterminal.getName(), production);
+
+        return addProductionAndGetNonterminal(conceptNonterminal, production, existingProduction);
     }
+
+    private Symbol addProductionAndGetNonterminal(NonterminalSymbol conceptNonterminal, Production production, Production existingProduction) {
+        if (existingProduction != null) {
+            grammar.addNonterminal(existingProduction.getLhs());
+            grammar.addProduction(existingProduction);
+            optionalID--;
+            return existingProduction.getLhs();
+        } else {
+            grammar.addProduction(production);
+            grammar.addNonterminal(conceptNonterminal);
+            return conceptNonterminal;
+        }
+    }
+
+
 
     private TerminalSymbol translateTokenNotationPart(TokenPart part) {
         return getTerminalFor(part.getToken());

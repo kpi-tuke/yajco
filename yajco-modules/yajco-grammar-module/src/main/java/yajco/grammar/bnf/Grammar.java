@@ -90,6 +90,34 @@ public class Grammar extends PatternSupport {
 		return null;
 	}
 
+	public List<NonterminalSymbol> getOptionalNonterminalsFor(String name) {
+		List<NonterminalSymbol> nonterminalSymbols = new ArrayList<NonterminalSymbol>();
+		for (String key: nonterminals.keySet()) {
+			if (nonterminals.get(key).getName().split("_")[0].equals(name.split("_")[0])) {
+				nonterminalSymbols.add(nonterminals.get(key));
+			}
+		}
+		return nonterminalSymbols;
+	}
+
+	public Production getExistingProductionForOptionalNonterminal(String name, Production production) {
+		for (NonterminalSymbol nonterminalSymbol: this.getOptionalNonterminalsFor(name)) {
+			boolean equals;
+			Production existingProduction = productions.get(nonterminalSymbol);
+			if (existingProduction.getRhs().size() != production.getRhs().size()) {
+				continue;
+			} else {
+				equals = existingProduction.getRhs().get(0).toString().equals(production.getRhs().get(0).toString());
+			}
+			if (equals) {
+				return existingProduction;
+			}
+		}
+		return null;
+	}
+
+
+
 	public void addSequence(String name, int min, int max, String sep, NonterminalSymbol nonterminal) {
 		sequencePool.put(new RangeEntry(name, min, max, sep), nonterminal);
 	}
