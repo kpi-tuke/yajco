@@ -33,9 +33,7 @@ public class Grammar implements Element {
             sb.append("}\n\n");
         }
 
-        sb.append("// Parser rules:\n")
-          .append(generateParserRules() + "\n")
-          .append("// Lexer rules:\n")
+        sb.append(generateParserRules() + "\n")
           .append(generateLexicalRules());
 
         return sb.toString();
