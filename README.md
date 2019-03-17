@@ -1,6 +1,6 @@
 # Getting started #
 
-You can start using YAJCo parser generator tool by following the steps descibed below. If you prefer to use existing more complex examples follow instructions in the [examples page](https://github.com/kpi-tuke/yajco/wiki/Examples).
+You can start using YAJCo parser generator tool by following the steps descibed below. If you prefer to use existing more complex examples follow instructions in the [examples project](https://github.com/kpi-tuke/yajco-examples).
 
 ## Maven builds ##
 
