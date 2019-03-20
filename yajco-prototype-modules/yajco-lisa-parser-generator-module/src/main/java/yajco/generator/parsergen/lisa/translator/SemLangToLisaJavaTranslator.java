@@ -1,20 +1,40 @@
 package yajco.generator.parsergen.lisa.translator;
 
-import yajco.ReferenceResolver;
-import yajco.grammar.semlang.*;
-import yajco.model.Language;
-import yajco.model.type.*;
-import yajco.model.utilities.Utilities;
-
 import java.io.PrintStream;
 import java.util.List;
+import yajco.ReferenceResolver;
+import yajco.model.utilities.Utilities;
+import yajco.model.Language;
+import yajco.grammar.semlang.Action;
+import yajco.grammar.semlang.AddElementToCollectionAction;
+import yajco.grammar.semlang.AssignAction;
+import yajco.grammar.semlang.ConvertCollectionToArrayAction;
+import yajco.grammar.semlang.ConvertListToCollectionAction;
+import yajco.grammar.semlang.ConvertStringToPrimitiveTypeAction;
+import yajco.grammar.semlang.CreateClassInstanceAction;
+import yajco.grammar.semlang.CreateCollectionInstanceAction;
+import yajco.grammar.semlang.CreateEnumInstanceAction;
+import yajco.grammar.semlang.DefineVariableAction;
+import yajco.grammar.semlang.LValue;
+import yajco.grammar.semlang.RValue;
+import yajco.grammar.semlang.ReferenceResolverRegisterAction;
+import yajco.grammar.semlang.ReturnAction;
+import yajco.model.type.ArrayType;
+import yajco.model.type.ComponentType;
+import yajco.model.type.ListType;
+import yajco.model.type.PrimitiveType;
+import yajco.model.type.PrimitiveTypeConst;
+import yajco.model.type.ReferenceType;
+import yajco.model.type.SetType;
+import yajco.model.type.Type;
 
 public class SemLangToLisaJavaTranslator {
 
     private final static String REFERENCE_RESOLVER_CLASS_NAME = ReferenceResolver.class.getCanonicalName();
-    //    private final static String DEFAULT_PACKAGE_NAME = "parser.lisa";
+    private final static String DEFAULT_PACKAGE_NAME = "parser.lisa";
     private final static SemLangToLisaJavaTranslator instance = new SemLangToLisaJavaTranslator();
     private Language language;
+    private String parserPackageName;
 
     private SemLangToLisaJavaTranslator() {
     }
@@ -28,14 +48,14 @@ public class SemLangToLisaJavaTranslator {
         }
 
         this.setLanguage(language);
-//        String parserPackageName = this.getLanguage().getName() != null ? this.getLanguage().getName() + "." + DEFAULT_PACKAGE_NAME : DEFAULT_PACKAGE_NAME;
+        parserPackageName = this.getLanguage().getName() != null ? this.getLanguage().getName() + "." + DEFAULT_PACKAGE_NAME : DEFAULT_PACKAGE_NAME;
         for (Action action : actions) {
             translateAction(action, writer);
         }
 
     }
 
-    private void translateAction(Action action, PrintStream writer) {
+    public void translateAction(Action action, PrintStream writer) {
         if (action == null) {
             return;
         }
@@ -76,9 +96,6 @@ public class SemLangToLisaJavaTranslator {
                 break;
             case REF_RESOLVER_REGISTER:
                 translateReferenceResolverRegisterAction((ReferenceResolverRegisterAction) action, writer);
-                break;
-            case CREATE_OPTIONAL_CLASS_INST:
-                translateCreateOptionalClassInstanceAction((CreateOptionalClassInstanceAction) action, writer);
                 break;
 
             default:
@@ -129,6 +146,10 @@ public class SemLangToLisaJavaTranslator {
     }
 
     private void translateConvertListToCollectionAction(ConvertListToCollectionAction action, PrintStream writer) {
+//		if (action.getResultCollectionType() instanceof ListType) {
+//			return;
+//		}
+
         if (action.getResultCollectionType() instanceof ArrayType) {
             translateRValue(action.getRValue(), writer);
             writer.print(".toArray(new ");
@@ -146,8 +167,6 @@ public class SemLangToLisaJavaTranslator {
             writer.print(">(");
             translateRValue(action.getRValue(), writer);
             writer.print(")");
-        } else if (action.getResultCollectionType() instanceof OptionalType) {
-            writer.print("java.util.Optional.empty()");
         } else {
             throw new IllegalArgumentException("Unknown component type detected: '" + action.getResultCollectionType().getClass().getCanonicalName() + "'!");
         }
@@ -167,8 +186,6 @@ public class SemLangToLisaJavaTranslator {
             writer.print("new java.util.HashSet<");
             writer.print(typeToString(action.getInnerType()));
             writer.print(">()");
-        } else if (action.getComponentType() instanceof OptionalType) {
-            writer.print("java.util.Optional.empty()");
         } else {
             throw new IllegalArgumentException("Unknown component type detected: '" + action.getComponentType().getClass().getCanonicalName() + "'!");
         }
@@ -200,16 +217,6 @@ public class SemLangToLisaJavaTranslator {
             }
         }
         writer.print(")");
-    }
-
-    private void translateCreateOptionalClassInstanceAction(CreateOptionalClassInstanceAction action, PrintStream writer) {
-        if (action.getParameter() == null) {
-            writer.print("java.util.Optional.empty()");
-        } else {
-            writer.print("java.util.Optional.of(");
-            translateRValue(action.getParameter(), writer);
-            writer.print(")");
-        }
     }
 
     private void translateCreateEnumInstanceAction(CreateEnumInstanceAction action, PrintStream writer) {
@@ -292,8 +299,6 @@ public class SemLangToLisaJavaTranslator {
             return "java.util.List<" + typeToString(componentType.getComponentType()) + ">";
         } else if (componentType instanceof SetType) {
             return "java.util.Set<" + typeToString(componentType.getComponentType()) + ">";
-        } else if(componentType instanceof OptionalType) {
-            return "java.util.Optional<" + typeToString(componentType.getComponentType()) + ">";
         } else {
             throw new IllegalArgumentException("Unknown component type detected: '" + componentType.getClass().getCanonicalName() + "'!");
         }
@@ -310,7 +315,7 @@ public class SemLangToLisaJavaTranslator {
     /**
      * @return the language
      */
-    private Language getLanguage() {
+    public Language getLanguage() {
         return language;
     }
 

@@ -16,7 +16,6 @@ import yajco.model.pattern.Pattern;
 import yajco.model.pattern.PatternSupport;
 import yajco.model.pattern.impl.Factory;
 import yajco.model.type.*;
-import yajco.model.type.ReferenceType;
 import yajco.model.utilities.XMLLanguageFormatHelper;
 import yajco.printer.Printer;
 
@@ -556,38 +555,10 @@ public class AnnotationProcessor extends AbstractProcessor {
             if (references != null) { // @References annotation.
                 //TODO: zatial nie je podpora pre polia referencii, treba to vsak doriesit
                 type = getSimpleType(typeMirror);
-                part = new LocalVariablePart(paramName, type, paramElement);
-                notation.addPart(part);
+                LocalVariablePart localVariablePart = new LocalVariablePart(paramName, type, paramElement);
+                notation.addPart(localVariablePart);
 
-                try {
-                    references.value();
-                } catch (MirroredTypeException e) {
-                    TypeElement referencedTypeElement = (TypeElement) processingEnv.getTypeUtils().asElement(e.getTypeMirror());
-
-                    Concept referencedConcept = processTypeElement(referencedTypeElement);
-                    Property property = null;
-                    if (!references.field().isEmpty()) {
-                        property = concept.getProperty(references.field());
-                    }
-                    if (property == null) {
-                        property = findReferencedProperty(paramElement, referencedConcept, references.field());
-                        if (property == null) {
-                            String propertyName;
-                            if (references.field().isEmpty()) {
-                                propertyName = paramName;
-                            } else {
-                                propertyName = references.field();
-                            }
-                            property = new Property(propertyName, new yajco.model.type.ReferenceType(referencedConcept, referencedTypeElement), e);
-                        }
-                        concept.addProperty(property);
-                    }
-                    // If names of notationPart and referenced property are identical, no need to fill property data to References pattern.
-                    if (property.getName().equals(paramName)) {
-                        property = null;
-                    }
-                    part.addPattern(new yajco.model.pattern.impl.References(referencedConcept, property, references));
-                }
+                part = processReferencedConcept(concept, paramElement, references, localVariablePart);
             } else { // Property reference.
                 Property property = concept.getProperty(paramName);
                 if (property == null) {
@@ -630,14 +601,32 @@ public class AnnotationProcessor extends AbstractProcessor {
             }
         }
 
+        String paramName = paramElement.getSimpleName().toString();
+        TypeMirror typeMirror = paramElement.asType();
         References references = paramElement.getAnnotation(References.class);
         Token tokenAnnotation = paramElement.getAnnotation(Token.class);
         BindingNotationPart part;
 
         if (references != null) { // @References annotation.
-            part = processReferencesAnnotation(concept, paramElement, optionalPart, references);
+            Type type;
+            List<? extends TypeMirror> types = ((DeclaredType) typeMirror).getTypeArguments();
+            if (processingEnv.getTypeUtils().asElement(typeMirror).toString().equals(Optional.class.getName())) {
+                type = getSimpleType(types.get(types.size() - 1));
+            } else {
+                type = getSimpleType(typeMirror);
+            }
+            LocalVariablePart localVariablePart = new LocalVariablePart(paramName, type, paramElement);
+            optionalPart.addPart(localVariablePart);
+            part = processReferencedConcept(concept, paramElement, references, localVariablePart);
         } else { // Property reference.
-            part = processPropertyReference(concept, paramElement, optionalPart);
+            Property property = concept.getProperty(paramName);
+            if (property == null) {
+                property = new Property(paramName, getType(typeMirror), null);
+                concept.addProperty(property);
+            }
+
+            part = new PropertyReferencePart(property, paramElement);
+            optionalPart.addPart(part);
         }
 
         if (tokenAnnotation != null) {
@@ -657,52 +646,16 @@ public class AnnotationProcessor extends AbstractProcessor {
     }
 
     /**
-     * Processes property reference.
+     * Processes referenced concept.
      *
      * @param concept Language concept.
      * @param paramElement Parameter of constructor or factory method.
-     * @param optionalPart Optional notation part.
-     * @return Binding notation part.
-     */
-    private BindingNotationPart processPropertyReference(Concept concept, VariableElement paramElement, OptionalPart optionalPart) {
-        String paramName = paramElement.getSimpleName().toString();
-        TypeMirror typeMirror = paramElement.asType();
-        BindingNotationPart part;
-        Property property = concept.getProperty(paramName);
-        if (property == null) {
-            property = new Property(paramName, getType(typeMirror), null);
-            concept.addProperty(property);
-        }
-
-        part = new PropertyReferencePart(property, paramElement);
-        optionalPart.addPart(part);
-        return part;
-    }
-
-    /**
-     * Processes reference annotation.
-     *
-     * @param concept Language concept.
-     * @param paramElement Parameter of constructor or factory method.
-     * @param optionalPart Optional notation part.
      * @param references References annotation.
+     * @param part  Local variable notation part.
      * @return Binding notation part.
      */
-    private BindingNotationPart processReferencesAnnotation(Concept concept, VariableElement paramElement, OptionalPart optionalPart, References references) {
+    private BindingNotationPart processReferencedConcept(Concept concept, VariableElement paramElement, References references, LocalVariablePart part) {
         String paramName = paramElement.getSimpleName().toString();
-        TypeMirror typeMirror = paramElement.asType();
-
-        BindingNotationPart part;//TODO: zatial nie je podpora pre polia referencii, treba to vsak doriesit
-        Type type;
-        List<? extends TypeMirror> types = ((DeclaredType) typeMirror).getTypeArguments();
-        if (processingEnv.getTypeUtils().asElement(typeMirror).toString().equals(Optional.class.getName())) {
-            type = getSimpleType(types.get(types.size() - 1));
-        } else {
-            type = getSimpleType(typeMirror);
-        }
-        part = new LocalVariablePart(paramName, type, paramElement);
-        optionalPart.addPart(part);
-
         try {
             references.value();
         } catch (MirroredTypeException e) {
@@ -721,7 +674,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                     } else {
                         propertyName = references.field();
                     }
-                    property = new Property(propertyName, new ReferenceType(referencedConcept, referencedTypeElement), e);
+                    property = new Property(propertyName, new yajco.model.type.ReferenceType(referencedConcept, referencedTypeElement), e);
                 }
                 concept.addProperty(property);
             }
