@@ -106,7 +106,7 @@ public class $lexerClassName implements TokenSource {
             return token;
         }
 
-        throw new RuntimeException("Lexer failure");
+        throw new RuntimeException("Lexer failed to find token at " + line + ":" + column);
     }
 
     private void skipWhiteSpaces() {
