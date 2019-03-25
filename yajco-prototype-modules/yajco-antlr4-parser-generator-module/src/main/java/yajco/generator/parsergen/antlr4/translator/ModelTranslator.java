@@ -38,19 +38,6 @@ public class ModelTranslator {
         SequencePart sequence;
     }
 
-    private static class LabelProvider {
-        private Map<String, Integer> counters = new HashMap<>();
-
-        public String createLabel(String ruleName) {
-            if (counters.containsKey(ruleName)) {
-                counters.put(ruleName, counters.get(ruleName) + 1);
-            } else {
-                counters.put(ruleName, 1);
-            }
-            return ruleName + "_" + counters.get(ruleName);
-        }
-    }
-
     private final Map<String, Production> productions = new LinkedHashMap<>();
 
     private final Map<String, String> tokens = new LinkedHashMap<>();

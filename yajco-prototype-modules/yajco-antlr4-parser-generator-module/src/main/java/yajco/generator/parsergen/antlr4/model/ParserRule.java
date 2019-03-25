@@ -3,7 +3,7 @@ package yajco.generator.parsergen.antlr4.model;
 public class ParserRule implements Element {
     private final String name;
     private final String returns;
-    private final Part body; // FIXME: This should be a model element, not a string.
+    private final Part body;
 
     public ParserRule(String name, String returns, Part body) {
         if (name.isEmpty() || Character.isUpperCase(name.charAt(0)))
