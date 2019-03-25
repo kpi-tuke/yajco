@@ -5,7 +5,7 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>sk.tuke.yajco</groupId>
-        <artifactId>yajco-prototype-modules</artifactId>
+        <artifactId>yajco-modules</artifactId>
         <version>0.5.10-SNAPSHOT</version>
     </parent>
     <groupId>sk.tuke.yajco</groupId>
