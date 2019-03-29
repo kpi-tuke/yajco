@@ -9,18 +9,17 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import yajco.lexer.LexerException;
+import yajco.lexer.Lexer;
+
 public class $tokenManagerClassName implements TokenManager, $constantClassName {
-    private String input;
+    private Token lastToken = null;
 
-    private int line = 1;
-
-    private int column = 1;
-
-    private Token lastToken;
-
-    private static final Map<Integer, Pattern> tokens = new LinkedHashMap<Integer, Pattern>();
+    private static final LinkedHashMap<Integer, Pattern> tokens = new LinkedHashMap<Integer, Pattern>();
 
     private static final List<Pattern> skips = new ArrayList<Pattern>();
+
+    private final Lexer lexer;
 
     static {
 #foreach( $entry in $tokens.entrySet() )
@@ -35,107 +34,32 @@ public class $tokenManagerClassName implements TokenManager, $constantClassName 
 #end
 #end
 
-#foreach( $skip in $skips )        
+#foreach( $skip in $skips )
         skips.add(Pattern.compile("$Utilities.encodeStringToJavaLiteral(${skip.getRegexp()})"));
 #end
     }
 
     public $tokenManagerClassName(String input) {
-        this.input = input;
+        this.lexer = new Lexer(input, tokens, skips);
     }
 
     public Token getNextToken() {
-        //Skip white spaces
-        skipWhiteSpaces();
-
-        //Return EOF at the end of input
-        if (input.length() == 0) {
-            return Token.newToken(EOF);
-        }
-
-        //Search for the longest matching pattern - test every pattern
-        return findToken();
-    }
-
-    private void skipWhiteSpaces() {
-        boolean matched;
-        do {
-            matched = false;
-            Matcher matcher = null;
-            for (Pattern skip : skips) {
-                if (matcher == null) {
-                    matcher = skip.matcher(input);
-                } else {
-                    matcher.usePattern(skip);
-                }
-                if (matcher.lookingAt()) {
-                    //Consume the white space from the input
-                    consumeInput(matcher.group().length());
-                    matched = true;
-                    matcher = null;
-                    break;
-                }
-            }
-        } while (matched);
-    }
-
-    private Token findToken() {
-        Matcher matcher = null;
-        int longest = 0;
-        Token token = null;
-        for (Map.Entry<Integer, Pattern> entry : tokens.entrySet()) {
-            if (matcher == null) {
-                matcher = entry.getValue().matcher(input);
+        try {
+            yajco.lexer.Token token = this.lexer.nextToken();
+            if (token.isEOF()) {
+                return Token.newToken(EOF);
             } else {
-                matcher.usePattern(entry.getValue());
+                Token adaptedToken = Token.newToken(token.getType(), token.getText());
+                adaptedToken.beginLine = token.getRange().getStart().getLine();
+                adaptedToken.beginColumn = token.getRange().getStart().getLine();
+                adaptedToken.endLine = token.getRange().getEnd().getLine();
+                adaptedToken.endColumn = token.getRange().getEnd().getLine();
+                lastToken = adaptedToken;
+                return adaptedToken;
             }
-            if (matcher.lookingAt()) {
-                String group = matcher.group();
-                if (longest < group.length()) {
-                    longest = group.length();
-                    int kind = entry.getKey();
-
-                    // try to get first not null group
-                    for (int i = 1; i <= matcher.groupCount(); i++) {
-                        if (matcher.group(i) != null) {
-                            group = matcher.group(i);
-                            break;
-                        }
-                    }
-
-                    //Create token                    
-                    token = Token.newToken(kind, group);
-                }
-            }
+        } catch (LexerException e) {
+            throw new TokenMgrError(false, 0, this.lexer.getLine(), this.lexer.getColumn(), lastToken == null ?
+                "" : lastToken.image, this.lexer.getCurrentCharacter(), TokenMgrError.LEXICAL_ERROR);
         }
-
-        //System.out.printf("Token %s\n", token.image);
-
-        //Return the longest matching token, consume it from input
-        if (token != null) {
-            //System.out.printf("Token recognized: %s (%d) with image:'%s'\n", tokenImage[token.kind], token.kind, token.image);
-            //Set the loaction info into the token and consume the token from the input
-            token.beginLine = line;
-            token.beginColumn = column;
-            consumeInput(longest);
-            token.endLine = line;
-            token.endColumn = column;
-            lastToken = token;
-            return token;
-        }
-
-        throw new TokenMgrError(false, 0, line, column, lastToken == null ? "" : lastToken.image, input.charAt(0), TokenMgrError.LEXICAL_ERROR);
-    }
-
-    private void consumeInput(int length) {
-        for (int i = 0; i < length; i++) {
-            char c = input.charAt(i);
-            column++;
-            if (c == '\n') {
-                column = 1;
-                line++;
-            }
-        }
-        input = input.substring(length);
     }
 }
