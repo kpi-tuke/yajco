@@ -39,9 +39,18 @@ public class ${className}<P> {
 #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
 #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
         visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
+#elseif( ${Utilities.getClassName($type.componentType)} == $primitiveTypeClassName )
+## Handle collection of primitives
+#set ( $tokenName = ${propertyToTokenNameMap.get($property)} )
+#set ( $typeString = $Utilities.getTypeName($type) )
+        for ($typeString $tokenName : ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}()) {
+            visitToken${Utilities.toUpperCaseIdent($tokenName)}($tokenName, p);
+        }
 #end
 #elseif( $className == $primitiveTypeClassName )
-## pri primitovnom type sa aktualne dalej nevnarame, cize sa nerobi nic
+## Handle primitive type
+#set ( $tokenName = ${propertyToTokenNameMap.get($property)} )
+        visitToken${Utilities.toUpperCaseIdent($tokenName)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
 #elseif( $className == $referenceTypeClassName )
         if (${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null && enterVisit(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}())) {
             visit${Utilities.getMethodPartName($nameMap, $type.concept)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
@@ -84,6 +93,18 @@ public class ${className}<P> {
 #end
 #end
 
+#end
+##
+## Generate visit methods for token types
+#foreach( $mapEntry in $tokenToUsedTypesMap.entrySet() )
+#set ( $tokenName = $mapEntry.key )
+#set ( $usedTypes = $mapEntry.value )
+#set ( $methodPartName = ${Utilities.toUpperCaseIdent($tokenName)} )
+#set ( $paramName = $tokenName.toLowerCase() )
+#foreach ( $type in $usedTypes )
+    protected void visitToken$methodPartName($type $paramName, P p) {
+    }
+#end
 #end
 
     protected boolean enterVisit(Object o) {
