@@ -6,7 +6,7 @@
     <artifactId>yajco</artifactId>
     <version>0.5.10-SNAPSHOT</version>
     <packaging>pom</packaging>
-    
+
     <parent>
         <groupId>org.sonatype.oss</groupId>
         <artifactId>oss-parent</artifactId>
@@ -52,13 +52,13 @@
         <module>yajco-parser</module>
         <module>yajco-prototype-modules</module>
     </modules>
-    
+
     <dependencyManagement>
         <dependencies>
             <dependency>
                 <groupId>junit</groupId>
                 <artifactId>junit</artifactId>
-                <version>4.10</version>
+                <version>4.12</version>
                 <scope>test</scope>
             </dependency>
             <dependency>
@@ -74,7 +74,7 @@
             <dependency>
                 <groupId>org.slf4j</groupId>
                 <artifactId>slf4j-api</artifactId>
-                <version>1.7.2</version>
+                <version>1.7.25</version>
             </dependency>
             <dependency>
                 <groupId>xstream</groupId>
@@ -102,7 +102,6 @@
                     <artifactId>graph-maven-plugin</artifactId>
                     <version>1.2.3</version>
                 </plugin>
-                
             </plugins>
         </pluginManagement>
         <!-- To use the plugin goals in your POM or parent POM -->
@@ -116,7 +115,7 @@
             </plugin>
         </plugins>
     </build>
-    
+
     <!--    <profiles>
         <profile>
             <id>release-sign-artifacts</id>
