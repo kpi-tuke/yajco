@@ -81,8 +81,8 @@ public class Grammar extends PatternSupport {
 		}
 	}
 
-	public NonterminalSymbol getSequenceNonterminalFor(String name, int min, int max, String sep) {
-		RangeEntry entry = new RangeEntry(name, min, max, sep);
+	public NonterminalSymbol getSequenceNonterminalFor(String name, int min, int max, String sep, boolean unique) {
+		RangeEntry entry = new RangeEntry(name, min, max, sep, unique);
 		if (sequencePool.containsKey(entry)) {
 			return sequencePool.get(entry);
 		}
@@ -116,8 +116,8 @@ public class Grammar extends PatternSupport {
 		return null;
 	}
 
-	public void addSequence(String name, int min, int max, String sep, NonterminalSymbol nonterminal) {
-		sequencePool.put(new RangeEntry(name, min, max, sep), nonterminal);
+	public void addSequence(String name, int min, int max, String sep, boolean unique, NonterminalSymbol nonterminal) {
+		sequencePool.put(new RangeEntry(name, min, max, sep, unique), nonterminal);
 	}
 
 	public Map<String, NonterminalSymbol> getNonterminals() {
@@ -176,12 +176,14 @@ public class Grammar extends PatternSupport {
 		private int minOccurs;
 		private int maxOccurs;
 		private String separator;
+		private boolean unique;
 
-		public RangeEntry(String name, int minOccurs, int maxOccurs, String separator) {
+		public RangeEntry(String name, int minOccurs, int maxOccurs, String separator, boolean unique) {
 			this.name = name;
 			this.minOccurs = minOccurs;
 			this.maxOccurs = maxOccurs;
 			this.separator = separator;
+			this.unique = unique;
 		}
 
 		public String getName() {
@@ -200,10 +202,14 @@ public class Grammar extends PatternSupport {
 			return separator;
 		}
 
+		public boolean isUnique() {
+			return unique;
+		}
+
 		@Override
 		public String toString() {
 			String sep = this.separator != null ? this.separator : "";
-			return name + "(from " + minOccurs + " to " + maxOccurs + " sep '" + sep + "')";
+			return name + "(from " + minOccurs + " to " + maxOccurs + " sep '" + sep + "'" + " unique " + unique + ")";
 		}
 
 		@Override

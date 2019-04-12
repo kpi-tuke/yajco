@@ -269,9 +269,15 @@ public class Printer {
 			printToken(writer, (Token) pattern);
 		} else if (pattern instanceof Factory) {
 			printFactory(writer, (Factory)pattern);
+		} else if (pattern instanceof UniqueValues) {
+			printUniqueValues(writer, (UniqueValues)pattern);
 		} else {
 			throw new PrinterException("Not supported pattern " + pattern.getClass());
 		}
+	}
+
+	private void printUniqueValues(PrintWriter writer, UniqueValues pattern) {
+		writer.print("Unique values");
 	}
 
 	private void printIdentifier(PrintWriter writer, Identifier pattern) {
