@@ -76,6 +76,8 @@ public class BeaverParserGenerator {
 //			writer.println("%import \"" + Utilities.getFullConceptClassName(language, concept) + "\";");
 //		}
         writer.println("%import \"" + parserPackageName + ".SymbolListImpl\";");
+        writer.println("%import \"" + parserPackageName + ".SymbolHashMapImpl\";");
+        writer.println("%import \"" + parserPackageName + ".SymbolUnorderedParam\";");
         //DOMINIK TEST
         writer.println("%import \"" + parserPackageName + ".SymbolWrapper\";");
         // END
@@ -239,6 +241,8 @@ public class BeaverParserGenerator {
         } else if (type instanceof ReferenceType) {
             ReferenceType refType = (ReferenceType) type;
             return Utilities.getFullConceptClassName(language, refType.getConcept());
+        } else if (type instanceof ObjectType) {
+            return "Object";
         } else if (type instanceof ComponentType) {
             ComponentType innerType = (ComponentType) type;
             //DOMINIK TEST
@@ -253,6 +257,10 @@ public class BeaverParserGenerator {
                 //return "java.util.List<" + innerTypeString + ">";
             } else if (type instanceof SetType) {
                 return "java.util.Set<" + innerTypeString + ">";
+            } else if (type instanceof HashMapType) {
+                return parserPackageName + ".SymbolHashMapImpl" + "<String, " + innerTypeString + ">";
+            } else if (type instanceof UnorderedParamType) {
+                return parserPackageName + ".SymbolUnorderedParam";
             } else if (type instanceof OptionalType) {
                 return "java.util.Optional<" + innerTypeString + ">";
             } else {

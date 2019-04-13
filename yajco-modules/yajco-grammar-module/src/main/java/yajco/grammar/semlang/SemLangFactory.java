@@ -27,6 +27,10 @@ public final class SemLangFactory {
 		return createOptionalClassInstanceAndReturnActions(symbolsToRValues(symbols));
 	}
 
+	public static List<Action> createNewUnorderedParamClassInstanceAndReturnActions(List<Symbol> symbols) {
+		return createUnorderedParamClassInstanceAndReturnActions(symbolsToRValues(symbols));
+	}
+
 	public static List<Action> createFactoryClassInstanceActions(String classType, String factoryMethodName, List<Symbol> symbols) {
 		return createClassInstanceActions(classType, factoryMethodName, symbolsToRValues(symbols));
 	}
@@ -101,6 +105,10 @@ public final class SemLangFactory {
 		return createCollectionAndAddElementsAndReturnActions(varName, new ListType(varType), simpleSymbolsToRValues(symbol));
 	}
 
+	public static List<Action> createHashMapAndPutElementsAndReturnActions(Type varType, String varName, List<Symbol> symbol) {
+		return createCollectionAndAddElementsAndReturnActions(varName, new HashMapType(varType), simpleSymbolsToRValues(symbol));
+	}
+
 	private static List<Action> createReturnValueActions(RValue value) {
 		List<Action> actions = new ArrayList<Action>(1);
 		actions.add(new ReturnAction(value));
@@ -124,6 +132,12 @@ public final class SemLangFactory {
 		return actions;
 	}
 
+	private static List<Action> createUnorderedParamClassInstanceActions(List<RValue> parameters) {
+		List<Action> actions = new ArrayList<Action>(1);
+		actions.add(new CreateUnorderedParamClassInstanceAction(parameters));
+		return actions;
+	}
+
 	private static List<Action> createClassInstanceAndReturnActions(String classType, String factoryMethodName, List<RValue> parameters) {
 		List<Action> actions = new ArrayList<Action>(1);
 		actions.add(new ReturnAction(new RValue(createClassInstanceActions(classType, factoryMethodName, parameters).get(0))));
@@ -137,6 +151,12 @@ public final class SemLangFactory {
 		} else {
 			actions.add(new ReturnAction(new RValue(createOptionalClassInstanceActions(null).get(0))));
 		}
+		return actions;
+	}
+
+	private static List<Action> createUnorderedParamClassInstanceAndReturnActions(List<RValue> parameters) {
+		List<Action> actions = new ArrayList<Action>(1);
+		actions.add(new ReturnAction(new RValue(createUnorderedParamClassInstanceActions(parameters).get(0))));
 		return actions;
 	}
 
@@ -165,6 +185,15 @@ public final class SemLangFactory {
 		return actions;
 	}
 
+	private static List<Action> createPutElementsToCollectionActions(ComponentType collectionType, LValue lValue, List<RValue> rValues) {
+		List<Action> actions = new ArrayList<Action>(rValues.size());
+		for (RValue rValue : rValues) {
+			actions.add(new AddElementToCollectionAction(collectionType, lValue, rValue));
+		}
+
+		return actions;
+	}
+
 	private static List<Action> createAddElementsToCollectionAndReturnActions(LValue lValue, List<RValue> rValues) {
 		List<Action> actions = new ArrayList<Action>(1 + rValues.size());
 		actions.addAll(createAddElementsToCollectionActions(lValue, rValues));
@@ -188,7 +217,11 @@ public final class SemLangFactory {
 		List<Action> actions = new ArrayList<Action>(2 + rValues.size());
 		actions.add(new DefineVariableAction(collectionType, varName));
 		actions.add(new AssignAction(new LValue(varName), new RValue(new CreateCollectionInstanceAction(collectionType))));
-		actions.addAll(createAddElementsToCollectionActions(new LValue(varName), rValues));
+		if (collectionType instanceof HashMapType) {
+			actions.addAll(createPutElementsToCollectionActions(collectionType, new LValue(varName), rValues));
+		} else {
+			actions.addAll(createAddElementsToCollectionActions(new LValue(varName), rValues));
+		}
 
 		return actions;
 	}
@@ -217,6 +250,8 @@ public final class SemLangFactory {
 				Type type = nonterminal.getReturnType();
 				if (type instanceof OptionalType) {
 					rValues.add(new RValue(symbol));
+				} else if (type instanceof UnorderedParamType) {
+					rValues.add(new RValue(new ConvertUnorderedParamsToObjectAction(((ComponentType) type), new RValue(symbol))));
 				} else if (type instanceof ComponentType /*&& !(type instanceof ListType)*/) {
 					rValues.add(new RValue(new ConvertListToCollectionAction(((ComponentType) type), new RValue(symbol))));
 				} else {

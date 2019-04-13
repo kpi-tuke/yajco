@@ -22,18 +22,29 @@ public class YajcoModelToBNFGrammarTranslator {
     public static final String DEFAULT_SYMBOL_NAME = "SYMBOL";
     private static final String DEFAULT_VAR_NAME = "val";
     private static final String DEFAULT_LIST_NAME = "list";
+    private static final String DEFAULT_MAP_NAME = "map";
+    private static final String DEFAULT_PARAM_VAR_NAME = "param";
     private static final String DEFAULT_ELEMENT_NAME = "elem";
+    private static final String DEFAULT_OPTIONAL_SYMBOL_NAME = "Optional";
+    private static final String DEFAULT_ARRAY_SYMBOL_NAME = "Array";
+    private static final String DEFAULT_PARAMS_SYMBOL_NAME = "Params";
+    private static final String DEFAULT_PARAM_SYMBOL_NAME = "Param";
+    private static final String DEFAULT_PARAMS_SYMBOL_VAR_NAME = "params";
     private static final YajcoModelToBNFGrammarTranslator instance = new YajcoModelToBNFGrammarTranslator();
     private Language language;
     private Grammar grammar;
     private int arrayID;
     private int optionalID;
+    private int unorderedParamID;
+    private List<NonterminalSymbol> unorderedParamNonterminals;
 
     private YajcoModelToBNFGrammarTranslator() {
         language = null;
         grammar = null;
         arrayID = 1;
         optionalID = 1;
+        unorderedParamID = 1;
+        unorderedParamNonterminals = new ArrayList<NonterminalSymbol>();
     }
 
     public Grammar translate(Language language) {
@@ -44,6 +55,8 @@ public class YajcoModelToBNFGrammarTranslator {
         this.language = language;
         arrayID = 1;
         optionalID = 1;
+        unorderedParamID = 1;
+        unorderedParamNonterminals = new ArrayList<NonterminalSymbol>();
 
         Concept mainConcept = language.getConcepts().get(0);
         NonterminalSymbol startSymbol = new NonterminalSymbol(mainConcept.getConceptName(), new ReferenceType(Utilities.getTopLevelParent(mainConcept), null), toPatternList(mainConcept.getPatterns()));
@@ -181,10 +194,30 @@ public class YajcoModelToBNFGrammarTranslator {
             } else if (part instanceof OptionalPart) {
                 symbol = translateOptionalPart(concept, (OptionalPart) part);
                 parameters.add(symbol);
+            } else if (part instanceof UnorderedParamPart) {
+                symbol = translateUnorderedParamPart(concept, (UnorderedParamPart) part);
+                parameters.add(symbol);
+                this.unorderedParamNonterminals.add(new NonterminalSymbol(symbol.getName(), symbol.getReturnType(), DEFAULT_PARAM_VAR_NAME + unorderedParamID++));
+                symbol = null;
             } else {
                 throw new IllegalArgumentException("Unknown notation part: '" + part.getClass().getCanonicalName() + "'!");
             }
-            alternative.addSymbol(symbol);
+
+            if (this.unorderedParamNonterminals.size() > 0 && !(part instanceof UnorderedParamPart)) {
+                Symbol nonterminal = this.createNonterminalForUnorderedParams(concept);
+                alternative.addSymbol(nonterminal);
+                this.unorderedParamNonterminals = new ArrayList<NonterminalSymbol>();
+            }
+
+            if (symbol != null) {
+                alternative.addSymbol(symbol);
+            }
+        }
+
+        if (this.unorderedParamNonterminals.size() > 0) {
+            Symbol nonterminal = this.createNonterminalForUnorderedParams(concept);
+            alternative.addSymbol(nonterminal);
+            this.unorderedParamNonterminals = new ArrayList<NonterminalSymbol>();
         }
 
 //        Operator opPattern = (Operator) concept.getPattern(Operator.class);
@@ -204,6 +237,78 @@ public class YajcoModelToBNFGrammarTranslator {
         }
 
         return alternative;
+    }
+
+    /**
+     * Creates nonterminal symbol representing array of unordered parameters.
+     */
+    private NonterminalSymbol createNonterminalForUnorderedParams(Concept concept) {
+        NonterminalSymbol lhs = new NonterminalSymbol(concept.getConceptName() + DEFAULT_PARAMS_SYMBOL_NAME, new HashMapType(new ObjectType()));
+        grammar.addNonterminal(lhs);
+
+        Production production = new Production(lhs);
+        List<Symbol> symbols = new ArrayList<Symbol>(this.unorderedParamNonterminals);
+
+        Alternative alternative = new Alternative();
+        alternative.addSymbols(symbols);
+        alternative.addActions(SemLangFactory.createHashMapAndPutElementsAndReturnActions(new ObjectType(), DEFAULT_MAP_NAME, symbols));
+        production.addAlternative(alternative);
+
+        grammar.addProduction(production);
+        grammar.addSequence(lhs.getName(), this.unorderedParamNonterminals.size(), this.unorderedParamNonterminals.size(), null, lhs);
+
+        return new NonterminalSymbol(lhs.getName(), new ObjectType(), DEFAULT_PARAMS_SYMBOL_VAR_NAME);
+    }
+
+    private Symbol translateUnorderedParamPart(Concept concept, UnorderedParamPart unorderedParamPart) {
+        NonterminalSymbol conceptNonterminal;
+        Alternative alternative = new Alternative();
+        Type type = null;
+        String varName = null;
+
+        Symbol symbol = null;
+        for (NotationPart notationPart : unorderedParamPart.getParts()) {
+            if (notationPart instanceof TokenPart) {
+                symbol = translateTokenNotationPart((TokenPart) notationPart);
+            } else if (notationPart instanceof PropertyReferencePart) {
+                symbol = translatePropertyRefNotationPart((PropertyReferencePart) notationPart);
+                type = symbol.getReturnType();
+                varName = symbol.getVarName();
+            } else if (notationPart instanceof LocalVariablePart) {
+                symbol = translateLocalVarPart((LocalVariablePart) notationPart);
+                type = symbol.getReturnType();
+                varName = symbol.getVarName();
+            } else if (notationPart instanceof OptionalPart) {
+                symbol = translateOptionalPart(concept, (OptionalPart) notationPart);
+                type = symbol.getReturnType();
+                varName = symbol.getVarName();
+            } else {
+                throw new IllegalArgumentException("Unknown notation part: '" + notationPart.getClass().getCanonicalName() + "'!");
+            }
+            alternative.addSymbol(symbol);
+        }
+
+        if (symbol != null) {
+            alternative.addActions(SemLangFactory.createNewUnorderedParamClassInstanceAndReturnActions(Collections.singletonList(symbol)));
+        }
+
+        conceptNonterminal = new NonterminalSymbol(concept.getConceptName() + DEFAULT_PARAM_SYMBOL_NAME, new UnorderedParamType(type), varName);
+        Production production = new Production(conceptNonterminal, Collections.singletonList(alternative), toPatternList(concept.getPatterns()));
+        Production existingProduction = grammar.getProduction(conceptNonterminal);
+
+        if (existingProduction != null) {
+            // Replace existing production with new one, which contains alternatives from old plus new alternative.
+            // All alternatives of general param symbol.
+            List<Alternative> newAlternatives = new ArrayList<Alternative>(existingProduction.getRhs());
+            newAlternatives.add(alternative);
+            production = new Production(conceptNonterminal, newAlternatives, toPatternList(concept.getPatterns()));
+            grammar.getProductions().remove(conceptNonterminal);
+            grammar.addProduction(production);
+        } else {
+            grammar.addProduction(production);
+            grammar.addNonterminal(conceptNonterminal);
+        }
+        return conceptNonterminal;
     }
 
     private Symbol translateOptionalPart(Concept concept, OptionalPart optionalPart) {
@@ -228,6 +333,7 @@ public class YajcoModelToBNFGrammarTranslator {
 
             Type innerType = cmpType.getComponentType();
             String name;
+            String varName = null;
             if (innerType instanceof ReferenceType) {
                 ReferenceType refType = (ReferenceType) innerType;
                 name = refType.getConcept().getConceptName();
@@ -248,9 +354,11 @@ public class YajcoModelToBNFGrammarTranslator {
                     symbol = translateTokenNotationPart((TokenPart) part);
                 } else if (part instanceof PropertyReferencePart) {
                     symbol = translatePropertyRefNotationPart((PropertyReferencePart) part);
+                    varName = symbol.getVarName();
                     alternative1.addActions(SemLangFactory.createNewOptionalClassInstanceAndReturnActions(Collections.singletonList(symbol)));
                 } else if (part instanceof LocalVariablePart) {
                     symbol = translateLocalVarPart((LocalVariablePart) part);
+                    varName = symbol.getVarName();
                 } else {
                     throw new IllegalArgumentException("Unknown notation part: '" + optionalPart.getClass().getCanonicalName() + "'!");
                 }
@@ -266,8 +374,8 @@ public class YajcoModelToBNFGrammarTranslator {
             alternative2.addActions(SemLangFactory.createNewOptionalClassInstanceAndReturnActions(symbols));
             alternatives.add(alternative2);
 
-            NonterminalSymbol conceptNonterminal = new NonterminalSymbol("Optional" + name + "_" +optionalID++,
-                    new OptionalType(cmpType.getComponentType()), DEFAULT_ELEMENT_NAME+optionalID);
+            NonterminalSymbol conceptNonterminal = new NonterminalSymbol(DEFAULT_OPTIONAL_SYMBOL_NAME + name + "_" +optionalID++,
+                    new OptionalType(cmpType.getComponentType()), varName);
 
             Production production = new Production(conceptNonterminal, alternatives, toPatternList(concept.getPatterns()));
             Production existingProduction = grammar.getExistingProductionForOptionalNonterminal(conceptNonterminal.getName(), production);
@@ -311,8 +419,8 @@ public class YajcoModelToBNFGrammarTranslator {
         alternative2.addActions(SemLangFactory.createNewOptionalClassInstanceAndReturnActions(symbols));
         alternatives.add(alternative2);
 
-        NonterminalSymbol conceptNonterminal = new NonterminalSymbol("Optional" + notationPart.getName() + "_" +optionalID++,
-                new OptionalType(notationPart.getType()), DEFAULT_ELEMENT_NAME+optionalID);
+        NonterminalSymbol conceptNonterminal = new NonterminalSymbol(DEFAULT_OPTIONAL_SYMBOL_NAME + notationPart.getName() + "_" +optionalID++,
+                new OptionalType(notationPart.getType()), terminal != null ? terminal.getVarName() : DEFAULT_ELEMENT_NAME+optionalID);
 
         Production production = new Production(conceptNonterminal, alternatives, toPatternList(concept.getPatterns()));
         Production existingProduction = grammar.getExistingProductionForOptionalNonterminal(conceptNonterminal.getName(), production);
@@ -475,7 +583,7 @@ public class YajcoModelToBNFGrammarTranslator {
     }
 
     private NonterminalSymbol createSequenceProductionFor(Symbol symbol, int minOccurs, int maxOccurs, String separator, ComponentType cmpType) {
-        NonterminalSymbol lhs = new NonterminalSymbol(symbol.getName() + "Array" + arrayID++, new ListType(cmpType.getComponentType()));
+        NonterminalSymbol lhs = new NonterminalSymbol(symbol.getName() + DEFAULT_ARRAY_SYMBOL_NAME + arrayID++, new ListType(cmpType.getComponentType()));
         grammar.addNonterminal(lhs);
 
         TerminalSymbol sepTerminal = getTerminalFor(separator);
