@@ -21,9 +21,9 @@ import java.security.Permission;
 import java.util.*;
 
 public class Antlr4CompilerGenerator implements CompilerGenerator {
-    static final private String ANTLR4_PARSER_CLASS_TEMPLATE = "/yajco/generator/parsergen/antlr4/templates/Parser.javavm";
-    static final private String ANTLR4_LEXER_CLASS_TEMPLATE = "/yajco/generator/parsergen/antlr4/templates/Lexer.javavm";
-    static final private String ANTLR4_PARSE_EXCEPTION_CLASS_TEMPLATE = "/yajco/generator/parsergen/antlr4/templates/ParseException.javavm";
+    static final private String ANTLR4_PARSER_CLASS_TEMPLATE = "/yajco/generator/parsergen/antlr4/templates/Parser.java.vm";
+    static final private String ANTLR4_LEXER_CLASS_TEMPLATE = "/yajco/generator/parsergen/antlr4/templates/Lexer.java.vm";
+    static final private String ANTLR4_PARSE_EXCEPTION_CLASS_TEMPLATE = "/yajco/generator/parsergen/antlr4/templates/ParseException.java.vm";
     private VelocityEngine velocityEngine;
 
     // TODO: Remove this hack later.
