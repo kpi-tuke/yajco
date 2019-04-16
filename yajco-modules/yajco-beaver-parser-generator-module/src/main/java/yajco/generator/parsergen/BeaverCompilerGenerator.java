@@ -34,6 +34,7 @@ public class BeaverCompilerGenerator implements CompilerGenerator {
     private static final String BEAVER_PARSER_METALEXER_CLASS_TEMPLATE = "/yajco/generator/parsergen/beaver/templates/LALRParserClassMetaLexerTemplate.vm";
     private static final String BEAVER_PARSE_EXCEPTION_CLASS_TEMPLATE = "/yajco/generator/parsergen/beaver/templates/LALRParseExceptionClassTemplate.vm";
     private static final String SYMBOL_LIST_IMPL_CLASS_TEMPLATE = "/yajco/generator/parsergen/beaver/templates/SymbolListImplClassTemplate.vm";
+    private static final String SYMBOL_LIST_IMPL_WITH_SHARED_CLASS_TEMPLATE = "/yajco/generator/parsergen/beaver/templates/SymbolListImplWithSharedClassTemplate.vm";
     private static final String SYMBOL_WRAPPER_CLASS_TEMPLATE = "/yajco/generator/parsergen/beaver/templates/SymbolWrapperClassTemplate.vm";
     private static final BeaverParserGenerator beaverParGen = BeaverParserGenerator.getInstance();
     private static final YajcoModelToBNFGrammarTranslator modelToBNFGrammarTranslator = YajcoModelToBNFGrammarTranslator.getInstance();
@@ -131,6 +132,14 @@ public class BeaverCompilerGenerator implements CompilerGenerator {
         writer.flush();
         writer.close();
 
+        // trieda SymbolListImplWithShared
+        //file = Utilities.createFile(filer, parserPackageName, "SymbolListImplWithShared.java");
+        fileObject = filer.createSourceFile(parserPackageName + "." + "SymbolListImplWithShared");
+        writer = fileObject.openWriter(); //new FileWriter(file);
+        writer.write(generateSymbolListImplWithSharedClass(parserPackageName));
+        writer.flush();
+        writer.close();
+
         // trieda SymbolWrapper
         //file = Utilities.createFile(filer, parserPackageName, "SymbolWrapper.java");
         fileObject = filer.createSourceFile(parserPackageName + "." + "SymbolWrapper");
@@ -221,6 +230,15 @@ public class BeaverCompilerGenerator implements CompilerGenerator {
         context.put("parserPackageName", parserPackageName);
         StringWriter writer = new StringWriter();
         engine.evaluate(context, writer, "", new InputStreamReader(getClass().getResourceAsStream(SYMBOL_LIST_IMPL_CLASS_TEMPLATE)));
+
+        return writer.toString();
+    }
+
+    private String generateSymbolListImplWithSharedClass(String parserPackageName) throws IOException {
+        VelocityContext context = new VelocityContext();
+        context.put("parserPackageName", parserPackageName);
+        StringWriter writer = new StringWriter();
+        engine.evaluate(context, writer, "", new InputStreamReader(getClass().getResourceAsStream(SYMBOL_LIST_IMPL_WITH_SHARED_CLASS_TEMPLATE)));
 
         return writer.toString();
     }

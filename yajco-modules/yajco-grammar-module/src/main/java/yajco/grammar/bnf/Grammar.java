@@ -81,8 +81,8 @@ public class Grammar extends PatternSupport {
 		}
 	}
 
-	public NonterminalSymbol getSequenceNonterminalFor(String name, int min, int max, String sep) {
-		RangeEntry entry = new RangeEntry(name, min, max, sep);
+	public NonterminalSymbol getSequenceNonterminalFor(String name, int min, int max, String sep, String sharedPartName) {
+		RangeEntry entry = new RangeEntry(name, min, max, sep, sharedPartName);
 		if (sequencePool.containsKey(entry)) {
 			return sequencePool.get(entry);
 		}
@@ -116,8 +116,8 @@ public class Grammar extends PatternSupport {
 		return null;
 	}
 
-	public void addSequence(String name, int min, int max, String sep, NonterminalSymbol nonterminal) {
-		sequencePool.put(new RangeEntry(name, min, max, sep), nonterminal);
+	public void addSequence(String name, int min, int max, String sep, String sharedPartName, NonterminalSymbol nonterminal) {
+		sequencePool.put(new RangeEntry(name, min, max, sep, sharedPartName), nonterminal);
 	}
 
 	public Map<String, NonterminalSymbol> getNonterminals() {
@@ -176,12 +176,14 @@ public class Grammar extends PatternSupport {
 		private int minOccurs;
 		private int maxOccurs;
 		private String separator;
+		private String sharedPart;
 
-		public RangeEntry(String name, int minOccurs, int maxOccurs, String separator) {
+		public RangeEntry(String name, int minOccurs, int maxOccurs, String separator, String sharedPart) {
 			this.name = name;
 			this.minOccurs = minOccurs;
 			this.maxOccurs = maxOccurs;
 			this.separator = separator;
+			this.sharedPart = sharedPart;
 		}
 
 		public String getName() {
@@ -200,10 +202,15 @@ public class Grammar extends PatternSupport {
 			return separator;
 		}
 
+		public String getSharedPart() {
+			return sharedPart;
+		}
+
 		@Override
 		public String toString() {
 			String sep = this.separator != null ? this.separator : "";
-			return name + "(from " + minOccurs + " to " + maxOccurs + " sep '" + sep + "')";
+			String shared = this.sharedPart !=null ? this.sharedPart : "";
+			return name + "(from " + minOccurs + " to " + maxOccurs + " sep '" + sep + "'" + "shared part '" + shared + "')";
 		}
 
 		@Override

@@ -78,6 +78,9 @@ public class SemLangToJavaTranslator {
 			case CREATE_OPTIONAL_CLASS_INST:
 				translateCreateOptionalClassInstanceAction((CreateOptionalClassInstanceAction) action, writer);
 				break;
+			case CONVERT_LIST_WITH_SHARED_TO_COLLECTION:
+				translateConvertListWithSharedToCollectionAction((ConvertListWithSharedToCollectionAction) action, writer);
+				break;
 			default:
 				throw new IllegalArgumentException("Unknown SemLang action detected: '" + action.getClass().getCanonicalName() + "'!");
 		}
@@ -154,6 +157,37 @@ public class SemLangToJavaTranslator {
 		}
 	}
 
+	private void translateConvertListWithSharedToCollectionAction(ConvertListWithSharedToCollectionAction action, PrintStream writer) {
+		if (action.getResultCollectionType() instanceof ArrayType) {
+			translateSharedSymbol(action, writer);
+			writer.print(".toArray(new ");
+			writer.print(typeToString(action.getResultCollectionInnerType()));
+			writer.print("[]{})");
+		} else if (action.getResultCollectionType() instanceof ListType || action.getResultCollectionType() instanceof ListTypeWithShared) {
+			writer.print("new java.util.ArrayList<");
+			writer.print(typeToString(action.getResultCollectionInnerType()));
+			writer.print(">(");
+			translateSharedSymbol(action, writer);
+			writer.print(")");
+		} else if (action.getResultCollectionType() instanceof SetType) {
+			writer.print("new java.util.HashSet<");
+			writer.print(typeToString(action.getResultCollectionInnerType()));
+			writer.print(">(");
+			translateSharedSymbol(action, writer);
+			writer.print(")");
+		} else if (action.getResultCollectionType() instanceof OptionalType) {
+			writer.print("java.util.Optional.empty()");
+		} else {
+			throw new IllegalArgumentException("Unknown component type detected: '" + action.getResultCollectionType().getClass().getCanonicalName() + "'!");
+		}
+	}
+
+	private void translateSharedSymbol(ConvertListWithSharedToCollectionAction action, PrintStream writer) {
+		translateLValue(action.getRValue(), writer);
+		writer.print(".getWrappedObject()");
+		writer.print(".getUpdatedList(\""  + action.getSharedPartName() +  "\")");
+	}
+
 	private void translateCreateCollectionInstanceAction(CreateCollectionInstanceAction action, PrintStream writer) {
 		if (action.getComponentType() instanceof ArrayType) {
 			writer.print("new ");
@@ -162,6 +196,10 @@ public class SemLangToJavaTranslator {
 		} else if (action.getComponentType() instanceof ListType) {
 			//writer.print("new java.util.ArrayList<");
 			writer.print("new SymbolListImpl<");
+			writer.print(typeToString(action.getInnerType()));
+			writer.print(">()");
+		} else if (action.getComponentType() instanceof ListTypeWithShared) {
+			writer.print("new SymbolListImplWithShared<");
 			writer.print(typeToString(action.getInnerType()));
 			writer.print(">()");
 		} else if (action.getComponentType() instanceof SetType) {
@@ -182,10 +220,19 @@ public class SemLangToJavaTranslator {
 		if (action.getLValue().getSymbol() != null) {
 			writer.print(".getWrappedObject()");
 		}
-		writer.print(".add(");
-		//writer.print(".add(");
-		translateRValue(action.getRValue(), writer);
-		writer.print("); ");
+
+
+		if ((action.getLValue().getSymbol() != null && action.getLValue().getSymbol().getReturnType() instanceof ListTypeWithShared)
+				|| (action.getRValue().getSymbol() != null && action.getRValue().getSymbol().getReturnType() instanceof ListType)) {
+			writer.print(".addAll(");
+			translateRValue(action.getRValue(), writer);
+			writer.print("); ");
+		} else {
+			writer.print(".add(");
+			//writer.print(".add(");
+			translateRValue(action.getRValue(), writer);
+			writer.print("); ");
+		}
 	}
 
 	private void translateCreateClassInstanceAction(CreateClassInstanceAction action, PrintStream writer) {
@@ -299,7 +346,7 @@ public class SemLangToJavaTranslator {
 	private String componentTypeToString(ComponentType componentType) {
 		if (componentType instanceof ArrayType) {
 			return typeToString(componentType.getComponentType()) + "[]";
-		} else if (componentType instanceof ListType) {
+		} else if (componentType instanceof ListType || componentType instanceof ListTypeWithShared) {
 			return "java.util.List<" + typeToString(componentType.getComponentType()) + ">";
 		} else if (componentType instanceof SetType) {
 			return "java.util.Set<" + typeToString(componentType.getComponentType()) + ">";
