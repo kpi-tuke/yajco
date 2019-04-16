@@ -1,14 +1,5 @@
 package yajco.generator.parsergen.beaver;
 
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import yajco.model.pattern.impl.Associativity;
 import yajco.generator.parsergen.beaver.semlang.translator.SemLangToJavaTranslator;
 import yajco.grammar.NonterminalSymbol;
 import yajco.grammar.Symbol;
@@ -18,15 +9,13 @@ import yajco.grammar.bnf.Grammar;
 import yajco.grammar.bnf.Production;
 import yajco.grammar.translator.YajcoModelToBNFGrammarTranslator;
 import yajco.model.Language;
+import yajco.model.pattern.impl.Associativity;
 import yajco.model.pattern.impl.Operator;
-import yajco.model.type.ArrayType;
-import yajco.model.type.ComponentType;
-import yajco.model.type.ListType;
-import yajco.model.type.PrimitiveType;
-import yajco.model.type.ReferenceType;
-import yajco.model.type.SetType;
-import yajco.model.type.Type;
+import yajco.model.type.*;
 import yajco.model.utilities.Utilities;
+
+import java.io.PrintStream;
+import java.util.*;
 
 public class BeaverParserGenerator {
 
@@ -264,6 +253,8 @@ public class BeaverParserGenerator {
                 //return "java.util.List<" + innerTypeString + ">";
             } else if (type instanceof SetType) {
                 return "java.util.Set<" + innerTypeString + ">";
+            } else if (type instanceof OptionalType) {
+                return "java.util.Optional<" + innerTypeString + ">";
             } else {
                 throw new IllegalArgumentException("Unknown component type detected: '" + type.getClass().getCanonicalName() + "'!");
             }
