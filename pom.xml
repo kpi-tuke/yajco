@@ -51,6 +51,7 @@
         <module>yajco-modules</module>
         <module>yajco-parser</module>
         <module>yajco-prototype-modules</module>
+        <module>yajco-xtext</module>
     </modules>
 
     <dependencyManagement>

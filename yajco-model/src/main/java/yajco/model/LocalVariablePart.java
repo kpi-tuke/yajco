@@ -56,6 +56,13 @@ public class LocalVariablePart extends BindingNotationPart {
     public String toString() {
         return "LocalVariable name: "+name + " | type: "+type.toString();
     }
-    
-    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof LocalVariablePart) {
+            return this.type == ((LocalVariablePart) obj).type &&
+                    this.name.equals(((LocalVariablePart) obj).name);
+        }
+        return false;
+    }
 }

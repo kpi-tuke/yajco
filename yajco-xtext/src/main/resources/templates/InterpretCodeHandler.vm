@@ -1,0 +1,135 @@
+package ${package}.ui.handler;
+
+
+import java.io.PrintWriter;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import org.eclipse.core.commands.AbstractHandler;
+import org.eclipse.core.commands.ExecutionEvent;
+import org.eclipse.core.commands.ExecutionException;
+import org.eclipse.core.commands.IHandler;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.console.ConsolePlugin;
+import org.eclipse.ui.console.IConsole;
+import org.eclipse.ui.console.IConsoleConstants;
+import org.eclipse.ui.console.IConsoleManager;
+import org.eclipse.ui.console.IConsoleView;
+import org.eclipse.ui.console.MessageConsole;
+import org.eclipse.ui.console.MessageConsoleStream;
+import org.eclipse.ui.handlers.HandlerUtil;
+import org.eclipse.xtext.resource.XtextResource;
+import org.eclipse.xtext.ui.editor.XtextEditor;
+import org.eclipse.xtext.util.concurrent.IUnitOfWork;
+import java.io.PrintStream;
+import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.xtext.diagnostics.Severity;
+import org.eclipse.xtext.validation.Issue;
+import org.eclipse.xtext.ui.util.IssueUtil;
+
+import com.google.inject.Inject;
+
+
+public class InterpretCodeHandler extends AbstractHandler implements IHandler {
+
+private List<String> errors = new ArrayList<>();
+
+    @Inject
+    private IssueUtil issueUtil;
+
+    private boolean hasErrors(XtextEditor source) {
+        boolean error = false;
+        IAnnotationModel annotationModel = source.getInternalSourceViewer().getAnnotationModel();
+        if (annotationModel != null) {
+            Iterator  r = annotationModel.getAnnotationIterator();
+            while (r.hasNext()) {
+                Annotation annotation = (Annotation)r.next();
+                if (!annotation.isMarkedDeleted()) {
+                    Issue issue = issueUtil.getIssueFromAnnotation(annotation);
+                    if (issue != null) {
+                        if (issue.getSeverity() == Severity.ERROR) {
+                        error = true;
+                        errors.add(issue.getMessage());
+                        }
+                    }
+                }
+            }
+        }
+        return error;
+    }
+
+    @Override
+    public Object execute(ExecutionEvent event) throws ExecutionException {
+
+        IEditorPart activeEditor = HandlerUtil.getActiveEditor(event);
+        IFile file = (IFile) activeEditor.getEditorInput().getAdapter(IFile.class);
+        if (file != null) {
+            IProject project = file.getProject();
+            if (activeEditor instanceof XtextEditor) {
+                String text = ((XtextEditor)activeEditor).getDocument().get();
+                ((XtextEditor)activeEditor).getDocument().readOnly(new IUnitOfWork<Boolean, XtextResource>() {
+
+                    @Override
+                    public Boolean exec(XtextResource state)
+                        throws Exception {
+                    try {
+                        MessageConsole myConsole = findConsole("DSL console");
+                        myConsole.clearConsole();
+                        IConsole cnsl = myConsole;// your console instance
+                        IWorkbench wb = PlatformUI.getWorkbench();
+                        IWorkbenchWindow win = wb.getActiveWorkbenchWindow();
+                        IWorkbenchPage page = win.getActivePage();
+                        String id = IConsoleConstants.ID_CONSOLE_VIEW;
+                        IConsoleView view = (IConsoleView) page.showView(id);
+                        view.display(myConsole);
+
+                        MessageConsoleStream out = myConsole.newMessageStream();
+                        PrintStream stream = new PrintStream(out);
+                        System.setErr(stream);
+                        System.setOut(stream);
+                        if (!hasErrors((XtextEditor)activeEditor)) {
+                            new ${codeRunner}().run(stream,text);
+                        }else {
+                            for (String e: errors) {
+                                out.println(e);
+                            }
+                            errors.clear();
+                        }
+                    } catch (Exception e) {
+                            e.printStackTrace();
+                            throw e;
+                    }
+                    return Boolean.TRUE;
+                    }
+                });
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    private MessageConsole findConsole(String name) {
+        ConsolePlugin plugin = ConsolePlugin.getDefault();
+        IConsoleManager conMan = plugin.getConsoleManager();
+        IConsole[] existing = conMan.getConsoles();
+        for (int i = 0; i < existing.length; i++)
+            if (name.equals(existing[i].getName()))
+                return (MessageConsole) existing[i];
+        MessageConsole myConsole = new MessageConsole(name, null);
+        conMan.addConsoles(new IConsole[]{myConsole});
+        return myConsole;
+    }
+}
+
