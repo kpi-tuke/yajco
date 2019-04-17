@@ -74,7 +74,6 @@ private List<String> errors = new ArrayList<>();
         if (file != null) {
             IProject project = file.getProject();
             if (activeEditor instanceof XtextEditor) {
-                String text = ((XtextEditor)activeEditor).getDocument().get();
                 ((XtextEditor)activeEditor).getDocument().readOnly(new IUnitOfWork<Boolean, XtextResource>() {
 
                     @Override
@@ -96,7 +95,12 @@ private List<String> errors = new ArrayList<>();
                         System.setErr(stream);
                         System.setOut(stream);
                         if (!hasErrors((XtextEditor)activeEditor)) {
-                            new ${codeRunner}().run(stream,text);
+                            if (activeEditor.isSaveOnCloseNeeded()){
+                                String text = ((XtextEditor)activeEditor).getDocument().get();
+                                new ${codeRunner}().run(stream,text,false);
+                            } else {
+                                new ${codeRunner}().run(stream,file.getLocation().toOSString(),true);
+                            }
                         }else {
                             for (String e: errors) {
                                 out.println(e);
