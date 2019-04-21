@@ -1,4 +1,4 @@
-package yajco.xtext.grammar;
+package yajco.xtext;
 
 import com.google.common.base.Charsets;
 import org.apache.maven.model.Model;
@@ -23,6 +23,7 @@ import yajco.model.pattern.impl.Identifier;
 import yajco.xtext.commons.maven.MavenRunner;
 import yajco.xtext.commons.model.XtextGrammarModel;
 import yajco.xtext.commons.settings.XtextProjectSettings;
+import yajco.xtext.grammar.XtextGrammarPrinter;
 import yajco.xtext.semantics.SemanticsGenerator;
 
 import javax.annotation.processing.Filer;
@@ -33,7 +34,7 @@ import java.util.Properties;
 import java.util.stream.Collectors;
 
 
-public class XtextGrammarGenerator implements FilesGenerator {
+public class IdeGenerator implements FilesGenerator {
     private static final String PROPERTY_ENABLER = "ide";
     private static final String GENERATE_TOOLS_KEY = "yajco.generateTools";
 
@@ -50,12 +51,13 @@ public class XtextGrammarGenerator implements FilesGenerator {
             return;
         }
 
+        System.out.println("Starting generation of the development environments ...");
         this.settings = XtextProjectSettings.getInstance();
         this.settings.init(properties);
 
         createXtextProjects();
         XtextGrammarModel grammarModel = createGrammarModel(language);
-        printXtextGrammar(grammarModel, language);
+        printXtextGrammar(grammarModel);
 
         try {
             MavenRunner.executeMavenCompile();
@@ -66,11 +68,15 @@ public class XtextGrammarGenerator implements FilesGenerator {
         updatePomFiles();
 
         if (settings.getCodeRunner() != null) {
-            new SemanticsGenerator().generateFiles(language);
+            System.out.println("Generation of the code runner for Eclipse enabled ... ");
+            new SemanticsGenerator().generateFiles();
+        }else {
+            System.out.println("Generation of the code runner for Eclipse disabled ... ");
         }
     }
 
     private void printQNPFiles(Language language) {
+        System.out.println("Generating QualifiedNameProvider class ... ");
         Writer writer = null;
         try {
             writer = new BufferedWriter(new FileWriter(settings.getRuntimeProjectRuntimeModulePath(), false));
@@ -106,12 +112,13 @@ public class XtextGrammarGenerator implements FilesGenerator {
         }
     }
 
-    private void printXtextGrammar(XtextGrammarModel grammarModel, Language language) {
+    private void printXtextGrammar(XtextGrammarModel grammarModel) {
+        System.out.println("Printing Xtext grammar ...");
         Writer writer = null;
         try {
             writer = new BufferedWriter(new FileWriter(settings.getRuntimeProjectGrammarPath(), false));
             XtextGrammarPrinter printer = new XtextGrammarPrinter(grammarModel);
-            printer.print(new PrintWriter(writer), language);
+            printer.print(new PrintWriter(writer));
         } catch (IOException ex) {
             throw new GeneratorException("Cannot print Xtext grammar.", ex);
         } finally {
@@ -126,6 +133,7 @@ public class XtextGrammarGenerator implements FilesGenerator {
     }
 
     private XtextGrammarModel createGrammarModel(Language language) {
+        System.out.println("Creating Xtext grammar model ...");
         XtextGrammarModel grammarModel = new XtextGrammarModel(language);
         grammarModel.createModel();
         return grammarModel;
@@ -158,7 +166,10 @@ public class XtextGrammarGenerator implements FilesGenerator {
             Files.sweepFolder(targetLocation);
             wizardConfiguration.setRootLocation(targetLocation.getPath());
             creator.createProjects(wizardConfiguration);
-            System.out.println("Creating Xtext projects ... " + wizardConfiguration.getBaseName());
+            System.out.println("Creating Xtext projects ... ");
+            System.out.println("Language name: " + wizardConfiguration.getLanguage().getName());
+            System.out.println("Language file extension: " + wizardConfiguration.getLanguage().getFileExtensions().toString());
+
         } catch (FileNotFoundException e) {
             throw new GeneratorException("Cannot create Xtext projects.", e);
         }
@@ -188,6 +199,7 @@ public class XtextGrammarGenerator implements FilesGenerator {
     }
 
     private void updatePomFiles() {
+        System.out.println("Updating POM files ...");
         String path = settings.getParentProjectPomPath();
 
         Model model = getMavenModel(path);

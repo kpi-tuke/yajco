@@ -18,10 +18,8 @@ import static yajco.xtext.commons.model.RuleUtils.makeCamelCaseName;
 public class XtextGrammarPrinter {
 
     private static final String TERM = "_TERMINAL";
-    private static final String PARENTHESES = "Parentheses";
 
     private final XtextProjectSettings settings;
-    private Language language;
     private XtextRegexCompiler regexCompiler = new XtextRegexCompiler();
 
     private XtextGrammarModel grammarModel;
@@ -31,11 +29,8 @@ public class XtextGrammarPrinter {
         this.grammarModel = grammarModel;
     }
 
-    public void print(PrintWriter printWriter, Language language) {
-        this.language = language;
-        String mainNode = language.getSetting("yajco.mainNode");
-        if (language.getName() != null && mainNode != null) {
-
+    public void print(PrintWriter printWriter) {
+        if (settings.getMainNode() != null) {
             printWriter.write(grammarModel.getGrammarDeclaration());
             printWriter.write(grammarModel.getGenerateDeclaration());
 
@@ -45,7 +40,7 @@ public class XtextGrammarPrinter {
         }
     }
 
-    public void printRules(PrintWriter printWriter) {
+    private void printRules(PrintWriter printWriter) {
         List<Rule> rules = grammarModel.getRules();
 
         for (int i = 0; i < rules.size(); i++) {
@@ -234,6 +229,7 @@ public class XtextGrammarPrinter {
         }
     }
 
+    //TODO change implementation of the method when primitive types in YAJCo are supported
     private void printPrimitiveType(PrintWriter writer, PrimitiveType type) {
         switch (type.getPrimitiveTypeConst()) {
             case BOOLEAN:
@@ -354,7 +350,7 @@ public class XtextGrammarPrinter {
     }
 
     private void printTokenNotationPart(PrintWriter writer, NotationPart part) {
-        TokenDef token = language.getToken(((TokenPart) part).getToken());
+        TokenDef token = grammarModel.getToken(((TokenPart) part).getToken());
         if (token != null) {
             printToken(writer, token);
         } else {
@@ -378,7 +374,7 @@ public class XtextGrammarPrinter {
             if (token != null) {
                 terminalName = token.getName();
             } else {
-                terminalName = this.language.getTokens().stream().filter(tkn -> tkn.getName().equals(
+                terminalName = this.grammarModel.getTokens().stream().filter(tkn -> tkn.getName().equals(
                         ((PropertyReferencePart) part).getProperty().getName().toUpperCase()))
                         .map(TokenDef::getName).findFirst().orElse("");
             }
@@ -466,14 +462,13 @@ public class XtextGrammarPrinter {
         if (tokenPattern != null) {
             name = tokenPattern.getName().toUpperCase() + TERM;
         } else {
-            name = this.language.getTokens().stream().filter(token -> token.getName().equals(
+            name = this.grammarModel.getTokens().stream().filter(token -> token.getName().equals(
                     part.getName().toUpperCase()))
                     .map(TokenDef::getName).findFirst().orElse("");
             name += TERM;
         }
         writer.write(" | " + name + "]");
     }
-
 
     private void printPatterns(PrintWriter writer, BindingNotationPart part) {
         List<? extends Pattern> patterns = (part).getPatterns();
@@ -497,7 +492,7 @@ public class XtextGrammarPrinter {
                 }
                 if (pattern instanceof Separator) {
                     writer.write(" (");
-                    String separatorName = this.language.getTokens().stream().filter(token -> token.getName().equals(
+                    String separatorName = this.grammarModel.getTokens().stream().filter(token -> token.getName().equals(
                             ((Separator) pattern).getValue().toUpperCase()))
                             .map(TokenDef::getName).findFirst().orElse("");
                     if (!separatorName.isEmpty()) {
@@ -518,7 +513,7 @@ public class XtextGrammarPrinter {
     }
 
     private String findTokenFromString(String str) {
-        return this.language.getTokens().stream()
+        return this.grammarModel.getTokens().stream()
                 .filter(token ->
                         str.equals(regexCompiler.compileRegex(token.getRegexp())
                                 .substring(regexCompiler.compileRegex(token.getRegexp()).indexOf('\'') + 1,

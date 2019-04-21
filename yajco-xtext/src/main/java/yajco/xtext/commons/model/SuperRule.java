@@ -16,7 +16,7 @@ public class SuperRule extends Rule {
         setSuperRules(this.rules);
 
         if (type == RuleType.OPERATOR) {
-            this.name = createName();
+            this.name = createOperatorName();
             this.associativity = rules.get(0).associativity;
             this.priority = rules.get(0).priority;
         } else if (type == RuleType.RETURNER_AGGREGATOR) {
@@ -42,7 +42,7 @@ public class SuperRule extends Rule {
     }
 
 
-    public String createName() {
+    private String createOperatorName() {
         if (this.rules.size() > 1) {
             String name = String.join("Or", this.rules.stream()
                     .map(rule -> rule.originalName.lastIndexOf(".") != -1 ?
@@ -54,7 +54,7 @@ public class SuperRule extends Rule {
         }
     }
 
-    public String createReturnerName() {
+    private String createReturnerName() {
         String name = String.join("", this.rules.stream().map(
                 rule -> rule.originalName.lastIndexOf(".") != -1 ?
                         rule.originalName.substring(rule.originalName.lastIndexOf(".") + 1) :

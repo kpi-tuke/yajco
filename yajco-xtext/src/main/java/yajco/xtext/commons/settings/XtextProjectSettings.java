@@ -7,7 +7,6 @@ import java.util.Properties;
 public class XtextProjectSettings {
 
     private static final String DEFAULT_LANGUAGE_BASE_NAME = "org.example.mydsl";
-    private static final String DEFAULT_LANGUAGE_SIMPLE_NAME = "MyDsl";
     private static final String DEFAULT_FILE_EXTENSION = "mydsl";
 
     private static String LANGUAGE_BASE_NAME;
@@ -18,7 +17,7 @@ public class XtextProjectSettings {
     private static final String XTEXT = "yajco.xtext";
     private static final String LANGUAGE_BASE_NAME_KEY = XTEXT + ".baseName";
     private static final String FILE_EXTENSION_KEY = XTEXT + ".fileExtension";
-    private static final String CODE_RUNNER_KEY = XTEXT + ".runCode";
+    private static final String CODE_RUNNER_KEY = XTEXT + ".codeRunner";
     private static final String YAJCO_MAINNODE_KEY = "yajco.mainNode";
 
     private static final String XTEXT_VERSION = "2.16.0";
@@ -31,16 +30,17 @@ public class XtextProjectSettings {
         return INSTANCE;
     }
 
-    public static String getCodeRunner() {
+    public String getCodeRunner() {
         return CODE_RUNNER;
     }
 
     public void init(Properties properties){
+        System.out.println("Initializing projects settings ...");
         LANGUAGE_BASE_NAME = properties.getProperty(LANGUAGE_BASE_NAME_KEY, DEFAULT_LANGUAGE_BASE_NAME);
         FILE_EXTENSION = LanguageDescriptor.FileExtensions.fromString(
                 properties.getProperty(FILE_EXTENSION_KEY, DEFAULT_FILE_EXTENSION));
-        String main = properties.getProperty(YAJCO_MAINNODE_KEY, DEFAULT_LANGUAGE_SIMPLE_NAME);
-        MAIN_NODE = main.lastIndexOf(".") != -1 ? main.substring(main.lastIndexOf(".")+1) : main;
+        String main = properties.getProperty(YAJCO_MAINNODE_KEY, null);
+        MAIN_NODE = main != null && main.lastIndexOf(".") != -1 ? main.substring(main.lastIndexOf(".")+1) : main;
         CODE_RUNNER = properties.getProperty(CODE_RUNNER_KEY, null);
     }
 

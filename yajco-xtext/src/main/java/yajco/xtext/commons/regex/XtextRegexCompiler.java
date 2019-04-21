@@ -11,8 +11,8 @@ import static java.util.regex.Pattern.compile;
 public class XtextRegexCompiler {
 
     private StringBuilder resultStringBuilder;
-    private List<Tuple<Integer, Integer>> tupleList = new ArrayList<>();
-    private Stack<Integer> indexStack = new Stack<>();
+    private List<Tuple<Integer, Integer>> tupleList;
+    private Stack<Integer> indexStack;
     private String regex;
     private boolean isInsideString;
 
@@ -23,12 +23,12 @@ public class XtextRegexCompiler {
         isInsideString = false;
 
         this.regex = regex;
-        mapParentheses(regex);
+        mapParentheses();
         processRegex(0, regex.length());
         return resultStringBuilder.toString();
     }
 
-    private void mapParentheses(String regex) {
+    private void mapParentheses() {
         int index = 0;
         boolean block = false;
         for (int i = 0; i < regex.length(); i++) {
@@ -270,7 +270,9 @@ public class XtextRegexCompiler {
                     append.append(separate ? "\'" + matcher.group() + "\'" : matcher.group());
                 }
             } else if (matcher.group().matches("\\\\\\p{Punct}")) {
-                append.append(separate ? "\'" + matcher.group().replace("\\", "") + "\'" : matcher.group().replace("\\", ""));
+                append.append(separate ?
+                        "\'" + matcher.group().replace("\\", "") + "\'" :
+                        matcher.group().replace("\\", ""));
             } else if (matcher.group().matches("[\\w ]")) {
                 append.append(separate ? "\'" + matcher.group() + "\'" : matcher.group());
             } else {

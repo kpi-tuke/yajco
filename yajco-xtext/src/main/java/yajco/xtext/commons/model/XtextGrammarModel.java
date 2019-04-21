@@ -53,6 +53,14 @@ public class XtextGrammarModel {
     }
 
 
+    public List<TokenDef> getTokens(){
+        return language.getTokens();
+    }
+
+    public TokenDef getToken(String name) {
+        return language.getToken(name);
+    }
+
     private void createGrammarDefinition() {
         grammarDeclaration = "grammar " + settings.getLanugageFullName()
                 + " with org.eclipse.xtext.common.Terminals\n\n";
@@ -369,6 +377,5 @@ public class XtextGrammarModel {
     private String getSimpleName(String name){
         return name.lastIndexOf(".") != -1 ? name.substring(name.lastIndexOf(".") + 1) : name;
     }
-
 
 }

@@ -5,13 +5,11 @@ import org.apache.maven.model.io.xpp3.MavenXpp3Reader;
 import org.apache.maven.project.MavenProject;
 import org.apache.velocity.VelocityContext;
 import org.apache.velocity.app.VelocityEngine;
-import org.apache.velocity.texen.Generator;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.xml.sax.SAXException;
 import yajco.generator.GeneratorException;
-import yajco.model.Language;
 import yajco.xtext.commons.settings.XtextProjectSettings;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -30,20 +28,23 @@ import java.util.jar.Manifest;
 
 public class SemanticsGenerator {
     private static final String TARGET_PATH = "target/xtext";
-    private Language language;
     private MavenProject mavenProject = getMavenProject();
 
-    public void generateFiles(Language language) {
-        this.language = language;
-        XtextProjectSettings settings = XtextProjectSettings.getInstance();
+    private XtextProjectSettings settings;
+    public void generateFiles() {
+        System.out.println("Generating code runner ...");
+        settings = XtextProjectSettings.getInstance();
 
-        changeUiManifest(settings);
-        changeUiProject(settings);
-        modifyPluginXml(settings);
-        changeUiBuildProperties(settings);
+        changeUiManifest();
+        generateHandlerFile();
+        modifyPluginXml();
+        changeUiBuildProperties();
+
+        System.out.println("Code runner generated successfully ...");
     }
 
-    private void changeUiBuildProperties(XtextProjectSettings settings) {
+    private void changeUiBuildProperties() {
+        System.out.println("Modifying build.properties file ...");
         FileOutputStream fileOutputStream = null;
         FileInputStream in = null;
         Properties properties = new Properties();
@@ -64,7 +65,8 @@ public class SemanticsGenerator {
         }
     }
 
-    private void changeUiManifest(XtextProjectSettings settings) {
+    private void changeUiManifest() {
+        System.out.println("Changing MANIFEST.MF file ...");
         InputStream stream = null;
         FileOutputStream stream1 = null;
         try {
@@ -93,7 +95,8 @@ public class SemanticsGenerator {
         }
     }
 
-    private void changeUiProject(XtextProjectSettings settings) {
+    private void generateHandlerFile() {
+        System.out.println("Generating intepreter classes ...");
         String srcPath = getUiSrcPath(settings);
         String path = (settings.getLanguageBaseName() + ".ui").replaceAll("\\.", "/");
         path += "/handler/" + "InterpretCodeHandler.java";
@@ -155,7 +158,8 @@ public class SemanticsGenerator {
                 settings.getLanguageBaseName() + ".ui";
     }
 
-    private void modifyPluginXml(XtextProjectSettings settings) {
+    private void modifyPluginXml() {
+        System.out.println("Modifying plugin.xml file ...");
         String path = getUiPath(settings) + "/plugin.xml";
         DocumentBuilder docBuilder = null;
         try {
@@ -218,7 +222,7 @@ public class SemanticsGenerator {
     private String getHandlerCode(XtextProjectSettings settings) {
         VelocityContext context = new VelocityContext();
         context.put("package", settings.getLanguageBaseName());
-        context.put("codeRunner", language.getSetting("yajco.xtext.runCode"));
+        context.put("codeRunner", settings.getCodeRunner());
         VelocityEngine engine = new VelocityEngine();
         StringWriter writer = new StringWriter();
         engine.evaluate(context, writer, "",
