@@ -78,6 +78,9 @@ public class SemLangToJavaTranslator {
 			case CREATE_OPTIONAL_CLASS_INST:
 				translateCreateOptionalClassInstanceAction((CreateOptionalClassInstanceAction) action, writer);
 				break;
+			case CREATE_SYMBOL_STRING_TOKEN_CLASS_INST:
+				translateCreateSymbolStringTokenClassInstanceAction((CreateSymbolStringTokenClassInstanceAction) action, writer);
+				break;
 			default:
 				throw new IllegalArgumentException("Unknown SemLang action detected: '" + action.getClass().getCanonicalName() + "'!");
 		}
@@ -201,7 +204,13 @@ public class SemLangToJavaTranslator {
 		}
 
 		for (int i = 0; i < action.getParameters().size(); i++) {
-			translateRValue(action.getParameters().get(i), writer);
+			RValue rValue = action.getParameters().get(i);
+
+			if (rValue.getSymbol() != null && rValue.getSymbol().getName().contains("StringToken")) {
+				writer.print(rValue.getSymbol().getVarName() + ".getWrappedObject().getStringValue()");
+			} else {
+				translateRValue(action.getParameters().get(i), writer);
+			}
 			if (i != (action.getParameters().size() - 1)) {
 				writer.print(", ");
 			}
@@ -217,6 +226,12 @@ public class SemLangToJavaTranslator {
 			translateRValue(action.getParameter(), writer);
 			writer.print(")");
 		}
+	}
+
+	private void translateCreateSymbolStringTokenClassInstanceAction(CreateSymbolStringTokenClassInstanceAction action, PrintStream writer) {
+		writer.print("new SymbolStringToken(");
+		writer.print(action.getParameter().getSymbol().getVarName());
+		writer.print(")");
 	}
 
 	private void translateCreateEnumInstanceAction(CreateEnumInstanceAction action, PrintStream writer) {
@@ -236,7 +251,12 @@ public class SemLangToJavaTranslator {
 		if (action.getParameters().size() > 0) {
 			writer.print(", (Object)");
 			for (int i = 0; i < action.getParameters().size(); i++) {
-				translateRValue(action.getParameters().get(i), writer);
+				RValue rValue = action.getParameters().get(i);
+				if (rValue.getSymbol() != null && rValue.getSymbol().getName().contains("StringToken")) {
+					writer.print(rValue.getSymbol().getVarName() + ".getWrappedObject().getStringValue()");
+				} else {
+					translateRValue(action.getParameters().get(i), writer);
+				}
 				if (i != (action.getParameters().size() - 1)) {
 					writer.print(", ");
 				}

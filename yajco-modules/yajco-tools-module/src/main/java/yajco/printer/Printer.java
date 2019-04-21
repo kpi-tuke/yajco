@@ -191,7 +191,15 @@ public class Printer {
 			printBindingNotationPart(writer, (BindingNotationPart) part);
 		} else if (part instanceof OptionalPart) {
 			printOptionalPart(writer, (OptionalPart) part);
+		} else if (part instanceof StringTokenPart) {
+			printStringTokenPart(writer, (StringTokenPart) part);
 		}
+	}
+
+	private void printStringTokenPart(PrintWriter writer, StringTokenPart part) {
+		writer.write("String token part [");
+		writer.write(part.getTokenPart().toString());
+		writer.write("]");
 	}
 
 	private void printOptionalPart(PrintWriter writer, OptionalPart part) {
