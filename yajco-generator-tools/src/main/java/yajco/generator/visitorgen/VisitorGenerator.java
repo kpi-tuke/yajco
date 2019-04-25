@@ -10,11 +10,7 @@ import yajco.generator.AbstractFileGenerator;
 import yajco.generator.GeneratorException;
 import yajco.generator.util.Utilities;
 import yajco.model.Language;
-import yajco.model.type.ArrayType;
-import yajco.model.type.ListType;
-import yajco.model.type.PrimitiveType;
-import yajco.model.type.ReferenceType;
-import yajco.model.type.SetType;
+import yajco.model.type.*;
 
 public class VisitorGenerator extends AbstractFileGenerator {
 
@@ -55,6 +51,7 @@ public class VisitorGenerator extends AbstractFileGenerator {
             context.put("setTypeClassName", SetType.class.getCanonicalName());
             context.put("referenceTypeClassName", ReferenceType.class.getCanonicalName());
             context.put("primitiveTypeClassName", PrimitiveType.class.getCanonicalName());
+            context.put("optionalTypeClassName", OptionalType.class.getCanonicalName());
             velocityEngine.evaluate(context, writer, "", reader);
             writer.flush();
         } catch (IOException ex) {

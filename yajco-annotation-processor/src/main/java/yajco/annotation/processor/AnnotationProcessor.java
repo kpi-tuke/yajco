@@ -1,42 +1,41 @@
 package yajco.annotation.processor;
 
-import java.io.*;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.util.*;
-import javax.annotation.processing.*;
-import javax.lang.model.*;
-import javax.lang.model.element.*;
-import javax.lang.model.type.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import yajco.annotation.*;
-import yajco.annotation.config.*;
-import yajco.annotation.reference.*;
+import yajco.annotation.config.Option;
+import yajco.annotation.config.Parser;
+import yajco.annotation.config.Skip;
+import yajco.annotation.reference.References;
 import yajco.generator.FilesGenerator;
 import yajco.generator.GeneratorException;
 import yajco.generator.parsergen.CompilerGenerator;
 import yajco.generator.util.ServiceFinder;
 import yajco.model.*;
-import yajco.model.TokenDef;
-import yajco.model.pattern.*;
+import yajco.model.pattern.Pattern;
+import yajco.model.pattern.PatternSupport;
 import yajco.model.pattern.impl.Factory;
-import yajco.model.type.ComponentType;
-import yajco.model.type.ListType;
-import yajco.model.type.PrimitiveTypeConst;
-import yajco.model.type.SetType;
-import yajco.model.type.Type;
+import yajco.model.type.*;
 import yajco.model.utilities.XMLLanguageFormatHelper;
 import yajco.printer.Printer;
 
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.RoundEnvironment;
+import javax.annotation.processing.SupportedAnnotationTypes;
+import javax.annotation.processing.SupportedSourceVersion;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.*;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.*;
+import java.io.InputStream;
+import java.io.PrintWriter;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.util.*;
+import java.util.Optional;
+
 @SupportedSourceVersion(SourceVersion.RELEASE_11)
 @SupportedAnnotationTypes({"yajco.annotation.config.Parser", "yajco.annotation.Exclude"})
-//TODO - anotacia @Optional nie je funkcna, malo by generovat vyskytu @Optional generovat vsetky moznosti v pripade
-//Ak pocet pouziti @Optional je x, potom pocet moznosti je: (x nad 0)+(x nad 1)+...+(x nad x-1)+(x nad x)
-// (x nad y) = ( x! / ( (x-y)! * y! ) )
-// pre x=1 -> 2, x=2 -> 4, x=3 -> 8, x=4 -> 16, x=5 -> 32
-//Mozno by tato anotacia mala byt uplne zrusena
-//
 //Nutnost upravit reference resolver, ktory funguje len s jednym konstruktoroms
 //Najlepsie to uplne zmenit podla novej struktury
 //TODO: zabezpecit lahsie rozsirenie o rozne anotacie - passing to model bez testovania
@@ -537,9 +536,69 @@ public class AnnotationProcessor extends AbstractProcessor {
      * @param paramElement Parameter of constructor or factory method.
      */
     private void processParameter(Concept concept, Notation notation, VariableElement paramElement) {
-        // @Before annotation.
+        Type type = getType(paramElement.asType());
+        if (type instanceof OptionalType) {
+            OptionalPart optionalPart = processOptionalParameter(concept, paramElement);
+            notation.addPart(optionalPart);
+        } else {
+            // @Before annotation.
+            if (paramElement.getAnnotation(Before.class) != null) {
+                addTokenParts(notation, paramElement.getAnnotation(Before.class).value());
+            }
+
+            String paramName = paramElement.getSimpleName().toString();
+            TypeMirror typeMirror = paramElement.asType();
+            References references = paramElement.getAnnotation(References.class);
+            Token tokenAnnotation = paramElement.getAnnotation(Token.class);
+            BindingNotationPart part;
+
+            if (references != null) { // @References annotation.
+                //TODO: zatial nie je podpora pre polia referencii, treba to vsak doriesit
+                type = getSimpleType(typeMirror);
+                LocalVariablePart localVariablePart = new LocalVariablePart(paramName, type, paramElement);
+                notation.addPart(localVariablePart);
+
+                part = processReferencedConcept(concept, paramElement, references, localVariablePart);
+            } else { // Property reference.
+                Property property = concept.getProperty(paramName);
+                if (property == null) {
+                    property = new Property(paramName, getType(typeMirror), null);
+                    concept.addProperty(property);
+                }
+
+                part = new PropertyReferencePart(property, paramElement);
+                notation.addPart(part);
+            }
+
+            if (tokenAnnotation != null) {
+                part.addPattern(new yajco.model.pattern.impl.Token(tokenAnnotation.value(), tokenAnnotation));
+            }
+
+            // Add notation part pattern from annotations (NotationPartPattern).
+            addPatternsFromAnnotations(paramElement, part);
+
+            // @After annotation.
+            if (paramElement.getAnnotation(After.class) != null) {
+                addTokenParts(notation, paramElement.getAnnotation(After.class).value());
+            }
+        }
+    }
+
+    /**
+     * Processes optional parameters.
+     *
+     * @param concept Language concept.
+     * @param paramElement Parameter of constructor or factory method.
+     * @return OptionalPart
+     */
+    private OptionalPart processOptionalParameter(Concept concept, VariableElement paramElement) {
+        OptionalPart optionalPart = new OptionalPart(null);
+
+        // @ABefore annotation.
         if (paramElement.getAnnotation(Before.class) != null) {
-            addTokenParts(notation, paramElement.getAnnotation(Before.class).value());
+            for (String value : paramElement.getAnnotation(Before.class).value()) {
+                optionalPart.addPart(new TokenPart(value));
+            }
         }
 
         String paramName = paramElement.getSimpleName().toString();
@@ -549,40 +608,16 @@ public class AnnotationProcessor extends AbstractProcessor {
         BindingNotationPart part;
 
         if (references != null) { // @References annotation.
-            //TODO: zatial nie je podpora pre polia referencii, treba to vsak doriesit
-            Type type = getSimpleType(typeMirror);
-            part = new LocalVariablePart(paramName, type, paramElement);
-            notation.addPart(part);
-
-            try {
-                references.value();
-            } catch (MirroredTypeException e) {
-                TypeElement referencedTypeElement = (TypeElement) processingEnv.getTypeUtils().asElement(e.getTypeMirror());
-
-                Concept referencedConcept = processTypeElement(referencedTypeElement);
-                Property property = null;
-                if (!references.field().isEmpty()) {
-                    property = concept.getProperty(references.field());
-                }
-                if (property == null) {
-                    property = findReferencedProperty(paramElement, referencedConcept, references.field());
-                    if (property == null) {
-                        String propertyName;
-                        if (references.field().isEmpty()) {
-                            propertyName = paramName;
-                        } else {
-                            propertyName = references.field();
-                        }
-                        property = new Property(propertyName, new yajco.model.type.ReferenceType(referencedConcept, referencedTypeElement), e);
-                    }
-                    concept.addProperty(property);
-                }
-                // If names of notationPart and referenced property are identical, no need to fill property data to References pattern.
-                if (property.getName().equals(paramName)) {
-                    property = null;
-                }
-                part.addPattern(new yajco.model.pattern.impl.References(referencedConcept, property, references));
+            Type type;
+            List<? extends TypeMirror> types = ((DeclaredType) typeMirror).getTypeArguments();
+            if (processingEnv.getTypeUtils().asElement(typeMirror).toString().equals(Optional.class.getName())) {
+                type = getSimpleType(types.get(types.size() - 1));
+            } else {
+                type = getSimpleType(typeMirror);
             }
+            LocalVariablePart localVariablePart = new LocalVariablePart(paramName, type, paramElement);
+            optionalPart.addPart(localVariablePart);
+            part = processReferencedConcept(concept, paramElement, references, localVariablePart);
         } else { // Property reference.
             Property property = concept.getProperty(paramName);
             if (property == null) {
@@ -591,7 +626,7 @@ public class AnnotationProcessor extends AbstractProcessor {
             }
 
             part = new PropertyReferencePart(property, paramElement);
-            notation.addPart(part);
+            optionalPart.addPart(part);
         }
 
         if (tokenAnnotation != null) {
@@ -601,10 +636,55 @@ public class AnnotationProcessor extends AbstractProcessor {
         // Add notation part pattern from annotations (NotationPartPattern).
         addPatternsFromAnnotations(paramElement, part);
 
-        // After annotation.
+        // @After annotation.
         if (paramElement.getAnnotation(After.class) != null) {
-            addTokenParts(notation, paramElement.getAnnotation(After.class).value());
+            for (String value : paramElement.getAnnotation(After.class).value()) {
+                optionalPart.addPart(new TokenPart(value));
+            }
         }
+        return optionalPart;
+    }
+
+    /**
+     * Processes referenced concept.
+     *
+     * @param concept Language concept.
+     * @param paramElement Parameter of constructor or factory method.
+     * @param references References annotation.
+     * @param part  Local variable notation part.
+     * @return Binding notation part.
+     */
+    private BindingNotationPart processReferencedConcept(Concept concept, VariableElement paramElement, References references, LocalVariablePart part) {
+        String paramName = paramElement.getSimpleName().toString();
+        try {
+            references.value();
+        } catch (MirroredTypeException e) {
+            TypeElement referencedTypeElement = (TypeElement) processingEnv.getTypeUtils().asElement(e.getTypeMirror());
+            Concept referencedConcept = processTypeElement(referencedTypeElement);
+            Property property = null;
+            if (!references.field().isEmpty()) {
+                property = concept.getProperty(references.field());
+            }
+            if (property == null) {
+                property = findReferencedProperty(paramElement, referencedConcept, references.field());
+                if (property == null) {
+                    String propertyName;
+                    if (references.field().isEmpty()) {
+                        propertyName = paramName;
+                    } else {
+                        propertyName = references.field();
+                    }
+                    property = new Property(propertyName, new yajco.model.type.ReferenceType(referencedConcept, referencedTypeElement), e);
+                }
+                concept.addProperty(property);
+            }
+            // If names of notationPart and referenced property are identical, no need to fill property data to References pattern.
+            if (property.getName().equals(paramName)) {
+                property = null;
+            }
+            part.addPattern(new yajco.model.pattern.impl.References(referencedConcept, property, references));
+        }
+        return part;
     }
 
     /**
@@ -657,6 +737,8 @@ public class AnnotationProcessor extends AbstractProcessor {
             return getSpecifiedYajcoComponentType(type, ListType.class);
         } else if (isSpecifiedClassType(type, Set.class)) {
             return getSpecifiedYajcoComponentType(type, SetType.class);
+        } else if (isSpecifiedClassType(type, Optional.class)) {
+            return getSpecifiedYajcoComponentType(type, OptionalType.class);
         } else {
             return getSimpleType(type);
         }
@@ -679,13 +761,15 @@ public class AnnotationProcessor extends AbstractProcessor {
 
         List<? extends TypeMirror> types = ((DeclaredType) type).getTypeArguments();
 
-//        com.sun.tools.javac.util.List<com.sun.tools.javac.code.Type> types = ((ClassType) type).getTypeArguments();
-
         if (types.isEmpty()) {
             throw new GeneratorException("Not specified type for " + type.toString() + ", please use generics to specify inner type.");
         } else {
             try {
                 Constructor constructor = yajcoType.getConstructor(Type.class);
+                if (processingEnv.getTypeUtils().asElement(type).toString().equals(Optional.class.getName())) {
+                    // Component type as Optional. For example Optional<String[]>
+                    return (T) (constructor.newInstance(getType(types.get(types.size() - 1))));
+                }
                 return (T) constructor.newInstance(getSimpleType(types.get(types.size() - 1)));
             } catch (NoSuchMethodException ex) {
                 throw new GeneratorException("Cannot find constructor for " + yajcoType.getName() + " with only " + Type.class.getName() + " paramater!", ex);
@@ -728,6 +812,15 @@ public class AnnotationProcessor extends AbstractProcessor {
             return new yajco.model.type.PrimitiveType(primTypeConst, type);
         } else if (type.toString().equals(String.class.getName())) {
             return new yajco.model.type.PrimitiveType(PrimitiveTypeConst.STRING, type);
+        } else if (type.toString().equals(Boolean.class.getName())) {
+            return new yajco.model.type.PrimitiveType(PrimitiveTypeConst.BOOLEAN, type);
+        } else if (type.toString().equals(Byte.class.getName())
+                || type.toString().equals(Short.class.getName())
+                || type.toString().equals(Integer.class.getName())
+                || type.toString().equals(Long.class.getName())) {
+            return new yajco.model.type.PrimitiveType(PrimitiveTypeConst.INTEGER, type);
+        } else if (type.toString().equals(Float.class.getName()) || type.toString().equals(Double.class.getName())) {
+            return new yajco.model.type.PrimitiveType(PrimitiveTypeConst.REAL, type);
         } else if (type.getKind() == TypeKind.DECLARED) {
             TypeElement referencedTypeElement = (TypeElement) processingEnv.getTypeUtils().asElement(type);
             System.out.println("getSimpleType(): referencedTypeElement: " + referencedTypeElement);
@@ -952,7 +1045,7 @@ public class AnnotationProcessor extends AbstractProcessor {
             return pattern;
         } catch (Exception e) {
             // TODO: upravit vypis
-            throw new GeneratorException("Cannot instantiate class for @Maps, class " + mapsToClass, e);
+            throw new GeneratorException("Cannot instantiate class for @MapsTo, class " + mapsToClass, e);
         }
     }
 

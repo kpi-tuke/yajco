@@ -1,39 +1,18 @@
 package yajco.generator.parsergen.beaver.semlang.translator;
 
+import yajco.ReferenceResolver;
+import yajco.grammar.semlang.*;
+import yajco.model.Language;
+import yajco.model.type.*;
+
 import java.io.PrintStream;
 import java.util.List;
-import yajco.ReferenceResolver;
-import yajco.generator.parsergen.beaver.BeaverParserGenerator;
-import yajco.grammar.semlang.Action;
-import yajco.grammar.semlang.AddElementToCollectionAction;
-import yajco.grammar.semlang.AssignAction;
-import yajco.grammar.semlang.ConvertCollectionToArrayAction;
-import yajco.grammar.semlang.ConvertListToCollectionAction;
-import yajco.grammar.semlang.ConvertStringToPrimitiveTypeAction;
-import yajco.grammar.semlang.CreateClassInstanceAction;
-import yajco.grammar.semlang.CreateCollectionInstanceAction;
-import yajco.grammar.semlang.CreateEnumInstanceAction;
-import yajco.grammar.semlang.DefineVariableAction;
-import yajco.grammar.semlang.LValue;
-import yajco.grammar.semlang.RValue;
-import yajco.grammar.semlang.ReferenceResolverRegisterAction;
-import yajco.grammar.semlang.ReturnAction;
-import yajco.model.Language;
-import yajco.model.type.ArrayType;
-import yajco.model.type.ComponentType;
-import yajco.model.type.ListType;
-import yajco.model.type.PrimitiveType;
-import yajco.model.type.PrimitiveTypeConst;
-import yajco.model.type.ReferenceType;
-import yajco.model.type.SetType;
-import yajco.model.type.Type;
 
 public class SemLangToJavaTranslator {
 
 	private final static String REFERENCE_RESOLVER_CLASS_NAME = ReferenceResolver.class.getCanonicalName();
 	private final static SemLangToJavaTranslator instance = new SemLangToJavaTranslator();
 	private Language language;
-        private String parserPackageName;
 
 	private SemLangToJavaTranslator() {
 	}
@@ -47,14 +26,14 @@ public class SemLangToJavaTranslator {
 		}
 
 		this.language = language;
-                parserPackageName = this.language.getName() != null ? this.language.getName() + "." + BeaverParserGenerator.DEFAULT_PACKAGE_NAME : BeaverParserGenerator.DEFAULT_PACKAGE_NAME;
+//		String parserPackageName = this.language.getName() != null ? this.language.getName() + "." + BeaverParserGenerator.DEFAULT_PACKAGE_NAME : BeaverParserGenerator.DEFAULT_PACKAGE_NAME;
 		for (Action action : actions) {
 			translateAction(action, writer);
 		}
 
 	}
 
-	public void translateAction(Action action, PrintStream writer) {
+	private void translateAction(Action action, PrintStream writer) {
 		if (action == null) {
 			return;
 		}
@@ -96,7 +75,9 @@ public class SemLangToJavaTranslator {
 			case REF_RESOLVER_REGISTER:
 				translateReferenceResolverRegisterAction((ReferenceResolverRegisterAction) action, writer);
 				break;
-
+			case CREATE_OPTIONAL_CLASS_INST:
+				translateCreateOptionalClassInstanceAction((CreateOptionalClassInstanceAction) action, writer);
+				break;
 			default:
 				throw new IllegalArgumentException("Unknown SemLang action detected: '" + action.getClass().getCanonicalName() + "'!");
 		}
@@ -118,12 +99,12 @@ public class SemLangToJavaTranslator {
 
 	private void translateReturnAction(ReturnAction action, PrintStream writer) {
 		//DOMINIK TEST
-                //writer.print("return (Symbol)");
-                //writer.print("return (Symbol) new "+ parserPackageName +".SymbolWrapper(");
-                writer.print("return (Symbol) new SymbolWrapper(");
+		//writer.print("return (Symbol)");
+		//writer.print("return (Symbol) new "+ parserPackageName +".SymbolWrapper(");
+		writer.print("return (Symbol) new SymbolWrapper(");
 		translateRValue(action.getRValue(), writer);
 		//writer.print("; ");
-                writer.print("); "); // mnou dodane
+		writer.print("); "); // mnou dodane
 	}
 
 	private void translateConvertStringToPrimitiveTypeAction(ConvertStringToPrimitiveTypeAction action, PrintStream writer) {
@@ -149,10 +130,6 @@ public class SemLangToJavaTranslator {
 	}
 
 	private void translateConvertListToCollectionAction(ConvertListToCollectionAction action, PrintStream writer) {
-//		if (action.getResultCollectionType() instanceof ListType) {
-//			return;
-//		}
-
 		if (action.getResultCollectionType() instanceof ArrayType) {
 			translateRValue(action.getRValue(), writer);
 			writer.print(".toArray(new ");
@@ -170,6 +147,8 @@ public class SemLangToJavaTranslator {
 			writer.print(">(");
 			translateRValue(action.getRValue(), writer);
 			writer.print(")");
+		} else if (action.getResultCollectionType() instanceof OptionalType) {
+			writer.print("java.util.Optional.empty()");
 		} else {
 			throw new IllegalArgumentException("Unknown component type detected: '" + action.getResultCollectionType().getClass().getCanonicalName() + "'!");
 		}
@@ -189,6 +168,8 @@ public class SemLangToJavaTranslator {
 			writer.print("new java.util.HashSet<");
 			writer.print(typeToString(action.getInnerType()));
 			writer.print(">()");
+		} else if (action.getComponentType() instanceof OptionalType) {
+			writer.print("java.util.Optional.empty()");
 		} else {
 			throw new IllegalArgumentException("Unknown component type detected: '" + action.getComponentType().getClass().getCanonicalName() + "'!");
 		}
@@ -196,15 +177,15 @@ public class SemLangToJavaTranslator {
 
 	private void translateAddElementToCollectionAction(AddElementToCollectionAction action, PrintStream writer) {
 		translateLValue(action.getLValue(), writer);
-                //TODO Neviem ci je to dobre takto
-                //DOMINIK UPRAVA
-                if (action.getLValue().getSymbol() != null) {
-                    writer.print(".getWrappedObject()");
-                }
-                writer.print(".add(");
-                //writer.print(".add(");
+		//TODO Neviem ci je to dobre takto
+		//DOMINIK UPRAVA
+		if (action.getLValue().getSymbol() != null) {
+			writer.print(".getWrappedObject()");
+		}
+		writer.print(".add(");
+		//writer.print(".add(");
 		translateRValue(action.getRValue(), writer);
-                writer.print("); ");
+		writer.print("); ");
 	}
 
 	private void translateCreateClassInstanceAction(CreateClassInstanceAction action, PrintStream writer) {
@@ -228,6 +209,16 @@ public class SemLangToJavaTranslator {
 		writer.print(")");
 	}
 
+	private void translateCreateOptionalClassInstanceAction(CreateOptionalClassInstanceAction action, PrintStream writer) {
+		if (action.getParameter() == null) {
+			writer.print("java.util.Optional.empty()");
+		} else {
+			writer.print("java.util.Optional.of(");
+			translateRValue(action.getParameter(), writer);
+			writer.print(")");
+		}
+	}
+
 	private void translateCreateEnumInstanceAction(CreateEnumInstanceAction action, PrintStream writer) {
 		writer.print(action.getEnumType());
 		writer.print(".");
@@ -238,10 +229,10 @@ public class SemLangToJavaTranslator {
 		writer.print(REFERENCE_RESOLVER_CLASS_NAME);
 		writer.print(".getInstance().register(");
 		translateCreateClassInstanceAction(action, writer);
-                String factoryMethodName = action.getFactoryMethodName();
-                if (factoryMethodName != null && !factoryMethodName.isEmpty()) {
-                    writer.print(", \""+factoryMethodName+"\"");
-                }
+		String factoryMethodName = action.getFactoryMethodName();
+		if (factoryMethodName != null && !factoryMethodName.isEmpty()) {
+			writer.print(", \""+factoryMethodName+"\"");
+		}
 		if (action.getParameters().size() > 0) {
 			writer.print(", (Object)");
 			for (int i = 0; i < action.getParameters().size(); i++) {
@@ -256,9 +247,9 @@ public class SemLangToJavaTranslator {
 
 	private void translateLValue(LValue lValue, PrintStream writer) {
 		if (lValue.getSymbol() != null) {
-                    //DOMINIK TEST
-                    writer.print(lValue.getSymbol().getVarName()); //tento riadok tu len bol
-                    //writer.print(lValue.getSymbol().getVarName() + ".getWrappedObject()"); //toto je moje dopisane
+			//DOMINIK TEST
+			writer.print(lValue.getSymbol().getVarName()); //tento riadok tu len bol
+			//writer.print(lValue.getSymbol().getVarName() + ".getWrappedObject()"); //toto je moje dopisane
 		} else {
 			writer.print(lValue.getVarName());
 		}
@@ -267,12 +258,12 @@ public class SemLangToJavaTranslator {
 	private void translateRValue(RValue rValue, PrintStream writer) {
 		if (rValue.getSymbol() != null || rValue.getVarName() != null) {
 			translateLValue(rValue, writer);
-                        //DOMINIK TEST
-                        if (rValue.getSymbol() != null
-                                && !(rValue.getSymbol().getReturnType() instanceof PrimitiveType)) {
-                            writer.print(".getWrappedObject()");
-                        }
-                        //POTIAL
+			//DOMINIK TEST
+			if (rValue.getSymbol() != null
+					&& !(rValue.getSymbol().getReturnType() instanceof PrimitiveType)) {
+				writer.print(".getWrappedObject()");
+			}
+			//POTIAL
 		} else {
 			translateAction(rValue.getAction(), writer);
 		}
@@ -312,6 +303,8 @@ public class SemLangToJavaTranslator {
 			return "java.util.List<" + typeToString(componentType.getComponentType()) + ">";
 		} else if (componentType instanceof SetType) {
 			return "java.util.Set<" + typeToString(componentType.getComponentType()) + ">";
+		} else if (componentType instanceof OptionalType) {
+			return "java.util.Optional<" + typeToString(componentType.getComponentType()) + ">";
 		} else {
 			throw new IllegalArgumentException("Unknown component type detected: '" + componentType.getClass().getCanonicalName() + "'!");
 		}
