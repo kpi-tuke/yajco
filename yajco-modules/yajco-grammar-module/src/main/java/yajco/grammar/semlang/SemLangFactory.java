@@ -1,16 +1,13 @@
 package yajco.grammar.semlang;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 import yajco.grammar.NonterminalSymbol;
 import yajco.grammar.Symbol;
 import yajco.grammar.TerminalSymbol;
-import yajco.model.type.ComponentType;
-import yajco.model.type.ListType;
-import yajco.model.type.PrimitiveType;
-import yajco.model.type.PrimitiveTypeConst;
-import yajco.model.type.Type;
+import yajco.model.type.*;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public final class SemLangFactory {
 
@@ -24,6 +21,10 @@ public final class SemLangFactory {
 
 	public static List<Action> createNewClassInstanceAndReturnActions(String classType, List<Symbol> symbols) {
 		return createClassInstanceAndReturnActions(classType, null, symbolsToRValues(symbols));
+	}
+
+	public static List<Action> createNewOptionalClassInstanceAndReturnActions(List<Symbol> symbols) {
+		return createOptionalClassInstanceAndReturnActions(symbolsToRValues(symbols));
 	}
 
 	public static List<Action> createFactoryClassInstanceActions(String classType, String factoryMethodName, List<Symbol> symbols) {
@@ -50,7 +51,7 @@ public final class SemLangFactory {
 		return createReferenceResolverRegisterAndReturnActions(classType, factoryMethodName, symbolsToRValues(symbols));
 	}
 
-	public static List<Action> createEnumInstanceActions(String enumType, String enumConstant) {
+	private static List<Action> createEnumInstanceActions(String enumType, String enumConstant) {
 		List<Action> actions = new ArrayList<Action>(1);
 		actions.add(new CreateEnumInstanceAction(enumType, enumConstant));
 
@@ -65,11 +66,11 @@ public final class SemLangFactory {
 	}
 
 	public static List<Action> createAddElementToCollectionActions(Symbol collection, Symbol element) {
-		return createAddElementsToCollectionActions(new LValue(collection), Arrays.asList(new RValue(element)));
+		return createAddElementsToCollectionActions(new LValue(collection), Collections.singletonList(new RValue(element)));
 	}
 
 	public static List<Action> createAddElementToCollectionAndReturnActions(Symbol collection, Symbol element) {
-		return createAddElementsToCollectionAndReturnActions(new LValue(collection), simpleSymbolsToRValues(Arrays.asList(element)));
+		return createAddElementsToCollectionAndReturnActions(new LValue(collection), simpleSymbolsToRValues(Collections.singletonList(element)));
 	}
 
 	public static List<Action> createAddElementsToCollectionActions(Symbol collection, List<Symbol> elements) {
@@ -85,11 +86,11 @@ public final class SemLangFactory {
 	}
 
 	public static List<Action> createListAndAddElementActions(Type varType, String varName, Symbol symbol) {
-		return createCollectionAndAddElementsActions(varName, new ListType(varType), Arrays.asList(new RValue(symbol)));
+		return createCollectionAndAddElementsActions(varName, new ListType(varType), Collections.singletonList(new RValue(symbol)));
 	}
 
 	public static List<Action> createListAndAddElementAndReturnActions(Type varType, String varName, Symbol symbol) {
-		return createCollectionAndAddElementsAndReturnActions(varType, varName, new ListType(varType), Arrays.asList(new RValue(symbol)));
+		return createCollectionAndAddElementsAndReturnActions(varName, new ListType(varType), Collections.singletonList(new RValue(symbol)));
 	}
 
 	public static List<Action> createListAndAddElementsActions(Type varType, String varName, List<Symbol> symbols) {
@@ -97,7 +98,7 @@ public final class SemLangFactory {
 	}
 
 	public static List<Action> createListAndAddElementsAndReturnActions(Type varType, String varName, List<Symbol> symbol) {
-		return createCollectionAndAddElementsAndReturnActions(varType, varName, new ListType(varType), simpleSymbolsToRValues(symbol));
+		return createCollectionAndAddElementsAndReturnActions(varName, new ListType(varType), simpleSymbolsToRValues(symbol));
 	}
 
 	private static List<Action> createReturnValueActions(RValue value) {
@@ -114,14 +115,28 @@ public final class SemLangFactory {
 		} else {
 			actions.add(new CreateClassInstanceAction(classType, factoryMethodName, parameters));
 		}
+		return actions;
+	}
 
+	private static List<Action> createOptionalClassInstanceActions(RValue parameter) {
+		List<Action> actions = new ArrayList<Action>(1);
+		actions.add(new CreateOptionalClassInstanceAction(parameter));
 		return actions;
 	}
 
 	private static List<Action> createClassInstanceAndReturnActions(String classType, String factoryMethodName, List<RValue> parameters) {
 		List<Action> actions = new ArrayList<Action>(1);
 		actions.add(new ReturnAction(new RValue(createClassInstanceActions(classType, factoryMethodName, parameters).get(0))));
+		return actions;
+	}
 
+	private static List<Action> createOptionalClassInstanceAndReturnActions(List<RValue> parameters) {
+		List<Action> actions = new ArrayList<Action>(1);
+		if (parameters.size() > 0) {
+			actions.add(new ReturnAction(new RValue(createOptionalClassInstanceActions(parameters.get(0)).get(0))));
+		} else {
+			actions.add(new ReturnAction(new RValue(createOptionalClassInstanceActions(null).get(0))));
+		}
 		return actions;
 	}
 
@@ -132,14 +147,12 @@ public final class SemLangFactory {
 		} else {
 			actions.add(new ReferenceResolverRegisterAction(classType, factoryMethodName, parameters));
 		}
-
 		return actions;
 	}
 
 	private static List<Action> createReferenceResolverRegisterAndReturnActions(String classType, String factoryMethodName, List<RValue> parameters) {
 		List<Action> actions = new ArrayList<Action>(1);
 		actions.add(new ReturnAction(new RValue(createReferenceResolverRegisterActions(classType, factoryMethodName, parameters).get(0))));
-
 		return actions;
 	}
 
@@ -164,7 +177,7 @@ public final class SemLangFactory {
 		return actions;
 	}
 
-	public static List<Action> createCollectionAndReturnActions(ComponentType collectionType) {
+	private static List<Action> createCollectionAndReturnActions(ComponentType collectionType) {
 		List<Action> actions = new ArrayList<Action>(1);
 		actions.add(new ReturnAction(new RValue(new CreateCollectionInstanceAction(collectionType))));
 
@@ -180,7 +193,7 @@ public final class SemLangFactory {
 		return actions;
 	}
 
-	private static List<Action> createCollectionAndAddElementsAndReturnActions(Type varType, String varName, ComponentType collectionType, List<RValue> rValues) {
+	private static List<Action> createCollectionAndAddElementsAndReturnActions(String varName, ComponentType collectionType, List<RValue> rValues) {
 		List<Action> actions = new ArrayList<Action>(3 + rValues.size());
 		actions.addAll(createCollectionAndAddElementsActions(varName, collectionType, rValues));
 		actions.add(new ReturnAction(new RValue(varName)));
@@ -202,14 +215,15 @@ public final class SemLangFactory {
 			} else {
 				NonterminalSymbol nonterminal = (NonterminalSymbol) symbol;
 				Type type = nonterminal.getReturnType();
-				if (type instanceof ComponentType/*&& !(type instanceof ListType)*/) {
+				if (type instanceof OptionalType) {
+					rValues.add(new RValue(symbol));
+				} else if (type instanceof ComponentType /*&& !(type instanceof ListType)*/) {
 					rValues.add(new RValue(new ConvertListToCollectionAction(((ComponentType) type), new RValue(symbol))));
 				} else {
 					rValues.add(new RValue(symbol));
 				}
 			}
 		}
-
 		return rValues;
 	}
 

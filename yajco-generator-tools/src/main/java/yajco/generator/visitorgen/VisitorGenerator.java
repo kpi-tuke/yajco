@@ -16,6 +16,7 @@ import yajco.generator.GeneratorException;
 import yajco.generator.util.Utilities;
 import yajco.model.*;
 import yajco.model.pattern.impl.Token;
+import yajco.model.Language;
 import yajco.model.type.*;
 
 public class VisitorGenerator extends AbstractFileGenerator {
@@ -66,6 +67,7 @@ public class VisitorGenerator extends AbstractFileGenerator {
             context.put("setTypeClassName", SetType.class.getCanonicalName());
             context.put("referenceTypeClassName", ReferenceType.class.getCanonicalName());
             context.put("primitiveTypeClassName", PrimitiveType.class.getCanonicalName());
+            context.put("optionalTypeClassName", OptionalType.class.getCanonicalName());
             context.put("propertyToTokenNameMap", propertyToTokenNameMap);
             context.put("tokenToUsedTypesMap", tokenToUsedTypesMap);
             velocityEngine.evaluate(context, writer, "", reader);

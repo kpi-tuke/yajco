@@ -2,7 +2,6 @@
 ##
 #set( $nameMap = ${Utilities.createConceptUniqueNames($language)} )
 package ${ModelUtilities.getLanguagePackageName($language)}.$package;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -35,6 +34,9 @@ public class ${className}<P> {
         if (${Utilities.toLowerCaseIdent($concept.conceptName)} != null) {
 #foreach( $property in $concept.abstractSyntax )
 #set( $type = $property.type )
+#if(${Utilities.getClassName($type)} == $optionalTypeClassName)
+#set( $type = $type.componentType)
+#end
 #set( $className = ${Utilities.getClassName($type)} )
 #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
 #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
@@ -78,6 +80,9 @@ public class ${className}<P> {
 
 #foreach( $property in $concept.abstractSyntax )
 #set( $type = $property.type )
+#if(${Utilities.getClassName($type)} == $optionalTypeClassName)
+#set( $type = $type.componentType)
+#end
 #set( $className = ${Utilities.getClassName($type)} )
 #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
 #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )

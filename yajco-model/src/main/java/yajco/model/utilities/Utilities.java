@@ -5,13 +5,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import yajco.model.Concept;
-import yajco.model.Language;
-import yajco.model.LocalVariablePart;
-import yajco.model.Notation;
-import yajco.model.NotationPart;
-import yajco.model.Property;
-import yajco.model.PropertyReferencePart;
+
+import yajco.model.*;
 import yajco.model.pattern.NotationPartPattern;
 import yajco.model.pattern.Pattern;
 import yajco.model.pattern.PatternSupport;
@@ -114,6 +109,14 @@ public class Utilities {
         patterns.addAll(getPatterns(property));
         for (Notation notation : concept.getConcreteSyntax()) {
             for (NotationPart notationPart : notation.getParts()) {
+                if (notationPart instanceof OptionalPart) {
+                    for (NotationPart notationPart1: ((OptionalPart) notationPart).getParts()) {
+                        if (property.equals(getPropertyFromNotationPart(notationPart1, concept))) {
+                            patterns.addAll(getPatterns(notationPart1));
+                            break;
+                        }
+                    }
+                }
                 if (property.equals(getPropertyFromNotationPart(notationPart, concept))) {
                     patterns.addAll(getPatterns(notationPart));
                     break;

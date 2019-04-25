@@ -1,49 +1,44 @@
 package yajco.printer;
 
-import yajco.model.type.PrimitiveType;
-import yajco.model.type.Type;
-import yajco.model.type.ReferenceType;
-import java.io.PrintWriter;
-import java.util.List;
-import java.util.Set;
-import yajco.model.pattern.impl.Associativity;
 import yajco.model.*;
-import yajco.model.pattern.*;
+import yajco.model.pattern.Pattern;
 import yajco.model.pattern.impl.*;
 import yajco.model.pattern.impl.printer.Indent;
 import yajco.model.pattern.impl.printer.NewLine;
-import yajco.model.type.ArrayType;
-import yajco.model.type.ListType;
-import yajco.model.type.SetType;
+import yajco.model.type.*;
+
+import java.io.PrintWriter;
+import java.util.List;
+import java.util.Set;
 
 /*  TOTO BY MALO BYT GENEROVANE DOMINIKOVYM PRINTER GENERATOROM
- * 
+ *
  *  napokon to ale bolo rucne upravovane pre niektore specificke veci
  */
 public class Printer {
 
 	public void printLanguage(PrintWriter writer, Language language) {
-            try {
-                if (language.getName() != null) {
-			writer.print("language " + language.getName() + "\n");
-			writer.println();
-			printTokens(writer, language.getTokens());
-			printSkips(writer, language.getSkips());
-			printConcepts(writer, language.getConcepts());
-                        if (!language.getSettings().isEmpty()) {
-                            printSettings(writer, language.getSettings());
-                        }
-		} else {
-			printTokens(writer, language.getTokens());
-			printSkips(writer, language.getSkips());
-			printConcepts(writer, language.getConcepts());
-                        if (!language.getSettings().isEmpty()) {
-                            printSettings(writer, language.getSettings());
-                        }
+		try {
+			if (language.getName() != null) {
+				writer.print("language " + language.getName() + "\n");
+				writer.println();
+				printTokens(writer, language.getTokens());
+				printSkips(writer, language.getSkips());
+				printConcepts(writer, language.getConcepts());
+				if (!language.getSettings().isEmpty()) {
+					printSettings(writer, language.getSettings());
+				}
+			} else {
+				printTokens(writer, language.getTokens());
+				printSkips(writer, language.getSkips());
+				printConcepts(writer, language.getConcepts());
+				if (!language.getSettings().isEmpty()) {
+					printSettings(writer, language.getSettings());
+				}
+			}
+		} finally {
+			writer.flush();
 		}
-            } finally {
-		writer.flush();
-            }
 	}
 
 	private void printConcepts(PrintWriter writer, List<Concept> concepts) {
@@ -116,6 +111,8 @@ public class Printer {
 			printListType(writer, (ListType) type);
 		} else if (type instanceof SetType) {
 			printSetType(writer, (SetType) type);
+		} else if (type instanceof OptionalType) {
+			printOptionalType(writer, (OptionalType) type);
 		} else {
 			throw new PrinterException("Not supported type " + type.getClass());
 		}
@@ -157,6 +154,11 @@ public class Printer {
 		printType(writer, setType.getComponentType());
 	}
 
+	private void printOptionalType(PrintWriter writer, OptionalType optionalType) {
+		writer.print("optional ");
+		printType(writer, optionalType.getComponentType());
+	}
+
 	/* ------------------------ Concrete Syntax ------------------------ */
 	private void printNotations(PrintWriter writer, List<Notation> notations) {
 		boolean seperate = false;
@@ -172,7 +174,7 @@ public class Printer {
 
 	private void printNotation(PrintWriter writer, Notation notation) {
 		printNotationParts(writer, notation.getParts());
-                printPatterns(writer, notation.getPatterns());
+		printPatterns(writer, notation.getPatterns());
 	}
 
 	private void printNotationParts(PrintWriter writer, List<NotationPart> parts) {
@@ -187,7 +189,18 @@ public class Printer {
 			print(writer, (TokenPart) part);
 		} else if (part instanceof BindingNotationPart) {
 			printBindingNotationPart(writer, (BindingNotationPart) part);
+		} else if (part instanceof OptionalPart) {
+			printOptionalPart(writer, (OptionalPart) part);
 		}
+	}
+
+	private void printOptionalPart(PrintWriter writer, OptionalPart part) {
+		writer.write("(");
+		for (NotationPart notationPart : part.getParts()) {
+			printNotationPart(writer, notationPart);
+			writer.write(" ");
+		}
+		writer.write(")?");
 	}
 
 	private void print(PrintWriter writer, TokenPart part) {
@@ -255,8 +268,8 @@ public class Printer {
 		} else if (pattern instanceof Token) {
 			printToken(writer, (Token) pattern);
 		} else if (pattern instanceof Factory) {
-                        printFactory(writer, (Factory)pattern);
-                } else {
+			printFactory(writer, (Factory)pattern);
+		} else {
 			throw new PrinterException("Not supported pattern " + pattern.getClass());
 		}
 	}
@@ -361,21 +374,21 @@ public class Printer {
 		writer.println();
 	}
 
-    private void printFactory(PrintWriter writer, Factory factory) {
-        writer.print("Factory(");
-        writer.print("method = \"" + factory.getName() + "\"");
-        writer.print(")");
-    }
+	private void printFactory(PrintWriter writer, Factory factory) {
+		writer.print("Factory(");
+		writer.print("method = \"" + factory.getName() + "\"");
+		writer.print(")");
+	}
 
-    private void printSettings(PrintWriter writer, Set<LanguageSetting> settings) {
-        writer.print("settings\n");
-        for (LanguageSetting languageSetting : settings) {
-            printLanguageSetting(writer, languageSetting);
-        }
-        writer.println();
-    }
-    
-    private void printLanguageSetting(PrintWriter writer, LanguageSetting languageSetting) {
+	private void printSettings(PrintWriter writer, Set<LanguageSetting> settings) {
+		writer.print("settings\n");
+		for (LanguageSetting languageSetting : settings) {
+			printLanguageSetting(writer, languageSetting);
+		}
+		writer.println();
+	}
+
+	private void printLanguageSetting(PrintWriter writer, LanguageSetting languageSetting) {
 		writer.print("   ");
 		writer.print(languageSetting.getName());
 		writer.print(" = ");

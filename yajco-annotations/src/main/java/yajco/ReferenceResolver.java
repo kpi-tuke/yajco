@@ -1,32 +1,5 @@
 package yajco;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.AccessibleObject;
-import java.lang.reflect.Array;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import javax.annotation.PostConstruct;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.xpath.XPath;
-import javax.xml.xpath.XPathConstants;
-import javax.xml.xpath.XPathExpression;
-import javax.xml.xpath.XPathExpressionException;
-import javax.xml.xpath.XPathFactory;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -34,6 +7,18 @@ import org.w3c.dom.NodeList;
 import yajco.annotation.Exclude;
 import yajco.annotation.reference.Identifier;
 import yajco.annotation.reference.References;
+
+import javax.annotation.PostConstruct;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.*;
+import java.util.*;
 
 public class ReferenceResolver {
     /** Singleton. */
@@ -122,7 +107,7 @@ public class ReferenceResolver {
      * @param objects  child AST nodes
      * @return the same object as passed by parameter object
      */
-    public <T> T register(T object, String methodName, Object... objects) {
+    private <T> T register(T object, String methodName, Object... objects) {
         registeredObjects.add(object);
         analyzeConstructor(object, methodName, objects);
         createXmlNode(object, objects);
@@ -231,6 +216,10 @@ public class ReferenceResolver {
 
         for (Object param : objects) {
             if (param != null) {
+                // If param is Optional get inner Object.
+                if (param instanceof Optional && ((Optional) param).isPresent()) {
+                    param = ((Optional) param).get();
+                }
                 if (param instanceof Collection) {
                     param = ((Collection)param).toArray();
                 }
@@ -338,7 +327,7 @@ public class ReferenceResolver {
         } else {
             throw new RuntimeException("Not known type of constructor/method");
         }
-        
+
         for (int i = 0; i < params.length; i++) {
             for (Annotation annotation : allAnnotations[i]) {
                 if (annotation instanceof References) {
@@ -385,7 +374,7 @@ public class ReferenceResolver {
             boolean found = true;
 //            System.out.println("******************* "+constructor.toGenericString());
 //            System.out.println("*****************++ "+objects.length + " / " + constructor.getParameterTypes().length);
-            
+
             for (int i = 0; i < parameterTypes.length; i++) {
                 Class class1 = parameterTypes[i];
                 Object object = objects[i];
@@ -413,8 +402,8 @@ public class ReferenceResolver {
 //                System.out.println("*** Class "+i+": "+class1.getName()+" / "+objects[i].getClass().getName());
 
                 if (object != null && !class1.isInstance(object)) {
-                  found = false;
-                  break;
+                    found = false;
+                    break;
                 }
             }
             if (!found) {

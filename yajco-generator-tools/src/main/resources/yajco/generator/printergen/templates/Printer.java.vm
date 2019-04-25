@@ -88,6 +88,9 @@ public class $className extends ${visitorClassName}<PrintWriter> {
     #if( ${ModelUtilities.getPropertyFromNotationPart(${notationPart},${concept})} )
      #set( $property = ${ModelUtilities.getPropertyFromNotationPart(${notationPart},${concept})} )
      #set( $type = ${property.type} )
+        #if(${Utilities.getClassName($type)} == $optionalTypeClassName)
+            #set( $type = $type.componentType)
+        #end
      #set( $className = ${Utilities.getClassName($type)} )
      #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
       #set( $hasRangePattern = ${Utilities.hasClassInList(${notationPart.patterns},${rangePatternClassName})} )
@@ -172,6 +175,9 @@ public class $className extends ${visitorClassName}<PrintWriter> {
 ##
  #foreach( $property in $concept.abstractSyntax )
   #set( $type = $property.type )
+     #if(${Utilities.getClassName($type)} == $optionalTypeClassName)
+         #set( $type = $type.componentType)
+     #end
   #set( $className = ${Utilities.getClassName($type)} )
   #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName )
    #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
@@ -334,6 +340,9 @@ public class $className extends ${visitorClassName}<PrintWriter> {
    #elseif( $notationPartClassName == $propertyReferencePartClassName || $notationPartClassName == $localVariablePartClassName)
     #set( $property = ${ModelUtilities.getPropertyFromNotationPart(${notationPart},${concept})} )
     #set( $type = ${property.type} )
+       #if(${Utilities.getClassName($type)} == $optionalTypeClassName)
+           #set( $type = $type.componentType)
+       #end
     #set( $className = ${Utilities.getClassName($type)} )
     #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
      #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
@@ -357,6 +366,10 @@ public class $className extends ${visitorClassName}<PrintWriter> {
         $Utilities.throwGeneratorException("Not known type for ${property.name}")
         // not known type for ${property.name}
     #end
+   #elseif( $notationPartClassName == $optionalPartClassName )
+       #foreach( $notationPart in $notationPart.parts )
+           #processNotationPart( $notationPart )
+       #end
    #else
         // not known type for NotationType
    #end
