@@ -1,0 +1,42 @@
+package $parserPackageName;
+
+import org.antlr.v4.runtime.TokenSource;
+import org.antlr.v4.runtime.CharStreams;
+import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.BailErrorStrategy;
+import org.antlr.v4.runtime.misc.ParseCancellationException;
+
+public class $parserClassName {
+    public $mainElementClassName parse(String input) throws ParseException {
+        TokenSource lexer = new ${ANTLRLexerFullClassName}(CharStreams.fromString(input));
+        ${ANTLRParserFullClassName} parser = new ${ANTLRParserFullClassName}(new CommonTokenStream(lexer));
+        parser.setErrorHandler(new BailErrorStrategy());
+
+        try {
+            yajco.ReferenceResolver referenceResolver = yajco.ReferenceResolver.createInstance();
+            $mainElementClassName root = parser.main().${returnVarName};
+            referenceResolver.resolveReferences();
+            return root;
+        } catch (ParseCancellationException e) {
+            throw new ParseException("Failed to parse input", e);
+        }
+    }
+
+    public $mainElementClassName parse(java.io.Reader reader) throws ParseException {
+        try {
+            return parse(readAsString(reader));
+        } catch (java.io.IOException e) {
+            throw new ParseException("Failed to read input file", e);
+        }
+    }
+
+    private String readAsString(java.io.Reader r) throws java.io.IOException {
+        StringBuilder sb = new StringBuilder();
+        java.io.BufferedReader br = new java.io.BufferedReader(r);
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line + "\n");
+        }
+        return sb.toString();
+    }
+}
