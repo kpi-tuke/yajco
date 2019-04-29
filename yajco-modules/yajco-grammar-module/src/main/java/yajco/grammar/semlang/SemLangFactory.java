@@ -151,6 +151,7 @@ public final class SemLangFactory {
 		} else {
 			actions.add(new ReturnAction(new RValue(createOptionalClassInstanceActions(null).get(0))));
 		}
+
 		return actions;
 	}
 
