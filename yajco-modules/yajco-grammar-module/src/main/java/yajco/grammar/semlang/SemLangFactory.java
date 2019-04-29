@@ -27,10 +27,6 @@ public final class SemLangFactory {
 		return createOptionalClassInstanceAndReturnActions(symbolsToRValues(symbols, null));
 	}
 
-	public static List<Action> createNewOptionalClassInstanceAndReturnActions(List<Symbol> symbols) {
-		return createOptionalClassInstanceAndReturnActions(symbolsToRValues(symbols));
-	}
-
 	public static List<Action> createFactoryClassInstanceActions(String classType, String factoryMethodName, List<Symbol> symbols) {
 		return createClassInstanceActions(classType, factoryMethodName, symbolsToRValues(symbols, null));
 	}
