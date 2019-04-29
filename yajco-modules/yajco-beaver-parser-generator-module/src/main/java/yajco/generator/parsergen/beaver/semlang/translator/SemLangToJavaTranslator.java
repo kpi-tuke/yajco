@@ -221,7 +221,6 @@ public class SemLangToJavaTranslator {
 			writer.print(".getWrappedObject()");
 		}
 
-
 		if ((action.getLValue().getSymbol() != null && action.getLValue().getSymbol().getReturnType() instanceof ListTypeWithShared)
 				|| (action.getRValue().getSymbol() != null && action.getRValue().getSymbol().getReturnType() instanceof ListType)) {
 			writer.print(".addAll(");
