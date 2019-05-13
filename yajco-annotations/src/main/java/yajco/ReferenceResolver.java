@@ -107,7 +107,7 @@ public class ReferenceResolver {
      * @param objects  child AST nodes
      * @return the same object as passed by parameter object
      */
-    private <T> T register(T object, String methodName, Object... objects) {
+    public <T> T register(T object, String methodName, Object... objects) {
         registeredObjects.add(object);
         analyzeConstructor(object, methodName, objects);
         createXmlNode(object, objects);
