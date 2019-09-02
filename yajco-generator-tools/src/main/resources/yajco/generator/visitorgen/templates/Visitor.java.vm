@@ -32,24 +32,35 @@ public class ${className}<P> {
 #foreach( $concept in $language.concepts )
     protected void visit${Utilities.getMethodPartName($nameMap, $concept)}(${Utilities.getClassName($nameMap, $concept)} ${Utilities.toLowerCaseIdent($concept.conceptName)}, P p) {
         if (${Utilities.toLowerCaseIdent($concept.conceptName)} != null) {
-    #foreach( $property in $concept.abstractSyntax )
-        #set( $type = $property.type )
-        #if(${Utilities.getClassName($type)} == $optionalTypeClassName)
-            #set( $type = $type.componentType)
-        #end
-        #set( $className = ${Utilities.getClassName($type)} )
-        #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
-            #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
-                visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
-            #end
-        #elseif( $className == $primitiveTypeClassName )
-        ## pri primitovnom type sa aktualne dalej nevnarame, cize sa nerobi nic
-        #elseif( $className == $referenceTypeClassName )
-            if (${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null && enterVisit(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}())) {
-                visit${Utilities.getMethodPartName($nameMap, $type.concept)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
-                exitVisit(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}());
-            }
-        #else
+#foreach( $property in $concept.abstractSyntax )
+#set( $type = $property.type )
+#set ( $getterExpr = "${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}()")
+#if(${Utilities.getClassName($type)} == $optionalTypeClassName)
+#set( $type = $type.componentType)
+#set( $getterExpr = "(${getterExpr}.isPresent() ? ${getterExpr}.get() : null)")
+#end
+#set( $className = ${Utilities.getClassName($type)} )
+#if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
+#if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
+        visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}($getterExpr, p);
+#elseif( ${Utilities.getClassName($type.componentType)} == $primitiveTypeClassName )
+## Handle collection of primitives
+#set ( $tokenName = ${propertyToTokenNameMap.get($property)} )
+#set ( $typeString = $Utilities.getTypeName($type) )
+        for ($typeString $tokenName : $getterExpr) {
+            visitToken${Utilities.toUpperCaseIdent($tokenName)}($tokenName, p);
+        }
+#end
+#elseif( $className == $primitiveTypeClassName )
+## Handle primitive type
+#set ( $tokenName = ${propertyToTokenNameMap.get($property)} )
+        visitToken${Utilities.toUpperCaseIdent($tokenName)}($getterExpr, p);
+#elseif( $className == $referenceTypeClassName )
+        if ($getterExpr != null && enterVisit($getterExpr)) {
+            visit${Utilities.getMethodPartName($nameMap, $type.concept)}($getterExpr, p);
+            exitVisit($getterExpr);
+        }
+#else
             $Utilities.throwGeneratorException("Not known type for ${property.name}")
         // not known type for ${property.name}
 #end
@@ -72,7 +83,7 @@ public class ${className}<P> {
 #foreach( $property in $concept.abstractSyntax )
 #set( $type = $property.type )
 #if(${Utilities.getClassName($type)} == $optionalTypeClassName)
-    #set( $type = $type.componentType)
+#set( $type = $type.componentType)
 #end
 #set( $className = ${Utilities.getClassName($type)} )
 #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
@@ -89,6 +100,18 @@ public class ${className}<P> {
 #end
 #end
 
+#end
+##
+## Generate visit methods for token types
+#foreach( $mapEntry in $tokenToUsedTypesMap.entrySet() )
+#set ( $tokenName = $mapEntry.key )
+#set ( $usedTypes = $mapEntry.value )
+#set ( $methodPartName = ${Utilities.toUpperCaseIdent($tokenName)} )
+#set ( $paramName = $tokenName.toLowerCase() )
+#foreach ( $type in $usedTypes )
+    protected void visitToken$methodPartName($type $paramName, P p) {
+    }
+#end
 #end
 
     protected boolean enterVisit(Object o) {
