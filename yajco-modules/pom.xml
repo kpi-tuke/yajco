@@ -45,5 +45,6 @@
         <module>yajco-grammar-module</module>
         <module>yajco-javacc-parser-generator-module</module>
         <module>yajco-tools-module</module>
+        <module>yajco-xtext-module</module>
     </modules>
 </project>
