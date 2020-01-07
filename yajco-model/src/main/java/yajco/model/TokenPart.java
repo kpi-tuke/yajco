@@ -20,7 +20,7 @@ public class TokenPart extends YajcoModelElement implements NotationPart {
         super(sourceElement);
         this.token = token;
     }
-    
+
     //needed for XML binding
     @Exclude
     private TokenPart() {
@@ -35,6 +35,12 @@ public class TokenPart extends YajcoModelElement implements NotationPart {
     public String toString() {
         return "Token: "+token;
     }
-    
-    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof TokenPart) {
+            return this.token.equals(((TokenPart) obj).token);
+        }
+        return false;
+    }
 }

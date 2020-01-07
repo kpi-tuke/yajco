@@ -29,7 +29,7 @@ public class PropertyReferencePart extends BindingNotationPart {
         super(sourceElement);
         this.property = property;
     }
-    
+
     //needed for XML binding
     @Exclude
     private PropertyReferencePart() {
@@ -44,6 +44,13 @@ public class PropertyReferencePart extends BindingNotationPart {
     public String toString() {
         return "Property reference: "+property.getName();
     }
-    
-    
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof PropertyReferencePart) {
+            return this.property.getType() == ((PropertyReferencePart) obj).property.getType() &&
+                    this.property.getName().equals(((PropertyReferencePart) obj).property.getName());
+        }
+        return false;
+    }
 }
