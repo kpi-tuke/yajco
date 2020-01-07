@@ -62,8 +62,9 @@ public class XtextGrammarModel {
     }
 
     private void createGrammarDefinition() {
-        grammarDeclaration = "grammar " + settings.getLanugageFullName()
-                + " with org.eclipse.xtext.common.Terminals\n\n";
+        grammarDeclaration = "grammar " + settings.getLanugageFullName() + "\n" +
+                "    hidden(WS)\n" +
+                "import \"http://www.eclipse.org/emf/2002/Ecore\" as ecore\n\n";
         generateDeclaration = "generate " + settings.getGrammarName() +
                 "Grammar \"http://www.example.org/" + settings.getGrammarName().toLowerCase() + "/" +
                 settings.getMainNode() + "Grammar\"\n\n";

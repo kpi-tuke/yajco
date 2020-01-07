@@ -528,7 +528,7 @@ public class XtextGrammarPrinter {
 
     private void printWsTerminal(PrintWriter writer, String body) {
         if (body != null && !body.isEmpty()) {
-            writer.print("@Override\n terminal WS: \n\t(" + body + ")+;\n\n");
+            writer.print("terminal WS: \n\t(" + body + ")+;\n\n");
         }
     }
 }
