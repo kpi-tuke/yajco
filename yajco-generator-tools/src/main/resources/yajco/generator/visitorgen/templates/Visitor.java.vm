@@ -37,7 +37,7 @@ public class ${className}<P> {
 #set ( $getterExpr = "${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}()")
 #if(${Utilities.getClassName($type)} == $optionalTypeClassName)
 #set( $type = $type.componentType)
-#set( $getterExpr = "(${getterExpr}.isPresent() ? ${getterExpr}.get() : null)")
+#set( $getterExpr = "${getterExpr}.orElse(null)")
 #end
 #set( $className = ${Utilities.getClassName($type)} )
 #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)

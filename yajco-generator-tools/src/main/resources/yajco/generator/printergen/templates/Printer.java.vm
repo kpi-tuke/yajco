@@ -88,43 +88,45 @@ public class $className extends ${visitorClassName}<PrintWriter> {
     #if( ${ModelUtilities.getPropertyFromNotationPart(${notationPart},${concept})} )
      #set( $property = ${ModelUtilities.getPropertyFromNotationPart(${notationPart},${concept})} )
      #set( $type = ${property.type} )
-        #if(${Utilities.getClassName($type)} == $optionalTypeClassName)
-            #set( $type = $type.componentType)
-        #end
+     #set( $getterExpr = "${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}()")
+     #if(${Utilities.getClassName($type)} == $optionalTypeClassName)
+        #set( $type = $type.componentType)
+        #set( $getterExpr = "${getterExpr}.orElse(null)")
+     #end
      #set( $className = ${Utilities.getClassName($type)} )
      #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
       #set( $hasRangePattern = ${Utilities.hasClassInList(${notationPart.patterns},${rangePatternClassName})} )
       #set( $rangePattern = ${Utilities.getObjectFromList(${notationPart.patterns},${rangePatternClassName})} )
       #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
-          && ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null
+          && $getterExpr != null
        #if( $hasRangePattern )
          #if( $className == $arrayTypeClassName )
-          && ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}().length >= ${rangePattern.minOccurs}
+          && ${getterExpr}.length >= ${rangePattern.minOccurs}
          #else
-          && ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}().size() >= ${rangePattern.minOccurs}
+          && ${getterExpr}.size() >= ${rangePattern.minOccurs}
          #end
         #if( $rangePattern.maxOccurs != $rangePatternInfinityValue )
          #if( $className == $arrayTypeClassName )
-          && ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}().length <= ${rangePattern.maxOccurs}
+          && ${getterExpr}.length <= ${rangePattern.maxOccurs}
          #else
-          && ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}().size() <= ${rangePattern.maxOccurs}
+          && ${getterExpr}.size() <= ${rangePattern.maxOccurs}
          #end
         #end
        #else
          #if( $className == $arrayTypeClassName )
-          && ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}().length > 0
+          && ${getterExpr}.length > 0
          #else
-          && !${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}().isEmpty()
+          && !${getterExpr}.isEmpty()
          #end
        #end
       #end
      #elseif( $className == $primitiveTypeClassName )
       #if( ${ModelUtilities.isStringType(${type})} )
-          && ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null
+          && $getterExpr != null
       #end
       ## stale to musi mat nejaku hodnotu pri int, real, boolean, cize netreba dalej kontrolovat
      #elseif( $className == $referenceTypeClassName )
-           && ${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}() != null
+           && $getterExpr != null
      #else
         $Utilities.throwGeneratorException("Not known type for ${property.name}")
         // not known type for ${property.name}
@@ -340,13 +342,15 @@ public class $className extends ${visitorClassName}<PrintWriter> {
    #elseif( $notationPartClassName == $propertyReferencePartClassName || $notationPartClassName == $localVariablePartClassName)
     #set( $property = ${ModelUtilities.getPropertyFromNotationPart(${notationPart},${concept})} )
     #set( $type = ${property.type} )
-       #if(${Utilities.getClassName($type)} == $optionalTypeClassName)
-           #set( $type = $type.componentType)
-       #end
+    #set( $getterExpr = "${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}()")
+    #if(${Utilities.getClassName($type)} == $optionalTypeClassName)
+       #set( $type = $type.componentType)
+       #set( $getterExpr = "${getterExpr}.orElse(null)")
+    #end
     #set( $className = ${Utilities.getClassName($type)} )
     #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
      #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
-        visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
+        visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}($getterExpr, p);
      #end
     #elseif( $className == $primitiveTypeClassName )
         printLiteral(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($notationPart.property.name)}(), p);
@@ -354,13 +358,13 @@ public class $className extends ${visitorClassName}<PrintWriter> {
      #if( $notationPartClassName == $localVariablePartClassName )
       ## je potrebne vypisat len hodnotu z Identifier property, kedze je to referencovane len menom v originali
       #set( $propertyWithIdentifier = ${ModelUtilities.getIdentifierProperty(${type.concept})} )
-        printLiteral(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}().get${Utilities.toUpperCaseIdent(${propertyWithIdentifier.name})}(), p);
+        printLiteral(${getterExpr}.get${Utilities.toUpperCaseIdent(${propertyWithIdentifier.name})}(), p);
      #else
 ##      #set( $hasLocalParenthesesPattern = ${Utilities.hasClassInList(${$type.concept.patterns},${parenthesesPatternClassName})} )
 ##        #if ( $hasLocalParenthesesPattern )
 ##
 ##        #end
-        visit${Utilities.getMethodPartName($nameMap, $type.concept)}(${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}(), p);
+        visit${Utilities.getMethodPartName($nameMap, $type.concept)}($getterExpr, p);
      #end
     #else
         $Utilities.throwGeneratorException("Not known type for ${property.name}")
