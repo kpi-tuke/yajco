@@ -42,24 +42,24 @@ public class ${className}<P> {
 #set( $className = ${Utilities.getClassName($type)} )
 #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
 #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
-        visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}($getterExpr, p);
+            visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}($getterExpr, p);
 #elseif( ${Utilities.getClassName($type.componentType)} == $primitiveTypeClassName )
 ## Handle collection of primitives
 #set ( $tokenName = ${propertyToTokenNameMap.get($property)} )
 #set ( $typeString = $Utilities.getTypeName($type) )
-        for ($typeString $tokenName : $getterExpr) {
-            visitToken${Utilities.toUpperCaseIdent($tokenName)}($tokenName, p);
-        }
+            for ($typeString $tokenName : $getterExpr) {
+                visitToken${Utilities.toUpperCaseIdent($tokenName)}($tokenName, p);
+            }
 #end
 #elseif( $className == $primitiveTypeClassName )
 ## Handle primitive type
 #set ( $tokenName = ${propertyToTokenNameMap.get($property)} )
-        visitToken${Utilities.toUpperCaseIdent($tokenName)}($getterExpr, p);
+            visitToken${Utilities.toUpperCaseIdent($tokenName)}($getterExpr, p);
 #elseif( $className == $referenceTypeClassName )
-        if ($getterExpr != null && enterVisit($getterExpr)) {
-            visit${Utilities.getMethodPartName($nameMap, $type.concept)}($getterExpr, p);
-            exitVisit($getterExpr);
-        }
+            if ($getterExpr != null && enterVisit($getterExpr)) {
+                visit${Utilities.getMethodPartName($nameMap, $type.concept)}($getterExpr, p);
+                exitVisit($getterExpr);
+            }
 #else
             $Utilities.throwGeneratorException("Not known type for ${property.name}")
         // not known type for ${property.name}
@@ -71,9 +71,9 @@ public class ${className}<P> {
 #if( !$descendants.isEmpty() )
 #set( $ifToken = "if" )
 #foreach( $descendant in $descendants )
-        $ifToken (${Utilities.toLowerCaseIdent($concept.conceptName)} instanceof ${Utilities.getClassName($nameMap, $descendant)}) {
-            visit${Utilities.getMethodPartName($nameMap, $descendant)}((${Utilities.getClassName($nameMap, $descendant)}) ${Utilities.toLowerCaseIdent($concept.conceptName)}, p);
-        }
+            $ifToken (${Utilities.toLowerCaseIdent($concept.conceptName)} instanceof ${Utilities.getClassName($nameMap, $descendant)}) {
+                visit${Utilities.getMethodPartName($nameMap, $descendant)}((${Utilities.getClassName($nameMap, $descendant)}) ${Utilities.toLowerCaseIdent($concept.conceptName)}, p);
+            }
 #set( $ifToken = "else if" )
 #end
 #end
