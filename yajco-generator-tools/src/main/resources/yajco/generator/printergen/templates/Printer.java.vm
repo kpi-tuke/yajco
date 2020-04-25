@@ -1,16 +1,16 @@
 #set( $nameMap = ${Utilities.createConceptUniqueNames($language)} )
 package ${ModelUtilities.getLanguagePackageName($language)}.$package;
 
+#foreach( $concept in ${Utilities.getConceptsNeededForImport($nameMap)} )
+import ${ModelUtilities.getFullConceptClassName($language, $concept)};
+#end
+import ${ModelUtilities.getLanguagePackageName($language)}.${visitorPackage}.${visitorClassName};
+
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.Set;
 import java.util.HashMap;
 import java.util.Map;
-import java.io.PrintWriter;
-import ${ModelUtilities.getLanguagePackageName($language)}.${visitorPackage}.${visitorClassName};
-
-#foreach( $concept in ${Utilities.getConceptsNeededForImport($nameMap)} )
-import ${ModelUtilities.getFullConceptClassName($language, $concept)};
-#end
 
 public class $className extends ${visitorClassName}<PrintWriter> {
 #if ( !$language.skips.isEmpty() )
@@ -34,6 +34,9 @@ public class $className extends ${visitorClassName}<PrintWriter> {
 #foreach( $concept in $language.concepts )
     @Override
     protected void visit${Utilities.getMethodPartName($nameMap, $concept)}(${Utilities.getClassName($nameMap, $concept)} ${Utilities.toLowerCaseIdent($concept.conceptName)}, PrintWriter p) {
+        if (${Utilities.toLowerCaseIdent($concept.conceptName)} == null) {
+            return;
+        }
  #set( $conceptPatterns = ${concept.patterns} )
  #set( $hasEnumPattern = ${Utilities.hasClassInList(${conceptPatterns},${enumPatternClassName})} )
  #set( $hasClassIndentPattern = ${Utilities.hasClassInList(${conceptPatterns},${indentPatternClassName})} )
@@ -91,7 +94,7 @@ public class $className extends ${visitorClassName}<PrintWriter> {
      #set( $getterExpr = "${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}()")
      #if(${Utilities.getClassName($type)} == $optionalTypeClassName)
         #set( $type = $type.componentType)
-        #set( $getterExpr = "${getterExpr}.orElse(null)")
+        #set( $getterExpr = "unwrapOptional(${getterExpr})")
      #end
      #set( $className = ${Utilities.getClassName($type)} )
      #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
@@ -185,6 +188,9 @@ public class $className extends ${visitorClassName}<PrintWriter> {
    #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
     @Override
     protected void visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}(#writeSpecifiedType($type ${Utilities.getClassName($nameMap, $type.componentType.concept)}) ${Utilities.toLowerCaseIdent($property.name)}, PrintWriter p) {
+           if (${Utilities.toLowerCaseIdent($property.name)} == null) {
+               return;
+           }
     #set( $patterns = ${ModelUtilities.getAllPatterns(${property},${concept})} )
     #set( $separator = false )
     #set( $separator = ${Utilities.getObjectFromList(${patterns},${separatorPatternClassName})} )
@@ -324,6 +330,10 @@ public class $className extends ${visitorClassName}<PrintWriter> {
 ##
 ##
 #macro( processNotationPart $notationPart )
+   #set( $property = ${ModelUtilities.getPropertyFromNotationPart(${notationPart},${concept})} )
+   #if( $property )
+    #set( $getterExpr = "${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}()")
+   #end
    #set( $hasPatternSupport = ${Utilities.instanceOf(${notationPart},${patternSupportClassName})} )
    #if( $hasPatternSupport )
     #set( $hasNewLinePattern = ${Utilities.hasClassInList(${notationPart.patterns},${newLinePatternClassName})} )
@@ -340,12 +350,10 @@ public class $className extends ${visitorClassName}<PrintWriter> {
    #if( $notationPartClassName == $tokenPartClassName )
         printLiteral("${notationPart.token}", p);
    #elseif( $notationPartClassName == $propertyReferencePartClassName || $notationPartClassName == $localVariablePartClassName)
-    #set( $property = ${ModelUtilities.getPropertyFromNotationPart(${notationPart},${concept})} )
     #set( $type = ${property.type} )
-    #set( $getterExpr = "${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}()")
     #if(${Utilities.getClassName($type)} == $optionalTypeClassName)
        #set( $type = $type.componentType)
-       #set( $getterExpr = "${getterExpr}.orElse(null)")
+       #set( $getterExpr = "unwrapOptional(${getterExpr})")
     #end
     #set( $className = ${Utilities.getClassName($type)} )
     #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
@@ -371,9 +379,11 @@ public class $className extends ${visitorClassName}<PrintWriter> {
         // not known type for ${property.name}
     #end
    #elseif( $notationPartClassName == $optionalPartClassName )
+       if (unwrapOptional(${getterExpr}) != null) {
        #foreach( $notationPart in $notationPart.parts )
            #processNotationPart( $notationPart )
        #end
+       }
    #else
         // not known type for NotationType
    #end
