@@ -19,5 +19,7 @@ jobs:
       uses: actions/setup-java@v1
       with:
         java-version: 11
-    - name: Build with Maven
-      run: mvn -B --fail-at-end package --file pom.xml
+    - name: Build and install with Maven
+      run: mvn -B --fail-at-end install --file pom.xml
+    - name: Checkout and test YAJCo Examples
+      run: ./test-examples.sh

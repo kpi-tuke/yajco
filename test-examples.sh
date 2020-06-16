@@ -2,8 +2,6 @@
 set -ex  # Stop on first failure, trace commands
 EXAMPLES_DIR=tmp-yajco-examples
 
-mvn install --fail-at-end
-
 # Find current yajco version.
 # Based on https://blog.soebes.de/blog/2018/06/09/help-plugin/
 # maven-help-plugin cannot be used because of issue 154:
