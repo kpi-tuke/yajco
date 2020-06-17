@@ -95,6 +95,8 @@ public class $className extends ${visitorClassName}<PrintWriter> {
      #if(${Utilities.getClassName($type)} == $optionalTypeClassName)
         #set( $type = $type.componentType)
         #set( $getterExpr = "unwrapOptional(${getterExpr})")
+        ## Ignore missing optional property
+        && ( ${getterExpr} == null || (true
      #end
      #set( $className = ${Utilities.getClassName($type)} )
      #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
@@ -133,6 +135,10 @@ public class $className extends ${visitorClassName}<PrintWriter> {
      #else
         $Utilities.throwGeneratorException("Not known type for ${property.name}")
         // not known type for ${property.name}
+     #end
+     #if(${Utilities.getClassName($property.type)} == $optionalTypeClassName)
+         ## close parentheses for optional properties
+         ))
      #end
     #end
    #end
