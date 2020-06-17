@@ -2,13 +2,16 @@
 ##
 #set( $nameMap = ${Utilities.createConceptUniqueNames($language)} )
 package ${ModelUtilities.getLanguagePackageName($language)}.$package;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import yajco.visitor.VisitorException;
+
 #foreach( $concept in ${Utilities.getConceptsNeededForImport($nameMap)} )
 import ${ModelUtilities.getFullConceptClassName($language, $concept)};
 #end
+import yajco.visitor.VisitorException;
+
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
 
 public class ${className}<P> {
     protected Set<Object> visited = new HashSet<Object>();
@@ -37,29 +40,29 @@ public class ${className}<P> {
 #set ( $getterExpr = "${Utilities.toLowerCaseIdent($concept.conceptName)}.get${Utilities.toUpperCaseIdent($property.name)}()")
 #if(${Utilities.getClassName($type)} == $optionalTypeClassName)
 #set( $type = $type.componentType)
-#set( $getterExpr = "(${getterExpr}.isPresent() ? ${getterExpr}.get() : null)")
+#set( $getterExpr = "unwrapOptional(${getterExpr})")
 #end
 #set( $className = ${Utilities.getClassName($type)} )
 #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
 #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
-        visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}($getterExpr, p);
+            visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}($getterExpr, p);
 #elseif( ${Utilities.getClassName($type.componentType)} == $primitiveTypeClassName )
 ## Handle collection of primitives
 #set ( $tokenName = ${propertyToTokenNameMap.get($property)} )
 #set ( $typeString = $Utilities.getTypeName($type) )
-        for ($typeString $tokenName : $getterExpr) {
-            visitToken${Utilities.toUpperCaseIdent($tokenName)}($tokenName, p);
-        }
+            for ($typeString $tokenName : $getterExpr) {
+                visitToken${Utilities.toUpperCaseIdent($tokenName)}($tokenName, p);
+            }
 #end
 #elseif( $className == $primitiveTypeClassName )
 ## Handle primitive type
 #set ( $tokenName = ${propertyToTokenNameMap.get($property)} )
-        visitToken${Utilities.toUpperCaseIdent($tokenName)}($getterExpr, p);
+            visitToken${Utilities.toUpperCaseIdent($tokenName)}($getterExpr, p);
 #elseif( $className == $referenceTypeClassName )
-        if ($getterExpr != null && enterVisit($getterExpr)) {
-            visit${Utilities.getMethodPartName($nameMap, $type.concept)}($getterExpr, p);
-            exitVisit($getterExpr);
-        }
+            if ($getterExpr != null && enterVisit($getterExpr)) {
+                visit${Utilities.getMethodPartName($nameMap, $type.concept)}($getterExpr, p);
+                exitVisit($getterExpr);
+            }
 #else
             $Utilities.throwGeneratorException("Not known type for ${property.name}")
         // not known type for ${property.name}
@@ -71,9 +74,9 @@ public class ${className}<P> {
 #if( !$descendants.isEmpty() )
 #set( $ifToken = "if" )
 #foreach( $descendant in $descendants )
-        $ifToken (${Utilities.toLowerCaseIdent($concept.conceptName)} instanceof ${Utilities.getClassName($nameMap, $descendant)}) {
-            visit${Utilities.getMethodPartName($nameMap, $descendant)}((${Utilities.getClassName($nameMap, $descendant)}) ${Utilities.toLowerCaseIdent($concept.conceptName)}, p);
-        }
+            $ifToken (${Utilities.toLowerCaseIdent($concept.conceptName)} instanceof ${Utilities.getClassName($nameMap, $descendant)}) {
+                visit${Utilities.getMethodPartName($nameMap, $descendant)}((${Utilities.getClassName($nameMap, $descendant)}) ${Utilities.toLowerCaseIdent($concept.conceptName)}, p);
+            }
 #set( $ifToken = "else if" )
 #end
 #end
@@ -89,6 +92,9 @@ public class ${className}<P> {
 #if( $className == $arrayTypeClassName || $className == $listTypeClassName || $className == $setTypeClassName)
 #if( ${Utilities.getClassName($type.componentType)} == $referenceTypeClassName )
     protected void visit${Utilities.toUpperCaseIdent($property.name)}In${Utilities.getMethodPartName($nameMap, $concept)}(#writeSpecifiedType($type ${Utilities.getClassName($nameMap, $type.componentType.concept)}) ${Utilities.toLowerCaseIdent($property.name)}, P p) {
+        if (${Utilities.toLowerCaseIdent($property.name)} == null) {
+            return;
+        }
         for (${Utilities.getClassName($nameMap, $type.componentType.concept)} ${Utilities.toLowerCaseIdent($type.componentType.concept.conceptName)} : ${Utilities.toLowerCaseIdent($property.name)}) {
             if (enterVisit(${Utilities.toLowerCaseIdent($type.componentType.concept.conceptName)})) {
                 visit${Utilities.getMethodPartName($nameMap, $type.componentType.concept)}(${Utilities.toLowerCaseIdent($type.componentType.concept.conceptName)}, p);
@@ -120,6 +126,14 @@ public class ${className}<P> {
 
     protected boolean exitVisit(Object o) {
         return visited.remove(o);
+    }
+
+    protected <T> T unwrapOptional(Optional<T> optional){
+        return optional.orElse(null);
+    }
+
+    protected <T> T unwrapOptional(T nonOptional){
+        return nonOptional;
     }
 }
 ##

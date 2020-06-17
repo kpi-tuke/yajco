@@ -1,12 +1,13 @@
 package yajco.model.utilities;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import yajco.model.*;
+import yajco.model.Concept;
+import yajco.model.Language;
+import yajco.model.LocalVariablePart;
+import yajco.model.Notation;
+import yajco.model.NotationPart;
+import yajco.model.OptionalPart;
+import yajco.model.Property;
+import yajco.model.PropertyReferencePart;
 import yajco.model.pattern.NotationPartPattern;
 import yajco.model.pattern.Pattern;
 import yajco.model.pattern.PatternSupport;
@@ -17,6 +18,10 @@ import yajco.model.type.PrimitiveType;
 import yajco.model.type.PrimitiveTypeConst;
 import yajco.model.type.ReferenceType;
 import yajco.model.type.Type;
+
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 public class Utilities {
 
@@ -99,6 +104,14 @@ public class Utilities {
                 }
             } else {
                 throw new RuntimeException("Cannot find references.");
+            }
+        } else if (notationPart instanceof OptionalPart) {
+            for (NotationPart innerPart : ((OptionalPart) notationPart).getParts()) {
+                final Property property = getPropertyFromNotationPart(innerPart, concept);
+                // essentially we are skipping NotationParts without a corresponding Property (i.e. TokenParts)
+                if (property != null) {
+                    return property;
+                }
             }
         }
         return null;
