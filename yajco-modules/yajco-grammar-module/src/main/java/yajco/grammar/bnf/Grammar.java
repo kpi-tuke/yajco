@@ -81,8 +81,8 @@ public class Grammar extends PatternSupport {
 		}
 	}
 
-	public NonterminalSymbol getSequenceNonterminalFor(String name, int min, int max, String sep, boolean unique) {
-		RangeEntry entry = new RangeEntry(name, min, max, sep, unique);
+	public NonterminalSymbol getSequenceNonterminalFor(String name, int min, int max, String sep, boolean unique, String sharedPartName) {
+		RangeEntry entry = new RangeEntry(name, min, max, sep, unique, sharedPartName);
 		if (sequencePool.containsKey(entry)) {
 			return sequencePool.get(entry);
 		}
@@ -116,8 +116,8 @@ public class Grammar extends PatternSupport {
 		return null;
 	}
 
-	public void addSequence(String name, int min, int max, String sep, boolean unique, NonterminalSymbol nonterminal) {
-		sequencePool.put(new RangeEntry(name, min, max, sep, unique), nonterminal);
+	public void addSequence(String name, int min, int max, String sep, boolean unique, String sharedPartName, NonterminalSymbol nonterminal) {
+		sequencePool.put(new RangeEntry(name, min, max, sep, unique, sharedPartName), nonterminal);
 	}
 
 	public Map<String, NonterminalSymbol> getNonterminals() {
@@ -177,13 +177,15 @@ public class Grammar extends PatternSupport {
 		private int maxOccurs;
 		private String separator;
 		private boolean unique;
+		private String sharedPart;
 
-		public RangeEntry(String name, int minOccurs, int maxOccurs, String separator, boolean unique) {
+		public RangeEntry(String name, int minOccurs, int maxOccurs, String separator, boolean unique, String sharedPart) {
 			this.name = name;
 			this.minOccurs = minOccurs;
 			this.maxOccurs = maxOccurs;
 			this.separator = separator;
 			this.unique = unique;
+			this.sharedPart = sharedPart;
 		}
 
 		public String getName() {
@@ -206,10 +208,15 @@ public class Grammar extends PatternSupport {
 			return unique;
 		}
 
+		public String getSharedPart() {
+			return sharedPart;
+		}
+
 		@Override
 		public String toString() {
 			String sep = this.separator != null ? this.separator : "";
-			return name + "(from " + minOccurs + " to " + maxOccurs + " sep '" + sep + "'" + " unique " + unique + ")";
+			String shared = this.sharedPart !=null ? this.sharedPart : "";
+			return name + "(from " + minOccurs + " to " + maxOccurs + " sep '" + sep + "'" + " unique " + unique + " shared part '" + shared +  ")";
 		}
 
 		@Override

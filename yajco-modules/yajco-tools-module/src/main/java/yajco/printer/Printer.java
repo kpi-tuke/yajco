@@ -271,6 +271,8 @@ public class Printer {
 			printFactory(writer, (Factory)pattern);
 		} else if (pattern instanceof UniqueValues) {
 			printUniqueValues(writer, (UniqueValues)pattern);
+		} else if(pattern instanceof Shared) {
+			printShared(writer, (Shared) pattern);
 		} else {
 			throw new PrinterException("Not supported pattern " + pattern.getClass());
 		}
@@ -343,6 +345,13 @@ public class Printer {
 		writer.print("Separator");
 		writer.print("(");
 		writer.print("\"" + pattern.getValue() + "\"");
+		writer.print(")");
+	}
+
+	private void printShared(PrintWriter writer, Shared pattern) {
+		writer.print("Shared part");
+		writer.print("(");
+		writer.print(pattern.getValue());
 		writer.print(")");
 	}
 

@@ -16,39 +16,39 @@ public final class SemLangFactory {
 	}
 
 	public static List<Action> createNewClassInstanceActions(String classType, List<Symbol> symbols) {
-		return createClassInstanceActions(classType, null, symbolsToRValues(symbols));
+		return createClassInstanceActions(classType, null, symbolsToRValues(symbols, null));
 	}
 
 	public static List<Action> createNewClassInstanceAndReturnActions(String classType, List<Symbol> symbols) {
-		return createClassInstanceAndReturnActions(classType, null, symbolsToRValues(symbols));
+		return createClassInstanceAndReturnActions(classType, null, symbolsToRValues(symbols, null));
 	}
 
 	public static List<Action> createNewOptionalClassInstanceAndReturnActions(List<Symbol> symbols) {
-		return createOptionalClassInstanceAndReturnActions(symbolsToRValues(symbols));
+		return createOptionalClassInstanceAndReturnActions(symbolsToRValues(symbols, null));
 	}
 
 	public static List<Action> createFactoryClassInstanceActions(String classType, String factoryMethodName, List<Symbol> symbols) {
-		return createClassInstanceActions(classType, factoryMethodName, symbolsToRValues(symbols));
+		return createClassInstanceActions(classType, factoryMethodName, symbolsToRValues(symbols, null));
 	}
 
 	public static List<Action> createFactoryClassInstanceAndReturnActions(String classType, String factoryMethodName, List<Symbol> symbols) {
-		return createClassInstanceAndReturnActions(classType, factoryMethodName, symbolsToRValues(symbols));
+		return createClassInstanceAndReturnActions(classType, factoryMethodName, symbolsToRValues(symbols, null));
 	}
 
 	public static List<Action> createRefResolverNewClassInstRegisterActions(String classType, List<Symbol> symbols) {
-		return createReferenceResolverRegisterActions(classType, null, symbolsToRValues(symbols));
+		return createReferenceResolverRegisterActions(classType, null, symbolsToRValues(symbols, null));
 	}
 
-	public static List<Action> createRefResolverNewClassInstRegisterAndReturnActions(String classType, List<Symbol> symbols) {
-		return createReferenceResolverRegisterAndReturnActions(classType, null, symbolsToRValues(symbols));
+	public static List<Action> createRefResolverNewClassInstRegisterAndReturnActions(String classType, List<Symbol> symbols, String sharedPartName) {
+		return createReferenceResolverRegisterAndReturnActions(classType, null, symbolsToRValues(symbols, sharedPartName));
 	}
 
 	public static List<Action> createRefResolverFactoryClassInstRegisterActions(String classType, String factoryMethodName, List<Symbol> symbols) {
-		return createReferenceResolverRegisterActions(classType, factoryMethodName, symbolsToRValues(symbols));
+		return createReferenceResolverRegisterActions(classType, factoryMethodName, symbolsToRValues(symbols, null));
 	}
 
-	public static List<Action> createRefResolverFactoryClassInstRegisterAndReturnActions(String classType, String factoryMethodName, List<Symbol> symbols) {
-		return createReferenceResolverRegisterAndReturnActions(classType, factoryMethodName, symbolsToRValues(symbols));
+	public static List<Action> createRefResolverFactoryClassInstRegisterAndReturnActions(String classType, String factoryMethodName, List<Symbol> symbols, String sharedPartName) {
+		return createReferenceResolverRegisterAndReturnActions(classType, factoryMethodName, symbolsToRValues(symbols, sharedPartName));
 	}
 
 	private static List<Action> createEnumInstanceActions(String enumType, String enumConstant) {
@@ -99,6 +99,10 @@ public final class SemLangFactory {
 
 	public static List<Action> createOrderedSetAndAddElementAndReturnActions(Type varType, String varName, Symbol symbol) {
 		return createCollectionAndAddElementsAndReturnActions(varName, new OrderedSetType(varType), Collections.singletonList(new RValue(symbol)));
+	}
+
+	public static List<Action> createListWithSharedAndAddElementAndReturnActions(Type varType, String varName, Symbol symbol) {
+		return createCollectionAndAddElementsAndReturnActions(varName, new ListTypeWithShared(varType), Collections.singletonList(new RValue(symbol)));
 	}
 
 	public static List<Action> createListAndAddElementsActions(Type varType, String varName, List<Symbol> symbols) {
@@ -213,7 +217,7 @@ public final class SemLangFactory {
 		return actions;
 	}
 
-	private static List<RValue> symbolsToRValues(List<Symbol> symbols) {
+	private static List<RValue> symbolsToRValues(List<Symbol> symbols, String sharedPartName) {
 		List<RValue> rValues = new ArrayList<RValue>(symbols.size());
 		for (Symbol symbol : symbols) {
 			if (symbol instanceof TerminalSymbol) {
@@ -230,7 +234,11 @@ public final class SemLangFactory {
 				if (type instanceof OptionalType) {
 					rValues.add(new RValue(symbol));
 				} else if (type instanceof ComponentType /*&& !(type instanceof ListType)*/) {
-					rValues.add(new RValue(new ConvertListToCollectionAction(((ComponentType) type), new RValue(symbol))));
+					if (sharedPartName != null) {
+						rValues.add(new RValue(new ConvertListWithSharedToCollectionAction(((ComponentType) type), sharedPartName, new RValue(symbol))));
+					} else {
+						rValues.add(new RValue(new ConvertListToCollectionAction(((ComponentType) type), new RValue(symbol))));
+					}
 				} else {
 					rValues.add(new RValue(symbol));
 				}

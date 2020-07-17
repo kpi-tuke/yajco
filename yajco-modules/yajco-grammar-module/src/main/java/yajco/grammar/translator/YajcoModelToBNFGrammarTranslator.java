@@ -24,11 +24,13 @@ public class YajcoModelToBNFGrammarTranslator {
     private static final String DEFAULT_LIST_NAME = "list";
     private static final String DEFAULT_SET_NAME = "set";
     private static final String DEFAULT_ELEMENT_NAME = "elem";
+    private static final String DEFAUL_SYMBOL_WITH_SHARED_SUFFIX = "WithSharedPart";
     private static final YajcoModelToBNFGrammarTranslator instance = new YajcoModelToBNFGrammarTranslator();
     private Language language;
     private Grammar grammar;
     private int arrayID;
     private int optionalID;
+    private String sharedPartName;
 
     private YajcoModelToBNFGrammarTranslator() {
         language = null;
@@ -192,17 +194,18 @@ public class YajcoModelToBNFGrammarTranslator {
         Factory factoryPattern = (Factory) notation.getPattern(Factory.class);
         if (factoryPattern != null) {
 //			if (opPattern == null) {
-            alternative.addActions(SemLangFactory.createRefResolverFactoryClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), factoryPattern.getName(), parameters));
+            alternative.addActions(SemLangFactory.createRefResolverFactoryClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), factoryPattern.getName(), parameters, this.sharedPartName));
 //			} else {
 //				alternative.addActions(SemLangFactory.createFactoryClassInstanceAndReturnActions(Utilities.getFullConceptClassName(language, concept), factoryPattern.getName(), parameters));
 //			}
         } else {
 //			if (opPattern == null) {
-            alternative.addActions(SemLangFactory.createRefResolverNewClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), parameters));
+            alternative.addActions(SemLangFactory.createRefResolverNewClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), parameters, this.sharedPartName));
 //			} else {
 //				alternative.addActions(SemLangFactory.createNewClassInstanceAndReturnActions(Utilities.getFullConceptClassName(language, concept), parameters));
 //			}
         }
+        this.sharedPartName = null;
 
         return alternative;
     }
@@ -408,7 +411,7 @@ public class YajcoModelToBNFGrammarTranslator {
         ComponentType cmpType = (ComponentType) part.getProperty().getType();
         Type innerType = cmpType.getComponentType();
         Symbol symbol;
-        String separator;
+        String separator, sharedPartName;
         int min, max;
         boolean unique;
 
@@ -429,18 +432,22 @@ public class YajcoModelToBNFGrammarTranslator {
         Separator sepPattern = (Separator) part.getPattern(Separator.class);
         Range rangePattern = (Range) part.getPattern(Range.class);
         UniqueValues uniqueValuesPattern = (UniqueValues) part.getPattern(UniqueValues.class);
+        Shared sharedPattern = (Shared) part.getPattern(Shared.class);
 
         unique = uniqueValuesPattern != null;
+        sharedPartName = sharedPattern != null ? sharedPattern.getValue() : "";
         separator = sepPattern != null ? sepPattern.getValue() : "";
         min = rangePattern != null ? rangePattern.getMinOccurs() : 0;
         max = rangePattern != null ? rangePattern.getMaxOccurs() : Range.INFINITY;
 
-        NonterminalSymbol nonterminal = grammar.getSequenceNonterminalFor(symbol.toString(), min, max, separator, unique);
+        NonterminalSymbol nonterminal = grammar.getSequenceNonterminalFor(symbol.toString(), min, max, separator, unique, sharedPartName);
         if (nonterminal != null) {
             return new NonterminalSymbol(nonterminal.getName(), cmpType, nonterminal.getVarName());
         } else {
             if (cmpType instanceof OptionalType) {
                 return symbol;
+            } else if (sharedPattern != null) {
+                return createSequenceProductionWithSharedFor(symbol, min, max, separator, cmpType, sharedPattern);
             } else {
                 return createSequenceProductionFor(symbol, min, max, separator, cmpType, unique);
             }
@@ -450,7 +457,7 @@ public class YajcoModelToBNFGrammarTranslator {
     private NonterminalSymbol translateOptionalComponentTypePropertyRef(ComponentType cmpType, PropertyReferencePart part) {
         Type innerType = cmpType.getComponentType();
         Symbol symbol;
-        String separator;
+        String separator, sharedPartName;
         int min, max;
         boolean unique;
 
@@ -468,17 +475,23 @@ public class YajcoModelToBNFGrammarTranslator {
         Separator sepPattern = (Separator) part.getPattern(Separator.class);
         Range rangePattern = (Range) part.getPattern(Range.class);
         UniqueValues uniqueValuesPattern = (UniqueValues) part.getPattern(UniqueValues.class);
+        Shared sharedPattern = (Shared) part.getPattern(Shared.class);
 
         unique = uniqueValuesPattern != null;
+        sharedPartName = sharedPattern != null ? sharedPattern.getValue() : "";
         separator = sepPattern != null ? sepPattern.getValue() : "";
         min = rangePattern != null ? rangePattern.getMinOccurs() : 1;
         max = rangePattern != null ? rangePattern.getMaxOccurs() : Range.INFINITY;
 
-        NonterminalSymbol nonterminal = grammar.getSequenceNonterminalFor(symbol.toString(), min, max, separator, unique);
+        NonterminalSymbol nonterminal = grammar.getSequenceNonterminalFor(symbol.toString(), min, max, separator, unique, sharedPartName);
         if (nonterminal != null) {
             return new NonterminalSymbol(nonterminal.getName(), cmpType, nonterminal.getVarName());
         } else {
-            return createSequenceProductionFor(symbol, min, max, separator, cmpType, unique);
+            if (sharedPattern != null) {
+                return createSequenceProductionWithSharedFor(symbol, min, max, separator, cmpType, sharedPattern);
+            } else {
+                return createSequenceProductionFor(symbol, min, max, separator, cmpType, unique);
+            }
         }
     }
 
@@ -558,7 +571,48 @@ public class YajcoModelToBNFGrammarTranslator {
         }
 
         grammar.addProduction(production);
-        grammar.addSequence(symbol.toString(), minOccurs, maxOccurs, separator, unique, lhs);
+        grammar.addSequence(symbol.toString(), minOccurs, maxOccurs, separator, unique, null, lhs);
+
+        return new NonterminalSymbol(lhs.getName(), cmpType);
+    }
+
+    private NonterminalSymbol createSequenceProductionWithSharedFor(Symbol symbol, int minOccurs, int maxOccurs, String separator, ComponentType cmpType, Shared shared) {
+        NonterminalSymbol nonterminal = grammar.getSequenceNonterminalFor(symbol.toString(), minOccurs, maxOccurs, separator, false, null);
+        if (nonterminal == null) {
+            nonterminal = createSequenceProductionFor(symbol, minOccurs, maxOccurs, separator, cmpType, false);
+        }
+
+        this.sharedPartName = Character.toUpperCase(shared.getValue().charAt(0)) + shared.getValue().substring(1);
+
+        NonterminalSymbol lhs = grammar.getSequenceNonterminalFor(nonterminal.toString(), minOccurs, maxOccurs, separator, false, null);
+        if (lhs == null) {
+            lhs = new NonterminalSymbol(symbol.getName() + "Array" + arrayID++ + DEFAUL_SYMBOL_WITH_SHARED_SUFFIX, new ListTypeWithShared(cmpType.getComponentType()));
+        }
+        grammar.addNonterminal(lhs);
+
+        TerminalSymbol sepTerminal = getTerminalFor(shared.getSeparator());
+        Production production = new Production(lhs);
+
+        NonterminalSymbol rhsNonterminal = new NonterminalSymbol(lhs.getName(), lhs.getReturnType(), DEFAULT_LIST_NAME);
+        Alternative alternative1 = new Alternative();
+        Alternative alternative2 = new Alternative();
+
+        alternative1.addSymbol(rhsNonterminal);
+        if (sepTerminal != null) {
+            alternative1.addSymbol(sepTerminal);
+        }
+        alternative1.addSymbol(nonterminal);
+        nonterminal.setVarName(DEFAULT_ELEMENT_NAME);
+        alternative1.addActions(SemLangFactory.createAddElementToCollectionAndReturnActions(rhsNonterminal, nonterminal));
+
+        alternative2.addSymbol(nonterminal);
+        alternative2.addActions(SemLangFactory.createListWithSharedAndAddElementAndReturnActions(cmpType.getComponentType(), DEFAULT_LIST_NAME, nonterminal));
+
+        production.addAlternative(alternative1);
+        production.addAlternative(alternative2);
+
+        grammar.addProduction(production);
+        grammar.addSequence(nonterminal.toString(), 1, Range.INFINITY, shared.getSeparator(), false, shared.getValue(), lhs);
 
         return new NonterminalSymbol(lhs.getName(), cmpType);
     }
