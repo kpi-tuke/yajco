@@ -76,6 +76,7 @@ public class BeaverParserGenerator {
 //			writer.println("%import \"" + Utilities.getFullConceptClassName(language, concept) + "\";");
 //		}
         writer.println("%import \"" + parserPackageName + ".SymbolListImpl\";");
+        writer.println("%import \"" + parserPackageName + ".SymbolLinkedHashSetImpl\";");
         //DOMINIK TEST
         writer.println("%import \"" + parserPackageName + ".SymbolWrapper\";");
         // END
@@ -251,7 +252,7 @@ public class BeaverParserGenerator {
                 // problem v beaver-i sposobuje nutnost tohoto riadku
                 return parserPackageName + ".SymbolListImpl" + "<" + innerTypeString + ">";
                 //return "java.util.List<" + innerTypeString + ">";
-            } else if (type instanceof SetType) {
+            } else if (type instanceof SetType || type instanceof OrderedSetType) {
                 return "java.util.Set<" + innerTypeString + ">";
             } else if (type instanceof OptionalType) {
                 return "java.util.Optional<" + innerTypeString + ">";

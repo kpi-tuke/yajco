@@ -85,6 +85,10 @@ public final class SemLangFactory {
 		return createCollectionAndReturnActions(new ListType(innerType));
 	}
 
+	public static List<Action> createOrderedSetAndReturnActions(Type innerType) {
+		return createCollectionAndReturnActions(new OrderedSetType(innerType));
+	}
+
 	public static List<Action> createListAndAddElementActions(Type varType, String varName, Symbol symbol) {
 		return createCollectionAndAddElementsActions(varName, new ListType(varType), Collections.singletonList(new RValue(symbol)));
 	}
@@ -93,12 +97,20 @@ public final class SemLangFactory {
 		return createCollectionAndAddElementsAndReturnActions(varName, new ListType(varType), Collections.singletonList(new RValue(symbol)));
 	}
 
+	public static List<Action> createOrderedSetAndAddElementAndReturnActions(Type varType, String varName, Symbol symbol) {
+		return createCollectionAndAddElementsAndReturnActions(varName, new OrderedSetType(varType), Collections.singletonList(new RValue(symbol)));
+	}
+
 	public static List<Action> createListAndAddElementsActions(Type varType, String varName, List<Symbol> symbols) {
 		return createCollectionAndAddElementsActions(varName, new ListType(varType), simpleSymbolsToRValues(symbols));
 	}
 
 	public static List<Action> createListAndAddElementsAndReturnActions(Type varType, String varName, List<Symbol> symbol) {
 		return createCollectionAndAddElementsAndReturnActions(varName, new ListType(varType), simpleSymbolsToRValues(symbol));
+	}
+
+	public static List<Action> createOrderedSetAndAddElementsAndReturnActions(Type varType, String varName, List<Symbol> symbol) {
+		return createCollectionAndAddElementsAndReturnActions(varName, new OrderedSetType(varType), simpleSymbolsToRValues(symbol));
 	}
 
 	private static List<Action> createReturnValueActions(RValue value) {
