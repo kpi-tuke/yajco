@@ -27,6 +27,10 @@ public final class SemLangFactory {
 		return createOptionalClassInstanceAndReturnActions(symbolsToRValues(symbols, null));
 	}
 
+	public static List<Action> createNewStringTokenClassInstanceAndReturnActions(List<Symbol> symbols) {
+		return createStringTokenClassInstanceAndReturnActions(symbolsToRValues(symbols, null));
+	}
+
 	public static List<Action> createFactoryClassInstanceActions(String classType, String factoryMethodName, List<Symbol> symbols) {
 		return createClassInstanceActions(classType, factoryMethodName, symbolsToRValues(symbols, null));
 	}
@@ -140,6 +144,12 @@ public final class SemLangFactory {
 		return actions;
 	}
 
+	private static List<Action> createStringTokenClassInstanceActions(RValue parameter) {
+		List<Action> actions = new ArrayList<Action>(1);
+		actions.add(new CreateSymbolStringTokenClassInstanceAction(parameter));
+		return actions;
+	}
+
 	private static List<Action> createClassInstanceAndReturnActions(String classType, String factoryMethodName, List<RValue> parameters) {
 		List<Action> actions = new ArrayList<Action>(1);
 		actions.add(new ReturnAction(new RValue(createClassInstanceActions(classType, factoryMethodName, parameters).get(0))));
@@ -153,6 +163,12 @@ public final class SemLangFactory {
 		} else {
 			actions.add(new ReturnAction(new RValue(createOptionalClassInstanceActions(null).get(0))));
 		}
+		return actions;
+	}
+
+	private static List<Action> createStringTokenClassInstanceAndReturnActions(List<RValue> parameters) {
+		List<Action> actions = new ArrayList<Action>(1);
+		actions.add(new ReturnAction(new RValue(createStringTokenClassInstanceActions(parameters.get(0)).get(0))));
 		return actions;
 	}
 

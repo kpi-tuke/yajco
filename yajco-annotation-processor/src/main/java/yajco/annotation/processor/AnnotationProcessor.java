@@ -66,6 +66,12 @@ public class AnnotationProcessor extends AbstractProcessor {
      */
     private Set<Concept> conceptsToProcess = new HashSet<>();
 
+    /**
+     * Used for creation of string tokens defined by @StringToken annotation.
+     */
+    private int stringTokenId = 1;
+    private static final String DEFAULT_STRING_TOKEN_NAME = "STRING_TOKEN";
+
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
         // Leave only @Parser annotation for later processing.
@@ -537,6 +543,7 @@ public class AnnotationProcessor extends AbstractProcessor {
      */
     private void processParameter(Concept concept, Notation notation, VariableElement paramElement) {
         Type type = getType(paramElement.asType());
+
         if (type instanceof OptionalType) {
             OptionalPart optionalPart = processOptionalParameter(concept, paramElement);
             notation.addPart(optionalPart);
@@ -550,9 +557,13 @@ public class AnnotationProcessor extends AbstractProcessor {
             TypeMirror typeMirror = paramElement.asType();
             References references = paramElement.getAnnotation(References.class);
             Token tokenAnnotation = paramElement.getAnnotation(Token.class);
-            BindingNotationPart part;
+            StringToken stringTokenAnnotation = paramElement.getAnnotation(StringToken.class);
+            BindingNotationPart part = null;
 
-            if (references != null) { // @References annotation.
+            if (stringTokenAnnotation != null) {
+                TokenDef tokenDef = createStringTokenDef(stringTokenAnnotation);
+                notation.addPart(new StringTokenPart(new TokenPart(tokenDef.getName())));
+            } else if (references != null) { // @References annotation.
                 //TODO: zatial nie je podpora pre polia referencii, treba to vsak doriesit
                 type = getSimpleType(typeMirror);
                 LocalVariablePart localVariablePart = new LocalVariablePart(paramName, type, paramElement);
@@ -570,7 +581,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                 notation.addPart(part);
             }
 
-            if (tokenAnnotation != null) {
+            if (tokenAnnotation != null && part != null) {
                 part.addPattern(new yajco.model.pattern.impl.Token(tokenAnnotation.value(), tokenAnnotation));
             }
 
@@ -594,7 +605,7 @@ public class AnnotationProcessor extends AbstractProcessor {
     private OptionalPart processOptionalParameter(Concept concept, VariableElement paramElement) {
         OptionalPart optionalPart = new OptionalPart(null);
 
-        // @ABefore annotation.
+        // @Before annotation.
         if (paramElement.getAnnotation(Before.class) != null) {
             for (String value : paramElement.getAnnotation(Before.class).value()) {
                 optionalPart.addPart(new TokenPart(value));
@@ -605,9 +616,13 @@ public class AnnotationProcessor extends AbstractProcessor {
         TypeMirror typeMirror = paramElement.asType();
         References references = paramElement.getAnnotation(References.class);
         Token tokenAnnotation = paramElement.getAnnotation(Token.class);
-        BindingNotationPart part;
+        StringToken stringTokenAnnotation = paramElement.getAnnotation(StringToken.class);
+        BindingNotationPart part = null;
 
-        if (references != null) { // @References annotation.
+        if (stringTokenAnnotation != null) {
+            TokenDef tokenDef = createStringTokenDef(stringTokenAnnotation);
+            optionalPart.addPart(new StringTokenPart(new TokenPart(tokenDef.getName())));
+        } else if (references != null) { // @References annotation.
             Type type;
             List<? extends TypeMirror> types = ((DeclaredType) typeMirror).getTypeArguments();
             if (processingEnv.getTypeUtils().asElement(typeMirror).toString().equals(Optional.class.getName())) {
@@ -629,7 +644,7 @@ public class AnnotationProcessor extends AbstractProcessor {
             optionalPart.addPart(part);
         }
 
-        if (tokenAnnotation != null) {
+        if (tokenAnnotation != null && part != null) {
             part.addPattern(new yajco.model.pattern.impl.Token(tokenAnnotation.value(), tokenAnnotation));
         }
 
@@ -642,7 +657,51 @@ public class AnnotationProcessor extends AbstractProcessor {
                 optionalPart.addPart(new TokenPart(value));
             }
         }
+
         return optionalPart;
+    }
+
+    /**
+     * Creates token for string token and adds it to language.
+     *
+     * @param stringTokenAnnotation StringToken annotation.
+     * @return TokenDef
+     */
+    private TokenDef createStringTokenDef(StringToken stringTokenAnnotation) {
+        String regex = formatStringTokenRegex(stringTokenAnnotation);
+        TokenDef tokenDef = null;
+
+        for (TokenDef token: language.getTokens()) {
+            if (token.getName().contains(DEFAULT_STRING_TOKEN_NAME) && token.getRegexp().equals(regex)) {
+                // Use existing string token with the same regex.
+                tokenDef = token;
+            }
+        }
+
+        if (tokenDef == null) {
+            tokenDef = new TokenDef(DEFAULT_STRING_TOKEN_NAME + "_" + stringTokenId++, regex);
+        }
+
+        // Add string token to language.
+        addToListAsSet(language.getTokens(), Collections.singletonList(tokenDef),false);
+
+        return tokenDef;
+    }
+
+    /**
+     * Formats regex from @StringToken annotation. Regex is used to match strings.
+     *
+     * @param stringTokenAnnotation StringToken annotation
+     * @return Regex for matching strings.
+     */
+    private String formatStringTokenRegex(StringToken stringTokenAnnotation) {
+        String delimiter = stringTokenAnnotation.delimiter();
+
+        if (delimiter.equals("\"") || delimiter.equals("'") || delimiter.equals("\\")) {
+            delimiter = "\\" + stringTokenAnnotation.delimiter();
+        }
+
+        return delimiter + "(?:\\\\" + delimiter + "|[^" + delimiter + "])*?" + delimiter;
     }
 
     /**
