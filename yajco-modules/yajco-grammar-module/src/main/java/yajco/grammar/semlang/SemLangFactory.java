@@ -3,6 +3,7 @@ package yajco.grammar.semlang;
 import yajco.grammar.NonterminalSymbol;
 import yajco.grammar.Symbol;
 import yajco.grammar.TerminalSymbol;
+import yajco.model.pattern.impl.QuotedString;
 import yajco.model.type.*;
 
 import java.util.ArrayList;
@@ -25,10 +26,6 @@ public final class SemLangFactory {
 
 	public static List<Action> createNewOptionalClassInstanceAndReturnActions(List<Symbol> symbols) {
 		return createOptionalClassInstanceAndReturnActions(symbolsToRValues(symbols, null));
-	}
-
-	public static List<Action> createNewStringTokenClassInstanceAndReturnActions(List<Symbol> symbols) {
-		return createStringTokenClassInstanceAndReturnActions(symbolsToRValues(symbols, null));
 	}
 
 	public static List<Action> createFactoryClassInstanceActions(String classType, String factoryMethodName, List<Symbol> symbols) {
@@ -144,12 +141,6 @@ public final class SemLangFactory {
 		return actions;
 	}
 
-	private static List<Action> createStringTokenClassInstanceActions(RValue parameter) {
-		List<Action> actions = new ArrayList<Action>(1);
-		actions.add(new CreateSymbolStringTokenClassInstanceAction(parameter));
-		return actions;
-	}
-
 	private static List<Action> createClassInstanceAndReturnActions(String classType, String factoryMethodName, List<RValue> parameters) {
 		List<Action> actions = new ArrayList<Action>(1);
 		actions.add(new ReturnAction(new RValue(createClassInstanceActions(classType, factoryMethodName, parameters).get(0))));
@@ -163,12 +154,6 @@ public final class SemLangFactory {
 		} else {
 			actions.add(new ReturnAction(new RValue(createOptionalClassInstanceActions(null).get(0))));
 		}
-		return actions;
-	}
-
-	private static List<Action> createStringTokenClassInstanceAndReturnActions(List<RValue> parameters) {
-		List<Action> actions = new ArrayList<Action>(1);
-		actions.add(new ReturnAction(new RValue(createStringTokenClassInstanceActions(parameters.get(0)).get(0))));
 		return actions;
 	}
 
@@ -240,7 +225,12 @@ public final class SemLangFactory {
 				TerminalSymbol terminal = (TerminalSymbol) symbol;
 				PrimitiveType primType = (PrimitiveType) terminal.getReturnType();
 				if (primType.getPrimitiveTypeConst() == PrimitiveTypeConst.STRING) {
-					rValues.add(new RValue(symbol));
+					QuotedString quoted = terminal.getPattern(QuotedString.class);
+					if (quoted != null) {
+						rValues.add(new RValue(new UnquoteStringAction(quoted.getDelimiter(), new RValue(symbol))));
+					} else {
+						rValues.add(new RValue(symbol));
+					}
 				} else {
 					rValues.add(new RValue(new ConvertStringToPrimitiveTypeAction(primType, new RValue(symbol))));
 				}

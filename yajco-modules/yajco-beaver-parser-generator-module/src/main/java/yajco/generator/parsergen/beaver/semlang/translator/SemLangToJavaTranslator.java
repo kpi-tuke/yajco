@@ -81,8 +81,8 @@ public class SemLangToJavaTranslator {
 			case CONVERT_LIST_WITH_SHARED_TO_COLLECTION:
 				translateConvertListWithSharedToCollectionAction((ConvertListWithSharedToCollectionAction) action, writer);
 				break;
-			case CREATE_SYMBOL_STRING_TOKEN_CLASS_INST:
-				translateCreateSymbolStringTokenClassInstanceAction((CreateSymbolStringTokenClassInstanceAction) action, writer);
+			case UNQUOTE_STRING:
+				translateUnquoteStringAction((UnquoteStringAction) action, writer);
 				break;
 			default:
 				throw new IllegalArgumentException("Unknown SemLang action detected: '" + action.getClass().getCanonicalName() + "'!");
@@ -260,13 +260,7 @@ public class SemLangToJavaTranslator {
 		}
 
 		for (int i = 0; i < action.getParameters().size(); i++) {
-			RValue rValue = action.getParameters().get(i);
-
-			if (rValue.getSymbol() != null && rValue.getSymbol().getName().contains("StringToken")) {
-				writer.print(rValue.getSymbol().getVarName() + ".getWrappedObject().getStringValue()");
-			} else {
-				translateRValue(action.getParameters().get(i), writer);
-			}
+			translateRValue(action.getParameters().get(i), writer);
 			if (i != (action.getParameters().size() - 1)) {
 				writer.print(", ");
 			}
@@ -284,10 +278,8 @@ public class SemLangToJavaTranslator {
 		}
 	}
 
-	private void translateCreateSymbolStringTokenClassInstanceAction(CreateSymbolStringTokenClassInstanceAction action, PrintStream writer) {
-		writer.print("new SymbolStringToken(");
-		writer.print(action.getParameter().getSymbol().getVarName());
-		writer.print(")");
+	private void translateUnquoteStringAction(UnquoteStringAction action, PrintStream writer) {
+		writer.print("QuotedStringUtils.unquote(" + action.getRValue().getSymbol().getVarName() + ")");
 	}
 
 	private void translateCreateEnumInstanceAction(CreateEnumInstanceAction action, PrintStream writer) {
@@ -307,12 +299,7 @@ public class SemLangToJavaTranslator {
 		if (action.getParameters().size() > 0) {
 			writer.print(", (Object)");
 			for (int i = 0; i < action.getParameters().size(); i++) {
-				RValue rValue = action.getParameters().get(i);
-				if (rValue.getSymbol() != null && rValue.getSymbol().getName().contains("StringToken")) {
-					writer.print(rValue.getSymbol().getVarName() + ".getWrappedObject().getStringValue()");
-				} else {
-					translateRValue(action.getParameters().get(i), writer);
-				}
+				translateRValue(action.getParameters().get(i), writer);
 				if (i != (action.getParameters().size() - 1)) {
 					writer.print(", ");
 				}

@@ -36,7 +36,7 @@ public class BeaverCompilerGenerator implements CompilerGenerator {
     private static final String SYMBOL_LIST_IMPL_CLASS_TEMPLATE = "/yajco/generator/parsergen/beaver/templates/SymbolListImplClassTemplate.vm";
     private static final String SYMBOL_LINKED_HASH_SET_IMPL_CLASS_TEMPLATE = "/yajco/generator/parsergen/beaver/templates/SymbolLinkedHashSetImplClassTemplate.vm";
     private static final String SYMBOL_LIST_IMPL_WITH_SHARED_CLASS_TEMPLATE = "/yajco/generator/parsergen/beaver/templates/SymbolListImplWithSharedClassTemplate.vm";
-    private static final String SYMBOL_STRING_TOKEN_CLASS_TEMPLATE = "/yajco/generator/parsergen/beaver/templates/SymbolStringTokenClassTemplate.vm";
+    private static final String QUOTED_STRING_UTILS_CLASS_TEMPLATE = "/yajco/generator/parsergen/beaver/templates/QuotedStringUtilsClassTemplate.vm";
     private static final String SYMBOL_WRAPPER_CLASS_TEMPLATE = "/yajco/generator/parsergen/beaver/templates/SymbolWrapperClassTemplate.vm";
     private static final BeaverParserGenerator beaverParGen = BeaverParserGenerator.getInstance();
     private static final YajcoModelToBNFGrammarTranslator modelToBNFGrammarTranslator = YajcoModelToBNFGrammarTranslator.getInstance();
@@ -134,11 +134,10 @@ public class BeaverCompilerGenerator implements CompilerGenerator {
         writer.flush();
         writer.close();
 
-        // trieda SymbolStringToken
-        //file = Utilities.createFile(filer, parserPackageName, "SymbolStringToken.java");
-        fileObject = filer.createSourceFile(parserPackageName + "." + "SymbolStringToken");
+        // trieda QuotedStringUtils
+        fileObject = filer.createSourceFile(parserPackageName + "." + "QuotedStringUtils");
         writer = fileObject.openWriter(); //new FileWriter(file);
-        writer.write(generateSymbolStringTokenClass(parserPackageName));
+        writer.write(generateQuotedStringUtilsClass(parserPackageName));
         writer.flush();
         writer.close();
 
@@ -269,11 +268,11 @@ public class BeaverCompilerGenerator implements CompilerGenerator {
         return writer.toString();
     }
 
-    private String generateSymbolStringTokenClass(String parserPackageName) throws IOException {
+    private String generateQuotedStringUtilsClass(String parserPackageName) throws IOException {
         VelocityContext context = new VelocityContext();
         context.put("parserPackageName", parserPackageName);
         StringWriter writer = new StringWriter();
-        engine.evaluate(context, writer, "", new InputStreamReader(getClass().getResourceAsStream(SYMBOL_STRING_TOKEN_CLASS_TEMPLATE)));
+        engine.evaluate(context, writer, "", new InputStreamReader(getClass().getResourceAsStream(QUOTED_STRING_UTILS_CLASS_TEMPLATE)));
 
         return writer.toString();
     }

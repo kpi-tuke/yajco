@@ -78,7 +78,7 @@ public class BeaverParserGenerator {
         writer.println("%import \"" + parserPackageName + ".SymbolListImpl\";");
         writer.println("%import \"" + parserPackageName + ".SymbolLinkedHashSetImpl\";");
         writer.println("%import \"" + parserPackageName + ".SymbolListImplWithShared\";");
-        writer.println("%import \"" + parserPackageName + ".SymbolStringToken\";");
+        writer.println("%import \"" + parserPackageName + ".QuotedStringUtils\";");
         //DOMINIK TEST
         writer.println("%import \"" + parserPackageName + ".SymbolWrapper\";");
         // END
@@ -242,8 +242,6 @@ public class BeaverParserGenerator {
         } else if (type instanceof ReferenceType) {
             ReferenceType refType = (ReferenceType) type;
             return Utilities.getFullConceptClassName(language, refType.getConcept());
-        } else if (type instanceof StringTokenType) {
-            return parserPackageName + ".SymbolStringToken";
         } else if (type instanceof ComponentType) {
             ComponentType innerType = (ComponentType) type;
             //DOMINIK TEST

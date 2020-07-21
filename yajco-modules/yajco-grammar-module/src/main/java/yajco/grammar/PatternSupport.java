@@ -18,14 +18,15 @@ public abstract class PatternSupport {
 		}
 	}
 
-	public Pattern getPattern(Class<? extends Pattern> clazz) {
+	public <T extends Pattern> T getPattern(Class<T> clazz) {
 		if (clazz == null) {
 			return null;
 		}
 
 		for (Pattern pattern : patterns) {
 			if (pattern.getClass().equals(clazz)) {
-				return pattern;
+				//noinspection unchecked
+				return (T) pattern;
 			}
 		}
 

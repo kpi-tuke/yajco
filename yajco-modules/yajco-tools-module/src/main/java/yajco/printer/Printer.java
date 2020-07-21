@@ -191,15 +191,7 @@ public class Printer {
 			printBindingNotationPart(writer, (BindingNotationPart) part);
 		} else if (part instanceof OptionalPart) {
 			printOptionalPart(writer, (OptionalPart) part);
-		} else if (part instanceof StringTokenPart) {
-			printStringTokenPart(writer, (StringTokenPart) part);
 		}
-	}
-
-	private void printStringTokenPart(PrintWriter writer, StringTokenPart part) {
-		writer.write("String token part [");
-		writer.write(part.getTokenPart().toString());
-		writer.write("]");
 	}
 
 	private void printOptionalPart(PrintWriter writer, OptionalPart part) {
@@ -281,7 +273,9 @@ public class Printer {
 			printUniqueValues(writer, (UniqueValues)pattern);
 		} else if(pattern instanceof Shared) {
 			printShared(writer, (Shared) pattern);
-		} else {
+		} else if(pattern instanceof QuotedString) {
+			printQuotedString(writer, (QuotedString) pattern);
+		}else {
 			throw new PrinterException("Not supported pattern " + pattern.getClass());
 		}
 	}
@@ -363,6 +357,13 @@ public class Printer {
 		writer.print(")");
 	}
 
+	private void printQuotedString(PrintWriter writer, QuotedString pattern) {
+		writer.print("Quoted string");
+		writer.print("(");
+		writer.print("\"" + escape(pattern.getDelimiter()) + "\"");
+		writer.print(")");
+	}
+
 	private void printIndent(PrintWriter writer, Indent indent) {
 		writer.print("Indent");
 	}
@@ -418,4 +419,13 @@ public class Printer {
 		writer.print("\"" + languageSetting.getValue().replaceAll("\"", "\\\"") + "\"\n");
 	}
 
+	private static String escape(String s){
+		return s.replace("\\", "\\\\")
+				.replace("\t", "\\t")
+				.replace("\b", "\\b")
+				.replace("\n", "\\n")
+				.replace("\r", "\\r")
+				.replace("\f", "\\f")
+				.replace("\"", "\\\"");
+	}
 }

@@ -25,8 +25,6 @@ public class YajcoModelToBNFGrammarTranslator {
     private static final String DEFAULT_SET_NAME = "set";
     private static final String DEFAULT_ELEMENT_NAME = "elem";
     private static final String DEFAUL_SYMBOL_WITH_SHARED_SUFFIX = "WithSharedPart";
-    private static final String DEFAULT_STRING_TOKEN_NAME = "STRING_TOKEN";
-    private static final String DEFAULT_STRING_TOKEN_SYMBOL_NAME = "StringToken";
     private static final YajcoModelToBNFGrammarTranslator instance = new YajcoModelToBNFGrammarTranslator();
     private Language language;
     private Grammar grammar;
@@ -177,9 +175,6 @@ public class YajcoModelToBNFGrammarTranslator {
             Symbol symbol;
             if (part instanceof TokenPart) {
                 symbol = translateTokenNotationPart((TokenPart) part);
-            } else if (part instanceof StringTokenPart) {
-                symbol = translateStringTokenNotationPart((StringTokenPart) part, false);
-                parameters.add(symbol);
             } else if (part instanceof PropertyReferencePart) {
                 symbol = translatePropertyRefNotationPart((PropertyReferencePart) part);
                 parameters.add(symbol);
@@ -215,53 +210,10 @@ public class YajcoModelToBNFGrammarTranslator {
         return alternative;
     }
 
-    private Symbol translateStringTokenNotationPart(StringTokenPart stringTokenPart, boolean optional) {
-        List<Alternative> alternatives = new ArrayList<Alternative>();
-        List<Symbol> parameters = new ArrayList<Symbol>();
-        Alternative alternative = new Alternative();
-
-        Symbol symbol = translateTokenNotationPart(stringTokenPart.getTokenPart());
-        if (stringTokenPart.getTokenPart().getToken().contains(DEFAULT_STRING_TOKEN_NAME)) {
-            symbol.setVarName(DEFAULT_VAR_NAME);
-            parameters.add(new TerminalSymbol(symbol.getName(), new PrimitiveType(PrimitiveTypeConst.STRING), DEFAULT_VAR_NAME));
-        }
-        if (symbol != null) {
-            alternative.addSymbol(symbol);
-        }
-
-        alternative.addActions(SemLangFactory.createNewStringTokenClassInstanceAndReturnActions(parameters));
-        alternatives.add(alternative);
-
-        if (optional) {
-            parameters = new ArrayList<Symbol>();
-            Alternative emptyAlternative = new Alternative();
-            emptyAlternative.addSymbols(parameters);
-            emptyAlternative.addActions(SemLangFactory.createNewOptionalClassInstanceAndReturnActions(parameters));
-            alternatives.add(emptyAlternative);
-        }
-
-        String stringTokenId = symbol != null ? symbol.getName().split("_")[2] : "";
-
-        NonterminalSymbol nonterminalSymbol = new NonterminalSymbol(DEFAULT_STRING_TOKEN_SYMBOL_NAME + "_" + stringTokenId, new StringTokenType(), DEFAULT_ELEMENT_NAME);
-        Production existingProduction = grammar.getProduction(nonterminalSymbol);
-
-        if (existingProduction != null) {
-            grammar.addNonterminal(existingProduction.getLhs());
-            grammar.addProduction(existingProduction);
-            return existingProduction.getLhs();
-        } else {
-            grammar.addProduction(new Production(nonterminalSymbol, alternatives));
-            grammar.addNonterminal(nonterminalSymbol);
-            return nonterminalSymbol;
-        }
-
-    }
 
     private Symbol translateOptionalPart(Concept concept, OptionalPart optionalPart) {
         for (NotationPart notationPart : optionalPart.getParts()) {
-            if (notationPart instanceof StringTokenPart) {
-                return translateStringTokenNotationPart((StringTokenPart) notationPart, true);
-            } else if (notationPart instanceof LocalVariablePart) {
+            if (notationPart instanceof LocalVariablePart) {
                 return translateOptionalLocalVariablePart(concept, (LocalVariablePart) notationPart);
             } else if (notationPart instanceof PropertyReferencePart) {
                 Symbol conceptNonterminal = translateOptionalPropertyReferencePart(concept, optionalPart, (PropertyReferencePart) notationPart);
@@ -433,6 +385,8 @@ public class YajcoModelToBNFGrammarTranslator {
 
         if (symbol != null) {
             symbol.setVarName(part.getProperty().getName());
+            for (Pattern pattern : part.getPatterns())
+                symbol.addPattern(pattern);
         }
         return symbol;
     }

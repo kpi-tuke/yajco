@@ -560,10 +560,7 @@ public class AnnotationProcessor extends AbstractProcessor {
             StringToken stringTokenAnnotation = paramElement.getAnnotation(StringToken.class);
             BindingNotationPart part = null;
 
-            if (stringTokenAnnotation != null) {
-                TokenDef tokenDef = createStringTokenDef(stringTokenAnnotation);
-                notation.addPart(new StringTokenPart(new TokenPart(tokenDef.getName())));
-            } else if (references != null) { // @References annotation.
+            if (references != null) { // @References annotation.
                 //TODO: zatial nie je podpora pre polia referencii, treba to vsak doriesit
                 type = getSimpleType(typeMirror);
                 LocalVariablePart localVariablePart = new LocalVariablePart(paramName, type, paramElement);
@@ -581,8 +578,11 @@ public class AnnotationProcessor extends AbstractProcessor {
                 notation.addPart(part);
             }
 
-            if (tokenAnnotation != null && part != null) {
+            if (tokenAnnotation != null) {
                 part.addPattern(new yajco.model.pattern.impl.Token(tokenAnnotation.value(), tokenAnnotation));
+            } else if (stringTokenAnnotation != null) {
+                TokenDef tokenDef = createStringTokenDef(stringTokenAnnotation);
+                part.addPattern(new yajco.model.pattern.impl.Token(tokenDef.getName(), tokenAnnotation));
             }
 
             // Add notation part pattern from annotations (NotationPartPattern).
@@ -617,12 +617,9 @@ public class AnnotationProcessor extends AbstractProcessor {
         References references = paramElement.getAnnotation(References.class);
         Token tokenAnnotation = paramElement.getAnnotation(Token.class);
         StringToken stringTokenAnnotation = paramElement.getAnnotation(StringToken.class);
-        BindingNotationPart part = null;
+        BindingNotationPart part;
 
-        if (stringTokenAnnotation != null) {
-            TokenDef tokenDef = createStringTokenDef(stringTokenAnnotation);
-            optionalPart.addPart(new StringTokenPart(new TokenPart(tokenDef.getName())));
-        } else if (references != null) { // @References annotation.
+        if (references != null) { // @References annotation.
             Type type;
             List<? extends TypeMirror> types = ((DeclaredType) typeMirror).getTypeArguments();
             if (processingEnv.getTypeUtils().asElement(typeMirror).toString().equals(Optional.class.getName())) {
@@ -644,8 +641,11 @@ public class AnnotationProcessor extends AbstractProcessor {
             optionalPart.addPart(part);
         }
 
-        if (tokenAnnotation != null && part != null) {
+        if (tokenAnnotation != null) {
             part.addPattern(new yajco.model.pattern.impl.Token(tokenAnnotation.value(), tokenAnnotation));
+        } else if (stringTokenAnnotation != null) {
+            TokenDef tokenDef = createStringTokenDef(stringTokenAnnotation);
+            part.addPattern(new yajco.model.pattern.impl.Token(tokenDef.getName(), tokenAnnotation));
         }
 
         // Add notation part pattern from annotations (NotationPartPattern).
