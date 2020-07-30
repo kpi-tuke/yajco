@@ -513,14 +513,19 @@ public class YajcoModelToBNFGrammarTranslator {
             }
         } else {
             int symID = 1;
-            List<Symbol> symbols = new ArrayList<Symbol>(maxOccurs);
+            List<Symbol> symbols = new ArrayList<>(maxOccurs);
             for (int i = 0; i < minOccurs; i++) {
                 symbols.add(symbol instanceof NonterminalSymbol ? new NonterminalSymbol(symbol.getName(), symbol.getReturnType(), DEFAULT_VAR_NAME + symID++) : new TerminalSymbol(symbol.getName(), symbol.getReturnType(), DEFAULT_VAR_NAME + symID++));
             }
 
-            for (int i = minOccurs; i <= maxOccurs; i++) {
+            for (int occurrenceIndex = minOccurs; occurrenceIndex <= maxOccurs; occurrenceIndex++) {
                 Alternative alternative = new Alternative();
-                alternative.addSymbols(symbols);
+                for (int symbolIndex = 0; symbolIndex < symbols.size(); symbolIndex++) {
+                    if (sepTerminal != null && symbolIndex > 0) {
+                        alternative.addSymbol(sepTerminal);
+                    }
+                    alternative.addSymbol(symbols.get(symbolIndex));
+                }
                 alternative.addActions(SemLangFactory.createListAndAddElementsAndReturnActions(cmpType.getComponentType(), DEFAULT_LIST_NAME, symbols));
                 production.addAlternative(alternative);
 
