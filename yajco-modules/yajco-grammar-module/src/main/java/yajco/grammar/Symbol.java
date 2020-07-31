@@ -4,10 +4,10 @@ import java.util.List;
 import yajco.model.pattern.Pattern;
 import yajco.model.type.Type;
 
-public abstract class Symbol extends PatternSupport {
+public abstract class Symbol extends PatternSupport implements Cloneable {
 
-	private String name;
-	private Type returnType;
+	private final String name;
+	private final Type returnType;
 	private String varName;
 
 	public Symbol(String name, Type returnType) {
@@ -29,6 +29,19 @@ public abstract class Symbol extends PatternSupport {
 		this.varName = varName;
 	}
 
+	/**
+	 * @return shallow copy
+	 * @throws RuntimeException if {@link CloneNotSupportedException} was thrown
+	 */
+	@Override
+	public Symbol clone() throws RuntimeException {
+		try {
+			return (Symbol) super.clone();
+		} catch (CloneNotSupportedException e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public String getName() {
 		return name;
 	}
@@ -43,5 +56,10 @@ public abstract class Symbol extends PatternSupport {
 
 	public void setVarName(String varName) {
 		this.varName = varName;
+	}
+
+	public Symbol withVarName(String varName) {
+		setVarName(varName);
+		return this;
 	}
 }
