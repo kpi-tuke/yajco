@@ -515,9 +515,7 @@ public class YajcoModelToBNFGrammarTranslator {
             Alternative alternative3 = new Alternative();
 
             alternative1.addSymbol(rhsNonterminal);
-            if (sepTerminal != null) {
-                alternative1.addSymbol(sepTerminal);
-            }
+            alternative1.addSymbol(sepTerminal);
             alternative1.addSymbol(symbol);
             alternative1.addActions(SemLangFactory.createAddElementToCollectionAndReturnActions(rhsNonterminal, symbol));
 
@@ -559,7 +557,7 @@ public class YajcoModelToBNFGrammarTranslator {
             for (int occurrenceIndex = minOccurs; occurrenceIndex <= maxOccurs; occurrenceIndex++) {
                 Alternative alternative = new Alternative();
                 for (int symbolIndex = 0; symbolIndex < symbols.size(); symbolIndex++) {
-                    if (sepTerminal != null && symbolIndex > 0) {
+                    if (symbolIndex > 0) {
                         alternative.addSymbol(sepTerminal);
                     }
                     alternative.addSymbol(symbols.get(symbolIndex));
