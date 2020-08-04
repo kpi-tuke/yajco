@@ -2,9 +2,10 @@
 #set( $tokenManagerClassName = $parserJavaCCPackageName + "." + $parserClassName + "TokenManager")
 package $parserPackageName;
 
-public class $parserClassName {
+public class $parserClassName implements yajco.generator.parsergen.Parser<$mainElementName, ParseException> {
   private static $parserJavaCCClassName _parser;
 
+  @Override
   public $mainElementName parse(String input) throws ParseException {
     $tokenManagerClassName tm = new $tokenManagerClassName(input);
     if (_parser == null) {
@@ -23,6 +24,7 @@ public class $parserClassName {
     }
   }
 
+  @Override
   public $mainElementName parse(java.io.Reader reader) throws ParseException {
     try {
       return parse(readAsString(reader));

@@ -9,9 +9,10 @@ package $parserClassPackageName;
 
 import ${parserPackageName}.$scannerClassName;
 
-public class $parserClassName {
+public class $parserClassName implements yajco.generator.parsergen.Parser<$mainElementClassName, ParseException> {
 	private static ${parserPackageName}.$parserClassName parser;
 
+	@Override
 	public $mainElementClassName parse(String input) throws ParseException {
 		$scannerClassName scanner = new ${scannerClassName}(input);
 		if (parser == null) {
@@ -30,6 +31,7 @@ public class $parserClassName {
 		}
 	}
 
+	@Override
 	public $mainElementClassName parse(java.io.Reader reader) throws ParseException {
 		try {
 			return parse(readAsString(reader));

@@ -7,9 +7,10 @@
 ## Input - translatorClassName
 package $parserClassPackageName;
 
-public class $parserClassName {
+public class $parserClassName implements yajco.generator.parsergen.Parser<$mainElementClassName, LisaParseException> {
 	private static ${parserPackageName}.$parserClassName parser;
 
+	@Override
 	public $mainElementClassName parse(String input) throws LisaParseException {
 		java.io.ByteArrayInputStream is = new java.io.ByteArrayInputStream(input.getBytes());
 		try {
@@ -30,6 +31,7 @@ public class $parserClassName {
                 return null;
 	}
 
+	@Override
 	public $mainElementClassName parse(java.io.Reader reader) throws LisaParseException {
 		try {
 			return parse(readAsString(reader));

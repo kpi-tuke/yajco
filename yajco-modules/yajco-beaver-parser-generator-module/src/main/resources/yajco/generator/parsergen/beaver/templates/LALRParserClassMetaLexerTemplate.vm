@@ -10,13 +10,15 @@ package $parserClassPackageName;
 import java.io.StringReader;
 import ${parserPackageName}.$scannerClassName;
 
-public class $parserClassName {
+public class $parserClassName implements yajco.generator.parsergen.Parser<$mainElementClassName, LALRParseException> {
 	private static ${parserPackageName}.$parserClassName parser;
 
+	@Override
 	public $mainElementClassName parse(String input) throws LALRParseException {
 		return parse(new StringReader(input));
 	}
 
+	@Override
 	public $mainElementClassName parse(java.io.Reader reader) throws LALRParseException {
 		$scannerClassName scanner = new ${scannerClassName}(reader);
 		if (parser == null) {

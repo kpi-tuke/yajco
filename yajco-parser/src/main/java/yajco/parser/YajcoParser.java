@@ -2,9 +2,10 @@ package yajco.parser;
 
 import yajco.parser.beaver.YajcoParserScanner;
 
-public class YajcoParser {
+public class YajcoParser implements yajco.generator.parsergen.Parser<yajco.model.Language, LALRParseException> {
 	private static yajco.parser.beaver.YajcoParser parser;
 
+	@Override
 	public yajco.model.Language parse(String input) throws LALRParseException {
 		YajcoParserScanner scanner = new YajcoParserScanner(input);
 		if (parser == null) {
@@ -23,6 +24,7 @@ public class YajcoParser {
 		}
 	}
 
+	@Override
 	public yajco.model.Language parse(java.io.Reader reader) throws LALRParseException {
 		try {
 			return parse(readAsString(reader));
