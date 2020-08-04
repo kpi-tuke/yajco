@@ -28,7 +28,7 @@ public class ReferenceResolver {
 
     private static final String USER_OBJECT_KEY = "object";
 
-    private Map<Object, Element> xmlElements = new HashMap<Object, Element>();
+    private final IdentityHashMap<Object, Element> xmlElements = new IdentityHashMap<>(85);
 
     /**
      * During the processing is the last node root. At the end root node will become the root node of XML document.
