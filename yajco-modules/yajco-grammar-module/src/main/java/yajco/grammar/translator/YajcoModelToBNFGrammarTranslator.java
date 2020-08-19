@@ -548,10 +548,7 @@ public class YajcoModelToBNFGrammarTranslator {
             int symID = 1;
             List<Symbol> symbols = new ArrayList<>(maxOccurs);
             for (int i = 0; i < minOccurs; i++) {
-                symbols.add(symbol instanceof NonterminalSymbol
-                        ? new NonterminalSymbol(symbol.getName(), symbol.getReturnType(), DEFAULT_VAR_NAME + symID++)
-                        : new TerminalSymbol(symbol.getName(), symbol.getReturnType(), DEFAULT_VAR_NAME + symID++)
-                );
+                symbols.add(symbol.withVarName(DEFAULT_VAR_NAME + symID++));
             }
 
             for (int occurrenceIndex = minOccurs; occurrenceIndex <= maxOccurs; occurrenceIndex++) {
@@ -568,10 +565,7 @@ public class YajcoModelToBNFGrammarTranslator {
                 );
                 production.addAlternative(alternative);
 
-                symbols.add(symbol instanceof NonterminalSymbol
-                        ? new NonterminalSymbol(symbol.getName(), symbol.getReturnType(), DEFAULT_VAR_NAME + symID++)
-                        : new TerminalSymbol(symbol.getName(), symbol.getReturnType(), DEFAULT_VAR_NAME + symID++)
-                );
+                symbols.add(symbol.withVarName(DEFAULT_VAR_NAME + symID++));
             }
         }
 
