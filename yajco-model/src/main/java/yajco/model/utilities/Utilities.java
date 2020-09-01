@@ -161,13 +161,24 @@ public class Utilities {
         return false;
     }
 
-    public static Property getIdentifierProperty(Concept concept) {
+    /**
+     * Search for the property with the {@link Identifier} pattern in {@code concept} and recursively in its parents.
+     *
+     * @param concept the concept whose identifier property we are searching
+     * @return identifier property of {@code concept} (declared in {@code concept} or one of its super-concepts),
+     * or null if concept does not have an identifier field
+     */
+    public static PropertyInConcept getIdentifierProperty(Concept concept) {
+        if (concept == null) {
+            return null;
+        }
+
         for (Property property : concept.getAbstractSyntax()) {
             if (property.getPattern(Identifier.class) != null) {
-                return property;
+                return new PropertyInConcept(property, concept);
             }
         }
-        return null;
+        return getIdentifierProperty(concept.getParent());
     }
 
     public static String toUpperCaseNotation(String camelNotation) {

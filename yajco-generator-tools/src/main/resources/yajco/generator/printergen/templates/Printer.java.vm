@@ -371,7 +371,7 @@ public class $className extends ${visitorClassName}<PrintWriter> {
     #elseif( $className == $referenceTypeClassName )
      #if( $notationPartClassName == $localVariablePartClassName )
       ## je potrebne vypisat len hodnotu z Identifier property, kedze je to referencovane len menom v originali
-      #set( $propertyWithIdentifier = ${ModelUtilities.getIdentifierProperty(${type.concept})} )
+      #set( $propertyWithIdentifier = ${ModelUtilities.getIdentifierProperty(${type.concept}).property} )
         printLiteral(${getterExpr}.get${Utilities.toUpperCaseIdent(${propertyWithIdentifier.name})}(), p);
      #else
 ##      #set( $hasLocalParenthesesPattern = ${Utilities.hasClassInList(${$type.concept.patterns},${parenthesesPatternClassName})} )
