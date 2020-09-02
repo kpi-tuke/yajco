@@ -28,7 +28,7 @@ public class ReferenceResolver {
 
     private static final String USER_OBJECT_KEY = "object";
 
-    private Map<Object, Element> xmlElements = new HashMap<Object, Element>();
+    private final IdentityHashMap<Object, Element> xmlElements = new IdentityHashMap<>(85);
 
     /**
      * During the processing is the last node root. At the end root node will become the root node of XML document.
@@ -46,12 +46,12 @@ public class ReferenceResolver {
     private XPath xpath;
 
     /** Map from class to field with Identifier annotation. */
-    private Map<Class, Field> identifierFields = new HashMap<Class, Field>();
+    private final Map<Class<?>, Field> identifierFields = new HashMap<>();
 
     /** List of already processed classes without Identifier  annotation.
      * Created just for performance reasons for faster resolving of identifiers fields.
      */
-    private Set<Class> classesWithoutIdentifiers = new HashSet<Class>();
+    private final Set<Class<?>> classesWithoutIdentifiers = new HashSet<>();
 
     /** List of nodes requiring reference. */
     private List<ReferenceItem> nodesToResolve = new ArrayList<ReferenceItem>();
@@ -427,11 +427,30 @@ public class ReferenceResolver {
         throw new RuntimeException("Referencing field of type '" + type + "' not found in class '" + clazz + "'");
     }
 
-    private Field getIdentifierField(Class clazz) {
+    private <T> Field getIdentifierField(Class<T> clazz) {
+        return getIdentifierField(clazz, clazz);
+    }
+
+    /**
+     * You should call {@link #getIdentifierField(Class)} to start this search (with {@code clazz == requester}).
+     * <p>
+     * Search for the field annotated with {@link Identifier} in {@code clazz} and recursively in its parents (up to Object).
+     * All of the classes including and between requester and clazz will be cached in {@link #identifierFields}.
+     *
+     * @param clazz     the current class to check for the identifier field
+     * @param requester the original subclass whose identifier field we are searching
+     * @param <T>       type of the class this recursive search started with
+     * @return identifier field of requester (declared in {@code requester} or one of its superclasses),
+     * or null if requester does not have an identifier field
+     */
+    private <T> Field getIdentifierField(Class<? super T> clazz, Class<T> requester) {
+        if (clazz == null) { // == Object.class.getSuperclass()
+            return null;
+        }
         {
             Field field = identifierFields.get(clazz);
             if (field != null) {
-                return field;
+                return cacheIdentifierField(field, requester, clazz);
             }
             if (classesWithoutIdentifiers.contains(clazz)) {
                 return null;
@@ -440,13 +459,23 @@ public class ReferenceResolver {
 
         for (Field field : clazz.getDeclaredFields()) {
             if (field.getAnnotation(Identifier.class) != null) {
-                identifierFields.put(clazz, field);
-                return field;
+                return cacheIdentifierField(field, requester, clazz);
             }
         }
 
         classesWithoutIdentifiers.add(clazz);
-        return null;
+        return getIdentifierField(clazz.getSuperclass(), requester);
+    }
+
+    /**
+     * @return input field
+     */
+    private <T> Field cacheIdentifierField(Field field, Class<T> from, Class<? super T> to) {
+        // from <= clsToCache <= to
+        for (Class<? super T> clsToCache = from; clsToCache != null && to.isAssignableFrom(clsToCache); clsToCache = clsToCache.getSuperclass()) {
+            identifierFields.put(clsToCache, field);
+        }
+        return field;
     }
 
     //TODO: potom upravit nielen priamo na triedu ale aj predkov
