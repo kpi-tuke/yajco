@@ -410,12 +410,12 @@ public class YajcoModelToBNFGrammarTranslator {
     }
 
     private Symbol translateComponentTypePropertyRef(PropertyReferencePart part) {
-        ComponentType cmpType = (ComponentType) part.getProperty().getType();
-        Type innerType = cmpType.getComponentType();
-        Symbol symbol;
-        String separator, sharedPartName;
-        int min, max;
-        boolean unique;
+        final ComponentType cmpType = (ComponentType) part.getProperty().getType();
+        final Type innerType = cmpType.getComponentType();
+        final Symbol symbol;
+        final String separator, sharedPartName;
+        final int min, max;
+        final boolean unique;
 
         if (innerType instanceof ReferenceType) {
             ReferenceType refType = (ReferenceType) innerType;
@@ -442,26 +442,18 @@ public class YajcoModelToBNFGrammarTranslator {
         min = rangePattern != null ? rangePattern.getMinOccurs() : 0;
         max = rangePattern != null ? rangePattern.getMaxOccurs() : Range.INFINITY;
 
-        NonterminalSymbol nonterminal = grammar.getSequenceNonterminalFor(symbol.toString(), min, max, separator, unique, sharedPartName);
-        if (nonterminal != null) {
-            return new NonterminalSymbol(nonterminal.getName(), cmpType, nonterminal.getVarName());
-        } else {
-            if (cmpType instanceof OptionalType) {
-                return symbol;
-            } else if (sharedPattern != null) {
-                return createSequenceProductionWithSharedFor(symbol, min, max, separator, cmpType, sharedPattern);
-            } else {
-                return createSequenceProductionFor(symbol, min, max, separator, cmpType, unique);
-            }
+        if (cmpType instanceof OptionalType) {
+            return symbol;
         }
+        return getOrCreateSequenceProductionFor(symbol, min, max, separator, cmpType, unique, sharedPattern, sharedPartName);
     }
 
     private NonterminalSymbol translateOptionalComponentTypePropertyRef(ComponentType cmpType, PropertyReferencePart part) {
-        Type innerType = cmpType.getComponentType();
-        Symbol symbol;
-        String separator, sharedPartName;
-        int min, max;
-        boolean unique;
+        final Type innerType = cmpType.getComponentType();
+        final Symbol symbol;
+        final String separator, sharedPartName;
+        final int min, max;
+        final boolean unique;
 
         if (innerType instanceof ReferenceType) {
             ReferenceType refType = (ReferenceType) innerType;
@@ -485,15 +477,18 @@ public class YajcoModelToBNFGrammarTranslator {
         min = rangePattern != null ? rangePattern.getMinOccurs() : 1;
         max = rangePattern != null ? rangePattern.getMaxOccurs() : Range.INFINITY;
 
-        NonterminalSymbol nonterminal = grammar.getSequenceNonterminalFor(symbol.toString(), min, max, separator, unique, sharedPartName);
+        return getOrCreateSequenceProductionFor(symbol, min, max, separator, cmpType, unique, sharedPattern, sharedPartName);
+    }
+
+    private NonterminalSymbol getOrCreateSequenceProductionFor(Symbol symbol, int minOccurs, int maxOccurs, String separator, ComponentType cmpType, boolean unique, Shared sharedPattern, String sharedPartName) {
+        NonterminalSymbol nonterminal = grammar.getSequenceNonterminalFor(symbol.toString(), minOccurs, maxOccurs, separator, unique, sharedPartName);
         if (nonterminal != null) {
             return new NonterminalSymbol(nonterminal.getName(), cmpType, nonterminal.getVarName());
+        }
+        if (sharedPattern != null) {
+            return createSequenceProductionWithSharedFor(symbol, minOccurs, maxOccurs, separator, cmpType, sharedPattern);
         } else {
-            if (sharedPattern != null) {
-                return createSequenceProductionWithSharedFor(symbol, min, max, separator, cmpType, sharedPattern);
-            } else {
-                return createSequenceProductionFor(symbol, min, max, separator, cmpType, unique);
-            }
+            return createSequenceProductionFor(symbol, minOccurs, maxOccurs, separator, cmpType, unique);
         }
     }
 
