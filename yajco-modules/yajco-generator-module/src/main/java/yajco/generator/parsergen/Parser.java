@@ -9,7 +9,7 @@ import java.io.Reader;
  * @param <E> specific parser exception
  * @see java.util.ServiceLoader
  */
-public interface Parser<T, E extends Exception> {
+public interface Parser<T, E extends ParseException> {
 	T parse(String input) throws E;
 
 	T parse(Reader reader) throws E;
