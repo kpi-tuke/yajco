@@ -131,6 +131,7 @@ public class Antlr4CompilerGenerator implements CompilerGenerator {
                     yajco.model.utilities.Utilities.getFullConceptClassName(language, language.getConcepts().get(0))
                 ));
             }
+            CompilerGenerator.registerParserServiceProvider(parserFullClassName, filer);
 
             // Create parse exception
             try (Writer writer = filer.createSourceFile(parserPackageName + ".ParseException").openWriter()) {
