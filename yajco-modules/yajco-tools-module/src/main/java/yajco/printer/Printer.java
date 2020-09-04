@@ -191,7 +191,18 @@ public class Printer {
 			printBindingNotationPart(writer, (BindingNotationPart) part);
 		} else if (part instanceof OptionalPart) {
 			printOptionalPart(writer, (OptionalPart) part);
+		}  else if (part instanceof UnorderedParamPart) {
+			printUnorderedParamPart(writer, (UnorderedParamPart) part);
 		}
+	}
+
+	private void printUnorderedParamPart(PrintWriter writer, UnorderedParamPart part) {
+		writer.write("Unordered parameter: [ ");
+		for (NotationPart notationPart : part.getParts()) {
+			printNotationPart(writer, notationPart);
+			writer.write(" ");
+		}
+		writer.write("]");
 	}
 
 	private void printOptionalPart(PrintWriter writer, OptionalPart part) {

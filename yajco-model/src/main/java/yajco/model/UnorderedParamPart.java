@@ -7,23 +7,23 @@ import yajco.model.utilities.Utilities;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OptionalPart extends YajcoModelElement implements CompoundNotationPart {
+public class UnorderedParamPart extends YajcoModelElement implements CompoundNotationPart {
     private List<NotationPart> parts;
 
-    public OptionalPart(@Range(minOccurs = 1) NotationPart[] parts) {
+    public UnorderedParamPart(@Range(minOccurs = 1) NotationPart[] parts) {
         super(null);
         this.parts = Utilities.asList(parts);
     }
 
     @Exclude
-    public OptionalPart(Object sourceElement) {
+    public UnorderedParamPart(Object sourceElement) {
         super(sourceElement);
         parts = new ArrayList<NotationPart>();
     }
 
     //needed for XML binding
     @Exclude
-    private OptionalPart() {
+    private UnorderedParamPart() {
         super(null);
     }
 
@@ -39,7 +39,7 @@ public class OptionalPart extends YajcoModelElement implements CompoundNotationP
     public String toString() {
         StringBuilder sb = new StringBuilder();
         boolean first = true;
-        sb.append("Optional: [");
+        sb.append("Unordered param: [");
         for (NotationPart notationPart : parts) {
             if (!first) {
                 sb.append(", ");

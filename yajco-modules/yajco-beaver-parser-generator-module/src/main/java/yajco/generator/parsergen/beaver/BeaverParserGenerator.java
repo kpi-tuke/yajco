@@ -8,6 +8,9 @@ import yajco.grammar.bnf.Alternative;
 import yajco.grammar.bnf.Grammar;
 import yajco.grammar.bnf.Production;
 import yajco.grammar.translator.YajcoModelToBNFGrammarTranslator;
+import yajco.grammar.type.HashMapType;
+import yajco.grammar.type.ObjectType;
+import yajco.grammar.type.UnorderedParamType;
 import yajco.model.Language;
 import yajco.model.pattern.impl.Associativity;
 import yajco.model.pattern.impl.Operator;
@@ -79,6 +82,8 @@ public class BeaverParserGenerator {
         writer.println("%import \"" + parserPackageName + ".SymbolLinkedHashSetImpl\";");
         writer.println("%import \"" + parserPackageName + ".SymbolListImplWithShared\";");
         writer.println("%import \"" + parserPackageName + ".QuotedStringUtils\";");
+        writer.println("%import \"" + parserPackageName + ".SymbolHashMapImpl\";");
+        writer.println("%import \"" + parserPackageName + ".SymbolUnorderedParam\";");
         //DOMINIK TEST
         writer.println("%import \"" + parserPackageName + ".SymbolWrapper\";");
         // END
@@ -242,6 +247,8 @@ public class BeaverParserGenerator {
         } else if (type instanceof ReferenceType) {
             ReferenceType refType = (ReferenceType) type;
             return Utilities.getFullConceptClassName(language, refType.getConcept());
+        } else if (type instanceof ObjectType) {
+            return "Object";
         } else if (type instanceof ComponentType) {
             ComponentType innerType = (ComponentType) type;
             //DOMINIK TEST
@@ -256,6 +263,10 @@ public class BeaverParserGenerator {
                 //return "java.util.List<" + innerTypeString + ">";
             } else if (type instanceof SetType) {
                 return "java.util.Set<" + innerTypeString + ">";
+            } else if (type instanceof HashMapType) {
+                return parserPackageName + ".SymbolHashMapImpl" + "<String, " + innerTypeString + ">";
+            } else if (type instanceof UnorderedParamType) {
+                return parserPackageName + ".SymbolUnorderedParam";
             } else if (type instanceof OptionalType) {
                 return "java.util.Optional<" + innerTypeString + ">";
             } else {

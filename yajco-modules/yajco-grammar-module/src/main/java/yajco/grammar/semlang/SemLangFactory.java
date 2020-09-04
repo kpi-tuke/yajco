@@ -4,6 +4,8 @@ import yajco.grammar.NonterminalSymbol;
 import yajco.grammar.Symbol;
 import yajco.grammar.TerminalSymbol;
 import yajco.model.pattern.impl.QuotedString;
+import yajco.grammar.type.HashMapType;
+import yajco.grammar.type.UnorderedParamType;
 import yajco.model.type.*;
 
 import java.util.ArrayList;
@@ -26,6 +28,10 @@ public final class SemLangFactory {
 
 	public static List<Action> createNewOptionalClassInstanceAndReturnActions(List<Symbol> symbols) {
 		return createOptionalClassInstanceAndReturnActions(symbolsToRValues(symbols, null));
+	}
+
+	public static List<Action> createNewUnorderedParamClassInstanceAndReturnActions(List<Symbol> symbols, String varName) {
+		return createUnorderedParamClassInstanceAndReturnActions(symbolsToRValues(symbols, null), varName);
 	}
 
 	public static List<Action> createFactoryClassInstanceActions(String classType, String factoryMethodName, List<Symbol> symbols) {
@@ -118,6 +124,10 @@ public final class SemLangFactory {
 		return createCollectionAndAddElementsAndReturnActions(varName, new OrderedSetType(varType), simpleSymbolsToRValues(symbol));
 	}
 
+	public static List<Action> createHashMapAndPutElementsAndReturnActions(Type varType, String varName, List<Symbol> symbol) {
+		return createCollectionAndAddElementsAndReturnActions(varName, new HashMapType(varType), simpleSymbolsToRValues(symbol));
+	}
+
 	private static List<Action> createReturnValueActions(RValue value) {
 		List<Action> actions = new ArrayList<Action>(1);
 		actions.add(new ReturnAction(value));
@@ -154,6 +164,14 @@ public final class SemLangFactory {
 		} else {
 			actions.add(new ReturnAction(new RValue(createOptionalClassInstanceActions(null).get(0))));
 		}
+
+		return actions;
+	}
+
+	private static List<Action> createUnorderedParamClassInstanceAndReturnActions(List<RValue> parameters, String varName) {
+		List<Action> actions = new ArrayList<Action>(1);
+		CreateUnorderedParamClassInstanceAction action = new CreateUnorderedParamClassInstanceAction(parameters, varName);
+		actions.add(new ReturnAction(new RValue(action)));
 		return actions;
 	}
 
@@ -182,6 +200,15 @@ public final class SemLangFactory {
 		return actions;
 	}
 
+	private static List<Action> createPutElementsToCollectionActions(ComponentType collectionType, LValue lValue, List<RValue> rValues) {
+		List<Action> actions = new ArrayList<Action>(rValues.size());
+		for (RValue rValue : rValues) {
+			actions.add(new AddElementToCollectionAction(collectionType, lValue, rValue));
+		}
+
+		return actions;
+	}
+
 	private static List<Action> createAddElementsToCollectionAndReturnActions(LValue lValue, List<RValue> rValues) {
 		List<Action> actions = new ArrayList<Action>(1 + rValues.size());
 		actions.addAll(createAddElementsToCollectionActions(lValue, rValues));
@@ -205,7 +232,11 @@ public final class SemLangFactory {
 		List<Action> actions = new ArrayList<Action>(2 + rValues.size());
 		actions.add(new DefineVariableAction(collectionType, varName));
 		actions.add(new AssignAction(new LValue(varName), new RValue(new CreateCollectionInstanceAction(collectionType))));
-		actions.addAll(createAddElementsToCollectionActions(new LValue(varName), rValues));
+		if (collectionType instanceof HashMapType) {
+			actions.addAll(createPutElementsToCollectionActions(collectionType, new LValue(varName), rValues));
+		} else {
+			actions.addAll(createAddElementsToCollectionActions(new LValue(varName), rValues));
+		}
 
 		return actions;
 	}
@@ -239,6 +270,8 @@ public final class SemLangFactory {
 				Type type = nonterminal.getReturnType();
 				if (type instanceof OptionalType) {
 					rValues.add(new RValue(symbol));
+				} else if (type instanceof UnorderedParamType) {
+					rValues.add(new RValue(new ConvertUnorderedParamsToObjectAction(((ComponentType) type), new RValue(symbol))));
 				} else if (type instanceof ComponentType /*&& !(type instanceof ListType)*/) {
 					if (sharedPartName != null) {
 						rValues.add(new RValue(new ConvertListWithSharedToCollectionAction(((ComponentType) type), sharedPartName, new RValue(symbol))));
