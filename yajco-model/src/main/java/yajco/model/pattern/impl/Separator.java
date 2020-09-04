@@ -7,26 +7,26 @@ import yajco.model.pattern.NotationPartPattern;
 
 public class Separator extends NotationPartPattern {
 
-	private String value;
+    private String value;
 
-	@Before({"Separator", "("})
-	@After(")")
-	public Separator(String stringValue) {
-		super(null);
-		this.value = stringValue;
-	}
+    @Before({"Separator", "("})
+    @After(")")
+    public Separator(String stringValue) {
+        super(null);
+        this.value = stringValue;
+    }
 
-	@Exclude
-	public Separator() {
-		super(null);
-	}
+    @Exclude
+    public Separator() {
+        super(null);
+    }
 
-	@Exclude
-	public Separator(String value, Object sourceElement) {
-		super(sourceElement);
-	}
+    @Exclude
+    public Separator(String value, Object sourceElement) {
+        super(sourceElement);
+    }
 
-	public String getValue() {
-		return value;
-	}
+    public String getValue() {
+        return value;
+    }
 }

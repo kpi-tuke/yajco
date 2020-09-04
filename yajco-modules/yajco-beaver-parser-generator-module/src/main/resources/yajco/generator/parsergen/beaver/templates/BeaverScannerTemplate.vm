@@ -24,37 +24,37 @@ import beaver.Scanner;
 import ${parserPackage}.${parserName}.Terminals;
 
 public class $className extends Scanner {
-	private static final LinkedHashMap<Integer, Pattern> tokens = new LinkedHashMap<Integer, Pattern>();
-	private static final List<Pattern> skips = new ArrayList<Pattern>();
+    private static final LinkedHashMap<Integer, Pattern> tokens = new LinkedHashMap<Integer, Pattern>();
+    private static final List<Pattern> skips = new ArrayList<Pattern>();
 
-	private final Lexer lexer;
+    private final Lexer lexer;
 
-	static {
+    static {
 #foreach( $terminal in $terminals )
 #if( $terminal.name.startsWith($defaultSymbolName) )
 #set( $regex = $regexps.get($terminal) )
-		tokens.put((int) Terminals.${terminal.name}, Pattern.compile("$Utilities.encodeStringToJavaLiteral($Utilities.encodeStringIntoRegex($regex))"));
+        tokens.put((int) Terminals.${terminal.name}, Pattern.compile("$Utilities.encodeStringToJavaLiteral($Utilities.encodeStringIntoRegex($regex))"));
 #end
 #end
 
 #foreach( $terminal in $terminals )
 #if( !$terminal.name.startsWith($defaultSymbolName) )
 #set( $regex = $regexps.get($terminal) )
-		tokens.put((int) Terminals.${terminal.name}, Pattern.compile("$Utilities.encodeStringToJavaLiteral($regex)"));
+        tokens.put((int) Terminals.${terminal.name}, Pattern.compile("$Utilities.encodeStringToJavaLiteral($regex)"));
 #end
 #end
 
 #foreach( $skip in $language.skips )
-		skips.add(Pattern.compile("$Utilities.encodeStringToJavaLiteral($skip.regexp)"));
+        skips.add(Pattern.compile("$Utilities.encodeStringToJavaLiteral($skip.regexp)"));
 #end
-	}
+    }
 
-	public ${className}(String input) {
+    public ${className}(String input) {
         this.lexer = new Lexer(input, tokens, skips);
-	}
+    }
 
-	@Override
-	public Symbol nextToken() throws IOException, Scanner.Exception {
+    @Override
+    public Symbol nextToken() throws IOException, Scanner.Exception {
         try {
             Token token = this.lexer.nextToken();
             if (token.isEOF()) {
@@ -73,5 +73,5 @@ public class $className extends Scanner {
             this.lexer.consumeInput(1);
             throw exception;
         }
-	}
+    }
 }

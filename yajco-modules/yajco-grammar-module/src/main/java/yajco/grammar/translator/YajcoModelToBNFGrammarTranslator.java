@@ -229,17 +229,17 @@ public class YajcoModelToBNFGrammarTranslator {
 //        Operator opPattern = (Operator) concept.getPattern(Operator.class);
         Factory factoryPattern = (Factory) notation.getPattern(Factory.class);
         if (factoryPattern != null) {
-//			if (opPattern == null) {
+//            if (opPattern == null) {
             alternative.addActions(SemLangFactory.createRefResolverFactoryClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), factoryPattern.getName(), parameters, this.sharedPartName));
-//			} else {
-//				alternative.addActions(SemLangFactory.createFactoryClassInstanceAndReturnActions(Utilities.getFullConceptClassName(language, concept), factoryPattern.getName(), parameters));
-//			}
+//            } else {
+//                alternative.addActions(SemLangFactory.createFactoryClassInstanceAndReturnActions(Utilities.getFullConceptClassName(language, concept), factoryPattern.getName(), parameters));
+//            }
         } else {
-//			if (opPattern == null) {
+//            if (opPattern == null) {
             alternative.addActions(SemLangFactory.createRefResolverNewClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), parameters, this.sharedPartName));
-//			} else {
-//				alternative.addActions(SemLangFactory.createNewClassInstanceAndReturnActions(Utilities.getFullConceptClassName(language, concept), parameters));
-//			}
+//            } else {
+//                alternative.addActions(SemLangFactory.createNewClassInstanceAndReturnActions(Utilities.getFullConceptClassName(language, concept), parameters));
+//            }
         }
         this.sharedPartName = null;
 
@@ -766,12 +766,12 @@ public class YajcoModelToBNFGrammarTranslator {
         return newList;
     }
 
-    //	private List<Symbol> toSymbolList(Symbol symbol) {
-//		List<Symbol> list = new ArrayList<Symbol>(1);
-//		list.add(symbol);
+    //    private List<Symbol> toSymbolList(Symbol symbol) {
+//        List<Symbol> list = new ArrayList<Symbol>(1);
+//        list.add(symbol);
 //
-//		return list;
-//	}
+//        return list;
+//    }
     private TokenDef getDefinedToken(String name) {
         String upperCaseNotation = Utilities.toUpperCaseNotation(name);
         for (TokenDef token : language.getTokens()) {

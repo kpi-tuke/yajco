@@ -146,9 +146,9 @@ public class SemLangToLisaJavaTranslator {
     }
 
     private void translateConvertListToCollectionAction(ConvertListToCollectionAction action, PrintStream writer) {
-//		if (action.getResultCollectionType() instanceof ListType) {
-//			return;
-//		}
+//        if (action.getResultCollectionType() instanceof ListType) {
+//            return;
+//        }
 
         if (action.getResultCollectionType() instanceof ArrayType) {
             translateRValue(action.getRValue(), writer);

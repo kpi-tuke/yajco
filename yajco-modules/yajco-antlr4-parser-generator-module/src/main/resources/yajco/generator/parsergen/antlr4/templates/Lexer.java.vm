@@ -30,7 +30,7 @@ public class $lexerClassName implements TokenSource {
 #end
 
 #foreach ($skip in $skips)
-		skips.add(Pattern.compile("$Utilities.encodeStringToJavaLiteral($skip.getRegexp())"));
+        skips.add(Pattern.compile("$Utilities.encodeStringToJavaLiteral($skip.getRegexp())"));
 #end
     }
 

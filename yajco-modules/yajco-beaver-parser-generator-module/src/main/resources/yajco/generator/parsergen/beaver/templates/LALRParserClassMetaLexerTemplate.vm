@@ -11,29 +11,29 @@ import java.io.StringReader;
 import ${parserPackageName}.$scannerClassName;
 
 public class $parserClassName implements yajco.generator.parsergen.Parser<$mainElementClassName, LALRParseException> {
-	private static ${parserPackageName}.$parserClassName parser;
+    private static ${parserPackageName}.$parserClassName parser;
 
-	@Override
-	public $mainElementClassName parse(String input) throws LALRParseException {
-		return parse(new StringReader(input));
-	}
+    @Override
+    public $mainElementClassName parse(String input) throws LALRParseException {
+        return parse(new StringReader(input));
+    }
 
-	@Override
-	public $mainElementClassName parse(java.io.Reader reader) throws LALRParseException {
-		$scannerClassName scanner = new ${scannerClassName}(reader);
-		if (parser == null) {
-			parser = new ${parserPackageName}.${parserClassName}();
-		}
+    @Override
+    public $mainElementClassName parse(java.io.Reader reader) throws LALRParseException {
+        $scannerClassName scanner = new ${scannerClassName}(reader);
+        if (parser == null) {
+            parser = new ${parserPackageName}.${parserClassName}();
+        }
 
-		try {
-			${referenceResolverClassName} referenceResolver = ${referenceResolverClassName}.createInstance();
-			$mainElementClassName root = ((${parserPackageName}.SymbolWrapper<${mainElementClassName}>) parser.parse(scanner)).getWrappedObject();
-			referenceResolver.resolveReferences();
-			return root;
-		} catch (java.io.IOException e) {
-			throw new ParseException("Problem parsing source code ", e);
-		} catch (${parserPackageName}.${parserClassName}.Exception e) {
-			throw new ParseException("Problem parsing source code ", e);
-		}
-	}
+        try {
+            ${referenceResolverClassName} referenceResolver = ${referenceResolverClassName}.createInstance();
+            $mainElementClassName root = ((${parserPackageName}.SymbolWrapper<${mainElementClassName}>) parser.parse(scanner)).getWrappedObject();
+            referenceResolver.resolveReferences();
+            return root;
+        } catch (java.io.IOException e) {
+            throw new ParseException("Problem parsing source code ", e);
+        } catch (${parserPackageName}.${parserClassName}.Exception e) {
+            throw new ParseException("Problem parsing source code ", e);
+        }
+    }
 }

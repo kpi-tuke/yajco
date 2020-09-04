@@ -2,7 +2,7 @@
 package $parserClassPackageName;
 
 public class LisaParseException extends yajco.generator.parsergen.ParseException {
-	public LisaParseException(String message, Throwable cause) {
-		super(message, cause);
-	}
+    public LisaParseException(String message, Throwable cause) {
+        super(message, cause);
+    }
 }

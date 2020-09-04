@@ -5,23 +5,23 @@ import yajco.model.type.Type;
 
 public class ConvertListToCollectionAction extends ConvertAction {
 
-	private final ComponentType resultCollectionType;
+    private final ComponentType resultCollectionType;
 
-	public ConvertListToCollectionAction(ComponentType resultCollectionType, RValue rValue) {
-		super(rValue);
-		this.resultCollectionType = resultCollectionType;
-	}
+    public ConvertListToCollectionAction(ComponentType resultCollectionType, RValue rValue) {
+        super(rValue);
+        this.resultCollectionType = resultCollectionType;
+    }
 
-	public Type getResultCollectionInnerType() {
-		return resultCollectionType.getComponentType();
-	}
+    public Type getResultCollectionInnerType() {
+        return resultCollectionType.getComponentType();
+    }
 
-	public ComponentType getResultCollectionType() {
-		return resultCollectionType;
-	}
+    public ComponentType getResultCollectionType() {
+        return resultCollectionType;
+    }
 
-	@Override
-	public ActionType getActionType() {
-		return ActionType.CONVERT_LIST_TO_COLLECTION;
-	}
+    @Override
+    public ActionType getActionType() {
+        return ActionType.CONVERT_LIST_TO_COLLECTION;
+    }
 }

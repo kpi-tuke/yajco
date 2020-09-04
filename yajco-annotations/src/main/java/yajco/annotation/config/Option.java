@@ -14,7 +14,7 @@ import java.lang.annotation.RetentionPolicy;
 //Target: None
 public @interface Option {
 
-	String name();
+    String name();
 
-	String value();
+    String value();
 }

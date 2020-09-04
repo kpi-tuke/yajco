@@ -263,9 +263,9 @@ public class JavaCCParserGenerator {
             token = (TokenPart) notation.getParts().get(0);
 
             // TODO: Token pattern
-//			if (element.getAnnotation(Token.class) != null) {
-//				token = element.getAnnotation(Token.class).value();
-//			}
+//            if (element.getAnnotation(Token.class) != null) {
+//                token = element.getAnnotation(Token.class).value();
+//            }
             if (!definedTokens.containsKey(token.getToken())) {
                 definedTokens.put(token.getToken(), token.getToken());
             }
@@ -307,9 +307,9 @@ public class JavaCCParserGenerator {
         // Lookahead
         // TODO: Lookahead pattern
         String lookahead = null;
-//		if (typeElement.getAnnotation(Lookahead.class) != null) {
-//			lookahead = typeElement.getAnnotation(Lookahead.class).value();
-//		}
+//        if (typeElement.getAnnotation(Lookahead.class) != null) {
+//            lookahead = typeElement.getAnnotation(Lookahead.class).value();
+//        }
 
         return new Choice(
                 "  " + getFullName(concept.getName()) + " _value = null;\n",
@@ -390,8 +390,8 @@ public class JavaCCParserGenerator {
 
         //Parameter
         Type bindingPartType = bindingPartToType(bindingPart);
-//		TypeMirror paramElemType = paramElement.asType();
-//		String paramElemTypeString = paramElemType.toString();
+//        TypeMirror paramElemType = paramElement.asType();
+//        String paramElemTypeString = paramElemType.toString();
 
         if (bindingPartType instanceof ComponentType) {
             expansions.add(processArrayType(bindingPart, paramNumber));
@@ -403,9 +403,9 @@ public class JavaCCParserGenerator {
         //Optional annotation
         Expansion expansion = new Sequence(expansions.toArray(new Expansion[expansions.size()]));
         // TODO: Optional pattern
-//		if (paramElement.getAnnotation(Optional.class) != null) {
-//			expansion = new ZeroOrOne(expansion);
-//		}
+//        if (paramElement.getAnnotation(Optional.class) != null) {
+//            expansion = new ZeroOrOne(expansion);
+//        }
 
         return expansion;
     }
@@ -597,13 +597,13 @@ public class JavaCCParserGenerator {
         for (int priority : priorityMap.keySet()) {
             List<Concept> operatorList = priorityMap.get(priority);
 
-//			ExecutableElement constructorElement = getConstructorElement(operatorList.get(0));
+//            ExecutableElement constructorElement = getConstructorElement(operatorList.get(0));
             int arity = getArity(operatorConcept, operatorList.get(0).getConcreteSyntax().get(0));
             Associativity associativity = Associativity.AUTO;
 
             //Test validity
             for (Concept concept : operatorList) {
-//				constructorElement = getConstructorElement(concept);
+//                constructorElement = getConstructorElement(concept);
                 if (arity != getArity(operatorConcept, concept.getConcreteSyntax().get(0))) {
                     throw new GeneratorException("All operators of type '" + getFullName(operatorConcept.getName())
                             + "' with the same priority must have the same arity (difference found in '" + getFullName(concept.getName()) + "')");
@@ -820,8 +820,8 @@ public class JavaCCParserGenerator {
                     separator = true;
                     if (isOperatorType(operatorConcept, notationPart)) {
                         //TODO: Spracovat ak je to subclass a nie priamo trieda operatora
-						/*if (!isSameOperatorType(classElement, paramElement)) {
-                         //						System.out.println("------>> Postfix - spracuvavam triedu: " + getTypeElementFrom(paramElement.asType()));
+                        /*if (!isSameOperatorType(classElement, paramElement)) {
+                         //                        System.out.println("------>> Postfix - spracuvavam triedu: " + getTypeElementFrom(paramElement.asType()));
                          processTypeElement(getTypeElementFrom(paramElement.asType()));
                          }*/
                         //System.out.println(">>>>>>>>>>>>>>>> " + paramElement.asType());
@@ -951,16 +951,16 @@ public class JavaCCParserGenerator {
     }
 
     private Expansion generateNonteminal(BindingNotationPart bindingPart, String variableName, String type, String code, int paramNumber) {
-//		if (concept.getPattern(yajco.model.pattern.impl.Enum.class) != null/* || isKnownClass(element)*/) { // Neterminal
+//        if (concept.getPattern(yajco.model.pattern.impl.Enum.class) != null/* || isKnownClass(element)*/) { // Neterminal
         return new NonTerminal(
                 "  " + type + " " + variableName + " = null;\n",
                 code,
                 getNonterminal(bindingPartToConcept(bindingPart), paramNumber),
                 variableName);
-//		} else {
-//			throw new GeneratorException("1Unsuported parameter '" + paramElement + " : " + paramElement.asType() +
-//					"' in element '" + paramElement.getEnclosingElement().getEnclosingElement() + "'");
-//		}
+//        } else {
+//            throw new GeneratorException("1Unsuported parameter '" + paramElement + " : " + paramElement.asType() +
+//                    "' in element '" + paramElement.getEnclosingElement().getEnclosingElement() + "'");
+//        }
     }
 
     private String getHigherPriorityNonterminal(int current, Concept concept, Set<Integer> priorities) {

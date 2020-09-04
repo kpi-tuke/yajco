@@ -75,9 +75,9 @@ public class BeaverParserGenerator {
     }
 
     private void writeImports(PrintStream writer) {
-//		for (Concept concept : language.getConcepts()) {
-//			writer.println("%import \"" + Utilities.getFullConceptClassName(language, concept) + "\";");
-//		}
+//        for (Concept concept : language.getConcepts()) {
+//            writer.println("%import \"" + Utilities.getFullConceptClassName(language, concept) + "\";");
+//        }
         writer.println("%import \"" + parserPackageName + ".SymbolListImpl\";");
         writer.println("%import \"" + parserPackageName + ".SymbolLinkedHashSetImpl\";");
         writer.println("%import \"" + parserPackageName + ".SymbolListImplWithShared\";");

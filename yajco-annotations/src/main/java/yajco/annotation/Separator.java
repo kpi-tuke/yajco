@@ -11,5 +11,5 @@ import yajco.annotation.processor.MapsTo;
 @MapsTo("yajco.model.pattern.impl.Separator")
 public @interface Separator {
 
-	String value();
+    String value();
 }

@@ -11,9 +11,9 @@ import yajco.annotation.processor.MapsTo;
 @MapsTo("yajco.model.pattern.impl.Range")
 public @interface Range {
 
-	public static final int INFINITY = -1;
+    public static final int INFINITY = -1;
 
-	int minOccurs() default 0;
+    int minOccurs() default 0;
 
-	int maxOccurs() default INFINITY;
+    int maxOccurs() default INFINITY;
 }

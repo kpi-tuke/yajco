@@ -12,8 +12,8 @@ import yajco.annotation.processor.MapsTo;
 @MapsTo("yajco.model.pattern.impl.Operator")
 public @interface Operator {
 
-	int priority() default 1;
+    int priority() default 1;
 
-	Associativity associativity() default Associativity.AUTO;
+    Associativity associativity() default Associativity.AUTO;
         
 }

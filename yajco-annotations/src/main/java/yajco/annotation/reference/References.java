@@ -10,24 +10,24 @@ import yajco.annotation.processor.MapsTo;
 @Target({ElementType.PARAMETER})
 public @interface References {
 
-	/**
-	 * Class of a referenced element.
-	 */
-	Class value();
+    /**
+     * Class of a referenced element.
+     */
+    Class value();
 
-	/**
-	 * Field name.
-	 * TODO: use name of the parameter if it is not supplied.
-	 */
-	String field() default "";
+    /**
+     * Field name.
+     * TODO: use name of the parameter if it is not supplied.
+     */
+    String field() default "";
 
-	/**
-	 * XPath expression for finding the declared concept node.
-	 */
-	String path() default "";
+    /**
+     * XPath expression for finding the declared concept node.
+     */
+    String path() default "";
 
-	/**
-	 * Automatically create concept node when the searched node not exists.
-	 */
-	boolean create() default false;
+    /**
+     * Automatically create concept node when the searched node not exists.
+     */
+    boolean create() default false;
 }

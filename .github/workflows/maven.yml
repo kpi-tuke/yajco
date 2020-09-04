@@ -10,16 +10,14 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Set up JDK 11
-      uses: actions/setup-java@v1
-      with:
-        java-version: 11
-    - name: Build and install with Maven
-      run: mvn -B --fail-at-end install --file pom.xml
-    - name: Checkout and test YAJCo Examples
-      run: ./test-examples.sh
+      - uses: actions/checkout@v2
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+      - name: Build and install with Maven
+        run: mvn -B --fail-at-end install --file pom.xml
+      - name: Checkout and test YAJCo Examples
+        run: ./test-examples.sh

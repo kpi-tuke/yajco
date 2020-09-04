@@ -7,7 +7,7 @@ import java.lang.annotation.RetentionPolicy;
 //Target: None
 public @interface TokenDef {
 
-	String name();
+    String name();
 
-	String regexp();
+    String regexp();
 }

@@ -83,25 +83,25 @@ public class Choice extends CompositeExpansion {
                 expansion.setLookahead(expansion.generateExpansion(1, false));
             }
         }
-//		int size = expansions.length;
-//		for (int i = 0; i < size; i++) {
-//			Expansion expansion1 = expansions[i];
-//			Set<String> set1 = expansion1.first(1);
-//			for (int j = i + 1; j < size; j++) {
-//				Expansion expansion2 = expansions[j];
-//				Set<String> set2 = expansion2.first(1);
-//				if (!Collections.disjoint(set1, set2)) {
-//					int lookahead = findLookahead(expansion1, expansion2, 1);
-//					if (expansion1.getShortestLength() < expansion2.getShortestLength()) {
-//						expansions[j] = expansion1;
-//						expansions[i] = expansion2;
-//						expansion2.setLookahead(String.valueOf(lookahead));
-//					} else {
-//						expansion1.setLookahead(String.valueOf(lookahead));
-//					}
-//				}
-//			}
-//		}
+//        int size = expansions.length;
+//        for (int i = 0; i < size; i++) {
+//            Expansion expansion1 = expansions[i];
+//            Set<String> set1 = expansion1.first(1);
+//            for (int j = i + 1; j < size; j++) {
+//                Expansion expansion2 = expansions[j];
+//                Set<String> set2 = expansion2.first(1);
+//                if (!Collections.disjoint(set1, set2)) {
+//                    int lookahead = findLookahead(expansion1, expansion2, 1);
+//                    if (expansion1.getShortestLength() < expansion2.getShortestLength()) {
+//                        expansions[j] = expansion1;
+//                        expansions[i] = expansion2;
+//                        expansion2.setLookahead(String.valueOf(lookahead));
+//                    } else {
+//                        expansion1.setLookahead(String.valueOf(lookahead));
+//                    }
+//                }
+//            }
+//        }
     }
 
     private int findLookahead(Expansion expansion1, Expansion expansion2, int firstLength) {

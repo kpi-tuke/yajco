@@ -11,8 +11,8 @@ import yajco.annotation.processor.MapsTo;
 @MapsTo("yajco.model.pattern.impl.Identifier")
 public @interface Identifier {
 
-	/**
-	 * XPath expression for definition of the context in which should be marked concept (domain class) unique.
-	 */
-	String unique() default "";
+    /**
+     * XPath expression for definition of the context in which should be marked concept (domain class) unique.
+     */
+    String unique() default "";
 }

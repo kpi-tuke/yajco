@@ -10,5 +10,5 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.CONSTRUCTOR, ElementType.PARAMETER})
 public @interface Lookahead {
 
-	String value();
+    String value();
 }

@@ -11,12 +11,12 @@ public @interface Parser {
 
         String className() default "";
 
-	String mainNode() default "";
+    String mainNode() default "";
 
-	TokenDef[] tokens() default {};
+    TokenDef[] tokens() default {};
 
-	Skip[] skips() default {};
+    Skip[] skips() default {};
 
-	Option[] options() default {};
+    Option[] options() default {};
         
 }

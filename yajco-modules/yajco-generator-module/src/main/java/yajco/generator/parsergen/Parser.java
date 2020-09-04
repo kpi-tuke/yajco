@@ -10,7 +10,7 @@ import java.io.Reader;
  * @see java.util.ServiceLoader
  */
 public interface Parser<T, E extends ParseException> {
-	T parse(String input) throws E;
+    T parse(String input) throws E;
 
-	T parse(Reader reader) throws E;
+    T parse(Reader reader) throws E;
 }

@@ -12,7 +12,7 @@ import yajco.annotation.processor.MapsTo;
 //Remove default values, have to be specified, or create a better processing with message about LPAR and RPAR
 public @interface Parentheses {
 
-	String left() default "(";
+    String left() default "(";
 
-	String right() default ")";
+    String right() default ")";
 }

@@ -10,43 +10,43 @@ package $parserClassPackageName;
 import ${parserPackageName}.$scannerClassName;
 
 public class $parserClassName implements yajco.generator.parsergen.Parser<$mainElementClassName, ParseException> {
-	private static ${parserPackageName}.$parserClassName parser;
+    private static ${parserPackageName}.$parserClassName parser;
 
-	@Override
-	public $mainElementClassName parse(String input) throws ParseException {
-		$scannerClassName scanner = new ${scannerClassName}(input);
-		if (parser == null) {
-			parser = new ${parserPackageName}.${parserClassName}();
-		}
+    @Override
+    public $mainElementClassName parse(String input) throws ParseException {
+        $scannerClassName scanner = new ${scannerClassName}(input);
+        if (parser == null) {
+            parser = new ${parserPackageName}.${parserClassName}();
+        }
 
-		try {
-			${referenceResolverClassName} referenceResolver = ${referenceResolverClassName}.createInstance();
-			$mainElementClassName root = ((${parserPackageName}.SymbolWrapper<${mainElementClassName}>) parser.parse(scanner)).getWrappedObject();
-			referenceResolver.resolveReferences();
-			return root;
-		} catch (java.io.IOException e) {
-			throw new ParseException("Problem parsing source code ", e);
-		} catch (${parserPackageName}.${parserClassName}.Exception e) {
-			throw new ParseException("Problem parsing source code ", e);
-		}
-	}
+        try {
+            ${referenceResolverClassName} referenceResolver = ${referenceResolverClassName}.createInstance();
+            $mainElementClassName root = ((${parserPackageName}.SymbolWrapper<${mainElementClassName}>) parser.parse(scanner)).getWrappedObject();
+            referenceResolver.resolveReferences();
+            return root;
+        } catch (java.io.IOException e) {
+            throw new ParseException("Problem parsing source code ", e);
+        } catch (${parserPackageName}.${parserClassName}.Exception e) {
+            throw new ParseException("Problem parsing source code ", e);
+        }
+    }
 
-	@Override
-	public $mainElementClassName parse(java.io.Reader reader) throws ParseException {
-		try {
-			return parse(readAsString(reader));
-		} catch(java.io.IOException e) {
-			throw new ParseException("Problem reading input file", e);
-		}
-	}
+    @Override
+    public $mainElementClassName parse(java.io.Reader reader) throws ParseException {
+        try {
+            return parse(readAsString(reader));
+        } catch(java.io.IOException e) {
+            throw new ParseException("Problem reading input file", e);
+        }
+    }
 
-	private String readAsString(java.io.Reader r) throws java.io.IOException {
-		StringBuilder sb = new StringBuilder();
-		java.io.BufferedReader br = new java.io.BufferedReader(r);
-		String line;
-		while ((line = br.readLine()) != null) {
-			sb.append(line + "\n");
-		}
-		return sb.toString();
-	}
+    private String readAsString(java.io.Reader r) throws java.io.IOException {
+        StringBuilder sb = new StringBuilder();
+        java.io.BufferedReader br = new java.io.BufferedReader(r);
+        String line;
+        while ((line = br.readLine()) != null) {
+            sb.append(line + "\n");
+        }
+        return sb.toString();
+    }
 }

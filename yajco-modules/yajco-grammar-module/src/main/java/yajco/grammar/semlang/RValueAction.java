@@ -2,17 +2,17 @@ package yajco.grammar.semlang;
 
 public abstract class RValueAction extends Action {
 
-	private final RValue rValue;
+    private final RValue rValue;
 
-	public RValueAction(RValue rValue) {
-		Utilities.checkForNullPointer(rValue);
+    public RValueAction(RValue rValue) {
+        Utilities.checkForNullPointer(rValue);
 
-		this.rValue = rValue;
-	}
+        this.rValue = rValue;
+    }
 
-	public RValue getRValue() {
-		return rValue;
-	}
+    public RValue getRValue() {
+        return rValue;
+    }
 
-	public abstract ActionType getActionType();
+    public abstract ActionType getActionType();
 }

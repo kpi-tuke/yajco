@@ -4,27 +4,27 @@ import yajco.grammar.Symbol;
 
 public class RValue extends LValue {
 
-	private final Action action;
+    private final Action action;
 
-	public RValue(Symbol symbol) {
-		super(symbol);
+    public RValue(Symbol symbol) {
+        super(symbol);
 
-		this.action = null;
-	}
+        this.action = null;
+    }
 
-	public RValue(Action action) {
-		Utilities.checkForNullPointer(action);
+    public RValue(Action action) {
+        Utilities.checkForNullPointer(action);
 
-		this.action = action;
-	}
+        this.action = action;
+    }
 
-	public RValue(String varName) {
-		super(varName);
+    public RValue(String varName) {
+        super(varName);
 
-		this.action = null;
-	}
+        this.action = null;
+    }
 
-	public Action getAction() {
-		return action;
-	}
+    public Action getAction() {
+        return action;
+    }
 }
