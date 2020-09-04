@@ -3,6 +3,8 @@ package yajco.grammar.semlang;
 import yajco.grammar.NonterminalSymbol;
 import yajco.grammar.Symbol;
 import yajco.grammar.TerminalSymbol;
+import yajco.grammar.type.HashMapType;
+import yajco.grammar.type.UnorderedParamType;
 import yajco.model.type.*;
 
 import java.util.ArrayList;

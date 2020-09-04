@@ -1,7 +1,9 @@
-package yajco.model.type;
+package yajco.grammar.type;
 
 import yajco.annotation.Before;
 import yajco.annotation.Exclude;
+import yajco.model.type.ComponentType;
+import yajco.model.type.Type;
 
 public class HashMapType extends ComponentType {
     @Before({"hash", "map", "of"})

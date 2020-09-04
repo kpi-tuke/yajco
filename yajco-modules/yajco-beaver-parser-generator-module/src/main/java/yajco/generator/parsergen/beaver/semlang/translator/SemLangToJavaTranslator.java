@@ -2,6 +2,9 @@ package yajco.generator.parsergen.beaver.semlang.translator;
 
 import yajco.ReferenceResolver;
 import yajco.grammar.semlang.*;
+import yajco.grammar.type.HashMapType;
+import yajco.grammar.type.ObjectType;
+import yajco.grammar.type.UnorderedParamType;
 import yajco.model.Language;
 import yajco.model.type.*;
 
