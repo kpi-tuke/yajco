@@ -4,9 +4,11 @@ import java.util.List;
 
 public class CreateUnorderedParamClassInstanceAction extends CreateInstanceAction {
     private final List<RValue> parameters;
+    private final String varName;
 
-    public CreateUnorderedParamClassInstanceAction(List<RValue> parameters) {
+    public CreateUnorderedParamClassInstanceAction(List<RValue> parameters, String varName) {
         this.parameters = parameters;
+        this.varName = varName;
     }
 
     public List<RValue> getParameters() {
@@ -16,5 +18,9 @@ public class CreateUnorderedParamClassInstanceAction extends CreateInstanceActio
     @Override
     public ActionType getActionType() {
         return ActionType.CREATE_UNORDERED_PARAM_CLASS_INST;
+    }
+
+    public String getVarName() {
+        return varName;
     }
 }

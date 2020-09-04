@@ -27,8 +27,8 @@ public final class SemLangFactory {
 		return createOptionalClassInstanceAndReturnActions(symbolsToRValues(symbols));
 	}
 
-	public static List<Action> createNewUnorderedParamClassInstanceAndReturnActions(List<Symbol> symbols) {
-		return createUnorderedParamClassInstanceAndReturnActions(symbolsToRValues(symbols));
+	public static List<Action> createNewUnorderedParamClassInstanceAndReturnActions(List<Symbol> symbols, String varName) {
+		return createUnorderedParamClassInstanceAndReturnActions(symbolsToRValues(symbols), varName);
 	}
 
 	public static List<Action> createFactoryClassInstanceActions(String classType, String factoryMethodName, List<Symbol> symbols) {
@@ -132,12 +132,6 @@ public final class SemLangFactory {
 		return actions;
 	}
 
-	private static List<Action> createUnorderedParamClassInstanceActions(List<RValue> parameters) {
-		List<Action> actions = new ArrayList<Action>(1);
-		actions.add(new CreateUnorderedParamClassInstanceAction(parameters));
-		return actions;
-	}
-
 	private static List<Action> createClassInstanceAndReturnActions(String classType, String factoryMethodName, List<RValue> parameters) {
 		List<Action> actions = new ArrayList<Action>(1);
 		actions.add(new ReturnAction(new RValue(createClassInstanceActions(classType, factoryMethodName, parameters).get(0))));
@@ -155,9 +149,10 @@ public final class SemLangFactory {
 		return actions;
 	}
 
-	private static List<Action> createUnorderedParamClassInstanceAndReturnActions(List<RValue> parameters) {
+	private static List<Action> createUnorderedParamClassInstanceAndReturnActions(List<RValue> parameters, String varName) {
 		List<Action> actions = new ArrayList<Action>(1);
-		actions.add(new ReturnAction(new RValue(createUnorderedParamClassInstanceActions(parameters).get(0))));
+		CreateUnorderedParamClassInstanceAction action = new CreateUnorderedParamClassInstanceAction(parameters, varName);
+		actions.add(new ReturnAction(new RValue(action)));
 		return actions;
 	}
 

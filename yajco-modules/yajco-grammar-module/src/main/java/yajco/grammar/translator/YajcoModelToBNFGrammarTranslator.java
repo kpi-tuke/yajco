@@ -289,7 +289,7 @@ public class YajcoModelToBNFGrammarTranslator {
         }
 
         if (symbol != null) {
-            alternative.addActions(SemLangFactory.createNewUnorderedParamClassInstanceAndReturnActions(Collections.singletonList(symbol)));
+            alternative.addActions(SemLangFactory.createNewUnorderedParamClassInstanceAndReturnActions(Collections.singletonList(symbol), varName));
         }
 
         conceptNonterminal = new NonterminalSymbol(concept.getConceptName() + DEFAULT_PARAM_SYMBOL_NAME, new UnorderedParamType(type), varName);

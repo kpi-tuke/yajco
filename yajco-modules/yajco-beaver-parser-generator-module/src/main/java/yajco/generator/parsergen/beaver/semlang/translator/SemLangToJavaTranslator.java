@@ -253,8 +253,8 @@ public class SemLangToJavaTranslator {
 
 	private void translateCreateUnorderedParamClassInstanceAction(CreateUnorderedParamClassInstanceAction action, PrintStream writer) {
 		writer.print("new SymbolUnorderedParam(");
-		writer.print(action.getParameters().get(0).getSymbol().getVarName() + ".getWrappedObject()");
-		writer.print(", \"" + action.getParameters().get(0).getSymbol().getVarName() + "\")");
+		translateRValue(action.getParameters().get(0), writer);
+		writer.print(", \"" + action.getVarName() + "\")");
 	}
 
 	private void translateCreateEnumInstanceAction(CreateEnumInstanceAction action, PrintStream writer) {
