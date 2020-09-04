@@ -1,7 +1,7 @@
 ##Input - parserClassPackageName
 package $parserClassPackageName;
 
-public class LisaParseException extends Exception {
+public class LisaParseException extends yajco.generator.parsergen.ParseException {
 	public LisaParseException(String message, Throwable cause) {
 		super(message, cause);
 	}

@@ -114,11 +114,13 @@ public class BeaverCompilerGenerator implements CompilerGenerator {
 
         // hlavna trieda parsera
         //file = Utilities.createFile(filer, parserClassPackageName, parserClassName + ".java");
-        fileObject = filer.createSourceFile(parserClassPackageName + "." + parserClassName);
+        final String mainParserFQN = parserClassPackageName + "." + parserClassName;
+        fileObject = filer.createSourceFile(mainParserFQN);
         writer = fileObject.openWriter(); //new FileWriter(file);
         writer.write(generateBeaverParserClass(parserClassName, parserPackageName, parserClassPackageName, mainElementClassName, scannerClassName, ReferenceResolver.class.getCanonicalName()));
         writer.flush();
         writer.close();
+        CompilerGenerator.registerParserServiceProvider(mainParserFQN, filer);
 
         // trieda vynimky parsera
         //file = Utilities.createFile(filer, parserClassPackageName, "LALRParseException.java");

@@ -142,11 +142,13 @@ public class LisaCompilerGenerator implements CompilerGenerator {
             //---- LISA YAJCO COMPILER ----
             String parserClassPackageName = parserPackageName.substring(0, parserPackageName.lastIndexOf('.'));
             //file = Utilities.createFile(filer, parserClassPackageName, LISA_PARSER_CLASS_NAME + ".java");
-            fileObject = filer.createClassFile(parserClassPackageName+"."+LISA_PARSER_CLASS_NAME);
+            final String lisaCompilerFQN = parserClassPackageName + "." + LISA_PARSER_CLASS_NAME;
+            fileObject = filer.createClassFile(lisaCompilerFQN);
             writer = fileObject.openWriter(); //new FileWriter(file);
             //writer.write(getLisaCompiler(language));
             writer.write(generateLisaCompilerClass(LISA_PARSER_CLASS_NAME, parserPackageName, parserClassPackageName, mainElementClassName, LISA_SCANNER_CLASS_NAME, LISA_TRANSLATOR_CLASS_NAME, ReferenceResolver.class.getCanonicalName()));
             writer.close();
+            CompilerGenerator.registerParserServiceProvider(lisaCompilerFQN, filer);
 
             //----- LISA EXCEPTION CLASS ----
             //file = Utilities.createFile(filer, parserClassPackageName, "LisaParseException.java");

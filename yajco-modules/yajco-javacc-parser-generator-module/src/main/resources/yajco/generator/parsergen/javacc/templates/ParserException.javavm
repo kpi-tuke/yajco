@@ -1,6 +1,6 @@
 package $parserPackageName;
 
-public class ParseException extends Exception {
+public class ParseException extends yajco.generator.parsergen.ParseException {
   public ParseException(String message, Throwable cause) {
     super(message, cause);
   }

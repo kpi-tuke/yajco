@@ -15,6 +15,7 @@ import org.apache.velocity.app.VelocityEngine;
 import org.javacc.parser.Main;
 import yajco.annotation.config.Option;
 import yajco.generator.GeneratorException;
+import yajco.generator.parsergen.CompilerGenerator;
 import yajco.generator.parsergen.Conversions;
 import yajco.generator.parsergen.javacc.model.Choice;
 import yajco.generator.parsergen.javacc.model.Expansion;
@@ -147,11 +148,13 @@ public class JavaCCParserGenerator {
 
             //generate parser class
             //file = Utilities.createFile(filer, parserMainParserPackageName, parserClassName + ".java");
-            fileObject = filer.createSourceFile(parserMainParserPackageName + "." + parserClassName);
+            final String mainParserFQN = parserMainParserPackageName + "." + parserClassName;
+            fileObject = filer.createSourceFile(mainParserFQN);
             writer = fileObject.openWriter(); //new FileWriter(file);
             writer.write(generateParserClass(parserClassName, parserMainParserPackageName, parserJavaCCPackageName, language.getName() + "." + language.getConcepts().get(0).getName()));
             writer.flush();
             writer.close();
+            CompilerGenerator.registerParserServiceProvider(mainParserFQN, filer);
 
             // register later generated files for compilation
             String[] laterGenFiles = {
