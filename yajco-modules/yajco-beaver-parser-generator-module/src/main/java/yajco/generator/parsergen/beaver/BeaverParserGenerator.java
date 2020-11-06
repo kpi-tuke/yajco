@@ -258,9 +258,7 @@ public class BeaverParserGenerator {
             if (type instanceof ArrayType) {
                 return innerTypeString + "[]";
             } else if (type instanceof ListType) {
-                // problem v beaver-i sposobuje nutnost tohoto riadku
-                return parserPackageName + ".SymbolListImpl" + "<" + innerTypeString + ">";
-                //return "java.util.List<" + innerTypeString + ">";
+                return "java.util.List<" + innerTypeString + ">";
             } else if (type instanceof SetType) {
                 return "java.util.Set<" + innerTypeString + ">";
             } else if (type instanceof HashMapType) {
