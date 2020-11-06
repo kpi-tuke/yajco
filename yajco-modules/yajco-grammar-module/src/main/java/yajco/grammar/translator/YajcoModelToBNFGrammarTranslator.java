@@ -271,8 +271,7 @@ public class YajcoModelToBNFGrammarTranslator {
     private Symbol translateUnorderedParamPart(Concept concept, UnorderedParamPart unorderedParamPart) {
         NonterminalSymbol conceptNonterminal;
         Alternative alternative = new Alternative();
-        Type type = null;
-        String varName = null;
+        Symbol varSymbol = null;
 
         Symbol symbol = null;
         for (NotationPart notationPart : unorderedParamPart.getParts()) {
@@ -280,27 +279,34 @@ public class YajcoModelToBNFGrammarTranslator {
                 symbol = translateTokenNotationPart((TokenPart) notationPart);
             } else if (notationPart instanceof PropertyReferencePart) {
                 symbol = translatePropertyRefNotationPart((PropertyReferencePart) notationPart);
-                type = symbol.getReturnType();
-                varName = symbol.getVarName();
+                varSymbol = symbol;
             } else if (notationPart instanceof LocalVariablePart) {
                 symbol = translateLocalVarPart((LocalVariablePart) notationPart);
-                type = symbol.getReturnType();
-                varName = symbol.getVarName();
+                varSymbol = symbol;
             } else if (notationPart instanceof OptionalPart) {
                 symbol = translateOptionalPart(concept, (OptionalPart) notationPart);
-                type = symbol.getReturnType();
-                varName = symbol.getVarName();
+                varSymbol = symbol;
             } else {
                 throw new IllegalArgumentException("Unknown notation part: '" + notationPart.getClass().getCanonicalName() + "'!");
             }
             alternative.addSymbol(symbol);
         }
 
-        if (symbol != null) {
-            alternative.addActions(SemLangFactory.createNewUnorderedParamClassInstanceAndReturnActions(Collections.singletonList(symbol), varName));
+        String varName = null;
+        Type varType = null;
+        if (varSymbol != null) {
+            varName = varSymbol.getVarName();
+            varType = varSymbol.getReturnType();
+            alternative.addActions(
+                SemLangFactory.createNewUnorderedParamClassInstanceAndReturnActions(
+                    Collections.singletonList(varSymbol),
+                    varName));
         }
 
-        conceptNonterminal = new NonterminalSymbol(concept.getConceptName() + DEFAULT_PARAM_SYMBOL_NAME, new UnorderedParamType(type), varName);
+        conceptNonterminal = new NonterminalSymbol(
+            concept.getConceptName() + DEFAULT_PARAM_SYMBOL_NAME,
+            new UnorderedParamType(varType),
+            varName);
         Production production = new Production(conceptNonterminal, Collections.singletonList(alternative), toPatternList(concept.getPatterns()));
         Production existingProduction = grammar.getProduction(conceptNonterminal);
 
