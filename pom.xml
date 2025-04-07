@@ -17,8 +17,8 @@
     <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification</description>
     <licenses>
         <license>
-            <name>GNU Lesser General Public License (GPL) v3</name>
-            <url>http://www.gnu.org/licenses/lgpl-3.0.txt</url>
+            <name>MIT License</name>
+            <url>https://opensource.org/license/mit</url>
         </license>
     </licenses>
     <url>http://code.google.com/p/yajco/</url>

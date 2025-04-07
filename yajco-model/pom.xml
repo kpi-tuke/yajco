@@ -13,8 +13,8 @@
     <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - basic language representation model</description>
     <licenses>
         <license>
-            <name>GNU General Public License (GPL) v3</name>
-            <url>http://www.gnu.org/licenses/gpl-3.0.txt</url>
+            <name>MIT License</name>
+            <url>https://opensource.org/license/mit</url>
         </license>
     </licenses>
     <url>http://code.google.com/p/yajco/</url>

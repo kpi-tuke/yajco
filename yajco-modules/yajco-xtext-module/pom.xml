@@ -15,8 +15,8 @@
     <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - integration with Xtext</description>
     <licenses>
         <license>
-            <name>GNU Lesser General Public License (LGPL) v3</name>
-            <url>https://www.gnu.org/licenses/lgpl-3.0.txt</url>
+            <name>MIT License</name>
+            <url>https://opensource.org/license/mit</url>
         </license>
     </licenses>
     <url>https://github.com/kpi-tuke/yajco/</url>
