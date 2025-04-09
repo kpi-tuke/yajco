@@ -45,7 +45,7 @@
             <version>${project.version}</version>
         </dependency>
         <dependency>
-            <groupId>xstream</groupId>
+            <groupId>com.thoughtworks.xstream</groupId>
             <artifactId>xstream</artifactId>
         </dependency>
     </dependencies>

@@ -27,7 +27,9 @@ public class XMLLanguageFormatHelper {
     private final static XStream xstream = new XStream();
 
     static {
+        xstream.allowTypesByWildcard(new String[] {"yajco.model.**"});
         xstream.omitField(YajcoModelElement.class, "sourceElement");
+        xstream.registerConverter(new PropertiesConverter());
     }
 
     public static void writeToXML(Language language, Writer writer) {
