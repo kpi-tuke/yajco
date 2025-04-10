@@ -1,148 +1,149 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 
-    <groupId>sk.tuke.yajco</groupId>
-    <artifactId>yajco</artifactId>
-    <version>0.5.10-SNAPSHOT</version>
-    <packaging>pom</packaging>
+  <groupId>sk.tuke.yajco</groupId>
+  <artifactId>yajco</artifactId>
+  <version>0.5.10-SNAPSHOT</version>
+  <packaging>pom</packaging>
 
-    <parent>
-        <groupId>org.sonatype.oss</groupId>
-        <artifactId>oss-parent</artifactId>
-        <version>9</version>
-    </parent>
+  <parent>
+    <groupId>org.sonatype.oss</groupId>
+    <artifactId>oss-parent</artifactId>
+    <version>9</version>
+  </parent>
 
-    <name>yajco</name>
-    <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification</description>
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>https://opensource.org/license/mit</url>
-        </license>
-    </licenses>
-    <url>http://code.google.com/p/yajco/</url>
-    <developers>
-        <developer>
-            <name>Jaroslav Porubän</name>
-            <email>jaroslav.poruban@tuke.sk</email>
-            <organization>Technical University of Košice</organization>
-        </developer>
-        <developer>
-            <name>Dominik Lakatoš</name>
-            <email>deel77@gmail.com</email>
-            <organization>Technical University of Košice</organization>
-        </developer>
-    </developers>
-    <scm>
-        <url>http://yajco.googlecode.com/svn/trunk/</url>
-        <connection>scm:svn:http://yajco.googlecode.com/svn/trunk/</connection>
-        <developerConnection>scm:svn:https://yajco.googlecode.com/svn/trunk/</developerConnection>
-    </scm>
+  <name>yajco</name>
+  <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification</description>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/license/mit</url>
+    </license>
+  </licenses>
+  <url>https://github.com/kpi-tuke/yajco/</url>
+  <developers>
+    <developer>
+      <name>Jaroslav Porubän</name>
+      <email>jaroslav.poruban@tuke.sk</email>
+      <organization>Technical University of Košice</organization>
+    </developer>
+    <developer>
+      <name>Dominik Lakatoš</name>
+      <email>deel77@gmail.com</email>
+      <organization>Technical University of Košice</organization>
+    </developer>
+  </developers>
+  <scm>
+    <url>https://github.com/kpi-tuke/yajco/tree/master</url>
+    <connection>scm:git:git://github.com:kpi-tuke/yajco.git</connection>
+    <developerConnection>scm:git:ssh://github.com:kpi-tuke/yajco.git</developerConnection>
+  </scm>
 
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
-    <modules>
-        <module>yajco-annotation-processor</module>
-        <module>yajco-annotations</module>
-        <module>yajco-generator-tools</module>
-        <module>yajco-model</module>
-        <module>yajco-modules</module>
-        <module>yajco-parser</module>
-        <module>yajco-prototype-modules</module>
-    </modules>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
+  <modules>
+    <module>yajco-annotation-processor</module>
+    <module>yajco-annotations</module>
+    <module>yajco-generator-tools</module>
+    <module>yajco-model</module>
+    <module>yajco-modules</module>
+    <module>yajco-parser</module>
+    <module>yajco-prototype-modules</module>
+  </modules>
 
-    <dependencyManagement>
-        <dependencies>
-            <dependency>
-                <groupId>junit</groupId>
-                <artifactId>junit</artifactId>
-                <version>4.13.1</version>
-                <scope>test</scope>
-            </dependency>
-            <dependency>
-                <groupId>jalopy</groupId>
-                <artifactId>jalopy</artifactId>
-                <version>1.5rc3</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.velocity</groupId>
-                <artifactId>velocity-engine-core</artifactId>
-                <version>2.2</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>1.7.25</version>
-            </dependency>
-            <dependency>
-                <groupId>com.thoughtworks.xstream</groupId>
-                <artifactId>xstream</artifactId>
-                <version>1.4.21</version>
-            </dependency>
-        </dependencies>
-    </dependencyManagement>
-    <build>
-        <!-- To define the plugin version in your parent POM -->
-        <pluginManagement>
-            <plugins>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.0</version>
-                    <configuration>
-                        <source>1.8</source>
-                        <target>1.8</target>
-                        <proc>none</proc>
-                    </configuration>
-                </plugin>
-                <plugin>
-                    <groupId>org.kuali.maven.plugins</groupId>
-                    <artifactId>graph-maven-plugin</artifactId>
-                    <version>1.2.3</version>
-                </plugin>
-            </plugins>
-        </pluginManagement>
-        <!-- To use the plugin goals in your POM or parent POM -->
-        <plugins>
-            <plugin>
-                <groupId>org.kuali.maven.plugins</groupId>
-                <artifactId>graph-maven-plugin</artifactId>
-                <configuration>
-                    <!--                    <includes>yajco:*</includes>-->
-                </configuration>
-            </plugin>
-        </plugins>
-    </build>
+  <dependencyManagement>
+    <dependencies>
+      <dependency>
+        <groupId>junit</groupId>
+        <artifactId>junit</artifactId>
+        <version>4.13.1</version>
+        <scope>test</scope>
+      </dependency>
+      <dependency>
+        <groupId>jalopy</groupId>
+        <artifactId>jalopy</artifactId>
+        <version>1.5rc3</version>
+      </dependency>
+      <dependency>
+        <groupId>org.apache.velocity</groupId>
+        <artifactId>velocity-engine-core</artifactId>
+        <version>2.2</version>
+      </dependency>
+      <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>1.7.25</version>
+      </dependency>
+      <dependency>
+        <groupId>com.thoughtworks.xstream</groupId>
+        <artifactId>xstream</artifactId>
+        <version>1.4.21</version>
+      </dependency>
+    </dependencies>
+  </dependencyManagement>
+  <build>
+    <!-- To define the plugin version in your parent POM -->
+    <pluginManagement>
+      <plugins>
+        <plugin>
+          <groupId>org.apache.maven.plugins</groupId>
+          <artifactId>maven-compiler-plugin</artifactId>
+          <version>3.0</version>
+          <configuration>
+            <source>1.8</source>
+            <target>1.8</target>
+            <proc>none</proc>
+          </configuration>
+        </plugin>
+        <plugin>
+          <groupId>org.kuali.maven.plugins</groupId>
+          <artifactId>graph-maven-plugin</artifactId>
+          <version>1.2.3</version>
+        </plugin>
+      </plugins>
+    </pluginManagement>
+    <!-- To use the plugin goals in your POM or parent POM -->
+    <plugins>
+      <plugin>
+        <groupId>org.kuali.maven.plugins</groupId>
+        <artifactId>graph-maven-plugin</artifactId>
+        <configuration>
+          <!--                    <includes>yajco:*</includes>-->
+        </configuration>
+      </plugin>
+    </plugins>
+  </build>
 
-    <!--    <profiles>
-        <profile>
-            <id>release-sign-artifacts</id>
-            <activation>
-                <property>
-                    <name>performRelease</name>
-                    <value>true</value>
-                </property>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>1.4</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>-->
+  <!--    <profiles>
+      <profile>
+          <id>release-sign-artifacts</id>
+          <activation>
+              <property>
+                  <name>performRelease</name>
+                  <value>true</value>
+              </property>
+          </activation>
+          <build>
+              <plugins>
+                  <plugin>
+                      <groupId>org.apache.maven.plugins</groupId>
+                      <artifactId>maven-gpg-plugin</artifactId>
+                      <version>1.4</version>
+                      <executions>
+                          <execution>
+                              <id>sign-artifacts</id>
+                              <phase>verify</phase>
+                              <goals>
+                                  <goal>sign</goal>
+                              </goals>
+                          </execution>
+                      </executions>
+                  </plugin>
+              </plugins>
+          </build>
+      </profile>
+  </profiles>-->
 </project>

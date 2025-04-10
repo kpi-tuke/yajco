@@ -1,118 +1,121 @@
-<?xml version="1.0"?>
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <parent>
-        <groupId>sk.tuke.yajco</groupId>
-        <artifactId>yajco</artifactId>
-        <version>0.5.10-SNAPSHOT</version>
-    </parent>
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <parent>
     <groupId>sk.tuke.yajco</groupId>
-    <artifactId>yajco-annotations</artifactId>
+    <artifactId>yajco</artifactId>
     <version>0.5.10-SNAPSHOT</version>
-    <packaging>jar</packaging>
-    <name>yajco-annotations</name>
-    <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - annotations module</description>
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>https://opensource.org/license/mit</url>
-        </license>
-    </licenses>
-    <url>http://code.google.com/p/yajco/</url>
-    <developers>
-        <developer>
-            <name>Jaroslav Porubän</name>
-            <email>jaroslav.poruban@tuke.sk</email>
-            <organization>Technical University of Košice</organization>
-        </developer>
-        <developer>
-            <name>Dominik Lakatoš</name>
-            <email>deel77@gmail.com</email>
-            <organization>Technical University of Košice</organization>
-        </developer>
-    </developers>
-    <scm>
-        <url>http://yajco.googlecode.com/svn/trunk/</url>
-        <connection>scm:svn:http://yajco.googlecode.com/svn/trunk/</connection>
-        <developerConnection>scm:svn:https://yajco.googlecode.com/svn/trunk/yajco-annotations/</developerConnection>
-    </scm>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+  </parent>
+  <groupId>sk.tuke.yajco</groupId>
+  <artifactId>yajco-annotations</artifactId>
+  <version>0.5.10-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>yajco-annotations</name>
+  <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - annotations
+    module
+  </description>
+  <licenses>
+    <license>
+      <name>MIT License</name>
+      <url>https://opensource.org/license/mit</url>
+    </license>
+  </licenses>
+  <url>https://github.com/kpi-tuke/yajco/</url>
+  <developers>
+    <developer>
+      <name>Jaroslav Porubän</name>
+      <email>jaroslav.poruban@tuke.sk</email>
+      <organization>Technical University of Košice</organization>
+    </developer>
+    <developer>
+      <name>Dominik Lakatoš</name>
+      <email>deel77@gmail.com</email>
+      <organization>Technical University of Košice</organization>
+    </developer>
+  </developers>
+  <scm>
+    <url>https://github.com/kpi-tuke/yajco/tree/master</url>
+    <connection>scm:git:git://github.com:kpi-tuke/yajco.git</connection>
+    <developerConnection>scm:git:ssh://github.com:kpi-tuke/yajco.git</developerConnection>
+  </scm>
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-enforcer-plugin</artifactId>
-                <version>3.0.0-M2</version>
-                <executions>
-                    <execution>
-                        <id>enforce-maven</id>
-                        <goals>
-                            <goal>enforce</goal>
-                        </goals>
-                        <configuration>
-                            <rules>
-                                <requireMavenVersion>
-                                    <version>3.1.0</version>
-                                </requireMavenVersion>
-                            </rules>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-enforcer-plugin</artifactId>
+        <version>3.0.0-M2</version>
+        <executions>
+          <execution>
+            <id>enforce-maven</id>
+            <goals>
+              <goal>enforce</goal>
+            </goals>
+            <configuration>
+              <rules>
+                <requireMavenVersion>
+                  <version>3.1.0</version>
+                </requireMavenVersion>
+              </rules>
+            </configuration>
+          </execution>
+        </executions>
+      </plugin>
 
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>3.8.0</version>
-                <configuration>
-                    <release>11</release>
-                    <proc>none</proc>
-                </configuration>
-            </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>3.8.0</version>
+        <configuration>
+          <release>11</release>
+          <proc>none</proc>
+        </configuration>
+      </plugin>
 
-            <!-- Runs unit tests -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>3.0.0-M1</version>
-                <configuration>
-                    <argLine>
-                        --illegal-access=permit
-                    </argLine>
-                </configuration>
-            </plugin>
+      <!-- Runs unit tests -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.0.0-M1</version>
+        <configuration>
+          <argLine>
+            --illegal-access=permit
+          </argLine>
+        </configuration>
+      </plugin>
 
-            <!-- Can be used in maven verify phase. -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-failsafe-plugin</artifactId>
-                <version>3.0.0-M1</version>
-                <configuration>
-                    <argLine>
-                        --illegal-access=permit
-                    </argLine>
-                </configuration>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>integration-test</goal>
-                            <goal>verify</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
+      <!-- Can be used in maven verify phase. -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-failsafe-plugin</artifactId>
+        <version>3.0.0-M1</version>
+        <configuration>
+          <argLine>
+            --illegal-access=permit
+          </argLine>
+        </configuration>
+        <executions>
+          <execution>
+            <goals>
+              <goal>integration-test</goal>
+              <goal>verify</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 
-    <dependencies>
-        <!-- https://mvnrepository.com/artifact/javax.annotation/jsr250-api -->
-        <dependency>
-            <groupId>javax.annotation</groupId>
-            <artifactId>jsr250-api</artifactId>
-            <version>1.0</version>
-        </dependency>
-    </dependencies>
+  <dependencies>
+    <!-- https://mvnrepository.com/artifact/javax.annotation/jsr250-api -->
+    <dependency>
+      <groupId>javax.annotation</groupId>
+      <artifactId>jsr250-api</artifactId>
+      <version>1.0</version>
+    </dependency>
+  </dependencies>
 </project>

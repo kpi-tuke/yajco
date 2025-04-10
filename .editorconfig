@@ -9,3 +9,6 @@ tab_width = 4
 
 [*.yml]
 indent_size = 2
+
+[*.xml]
+indent_size = 2
