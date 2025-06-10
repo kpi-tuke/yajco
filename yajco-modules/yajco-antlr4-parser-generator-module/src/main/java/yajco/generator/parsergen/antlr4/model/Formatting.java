@@ -1,7 +1,7 @@
 package yajco.generator.parsergen.antlr4.model;
 
 /**
- * @brief Utility functions for formatting
+ * Utility functions for formatting
  */
 public class Formatting {
     /* Create indentation string of the given level. */

@@ -39,7 +39,8 @@ public class PropertyInConcept implements Serializable {
     }
 
     /**
-     * <ol>These must be equal:
+     * <p>These must be equal:</p>
+     * <ol>
      *  <li>{@link Concept}</li>
      *  <li>{@link Property#getName()}</li>
      *  <li>class of {@link Property#getType()}</li>
@@ -64,7 +65,8 @@ public class PropertyInConcept implements Serializable {
     }
 
     /**
-     * <ol>Depends on:
+     * <p>Depends on:</p>
+     * <ol>
      *  <li>{@link Concept}</li>
      *  <li>{@link Property#getName()}</li>
      *  <li>class of {@link Property#getType()}</li>

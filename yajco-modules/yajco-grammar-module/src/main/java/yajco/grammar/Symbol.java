@@ -62,7 +62,8 @@ public abstract class Symbol extends PatternSupport implements Cloneable {
      * Returns a {@link #clone() shallow copy} of this {@code Symbol} with the varName altered.
      *
      * @return a {@code Symbol} based on this symbol with the requested varName, not null
-     * @apiNote This method is in the style of the convention of Lombok's {@code @With}
+     *
+     * Note: This method is in the style of the convention of Lombok's {@code @With}
      * and the {@code with*()} methods in {@code java.time}.
      */
     public Symbol withVarName(String newVarName) {

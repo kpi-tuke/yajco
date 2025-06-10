@@ -1,7 +1,7 @@
 package yajco.lexer;
 
 /**
- * @brief A matched token.
+ * A matched token.
  */
 public class Token {
     static public class Range<T> {
