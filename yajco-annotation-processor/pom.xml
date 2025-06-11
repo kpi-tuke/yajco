@@ -18,63 +18,6 @@
 
   <build>
     <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-enforcer-plugin</artifactId>
-        <version>3.0.0-M2</version>
-        <executions>
-          <execution>
-            <id>enforce-maven</id>
-            <goals>
-              <goal>enforce</goal>
-            </goals>
-            <configuration>
-              <rules>
-                <requireMavenVersion>
-                  <version>3.1.0</version>
-                </requireMavenVersion>
-              </rules>
-            </configuration>
-          </execution>
-        </executions>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.0</version>
-        <configuration>
-          <release>11</release>
-          <proc>none</proc>
-        </configuration>
-      </plugin>
-
-      <!--            <plugin>
-          <artifactId>maven-assembly-plugin</artifactId>
-          <version>2.3</version>
-          <executions>
-              <execution>
-                  <id>create-executable-jar</id>
-                  <phase>package</phase>
-                  <goals>
-                      <goal>single</goal>
-                  </goals>
-                  <configuration>
-                      <descriptorRefs>
-                          <descriptorRef>
-                              jar-with-dependencies
-                          </descriptorRef>
-                      </descriptorRefs>
-                      <archive>
-                          <manifest>
-                              <mainClass>yajco.Main</mainClass>
-                          </manifest>
-                      </archive>
-                  </configuration>
-              </execution>
-          </executions>
-      </plugin>-->
-
       <!-- Runs unit tests -->
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -130,31 +73,4 @@
       <artifactId>slf4j-api</artifactId>
     </dependency>
   </dependencies>
-
-  <profiles>
-    <profile>
-      <id>default-profile</id>
-      <activation>
-        <activeByDefault>true</activeByDefault>
-        <file>
-          <exists>${java.home}/../lib/tools.jar</exists>
-        </file>
-      </activation>
-      <properties>
-        <toolsjar>${java.home}/../lib/tools.jar</toolsjar>
-      </properties>
-    </profile>
-    <profile>
-      <id>mac-profile</id>
-      <activation>
-        <activeByDefault>false</activeByDefault>
-        <file>
-          <exists>${java.home}/../Classes/classes.jar</exists>
-        </file>
-      </activation>
-      <properties>
-        <toolsjar>${java.home}/../Classes/classes.jar</toolsjar>
-      </properties>
-    </profile>
-  </profiles>
 </project>
