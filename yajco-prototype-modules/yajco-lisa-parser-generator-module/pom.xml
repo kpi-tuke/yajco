@@ -7,7 +7,6 @@
     <artifactId>yajco-prototype-modules</artifactId>
     <version>0.5.10-SNAPSHOT</version>
   </parent>
-  <groupId>sk.tuke.yajco</groupId>
   <artifactId>yajco-lisa-parser-generator-module</artifactId>
   <version>0.1.2-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -15,33 +14,6 @@
   <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - LISA parser
     generator
   </description>
-  <licenses>
-    <license>
-      <name>MIT License</name>
-      <url>https://opensource.org/license/mit</url>
-    </license>
-  </licenses>
-  <url>https://github.com/kpi-tuke/yajco/</url>
-  <developers>
-    <developer>
-      <name>Jaroslav Porubän</name>
-      <email>jaroslav.poruban@tuke.sk</email>
-      <organization>Technical University of Košice</organization>
-    </developer>
-    <developer>
-      <name>Dominik Lakatoš</name>
-      <email>deel77@gmail.com</email>
-      <organization>Technical University of Košice</organization>
-    </developer>
-  </developers>
-  <scm>
-    <url>https://github.com/kpi-tuke/yajco/tree/master</url>
-    <connection>scm:git:git://github.com:kpi-tuke/yajco.git</connection>
-    <developerConnection>scm:git:ssh://github.com:kpi-tuke/yajco.git</developerConnection>
-  </scm>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
   <dependencies>
     <dependency>
       <groupId>${project.groupId}</groupId>
