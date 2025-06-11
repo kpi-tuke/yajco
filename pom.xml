@@ -16,33 +16,53 @@
 
   <name>yajco</name>
   <description>YAJCo - Yet Another Java Compiler Compiler - object oriented language specification</description>
+  <url>https://github.com/kpi-tuke/yajco/</url>
+  
   <licenses>
     <license>
       <name>MIT License</name>
       <url>https://opensource.org/license/mit</url>
+      <distribution>repo</distribution>
     </license>
   </licenses>
-  <url>https://github.com/kpi-tuke/yajco/</url>
+  
   <developers>
     <developer>
       <name>Jaroslav Porubän</name>
       <email>jaroslav.poruban@tuke.sk</email>
       <organization>Technical University of Košice</organization>
+      <organizationUrl>https://www.tuke.sk</organizationUrl>
     </developer>
     <developer>
       <name>Dominik Lakatoš</name>
       <email>deel77@gmail.com</email>
       <organization>Technical University of Košice</organization>
+      <organizationUrl>https://www.tuke.sk</organizationUrl>
+    </developer>
+    <developer>
+      <name>Sergej Chodarev</name>
+      <email>sergejx@sergejx.net</email>
+      <organization>Technical University of Košice</organization>
+      <organizationUrl>https://www.tuke.sk</organizationUrl>
     </developer>
   </developers>
   <scm>
     <url>https://github.com/kpi-tuke/yajco/tree/master</url>
-    <connection>scm:git:git://github.com:kpi-tuke/yajco.git</connection>
-    <developerConnection>scm:git:ssh://github.com:kpi-tuke/yajco.git</developerConnection>
+    <connection>scm:git:git://github.com/kpi-tuke/yajco.git</connection>
+    <developerConnection>scm:git:ssh://git@github.com/kpi-tuke/yajco.git</developerConnection>
   </scm>
+
+  <issueManagement>
+    <system>GitHub</system>
+    <url>https://github.com/kpi-tuke/yajco/issues</url>
+  </issueManagement>
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
+    <maven.compiler.release>11</maven.compiler.release>
   </properties>
   <modules>
     <module>yajco-annotation-processor</module>
