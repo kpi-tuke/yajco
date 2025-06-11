@@ -5,7 +5,7 @@
   <parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco</artifactId>
-    <version>0.5.10-SNAPSHOT</version>
+    <version>0.6.0-SNAPSHOT</version>
   </parent>
   <artifactId>yajco-model</artifactId>
   <name>yajco-model</name>
