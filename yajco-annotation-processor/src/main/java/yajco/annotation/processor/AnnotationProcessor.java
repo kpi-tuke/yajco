@@ -34,7 +34,6 @@ import java.lang.reflect.Field;
 import java.util.*;
 import java.util.Optional;
 
-@SupportedSourceVersion(SourceVersion.RELEASE_11)
 @SupportedAnnotationTypes({"yajco.annotation.config.Parser", "yajco.annotation.Exclude"})
 //Nutnost upravit reference resolver, ktory funguje len s jednym konstruktoroms
 //Najlepsie to uplne zmenit podla novej struktury
@@ -71,6 +70,11 @@ public class AnnotationProcessor extends AbstractProcessor {
      */
     private int stringTokenId = 1;
     private static final String DEFAULT_STRING_TOKEN_NAME = "STRING_TOKEN";
+
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.latestSupported();
+    }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
