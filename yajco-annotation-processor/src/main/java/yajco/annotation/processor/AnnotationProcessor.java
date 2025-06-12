@@ -466,10 +466,37 @@ public class AnnotationProcessor extends AbstractProcessor {
      */
     private void defineConcreteSyntax(Concept concept, TypeElement classElement) {
         Set<ExecutableElement> constructors = getConstructorsAndFactoryMethods(classElement);
+
+        // Check for class-level @Before and @After annotations
+        Before beforeClassAnnotation = classElement.getAnnotation(Before.class);
+        After afterClassAnnotation = classElement.getAnnotation(After.class);
+
+        // If there are no constructors but class has @Before or @After annotations, create a default constructor notation
+        if (constructors.isEmpty() && (beforeClassAnnotation != null || afterClassAnnotation != null)) {
+            Notation defaultNotation = new Notation(classElement);
+
+            // Apply class-level @Before annotation
+            if (beforeClassAnnotation != null) {
+                addTokenParts(defaultNotation, beforeClassAnnotation.value());
+            }
+
+            // Apply class-level @After annotation
+            if (afterClassAnnotation != null) {
+                addTokenParts(defaultNotation, afterClassAnnotation.value());
+            }
+
+            concept.addNotation(defaultNotation);
+        }
+
         for (ExecutableElement constructor : constructors) {
             Notation notation = new Notation(constructor);
 
-            // @Before annotation.
+            // Apply class-level @Before annotation first, if present
+            if (beforeClassAnnotation != null) {
+                addTokenParts(notation, beforeClassAnnotation.value());
+            }
+
+            // Then apply constructor-level @Before annotation
             if (constructor.getAnnotation(Before.class) != null) {
                 addTokenParts(notation, constructor.getAnnotation(Before.class).value());
             }
@@ -484,9 +511,14 @@ public class AnnotationProcessor extends AbstractProcessor {
                 }
             }
 
-            // @After annotation.
+            // Apply constructor-level @After annotation
             if (constructor.getAnnotation(After.class) != null) {
                 addTokenParts(notation, constructor.getAnnotation(After.class).value());
+            }
+
+            // Then apply class-level @After annotation, if present
+            if (afterClassAnnotation != null) {
+                addTokenParts(notation, afterClassAnnotation.value());
             }
 
             concept.addNotation(notation);
