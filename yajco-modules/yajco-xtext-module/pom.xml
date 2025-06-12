@@ -15,7 +15,7 @@
     YAJCo - Yet Another Java Compiler Compiler - object oriented language specification - integration with Xtext
   </description>
   <properties>
-    <xtext.version>2.16.0</xtext.version>
+    <xtext.version>2.35.0</xtext.version>
   </properties>
   <dependencies>
     <dependency>
