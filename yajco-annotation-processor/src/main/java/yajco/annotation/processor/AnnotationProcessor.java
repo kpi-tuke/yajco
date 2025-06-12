@@ -27,6 +27,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.*;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.*;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
 import java.lang.reflect.Constructor;
@@ -78,9 +79,20 @@ public class AnnotationProcessor extends AbstractProcessor {
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {
+        // Check if processing is over and write all collected parser service providers
+        if (roundEnv.processingOver()) {
+            try {
+                CompilerGenerator.writeParserServiceProviders(processingEnv.getFiler());
+            } catch (IOException e) {
+                logger.error("Error writing parser service providers", e);
+            }
+            return false;
+        }
+
         // Leave only @Parser annotation for later processing.
         annotations.removeIf(typeElement -> typeElement.getQualifiedName().contentEquals(Exclude.class.getName()));
 
+        // Initialize properties
         properties = new Properties();
         this.loadSettingsFromSettingsFile();
 
@@ -90,114 +102,113 @@ public class AnnotationProcessor extends AbstractProcessor {
             return false;
         }
 
-        // Disable class generating - annotation processor works on classes, don't generate new ones.
-        properties.setProperty("yajco.generator.classgen.ClassGenerator", "false");
-
         this.roundEnv = roundEnv;
         this.processExcludedElements();
 
         try {
             if (annotations.size() == 1) {
-                // Check if only one @Parser annotation is used. Parser generator works only with one @Parser annotation.
-                if (roundEnv.getElementsAnnotatedWith(yajco.annotation.config.Parser.class).size() != 1) {
-                    System.err.println("Elements annotated with @Parser annotation:");
-                    for (Element element : roundEnv.getElementsAnnotatedWith(yajco.annotation.config.Parser.class)) {
-                        System.err.println(element.asType().toString());
-                    }
-                    throw new GeneratorException("There should be only one @Parser annotation in the model.");
-                }
-
                 //logger.info("YAJCo parser generator {}", VERSION);
                 System.out.println("YAJCo parser generator " + VERSION);
 
                 Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(yajco.annotation.config.Parser.class);
 
-                // Find directory for saving generated files.
-                // FileObject fo = processingEnv.getFiler().createResource(StandardLocation.SOURCE_OUTPUT, "", "temp.java");
-                // targetDirectory = new File(fo.toUri()).getParentFile();
+                if (elements.isEmpty()) {
+                    return false;
+                }
 
-                // Take the first annotation (the only one).
-                Element parserAnnotationElement = elements.iterator().next();
-                Parser parserAnnotation = parserAnnotationElement.getAnnotation(Parser.class);
+                // Process each @Parser annotation
+                for (Element parserAnnotationElement : elements) {
+                    // Initialize properties for this parser
+                    properties = new Properties();
+                    this.loadSettingsFromSettingsFile();
 
-                this.extractOptionsFromParserAnnotation(parserAnnotation);
+                    // Disable class generating - annotation processor works on classes, don't generate new ones.
+                    properties.setProperty("yajco.generator.classgen.ClassGenerator", "false");
 
-                // Extract the main element, package or type can be annotated with @Parser.
-                ElementKind parserAnnotationElemKind = parserAnnotationElement.getKind();
-                TypeElement mainElement;
-                String mainElementName;
-                if (parserAnnotationElemKind == ElementKind.PACKAGE) {
-                    mainElementName = parserAnnotation.mainNode();
-                    if (mainElementName.indexOf('.') == -1) {
-                        //TODO: Chyba v javac - ak nexistovala trieda tak ju vytvorilo ale nehlasilo null
-                        // ak som zavolal pre "Expression" vratilo sice null ale potom hlasilo duplicate class
-                        //mainElement = processingEnv.getElementUtils().getTypeElement(mainElementName);
-                        //mozno treba niekde v tools nastavit aby negenerovalo po otazke triedu ak neexistuje,
-                        //zda sa mi ze som to niekde videl v helpe
-                        mainElementName = ((PackageElement) parserAnnotationElement).getQualifiedName() + "." + mainElementName;
+                    Parser parserAnnotation = parserAnnotationElement.getAnnotation(Parser.class);
+                    this.extractOptionsFromParserAnnotation(parserAnnotation);
+
+                    // Extract the main element, package or type can be annotated with @Parser.
+                    ElementKind parserAnnotationElemKind = parserAnnotationElement.getKind();
+                    TypeElement mainElement;
+                    String mainElementName;
+                    if (parserAnnotationElemKind == ElementKind.PACKAGE) {
+                        mainElementName = parserAnnotation.mainNode();
+                        if (mainElementName.indexOf('.') == -1) {
+                            //TODO: Chyba v javac - ak nexistovala trieda tak ju vytvorilo ale nehlasilo null
+                            // ak som zavolal pre "Expression" vratilo sice null ale potom hlasilo duplicate class
+                            //mainElement = processingEnv.getElementUtils().getTypeElement(mainElementName);
+                            //mozno treba niekde v tools nastavit aby negenerovalo po otazke triedu ak neexistuje,
+                            //zda sa mi ze som to niekde videl v helpe
+                            mainElementName = ((PackageElement) parserAnnotationElement).getQualifiedName() + "." + mainElementName;
+                        }
+                        mainElement = processingEnv.getElementUtils().getTypeElement(mainElementName);
+                    } else if (parserAnnotationElemKind == ElementKind.CLASS || parserAnnotationElemKind == ElementKind.INTERFACE || parserAnnotationElemKind == ElementKind.ENUM) {
+                        mainElement = (TypeElement) parserAnnotationElement;
+                        mainElementName = mainElement.asType().toString();
+                        properties.setProperty("yajco.mainNode", mainElementName);
+                    } else {
+                        System.err.println("@Parser annotation can't be used on [" + parserAnnotationElemKind.toString() + "]\n");
+                        throw new GeneratorException("Annotation @Parser should annotate only package, class, interface or enum.");
                     }
-                    mainElement = processingEnv.getElementUtils().getTypeElement(mainElementName);
-                } else if (parserAnnotationElemKind == ElementKind.CLASS || parserAnnotationElemKind == ElementKind.INTERFACE || parserAnnotationElemKind == ElementKind.ENUM) {
-                    mainElement = (TypeElement) parserAnnotationElement;
-                    mainElementName = mainElement.asType().toString();
-                    properties.setProperty("yajco.mainNode", mainElementName);
-                } else {
-                    System.err.println("@Parser annotation can't be used on [" + parserAnnotationElemKind.toString() + "]\n");
-                    throw new GeneratorException("Annotation @Parser should annotate only package, class, interface or enum.");
-                }
 
-                if (mainElement == null) {
-                    throw new GeneratorException("Main language concept not found '" + parserAnnotation.mainNode() + "'");
-                }
+                    if (mainElement == null) {
+                        throw new GeneratorException("Main language concept not found '" + parserAnnotation.mainNode() + "'");
+                    }
 
-                //Map element to lines
-//                Trees trees = Trees.instance(processingEnv);
-//                SourcePositions sc = trees.getSourcePositions();
-//                System.out.println("trees=" + trees + ", sc=" + sc);
-//                TreePath path = trees.getPath(mainElement);
-//                Tree tree = trees.getTree(mainElement);
-//                CompilationUnitTree cut = path.getCompilationUnit();
-//                LineMap lm = cut.getLineMap();
-//                System.out.println("mainElement=" + mainElement + ", class=" + mainElement.getClass());
-//                System.out.println("path=" + path);
-//                System.out.println("cut=" + cut.getClass());
-//                System.out.println("tree=" + tree.getClass());
-//                System.out.println("lm=" + lm);
-//                long startPosition = sc.getStartPosition(cut, tree);
-//                long endPosition = sc.getEndPosition(cut, tree);
-//                System.out.println("uri=" + cut.getSourceFile().toUri());
-//                System.out.printf("Position (%d,%d) to (%d,%d)\n", lm.getLineNumber(startPosition), lm.getColumnNumber(startPosition), lm.getLineNumber(endPosition), lm.getColumnNumber(endPosition));
+                    //Map element to lines
+    //                Trees trees = Trees.instance(processingEnv);
+    //                SourcePositions sc = trees.getSourcePositions();
+    //                System.out.println("trees=" + trees + ", sc=" + sc);
+    //                TreePath path = trees.getPath(mainElement);
+    //                Tree tree = trees.getTree(mainElement);
+    //                CompilationUnitTree cut = path.getCompilationUnit();
+    //                LineMap lm = cut.getLineMap();
+    //                System.out.println("mainElement=" + mainElement + ", class=" + mainElement.getClass());
+    //                System.out.println("path=" + path);
+    //                System.out.println("cut=" + cut.getClass());
+    //                System.out.println("tree=" + tree.getClass());
+    //                System.out.println("lm=" + lm);
+    //                long startPosition = sc.getStartPosition(cut, tree);
+    //                long endPosition = sc.getEndPosition(cut, tree);
+    //                System.out.println("uri=" + cut.getSourceFile().toUri());
+    //                System.out.printf("Position (%d,%d) to (%d,%d)\n", lm.getLineNumber(startPosition), lm.getColumnNumber(startPosition), lm.getLineNumber(endPosition), lm.getColumnNumber(endPosition));
 
 
-                // Create language.
-                language = new Language(mainElement);
-                // Add main package name == language name.
-                String languageName = mainElementName.substring(0, mainElementName.lastIndexOf('.'));
-                System.out.println("---- mainElementName: " + mainElementName + " == languageName: " + languageName);
-                if (!languageName.isEmpty()) {
-                    language.setName(languageName);
-                }
+                    // Create language.
+                    language = new Language(mainElement);
+                    // Add main package name == language name.
+                    String languageName = mainElementName.substring(0, mainElementName.lastIndexOf('.'));
+                    System.out.println("---- mainElementName: " + mainElementName + " == languageName: " + languageName);
+                    if (!languageName.isEmpty()) {
+                        language.setName(languageName);
+                    }
 
-                // Add language concepts from included JARs.
-                addLanguageConceptsFromIncludedJARs();
+                    // Add language concepts from included JARs.
+                    addLanguageConceptsFromIncludedJARs();
 
-                // Start processing with the main element.
-                System.out.println(" ? mainElement ? : " + mainElement);
-                processTypeElement(mainElement);
+                    // Start processing with the main element.
+                    System.out.println(" ? mainElement ? : " + mainElement);
+                    processTypeElement(mainElement);
 
-                // Add tokens and skips into language.
-                addTokensAndSkipsIntoLanguage(parserAnnotation);
+                    // Add tokens and skips into language.
+                    addTokensAndSkipsIntoLanguage(parserAnnotation);
 
-                // Convert properties to language settings.
-                language.setSettings(LanguageSetting.convertToLanguageSetting(properties));
+                    // Convert properties to language settings.
+                    language.setSettings(LanguageSetting.convertToLanguageSetting(properties));
 
-                // Print recognized language to output.
-                printLanguage();
+                    // Print recognized language to output.
+                    printLanguage();
 
-                // Generate compiler.
-                if (!("false".equalsIgnoreCase(properties.getProperty("yajco.generateParser")))) {
-                    String parserClassName = parserAnnotation.className();
-                    generateCompiler(parserClassName);
+                    // Generate compiler.
+                    if (!("false".equalsIgnoreCase(properties.getProperty("yajco.generateParser")))) {
+                        String parserClassName = parserAnnotation.className();
+                        generateCompiler(parserClassName);
+                    }
+
+                    // Reset for next parser
+                    conceptsToProcess.clear();
+                    stringTokenId = 1;
                 }
 
                 // generates all new files
