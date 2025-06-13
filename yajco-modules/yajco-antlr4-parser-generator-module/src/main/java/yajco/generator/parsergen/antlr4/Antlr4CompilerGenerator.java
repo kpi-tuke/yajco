@@ -17,7 +17,6 @@ import javax.tools.FileObject;
 import javax.tools.StandardLocation;
 import java.io.*;
 import java.net.URI;
-import java.security.Permission;
 import java.util.*;
 
 public class Antlr4CompilerGenerator implements CompilerGenerator {
@@ -26,18 +25,6 @@ public class Antlr4CompilerGenerator implements CompilerGenerator {
     static final private String ANTLR4_PARSE_EXCEPTION_CLASS_TEMPLATE = "/yajco/generator/parsergen/antlr4/templates/ParseException.java.vm";
     private VelocityEngine velocityEngine;
 
-    // TODO: Remove this hack later.
-    static private class SystemExitException extends SecurityException {
-        private final int status;
-
-        public SystemExitException(int status) {
-            this.status = status;
-        }
-
-        public int getStatus() {
-            return status;
-        }
-    }
 
     @Override
     public void generateFiles(Language language, Filer filer, Properties properties) {
@@ -96,29 +83,12 @@ public class Antlr4CompilerGenerator implements CompilerGenerator {
             FileObject lexerFileObject = filer.createSourceFile(ANTLRParserPackageName + "." + ANTLRLexerClassName);
 
             // Run the ANTLR tool.
-            // FIXME: Is this part of the public API? Maybe there is a better way, less prone to compatibility breakage?
-            // FIXME: We use a nasty hack to catch System.exit called from Tool.main.
-            SecurityManager oldSecurityManager = System.getSecurityManager();
-            System.setSecurityManager(new SecurityManager() {
-                @Override
-                public void checkPermission(Permission perm)
-                {
-                }
-
-                @Override
-                public void checkExit(int status)
-                {
-                    throw new SystemExitException(status);
-                }
-            });
-            try {
-                Tool.main(args);
-            } catch (SystemExitException e) {
-                if (e.getStatus() != 0)
-                    throw new RuntimeException("ANTLR4 exited with a non-zero code");
-            } finally {
-                // Restore old security manager
-                System.setSecurityManager(oldSecurityManager);
+            // Using Tool instance directly instead of Tool.main to avoid System.exit calls
+            Tool antlrTool = new Tool(args);
+            antlrTool.processGrammarsOnCommandLine();
+            if (antlrTool.errMgr.getNumErrors() > 0) {
+                System.err.println(antlrTool.logMgr);
+                throw new RuntimeException("ANTLR4 encountered errors during processing");
             }
 
             // Create parser class wrapping the ANTLR-generated one.
