@@ -2,36 +2,13 @@ package yajco.generator.util;
 
 import com.google.googlejavaformat.java.Formatter;
 import com.google.googlejavaformat.java.FormatterException;
+import yajco.generator.GeneratorException;
+import yajco.model.*;
+import yajco.model.type.*;
+
 import java.io.File;
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import yajco.generator.GeneratorException;
-import yajco.model.BindingNotationPart;
-import yajco.model.Concept;
-import yajco.model.Language;
-import yajco.model.LocalVariablePart;
-import yajco.model.Notation;
-import yajco.model.NotationPart;
-import yajco.model.Property;
-import yajco.model.PropertyReferencePart;
-import yajco.model.TokenPart;
-import yajco.model.pattern.NotationPartPattern;
-import yajco.model.pattern.Pattern;
-import yajco.model.pattern.PatternSupport;
-import yajco.model.pattern.PropertyPattern;
-import yajco.model.pattern.impl.Identifier;
-import yajco.model.pattern.impl.References;
-import yajco.model.type.ArrayType;
-import yajco.model.type.ListType;
-import yajco.model.type.PrimitiveType;
-import yajco.model.type.PrimitiveTypeConst;
-import yajco.model.type.ReferenceType;
-import yajco.model.type.SetType;
-import yajco.model.type.Type;
+import java.util.*;
 
 public class Utilities {
 
