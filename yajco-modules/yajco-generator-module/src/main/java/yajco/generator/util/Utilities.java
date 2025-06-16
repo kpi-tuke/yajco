@@ -1,6 +1,7 @@
 package yajco.generator.util;
 
-import de.hunsicker.jalopy.Jalopy;
+import com.google.googlejavaformat.java.Formatter;
+import com.google.googlejavaformat.java.FormatterException;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
@@ -34,7 +35,7 @@ import yajco.model.type.Type;
 
 public class Utilities {
 
-    private static Jalopy jalopy;
+    private static Formatter formatter;
 
     public static String toUpperCaseIdent(String ident) {
         return Character.toUpperCase(ident.charAt(0)) + ident.substring(1);
@@ -103,12 +104,16 @@ public class Utilities {
 
     public static void formatCode(File file) {
         try {
-            Jalopy j = getJalopy();
-            j.setInput(file);
-            j.setOutput(file);
-            j.format();
+            Formatter formatter = getFormatter();
+            String source = java.nio.file.Files.readString(file.toPath());
+            String formatted = formatter.formatSource(source);
+            java.nio.file.Files.writeString(file.toPath(), formatted);
         } catch (FileNotFoundException ex) {
             throw new GeneratorException("File " + file.getAbsolutePath() + " is not available", ex);
+        } catch (java.io.IOException ex) {
+            throw new GeneratorException("Error reading or writing file " + file.getAbsolutePath(), ex);
+        } catch (FormatterException ex) {
+            throw new GeneratorException("Error formatting file " + file.getAbsolutePath(), ex);
         }
     }
 
@@ -224,11 +229,11 @@ public class Utilities {
         return str.toString();
     }
 
-    private synchronized static Jalopy getJalopy() {
-        if (jalopy == null) {
-            jalopy = new Jalopy();
+    private synchronized static Formatter getFormatter() {
+        if (formatter == null) {
+            formatter = new Formatter();
         }
-        return jalopy;
+        return formatter;
     }
 
     public static String encodeStringIntoTokenName(String s) {
@@ -252,7 +257,7 @@ public class Utilities {
             } else {
                 sb.append('_').append(((int) c));
             }
-            
+
         }
         return sb.toString().toUpperCase();
     }

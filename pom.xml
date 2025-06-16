@@ -84,7 +84,7 @@
     <velocity.version>2.4.1</velocity.version>
     <slf4j.version>2.0.16</slf4j.version>
     <xstream.version>1.4.21</xstream.version>
-    <jalopy.version>1.5rc3</jalopy.version>
+    <google-java-format.version>1.21.0</google-java-format.version>
   </properties>
 
   <modules>
@@ -106,9 +106,9 @@
         <scope>test</scope>
       </dependency>
       <dependency>
-        <groupId>jalopy</groupId>
-        <artifactId>jalopy</artifactId>
-        <version>${jalopy.version}</version>
+        <groupId>com.google.googlejavaformat</groupId>
+        <artifactId>google-java-format</artifactId>
+        <version>${google-java-format.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.velocity</groupId>
