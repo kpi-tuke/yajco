@@ -1,21 +1,14 @@
 package yajco.generator;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import java.nio.charset.Charset;
-import java.util.Properties;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.annotation.processing.Filer;
-import javax.tools.FileObject;
-import javax.tools.JavaFileManager;
-import javax.tools.StandardLocation;
 import yajco.generator.util.Utilities;
 import yajco.model.Language;
+
+import javax.annotation.processing.Filer;
+import javax.tools.FileObject;
+import javax.tools.StandardLocation;
+import java.io.*;
+import java.nio.charset.Charset;
+import java.util.Properties;
 
 public abstract class AbstractFileGenerator implements FilesGenerator {
 
@@ -47,7 +40,7 @@ public abstract class AbstractFileGenerator implements FilesGenerator {
         try {
             writer = new OutputStreamWriter(new FileOutputStream(file), Charset.forName("UTF-8"));
             generate(language, writer);
-            if (file.getName().toLowerCase().endsWith(".class")) {
+            if (file.getName().toLowerCase().endsWith(".java")) {
                 Utilities.formatCode(file);
             }
         } catch (IOException ex) {
@@ -66,7 +59,7 @@ public abstract class AbstractFileGenerator implements FilesGenerator {
     protected File getFileToWrite(Language language, Filer filer, String packageName, String fileName) {
         return getFileToWrite(language, filer, packageName, fileName, true);
     }
-    
+
     protected File getFileToWrite(Language language, Filer filer, String packageName, String fileName, boolean isSource) {
 //        if (!directory.isDirectory()) {
 //            throw new GeneratorException("Supplied file argument is not directory: " + directory.getAbsolutePath());
@@ -81,7 +74,6 @@ public abstract class AbstractFileGenerator implements FilesGenerator {
             if (isSource) {
                 fileObject = filer.createSourceFile(fullPackage + "." + fileName);
             } else {
-                
                 fileObject = filer.createResource(StandardLocation.CLASS_OUTPUT,fullPackage,fileName);
             }
             fileObject.openWriter().close();
