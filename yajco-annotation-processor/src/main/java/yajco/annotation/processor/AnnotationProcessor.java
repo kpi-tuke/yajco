@@ -478,17 +478,23 @@ public class AnnotationProcessor extends AbstractProcessor {
     private void defineConcreteSyntax(Concept concept, TypeElement classElement) {
         Set<ExecutableElement> constructors = getConstructorsAndFactoryMethods(classElement);
 
-        // Check for class-level @Before and @After annotations
+        // Check for class-level @Before, @Keyword, and @After annotations
         Before beforeClassAnnotation = classElement.getAnnotation(Before.class);
+        Keyword keywordClassAnnotation = classElement.getAnnotation(Keyword.class);
         After afterClassAnnotation = classElement.getAnnotation(After.class);
 
-        // If there are no constructors but class has @Before or @After annotations, create a default constructor notation
-        if (constructors.isEmpty() && (beforeClassAnnotation != null || afterClassAnnotation != null)) {
+        // If there are no constructors but class has @Before, @Keyword, or @After annotations, create a default constructor notation
+        if (constructors.isEmpty() && (beforeClassAnnotation != null || keywordClassAnnotation != null || afterClassAnnotation != null)) {
             Notation defaultNotation = new Notation(classElement);
 
             // Apply class-level @Before annotation
             if (beforeClassAnnotation != null) {
                 addTokenParts(defaultNotation, beforeClassAnnotation.value());
+            }
+
+            // Apply class-level @Keyword annotation
+            if (keywordClassAnnotation != null) {
+                addTokenParts(defaultNotation, keywordClassAnnotation.value());
             }
 
             // Apply class-level @After annotation
@@ -507,9 +513,19 @@ public class AnnotationProcessor extends AbstractProcessor {
                 addTokenParts(notation, beforeClassAnnotation.value());
             }
 
+            // Apply class-level @Keyword annotation, if present
+            if (keywordClassAnnotation != null) {
+                addTokenParts(notation, keywordClassAnnotation.value());
+            }
+
             // Then apply constructor-level @Before annotation
             if (constructor.getAnnotation(Before.class) != null) {
                 addTokenParts(notation, constructor.getAnnotation(Before.class).value());
+            }
+
+            // Then apply constructor-level @Keyword annotation
+            if (constructor.getAnnotation(Keyword.class) != null) {
+                addTokenParts(notation, constructor.getAnnotation(Keyword.class).value());
             }
 
             // @UnorderedParameters annotation.
