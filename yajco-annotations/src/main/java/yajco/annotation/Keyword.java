@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.SOURCE)
-@Target({ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.TYPE})
+@Target({ElementType.CONSTRUCTOR, ElementType.METHOD, ElementType.TYPE, ElementType.PARAMETER})
 public @interface Keyword {
     String[] value();
 }

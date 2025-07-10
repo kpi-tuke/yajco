@@ -656,6 +656,11 @@ public class AnnotationProcessor extends AbstractProcessor {
             OptionalPart optionalPart = (OptionalPart) processCompoundParameter(concept, paramElement, new OptionalPart(null));
             notation.addPart(optionalPart);
         } else {
+            // @Keyword annotation.
+            if (paramElement.getAnnotation(Keyword.class) != null) {
+                addTokenParts(notation, paramElement.getAnnotation(Keyword.class).value());
+            }
+
             // @Before annotation.
             if (paramElement.getAnnotation(Before.class) != null) {
                 addTokenParts(notation, paramElement.getAnnotation(Before.class).value());
@@ -713,6 +718,13 @@ public class AnnotationProcessor extends AbstractProcessor {
      * @return Compound notation part.
      */
     private CompoundNotationPart processCompoundParameter(Concept concept, VariableElement paramElement, CompoundNotationPart notationPart) {
+        // @Keyword annotation.
+        if (paramElement.getAnnotation(Keyword.class) != null) {
+            for (String value : paramElement.getAnnotation(Keyword.class).value()) {
+                notationPart.addPart(new TokenPart(value));
+            }
+        }
+
         // @Before annotation.
         if (paramElement.getAnnotation(Before.class) != null) {
             for (String value : paramElement.getAnnotation(Before.class).value()) {
