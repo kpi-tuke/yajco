@@ -1,13 +1,13 @@
 # Getting started #
 
-You can start using YAJCo parser generator tool by following the steps descibed below. If you prefer to use existing more complex examples follow instructions in the [examples project](https://github.com/kpi-tuke/yajco-examples).
+You can start using YAJCo parser generator tool by following the steps described below. If you prefer to use existing more complex examples follow instructions in the [examples project](https://github.com/kpi-tuke/yajco-examples).
 
 ## Maven builds ##
 
 **Recommended way of using YAJCo is within Maven project.** YAJCo tool consists of plenty modules and dependencies, which can be bothersome to include in project otherwise. If you have not used Maven builds in Java, you need to [download and install Maven](http://maven.apache.org/) and we recommend to get to know a little about how Maven works.
 
 ### Prepare Java Maven project ###
-Create simple Java Maven project. You can use following command or use any of your prefered IDE.
+Create simple Java Maven project. You can use following command or use any of your preferred IDE.
 ```bash
 mvn archetype:create 
   -DgroupId=sk.tuke.yajco.example
@@ -44,7 +44,7 @@ The following class defines a very simple YAJCo language specification. We will 
 
 `id superman`
 
-Language will consists of one language concept called **`SimpleIdentifier`**. We will implement it as a Java class with the same name. In order to specify main (root) concept of language, it is needed to mark it with **`@Parser`** annotation. Each constructor represents concrete syntax of a language. Annotation `@Before` serves for specifying a keyword `id` as a required word before identifier. Identifier consists of small latin characters, which is specified by regular expression inside **`@TokenDef`** annotation defined inside `@Parser` annotation. Parameter name is automatically maped to corresponding `TokenDef` name.
+Language will consist of one language concept called **`SimpleIdentifier`**. We will implement it as a Java class with the same name. In order to specify main (root) concept of language, it is needed to mark it with **`@Parser`** annotation. Each constructor represents concrete syntax of a language. Annotation `@Before` serves for specifying a keyword `id` as a required word before identifier. Identifier consists of small latin characters, which is specified by regular expression inside **`@TokenDef`** annotation defined inside `@Parser` annotation. Parameter name is automatically mapped to corresponding `TokenDef` name.
 ```java
 package mylang;
 
@@ -66,14 +66,14 @@ public class SimpleIdentifier {
     }
 }
 ```
-We have created **`getIdentifier()`** method for easy access to identifier name, which we will use later. After creating project with **`SimpleIdentifier`** class you have succesfully specified your new language. Just build it with Maven:
+We have created **`getIdentifier()`** method for easy access to identifier name, which we will use later. After creating project with **`SimpleIdentifier`** class you have successfully specified your new language. Just build it with Maven:
 ```bash
 mvn package
 ```
 and you get your parser generated instantly. You can check directory `target/generated-sources/annotations` in your project directory for generated parser.
 
 ### Running parser ###
-It's not fun having a parser such promtly and not being able to use it. Let's create a main class for actual parsing of some textual input. Generated parser is accessible through class **`LALRSimpleIdentifierParser`**, as it has default name created using root concept name (`SimpleIdentifier`).
+It's not fun having a parser such promptly and not being able to use it. Let's create a main class for actual parsing of some textual input. Generated parser is accessible through class **`LALRSimpleIdentifierParser`**, as it has default name created using root concept name (`SimpleIdentifier`).
 
 ```java
 import mylang.SimpleIdentifier;
@@ -83,12 +83,12 @@ public class MainClass {
 
     public static void main(String[] args) throws ParseException {
         String input = "id superman";
-        System.out.println("Going to parse: '"+input+"'");
+        System.out.println("Going to parse: '" + input + "'");
 
         LALRSimpleIdentifierParser parser = new LALRSimpleIdentifierParser();
         SimpleIdentifier simpleIdentifier = parser.parse(input);
 
-        System.out.println("Parsed identifier: "+simpleIdentifier.getIdentifier());
+        System.out.println("Parsed identifier: " + simpleIdentifier.getIdentifier());
     }
 }
 ```
