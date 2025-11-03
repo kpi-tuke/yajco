@@ -170,6 +170,6 @@ Parsed identifier: superman
 You have now created your first simple language using only plain Java classes and YAJCo.
 
 You can download
-the [complete source code of this example](https://github.com/kpi-tuke/yajco/wiki/examples/yajco_examples.zip)
-(see the `yajco-example-gettingStarted` directory inside the ZIP)
-or explore [more complex examples](https://github.com/kpi-tuke/yajco/wiki/Examples).
+the [complete source code of this example](https://github.com/kpi-tuke/yajco-examples/archive/master.zip)
+(see the `getting-started` directory inside the ZIP)
+or explore [more complex examples](https://github.com/kpi-tuke/yajco-examples).
