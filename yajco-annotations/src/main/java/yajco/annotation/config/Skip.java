@@ -6,5 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 @Retention(RetentionPolicy.SOURCE)
 //Target: None
 public @interface Skip {
-    String value();
+    String value() default "";
+    String start() default "";
+    String end() default "";
+    boolean whitespace() default false;
 }

@@ -323,7 +323,8 @@ public class AnnotationProcessor extends AbstractProcessor {
             tokens.add(new TokenDef(tokenDef.name(), tokenDef.regexp(), tokenDef));
         }
         for (Skip skip : parserAnnotation.skips()) {
-            skips.add(new SkipDef(skip.value(), skip));
+            String regexp = convertSkipToRegexp(skip);
+            skips.add(new SkipDef(regexp, skip));
         }
 
         // Add default white space for skips if empty.
@@ -332,6 +333,51 @@ public class AnnotationProcessor extends AbstractProcessor {
         }
         addToListAsSet(language.getSkips(), skips, true);
         addToListAsSet(language.getTokens(), tokens, true);
+    }
+
+    /**
+     * Converts @Skip annotation parameters into a regular expression.
+     * Supports syntactic sugar for whitespace and comment patterns.
+     *
+     * @param skip @Skip annotation object
+     * @return Regular expression string
+     */
+    private String convertSkipToRegexp(Skip skip) {
+        // If value is explicitly set, use it directly (highest priority)
+        if (!skip.value().isEmpty()) {
+            return skip.value();
+        }
+
+        // Handle whitespace flag
+        if (skip.whitespace()) {
+            return "\\s";
+        }
+
+        // Handle comment patterns with start and optional end
+        if (!skip.start().isEmpty()) {
+            String start = escapeRegex(skip.start());
+            if (!skip.end().isEmpty()) {
+                // Multi-line comment with explicit end: start...end
+                String end = escapeRegex(skip.end());
+                return start + "(?:(?!" + end + ")[\\s\\S])*" + end;
+            } else {
+                // Single-line comment: start until end of line
+                return start + ".*";
+            }
+        }
+
+        // If nothing is specified, return empty string (should not happen in practice)
+        return "";
+    }
+
+    /**
+     * Escapes special regex characters in a literal string.
+     *
+     * @param literal String to escape
+     * @return Escaped string safe for use in regex
+     */
+    private String escapeRegex(String literal) {
+        return literal.replaceAll("([\\\\.*+?^${}()|\\[\\]])", "\\\\$1");
     }
 
     /**
