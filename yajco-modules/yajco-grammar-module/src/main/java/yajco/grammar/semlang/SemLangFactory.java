@@ -294,4 +294,28 @@ public final class SemLangFactory {
 
         return rValues;
     }
+
+    /**
+     * Creates actions that filter a mixed list by element type.
+     * Generates:  varName = new ArrayList<>(); for (Object e : mixedList) { if (e instanceof Type) varName.add((Type)e); }
+     *
+     * @param mixedListSymbol Symbol containing the mixed list
+     * @param elementClassName Fully qualified class name of elements to filter
+     * @param filteredSymbol Symbol representing the filtered result list
+     * @return List of actions to perform the filtering
+     */
+    public static List<Action> createFilterListByTypeActions(
+            Symbol mixedListSymbol,
+            String elementClassName,
+            Symbol filteredSymbol) {
+        List<Action> actions = new ArrayList<Action>();
+
+        // Single action handles both list creation and filtering
+        actions.add(new FilterByTypeAction(
+            new RValue(mixedListSymbol),
+            elementClassName,
+            new LValue(filteredSymbol.getVarName())));
+
+        return actions;
+    }
 }

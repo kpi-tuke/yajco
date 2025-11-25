@@ -6,6 +6,7 @@ import yajco.grammar.TerminalSymbol;
 import yajco.grammar.bnf.Alternative;
 import yajco.grammar.bnf.Grammar;
 import yajco.grammar.bnf.Production;
+import yajco.grammar.semlang.Action;
 import yajco.grammar.semlang.SemLangFactory;
 import yajco.grammar.type.HashMapType;
 import yajco.grammar.type.ObjectType;
@@ -43,6 +44,8 @@ public class YajcoModelToBNFGrammarTranslator {
     private String sharedPartName;
     private int unorderedParamID;
     private List<NonterminalSymbol> unorderedParamNonterminals;
+    private MixedRepetitionPart currentMixedRepetitionPart;  // Track current mixed repetition
+    private Symbol currentMixedRepetitionSymbol;  // The symbol representing the mixed list
 
     private YajcoModelToBNFGrammarTranslator() {
         language = null;
@@ -205,6 +208,11 @@ public class YajcoModelToBNFGrammarTranslator {
                 parameters.add(symbol);
                 this.unorderedParamNonterminals.add(new NonterminalSymbol(symbol.getName(), symbol.getReturnType(), DEFAULT_PARAM_VAR_NAME + unorderedParamID++));
                 symbol = null;
+            } else if (part instanceof MixedRepetitionPart) {
+                List<Symbol> mixedSymbols = translateMixedRepetitionPart(concept, (MixedRepetitionPart) part);
+                parameters.addAll(mixedSymbols);
+                // Keep the first symbol (the mixed list) to add to the alternative
+                symbol = mixedSymbols.isEmpty() ? null : mixedSymbols.get(0);
             } else {
                 throw new IllegalArgumentException("Unknown notation part: '" + part.getClass().getCanonicalName() + "'!");
             }
@@ -228,18 +236,84 @@ public class YajcoModelToBNFGrammarTranslator {
 
 //        Operator opPattern = (Operator) concept.getPattern(Operator.class);
         Factory factoryPattern = (Factory) notation.getPattern(Factory.class);
-        if (factoryPattern != null) {
+
+        // Handle mixed repetition: distribute elements before creating instance
+        if (this.currentMixedRepetitionPart != null) {
+            // Build the distribution: create filtered lists from mixed list and replace in parameters
+            List<Symbol> distributedParameters = new ArrayList<Symbol>();
+            List<Action> distributionActions = new ArrayList<Action>();
+
+            // Find and process the mixed symbol in parameters
+            for (Symbol param : parameters) {
+                if (param == this.currentMixedRepetitionSymbol) {
+                    // This is the mixed list - distribute it into separate collections
+                    for (NotationPart notationPart : this.currentMixedRepetitionPart.getParts()) {
+                        if (notationPart instanceof PropertyReferencePart) {
+                            PropertyReferencePart propRefPart = (PropertyReferencePart) notationPart;
+                            Property property = propRefPart.getProperty();
+
+                            Type propertyType = property.getType();
+                            Type elementType;
+                            if (propertyType instanceof ListType) {
+                                elementType = ((ListType) propertyType).getComponentType();
+                            } else {
+                                elementType = ((ArrayType) propertyType).getComponentType();
+                            }
+
+                            // Create a new symbol for the filtered list
+                            String filteredVarName = property.getName();
+                            NonterminalSymbol filteredSymbol = new NonterminalSymbol(
+                                filteredVarName,
+                                propertyType,
+                                filteredVarName);
+
+                            // Add action to filter the mixed list by type
+                            if (elementType instanceof ReferenceType) {
+                                String elementClassName = Utilities.getFullConceptClassName(language, ((ReferenceType) elementType).getConcept());
+                                distributionActions.addAll(SemLangFactory.createFilterListByTypeActions(
+                                    this.currentMixedRepetitionSymbol,
+                                    elementClassName,
+                                    filteredSymbol));
+                            }
+
+                            distributedParameters.add(filteredSymbol);
+                        }
+                    }
+                } else {
+                    distributedParameters.add(param);
+                }
+            }
+
+            // Add distribution actions first
+            for (Action action : distributionActions) {
+                alternative.addAction(action);
+            }
+
+            // Then add constructor creation
+            if (factoryPattern != null) {
+                alternative.addActions(SemLangFactory.createRefResolverFactoryClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), factoryPattern.getName(), distributedParameters, this.sharedPartName));
+            } else {
+                alternative.addActions(SemLangFactory.createRefResolverNewClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), distributedParameters, this.sharedPartName));
+            }
+
+            // Clear mixed repetition state
+            this.currentMixedRepetitionPart = null;
+            this.currentMixedRepetitionSymbol = null;
+        } else {
+            // Normal processing without mixed repetition
+            if (factoryPattern != null) {
 //            if (opPattern == null) {
-            alternative.addActions(SemLangFactory.createRefResolverFactoryClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), factoryPattern.getName(), parameters, this.sharedPartName));
+                alternative.addActions(SemLangFactory.createRefResolverFactoryClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), factoryPattern.getName(), parameters, this.sharedPartName));
 //            } else {
 //                alternative.addActions(SemLangFactory.createFactoryClassInstanceAndReturnActions(Utilities.getFullConceptClassName(language, concept), factoryPattern.getName(), parameters));
 //            }
-        } else {
+            } else {
 //            if (opPattern == null) {
-            alternative.addActions(SemLangFactory.createRefResolverNewClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), parameters, this.sharedPartName));
+                alternative.addActions(SemLangFactory.createRefResolverNewClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), parameters, this.sharedPartName));
 //            } else {
 //                alternative.addActions(SemLangFactory.createNewClassInstanceAndReturnActions(Utilities.getFullConceptClassName(language, concept), parameters));
 //            }
+            }
         }
         this.sharedPartName = null;
 
@@ -323,6 +397,144 @@ public class YajcoModelToBNFGrammarTranslator {
             grammar.addNonterminal(conceptNonterminal);
         }
         return conceptNonterminal;
+    }
+
+    /**
+     * Translates mixed repetition part into grammar symbols.
+     *
+     * Creates a union nonterminal that accepts any of the element types,
+     * and list nonterminals for repetition.
+     *
+     * Grammar structure:
+     *   ConceptElementArray ::= ConceptElement*
+     *   ConceptElement ::= ElementType1 | ElementType2 | ...
+     *
+     * LIMITATION: Currently returns a single mixed list containing all elements.
+     * The constructor receives this mixed list for ALL collection parameters.
+     * Proper type-based distribution requires user code to filter the list.
+     *
+     * Returns a list containing ONE symbol representing the mixed array.
+     */
+    private List<Symbol> translateMixedRepetitionPart(Concept concept, MixedRepetitionPart mixedRepetitionPart) {
+        List<Symbol> collectionSymbols = new ArrayList<Symbol>();
+        List<NonterminalSymbol> elementAlternatives = new ArrayList<NonterminalSymbol>();
+
+        // Collect element types from each collection parameter
+        for (NotationPart notationPart : mixedRepetitionPart.getParts()) {
+            if (!(notationPart instanceof PropertyReferencePart)) {
+                throw new IllegalArgumentException(
+                    "MixedRepetitionPart can only contain PropertyReferencePart, found: " +
+                    notationPart.getClass().getCanonicalName());
+            }
+
+            PropertyReferencePart propRefPart = (PropertyReferencePart) notationPart;
+            Property property = propRefPart.getProperty();
+            Type propertyType = property.getType();
+
+            // Extract element type from collection
+            Type elementType;
+            if (propertyType instanceof ListType) {
+                elementType = ((ListType) propertyType).getComponentType();
+            } else if (propertyType instanceof ArrayType) {
+                elementType = ((ArrayType) propertyType).getComponentType();
+            } else {
+                throw new IllegalArgumentException(
+                    "MixedRepetition property '" + property.getName() +
+                    "' must be List or Array type, found: " + propertyType.getClass().getSimpleName());
+            }
+
+            // Get or create nonterminal for this element type
+            if (elementType instanceof ReferenceType) {
+                Concept elementConcept = ((ReferenceType) elementType).getConcept();
+                NonterminalSymbol elementSymbol = new NonterminalSymbol(
+                    elementConcept.getConceptName(),
+                    elementType,
+                    property.getName() + "Element");
+                elementAlternatives.add(elementSymbol);
+            } else {
+                throw new IllegalArgumentException(
+                    "MixedRepetition only supports reference types (concepts), found: " +
+                    elementType.getClass().getSimpleName() + " for property " + property.getName());
+            }
+        }
+
+        // Create union nonterminal: ConceptElement ::= ElementType1 | ElementType2 | ...
+        String unionNonterminalName = concept.getConceptName() + "Element";
+        NonterminalSymbol unionNonterminal = new NonterminalSymbol(
+            unionNonterminalName,
+            new ObjectType(),
+            "element");
+
+        // Check if union nonterminal already exists
+        Production existingUnion = grammar.getProduction(unionNonterminal);
+        if (existingUnion == null) {
+            Production unionProduction = new Production(unionNonterminal);
+
+            for (NonterminalSymbol elementSymbol : elementAlternatives) {
+                Alternative alt = new Alternative();
+                alt.addSymbol(elementSymbol);
+                alt.addActions(SemLangFactory.createReturnSymbolValueActions(elementSymbol));
+                unionProduction.addAlternative(alt);
+            }
+
+            grammar.addProduction(unionProduction);
+            grammar.addNonterminal(unionNonterminal);
+        }
+
+        // Create list nonterminal: ConceptElementArray ::= ConceptElement*
+        String listNonterminalName = concept.getConceptName() + "ElementArray";
+        NonterminalSymbol listNonterminal = new NonterminalSymbol(
+            listNonterminalName,
+            new ListType(new ObjectType()),
+            "elements");
+
+        // Check if list nonterminal already exists
+        Production existingList = grammar.getProduction(listNonterminal);
+        if (existingList == null) {
+            // Create list production with standard repetition pattern
+            // Alt 1: list element -> add to list
+            // Alt 2: empty -> create empty list
+            // Alt 3: element -> create list with single element
+            Production listProduction = new Production(listNonterminal);
+
+            // Alternative 1: list element
+            Alternative alt1 = new Alternative();
+            NonterminalSymbol listSymbol1 = new NonterminalSymbol(listNonterminalName, new ListType(new ObjectType()), DEFAULT_LIST_NAME);
+            alt1.addSymbol(listSymbol1);
+            alt1.addSymbol(unionNonterminal);
+            alt1.addActions(SemLangFactory.createAddElementToCollectionAndReturnActions(listSymbol1, unionNonterminal));
+            listProduction.addAlternative(alt1);
+
+            // Alternative 2: empty (epsilon)
+            Alternative alt2 = new Alternative();
+            alt2.addActions(SemLangFactory.createListAndReturnActions(new ObjectType()));
+            listProduction.addAlternative(alt2);
+
+            // Alternative 3: single element
+            Alternative alt3 = new Alternative();
+            alt3.addSymbol(unionNonterminal);
+            alt3.addActions(SemLangFactory.createListAndAddElementAndReturnActions(
+                new ObjectType(), DEFAULT_LIST_NAME, unionNonterminal));
+            listProduction.addAlternative(alt3);
+
+            grammar.addProduction(listProduction);
+            grammar.addNonterminal(listNonterminal);
+        }
+
+        // Return a SINGLE symbol for the mixed list
+        // Store metadata so the alternative creation can generate distribution logic
+        NonterminalSymbol mixedListSymbol = new NonterminalSymbol(
+            listNonterminalName,
+            new ListType(new ObjectType()),
+            "mixedElements");
+
+        collectionSymbols.add(mixedListSymbol);
+
+        // Store metadata for later use in alternative creation
+        this.currentMixedRepetitionPart = mixedRepetitionPart;
+        this.currentMixedRepetitionSymbol = mixedListSymbol;
+
+        return collectionSymbols;
     }
 
     private Symbol translateOptionalPart(Concept concept, OptionalPart optionalPart) {

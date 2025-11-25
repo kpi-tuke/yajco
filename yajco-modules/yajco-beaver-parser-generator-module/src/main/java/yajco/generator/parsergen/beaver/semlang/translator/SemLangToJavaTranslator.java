@@ -93,6 +93,9 @@ public class SemLangToJavaTranslator {
             case CONVERT_UNORDERED_PARAMS_TO_OBJECT:
                 translateConvertUnorderedParamsToObjectAction((ConvertUnorderedParamsToObjectAction) action, writer);
                 break;
+            case FILTER_BY_TYPE:
+                translateFilterByTypeAction((yajco.grammar.semlang.FilterByTypeAction) action, writer);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown SemLang action detected: '" + action.getClass().getCanonicalName() + "'!");
         }
@@ -218,6 +221,26 @@ public class SemLangToJavaTranslator {
         writer.print("(" + typeToString(action.getResultInnerType()) + ") ");
         writer.print("params.getWrappedObject()");
         writer.print(".get(\"" + varName + "\")");
+    }
+
+    /**
+     * Translates FilterByTypeAction into Java code that creates a SymbolWrapper list and filters by element type.
+     * Generates: targetList = new SymbolWrapper(new SymbolListImpl<>()); for (...) targetList.getWrappedObject().add(...);
+     */
+    private void translateFilterByTypeAction(yajco.grammar.semlang.FilterByTypeAction action, PrintStream writer) {
+        String targetClassName = action.getTargetClassName();
+        String sourceListVar = action.getSourceList().getSymbol().getVarName();
+        String targetListVar = action.getTargetList().getVarName();
+
+        // Create the wrapped list
+        writer.print("SymbolWrapper<java.util.List<" + targetClassName + ">> " + targetListVar + " = ");
+        writer.print("new SymbolWrapper<>(new SymbolListImpl<" + targetClassName + ">()); ");
+
+        // Filter and populate the wrapped list
+        writer.print("for (Object __elem : " + sourceListVar + ".getWrappedObject()) { ");
+        writer.print("if (__elem instanceof " + targetClassName + ") { ");
+        writer.print(targetListVar + ".getWrappedObject().add((" + targetClassName + ")__elem); ");
+        writer.print("} } ");
     }
 
     private void translateCreateCollectionInstanceAction(CreateCollectionInstanceAction action, PrintStream writer) {

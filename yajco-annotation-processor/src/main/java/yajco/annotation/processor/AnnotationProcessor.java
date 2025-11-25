@@ -578,8 +578,12 @@ public class AnnotationProcessor extends AbstractProcessor {
 
             // @UnorderedParameters annotation.
             UnorderedParameters unorderedParametersAnnotation = constructor.getAnnotation(UnorderedParameters.class);
+            MixedRepetition mixedRepetitionAnnotation = constructor.getAnnotation(MixedRepetition.class);
+
             if (unorderedParametersAnnotation != null) {
                 processUnorderedParamsConstructor(concept, constructor, notation, unorderedParametersAnnotation);
+            } else if (mixedRepetitionAnnotation != null) {
+                processMixedRepetitionConstructor(concept, constructor, notation, mixedRepetitionAnnotation);
             } else {
                 for (VariableElement paramElement : constructor.getParameters()) {
                     processParameter(concept, notation, paramElement);
@@ -643,6 +647,56 @@ public class AnnotationProcessor extends AbstractProcessor {
             if (cantBeExcluded && cantBeUnordered) {
                 throw new GeneratorException("Excluded parameter can't be in the middle of unordered parameters.");
             }
+        }
+    }
+
+    /**
+     * Processes constructor annotated with @MixedRepetition annotation.
+     *
+     * @param concept Language concept.
+     * @param constructor Constructor or factory method element.
+     * @param notation Language concept notation.
+     * @param mixedRepetitionAnnotation MixedRepetition annotation
+     */
+    private void processMixedRepetitionConstructor(Concept concept, ExecutableElement constructor, Notation notation, MixedRepetition mixedRepetitionAnnotation) {
+        MixedRepetitionPart mixedRepetitionPart = new MixedRepetitionPart(null);
+
+        for (VariableElement paramElement : constructor.getParameters()) {
+            String paramName = paramElement.getSimpleName().toString();
+
+            // Check if parameter is excluded
+            if (Arrays.asList(mixedRepetitionAnnotation.exclude()).contains(paramName)) {
+                processParameter(concept, notation, paramElement);
+            } else {
+                // Parameter should be a collection type (List or Array)
+                Type paramType = getType(paramElement.asType());
+
+                if (!(paramType instanceof ListType || paramType instanceof ArrayType)) {
+                    throw new GeneratorException(
+                        "Parameter '" + paramName + "' in @MixedRepetition must be a List or Array type. Found: " + paramType.getClass().getSimpleName()
+                    );
+                }
+
+                // Create property reference part for this collection parameter
+                Property property = concept.getProperty(paramName);
+                if (property == null) {
+                    property = new Property(paramName, paramType, null);
+                    concept.addProperty(property);
+                }
+
+                PropertyReferencePart propertyRefPart = new PropertyReferencePart(property, paramElement);
+
+                // Add patterns from annotations (e.g., @Before, @After on individual parameters)
+                addPatternsFromAnnotations(paramElement, propertyRefPart);
+
+                // Add this property reference to the mixed repetition part
+                mixedRepetitionPart.addPart(propertyRefPart);
+            }
+        }
+
+        // Add the mixed repetition part to the notation
+        if (mixedRepetitionPart.getParts().size() > 0) {
+            notation.addPart(mixedRepetitionPart);
         }
     }
 
