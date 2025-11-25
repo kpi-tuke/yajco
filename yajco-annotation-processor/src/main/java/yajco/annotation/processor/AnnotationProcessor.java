@@ -71,6 +71,8 @@ public class AnnotationProcessor extends AbstractProcessor {
      */
     private int stringTokenId = 1;
     private static final String DEFAULT_STRING_TOKEN_NAME = "STRING_TOKEN";
+    private static final String IDENTIFIER_TOKEN_NAME = "IDENTIFIER";
+    private static final String IDENTIFIER_TOKEN_REGEXP = "[a-zA-Z_][a-zA-Z0-9_]*";
 
     @Override
     public SourceVersion getSupportedSourceVersion() {
@@ -742,6 +744,18 @@ public class AnnotationProcessor extends AbstractProcessor {
             } else if (stringTokenAnnotation != null) {
                 TokenDef tokenDef = createStringTokenDef(stringTokenAnnotation);
                 part.addPattern(new yajco.model.pattern.impl.Token(tokenDef.getName(), tokenAnnotation));
+            } else if (references != null) {
+                // Automatically add IDENTIFIER token for @References parameters
+                ensureIdentifierTokenExists();
+                part.addPattern(new yajco.model.pattern.impl.Token(IDENTIFIER_TOKEN_NAME, references));
+            } else if (part instanceof PropertyReferencePart) {
+                // Check if the referenced property has @Identifier pattern
+                PropertyReferencePart propRefPart = (PropertyReferencePart) part;
+                if (propertyHasIdentifierPattern(propRefPart.getProperty())) {
+                    // Automatically add IDENTIFIER token for properties with @Identifier
+                    ensureIdentifierTokenExists();
+                    part.addPattern(new yajco.model.pattern.impl.Token(IDENTIFIER_TOKEN_NAME, paramElement));
+                }
             }
 
             // Add notation part pattern from annotations (NotationPartPattern).
@@ -852,6 +866,47 @@ public class AnnotationProcessor extends AbstractProcessor {
         addToListAsSet(language.getTokens(), Collections.singletonList(tokenDef),false);
 
         return tokenDef;
+    }
+
+    /**
+     * Ensures IDENTIFIER token exists in the language definition.
+     * If the token doesn't exist, it creates and adds it automatically.
+     *
+     * @return TokenDef for IDENTIFIER token
+     */
+    private TokenDef ensureIdentifierTokenExists() {
+        // Check if IDENTIFIER token already exists
+        for (TokenDef token : language.getTokens()) {
+            if (token.getName().equals(IDENTIFIER_TOKEN_NAME)) {
+                return token;
+            }
+        }
+
+        // Create new IDENTIFIER token
+        TokenDef tokenDef = new TokenDef(IDENTIFIER_TOKEN_NAME, IDENTIFIER_TOKEN_REGEXP);
+
+        // Add IDENTIFIER token to language
+        addToListAsSet(language.getTokens(), Collections.singletonList(tokenDef), false);
+
+        return tokenDef;
+    }
+
+    /**
+     * Checks if a property has an @Identifier pattern.
+     *
+     * @param property Property to check
+     * @return true if property has @Identifier pattern, false otherwise
+     */
+    private boolean propertyHasIdentifierPattern(Property property) {
+        if (property == null) {
+            return false;
+        }
+        for (Pattern pattern : property.getPatterns()) {
+            if (pattern instanceof yajco.model.pattern.impl.Identifier) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
