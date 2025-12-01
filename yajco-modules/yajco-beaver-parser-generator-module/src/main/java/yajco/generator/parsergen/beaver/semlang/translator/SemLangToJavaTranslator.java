@@ -5,6 +5,7 @@ import yajco.grammar.semlang.*;
 import yajco.grammar.type.HashMapType;
 import yajco.grammar.type.ObjectType;
 import yajco.grammar.type.UnorderedParamType;
+import yajco.grammar.NonterminalSymbol;
 import yajco.model.Language;
 import yajco.model.type.*;
 
@@ -381,14 +382,26 @@ public class SemLangToJavaTranslator {
     }
 
     private void translateRValue(RValue rValue, PrintStream writer) {
-        if (rValue.getSymbol() != null || rValue.getVarName() != null) {
+        if (rValue.isLiteral()) {
+            // Handle literal values (boolean, int, string, etc.)
+            Object literal = rValue.getLiteralValue();
+            if (literal instanceof Boolean) {
+                writer.print(literal.toString());
+            } else if (literal instanceof String) {
+                writer.print("\"");
+                writer.print(literal.toString());
+                writer.print("\"");
+            } else {
+                writer.print(literal.toString());
+            }
+        } else if (rValue.getSymbol() != null || rValue.getVarName() != null) {
             translateLValue(rValue, writer);
-            //DOMINIK TEST
+            // Nonterminals always return wrapped values, so unwrap them
+            // Terminals return unwrapped primitives, so don't unwrap
             if (rValue.getSymbol() != null
-                    && !(rValue.getSymbol().getReturnType() instanceof PrimitiveType)) {
+                    && rValue.getSymbol() instanceof NonterminalSymbol) {
                 writer.print(".getWrappedObject()");
             }
-            //POTIAL
         } else {
             translateAction(rValue.getAction(), writer);
         }

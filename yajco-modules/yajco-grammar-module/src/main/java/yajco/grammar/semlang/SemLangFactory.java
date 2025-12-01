@@ -18,6 +18,10 @@ public final class SemLangFactory {
         return createReturnValueActions(new RValue(symbol));
     }
 
+    public static List<Action> createReturnBooleanLiteralActions(boolean value) {
+        return createReturnValueActions(new RValue(value));
+    }
+
     public static List<Action> createNewClassInstanceActions(String classType, List<Symbol> symbols) {
         return createClassInstanceActions(classType, null, symbolsToRValues(symbols, null));
     }

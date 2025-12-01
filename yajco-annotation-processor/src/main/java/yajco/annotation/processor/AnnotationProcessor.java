@@ -753,8 +753,33 @@ public class AnnotationProcessor extends AbstractProcessor {
      */
     private void processParameter(Concept concept, Notation notation, VariableElement paramElement) {
         Type type = getType(paramElement.asType());
+        yajco.annotation.Flag flagAnnotation = paramElement.getAnnotation(yajco.annotation.Flag.class);
 
-        if (type instanceof OptionalType) {
+        // Handle @Flag annotation on boolean parameters
+        if (flagAnnotation != null) {
+            if (!(type instanceof yajco.model.type.PrimitiveType
+                    && ((yajco.model.type.PrimitiveType) type).getPrimitiveTypeConst() == PrimitiveTypeConst.BOOLEAN)) {
+                throw new GeneratorException("@Flag annotation can only be used on boolean parameters");
+            }
+
+            String paramName = paramElement.getSimpleName().toString();
+            Property property = concept.getProperty(paramName);
+            if (property == null) {
+                property = new Property(paramName, type, null);
+                concept.addProperty(property);
+            }
+
+            // Create an optional part containing the flag token
+            OptionalPart optionalPart = new OptionalPart(null);
+            optionalPart.addPart(new TokenPart(flagAnnotation.value()));
+
+            // Add property reference with Flag pattern
+            PropertyReferencePart propertyRefPart = new PropertyReferencePart(property, paramElement);
+            propertyRefPart.addPattern(new yajco.model.pattern.impl.Flag(flagAnnotation.value(), flagAnnotation));
+            optionalPart.addPart(propertyRefPart);
+
+            notation.addPart(optionalPart);
+        } else if (type instanceof OptionalType) {
             OptionalPart optionalPart = (OptionalPart) processCompoundParameter(concept, paramElement, new OptionalPart(null));
             notation.addPart(optionalPart);
         } else {

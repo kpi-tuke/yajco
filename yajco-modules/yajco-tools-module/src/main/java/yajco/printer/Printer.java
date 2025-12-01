@@ -286,6 +286,8 @@ public class Printer {
             printShared(writer, (Shared) pattern);
         } else if(pattern instanceof QuotedString) {
             printQuotedString(writer, (QuotedString) pattern);
+        } else if(pattern instanceof yajco.model.pattern.impl.Flag) {
+            printFlag(writer, (yajco.model.pattern.impl.Flag) pattern);
         }else {
             throw new PrinterException("Not supported pattern " + pattern.getClass());
         }
@@ -390,6 +392,12 @@ public class Printer {
     private void printToken(PrintWriter writer, Token tokenPattern) {
         writer.print("Token(\"");
         writer.print(tokenPattern.getName());
+        writer.print("\")");
+    }
+
+    private void printFlag(PrintWriter writer, yajco.model.pattern.impl.Flag flagPattern) {
+        writer.print("Flag(\"");
+        writer.print(flagPattern.getToken());
         writer.print("\")");
     }
 

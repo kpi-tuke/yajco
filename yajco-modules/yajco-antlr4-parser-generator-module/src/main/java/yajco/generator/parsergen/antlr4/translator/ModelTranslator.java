@@ -59,6 +59,15 @@ public class ModelTranslator {
                     if (part instanceof TokenPart) {
                         String tokenName = ((TokenPart) part).getToken();
                         this.tokens.putIfAbsent(convertTokenName(tokenName), Utilities.encodeStringIntoRegex(tokenName));
+                    } else if (part instanceof OptionalPart) {
+                        // Register tokens inside OptionalPart (e.g., for Flag pattern)
+                        OptionalPart optionalPart = (OptionalPart) part;
+                        for (NotationPart innerPart : optionalPart.getParts()) {
+                            if (innerPart instanceof TokenPart) {
+                                String tokenName = ((TokenPart) innerPart).getToken();
+                                this.tokens.putIfAbsent(convertTokenName(tokenName), Utilities.encodeStringIntoRegex(tokenName));
+                            }
+                        }
                     }
                 }
             }
@@ -317,6 +326,39 @@ public class ModelTranslator {
                 if (part instanceof TokenPart) {
                     String tokenName = ((TokenPart) part).getToken();
                     parts.add(new RulePart(convertTokenName(tokenName)));
+                } else if (part instanceof OptionalPart) {
+                    OptionalPart optionalPart = (OptionalPart) part;
+                    // Handle Flag pattern: check if this optional part contains a flag
+                    PropertyReferencePart flagPropertyPart = null;
+                    String flagToken = null;
+                    for (NotationPart innerPart : optionalPart.getParts()) {
+                        if (innerPart instanceof TokenPart) {
+                            flagToken = ((TokenPart) innerPart).getToken();
+                        } else if (innerPart instanceof PropertyReferencePart) {
+                            PropertyReferencePart propPart = (PropertyReferencePart) innerPart;
+                            yajco.model.pattern.impl.Flag flagPattern =
+                                (yajco.model.pattern.impl.Flag) propPart.getPattern(yajco.model.pattern.impl.Flag.class);
+                            if (flagPattern != null) {
+                                flagPropertyPart = propPart;
+                            }
+                        }
+                    }
+
+                    if (flagPropertyPart != null && flagToken != null) {
+                        // This is a Flag pattern: token presence = true, absence = false
+                        String tokenRuleName = convertTokenName(flagToken);
+                        RulePart rulePart = new RulePart(tokenRuleName);
+                        String label = labelProvider.createLabel(tokenRuleName);
+                        rulePart.setLabel(label);
+                        // Wrap in ZeroOrOnePart to make it optional in ANTLR grammar
+                        ZeroOrOnePart optionalRulePart = new ZeroOrOnePart(rulePart);
+                        parts.add(optionalRulePart);
+                        // Generate: ($label != null) for boolean parameter
+                        params.add("($ctx." + label + " != null)");
+                    } else {
+                        // Handle regular optional parts (not flags)
+                        throw new GeneratorException("Non-flag optional parts are not yet supported in ANTLR4 generator");
+                    }
                 } else if (part instanceof BindingNotationPart) {
                     BindingNotationPart bindingNotationPart = (BindingNotationPart) part;
                     Type type;
