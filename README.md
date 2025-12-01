@@ -6,30 +6,12 @@ the [yajco-examples project](https://github.com/kpi-tuke/yajco-examples).
 
 ---
 
-### Maven Builds
+## Maven Builds
 
 **The recommended way to use YAJCo is within a Maven project.**  
 YAJCo consists of multiple modules and dependencies, which are managed through Maven.  
 If you’re new to Maven, you can [download and install it here](http://maven.apache.org/) and read its basic
 documentation.
-
----
-
-## Installing YAJCo Locally
-
-Before creating your own project, install YAJCo into your local Maven repository.
-
-1. Clone the YAJCo repository:
-   ```bash
-   git clone https://github.com/kpi-tuke/yajco.git
-   cd yajco
-   ```
-2. Build and install it:
-   ```bash
-   mvn clean install
-   ```
-   This will install YAJCo version `0.6.0-SNAPSHOT` into your local `.m2` repository so it can be used as a dependency
-   in your projects.
 
 ---
 
@@ -52,30 +34,63 @@ This command creates a basic Java Maven project using the `maven-archetype-quick
 
 ## Configuring Dependencies
 
+Ensure your project uses at least **JDK 11** by including the following properties in your `pom.xml`:
+
+```xml
+<properties>
+  <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  <maven.compiler.release>11</maven.compiler.release>
+  <yajco.version>0.6.0</yajco.version>
+</properties>
+```
+
+This also sets the YAJCo version.
+
 Add the following **YAJCo** dependencies to your project’s `pom.xml`:
 
 ```xml
 <dependencies>
-    <dependency>
-        <groupId>sk.tuke.yajco</groupId>
-        <artifactId>yajco-annotation-processor</artifactId>
-        <version>0.6.0-SNAPSHOT</version>
-    </dependency>
-    <dependency>
-        <groupId>sk.tuke.yajco</groupId>
-        <artifactId>yajco-beaver-parser-generator-module</artifactId>
-        <version>0.6.0-SNAPSHOT</version>
-    </dependency>
+  <dependency>
+    <groupId>sk.tuke.yajco</groupId>
+    <artifactId>yajco-annotations</artifactId>
+    <version>${yajco.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>sk.tuke.yajco</groupId>
+    <artifactId>yajco-beaver-parser-generator-module</artifactId>
+    <version>${yajco.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>junit</groupId>
+    <artifactId>junit</artifactId>
+    <version>4.13.1</version>
+    <scope>test</scope>
+  </dependency>
 </dependencies>
-```
 
-Ensure your project uses **JDK 11** by including the following properties in your `pom.xml`:
-
-```xml
-<properties>
-    <maven.compiler.source>11</maven.compiler.source>
-    <maven.compiler.target>11</maven.compiler.target>
-</properties>
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-compiler-plugin</artifactId>
+      <version>3.13.0</version>
+      <configuration>
+        <annotationProcessorPaths>
+          <path>
+            <groupId>sk.tuke.yajco</groupId>
+            <artifactId>yajco-annotation-processor</artifactId>
+            <version>${yajco.version}</version>
+          </path>
+          <path>
+            <groupId>sk.tuke.yajco</groupId>
+            <artifactId>yajco-beaver-parser-generator-module</artifactId>
+            <version>${yajco.version}</version>
+          </path>
+        </annotationProcessorPaths>
+      </configuration>
+    </plugin>
+  </plugins>
+</build>
 ```
 
 ---
@@ -88,7 +103,7 @@ Our language will recognize the keyword `id` followed by an identifier made up o
 
 A valid input sentence would look like this:
 
-```bash
+```
 id superman
 ```
 
@@ -158,7 +173,7 @@ mvn exec:java -Dexec.mainClass="Main"
 
 You should see the following output:
 
-```bash
+```
 Going to parse: 'id superman'
 Parsed identifier: superman
 ```
