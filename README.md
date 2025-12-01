@@ -1,50 +1,101 @@
-# Getting started #
+# Getting Started
 
-You can start using YAJCo parser generator tool by following the steps descibed below. If you prefer to use existing more complex examples follow instructions in the [examples project](https://github.com/kpi-tuke/yajco-examples).
+You can start using the YAJCo parser generator tool by following the steps described below.  
+If you prefer to explore more complex examples, see
+the [yajco-examples project](https://github.com/kpi-tuke/yajco-examples).
 
-## Maven builds ##
+---
 
-**Recommended way of using YAJCo is within Maven project.** YAJCo tool consists of plenty modules and dependencies, which can be bothersome to include in project otherwise. If you have not used Maven builds in Java, you need to [download and install Maven](http://maven.apache.org/) and we recommend to get to know a little about how Maven works.
+### Maven Builds
 
-### Prepare Java Maven project ###
-Create simple Java Maven project. You can use following command or use any of your prefered IDE.
+**The recommended way to use YAJCo is within a Maven project.**  
+YAJCo consists of multiple modules and dependencies, which are managed through Maven.  
+If you’re new to Maven, you can [download and install it here](http://maven.apache.org/) and read its basic
+documentation.
+
+---
+
+## Installing YAJCo Locally
+
+Before creating your own project, install YAJCo into your local Maven repository.
+
+1. Clone the YAJCo repository:
+   ```bash
+   git clone https://github.com/kpi-tuke/yajco.git
+   cd yajco
+   ```
+2. Build and install it:
+   ```bash
+   mvn clean install
+   ```
+   This will install YAJCo version `0.6.0-SNAPSHOT` into your local `.m2` repository so it can be used as a dependency
+   in your projects.
+
+---
+
+## Creating a Java Maven Project
+
+Next, create a simple Maven project. You can do this from your IDE or using the following command:
+
 ```bash
-mvn archetype:create 
-  -DgroupId=sk.tuke.yajco.example
-  -DartifactId=yourExampleName
-  -DarchetypeArtifactId=maven-archetype-quickstart
+mvn archetype:generate \
+  -DgroupId=sk.tuke.yajco.example \
+  -DartifactId=yajco-example \
+  -DarchetypeArtifactId=maven-archetype-quickstart \
+  -DinteractiveMode=false
 ```
-Add following maven dependencies to project `pom.xml`
-- `sk.tuke.yajco:yajco-annotation-processor:0.5.9`
-- `sk.tuke.yajco:yajco-beaver-parser-generator-module:0.5.9`
+
+This command creates a basic Java Maven project using the `maven-archetype-quickstart` template.
+
+
+---
+
+## Configuring Dependencies
+
+Add the following **YAJCo** dependencies to your project’s `pom.xml`:
+
 ```xml
 <dependencies>
     <dependency>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco-annotation-processor</artifactId>
-        <version>0.5.9</version>
+        <version>0.6.0-SNAPSHOT</version>
     </dependency>
     <dependency>
         <groupId>sk.tuke.yajco</groupId>
         <artifactId>yajco-beaver-parser-generator-module</artifactId>
-        <version>0.5.9</version>
+        <version>0.6.0-SNAPSHOT</version>
     </dependency>
 </dependencies>
 ```
-Make sure project uses at least Java 1.6 for compilation. File `pom.xml` should contain following.
+
+Ensure your project uses **JDK 11** by including the following properties in your `pom.xml`:
+
 ```xml
 <properties>
-    <maven.compiler.source>1.6</maven.compiler.source>
-    <maven.compiler.target>1.6</maven.compiler.target>
+    <maven.compiler.source>11</maven.compiler.source>
+    <maven.compiler.target>11</maven.compiler.target>
 </properties>
 ```
 
-### Create a language model ###
-The following class defines a very simple YAJCo language specification. We will create a language, which starts with `id` keyword followed by identifier consisting of small latin characters. This is a valid language sentence:
+---
 
-`id superman`
+## Creating a Language Model
 
-Language will consists of one language concept called **`SimpleIdentifier`**. We will implement it as a Java class with the same name. In order to specify main (root) concept of language, it is needed to mark it with **`@Parser`** annotation. Each constructor represents concrete syntax of a language. Annotation `@Before` serves for specifying a keyword `id` as a required word before identifier. Identifier consists of small latin characters, which is specified by regular expression inside **`@TokenDef`** annotation defined inside `@Parser` annotation. Parameter name is automatically maped to corresponding `TokenDef` name.
+Let’s define a very simple YAJCo language.
+
+Our language will recognize the keyword `id` followed by an identifier made up of lowercase Latin letters.
+
+A valid input sentence would look like this:
+
+```bash
+id superman
+```
+
+This language has one concept, `SimpleIdentifier`, represented as a Java class.
+The root concept is marked with the `@Parser` annotation. Each constructor defines a syntax rule,
+and annotations such as `@Before` and `@TokenDef` describe keywords and tokens.
+
 ```java
 package mylang;
 
@@ -66,46 +117,59 @@ public class SimpleIdentifier {
     }
 }
 ```
-We have created **`getIdentifier()`** method for easy access to identifier name, which we will use later. After creating project with **`SimpleIdentifier`** class you have succesfully specified your new language. Just build it with Maven:
+
+The `getIdentifier()` method provides access to the parsed identifier name.
+
+After creating the project with this class, build it using Maven:
+
 ```bash
 mvn package
 ```
-and you get your parser generated instantly. You can check directory `target/generated-sources/annotations` in your project directory for generated parser.
 
-### Running parser ###
-It's not fun having a parser such promtly and not being able to use it. Let's create a main class for actual parsing of some textual input. Generated parser is accessible through class **`LALRSimpleIdentifierParser`**, as it has default name created using root concept name (`SimpleIdentifier`).
+This will generate your parser automatically.
+You can find the generated sources in `target/generated-sources/annotations`.
+
+---
+
+## Running the Parser
+
+Now let’s create a small program that uses the generated parser to read an input string.
 
 ```java
 import mylang.SimpleIdentifier;
 import mylang.parser.*;
 
-public class MainClass {
-
+public class Main {
     public static void main(String[] args) throws ParseException {
         String input = "id superman";
-        System.out.println("Going to parse: '"+input+"'");
+        System.out.println("Going to parse: '" + input + "'");
 
-        LALRSimpleIdentifierParser parser = new LALRSimpleIdentifierParser();
-        SimpleIdentifier simpleIdentifier = parser.parse(input);
-
-        System.out.println("Parsed identifier: "+simpleIdentifier.getIdentifier());
+        SimpleIdentifier identifier = new LALRSimpleIdentifierParser().parse(input);
+        System.out.println("Parsed identifier: " + identifier.getIdentifier());
     }
 }
 ```
 
-It is possible to finally run the example using maven command:
+Run the example using Maven:
 
 ```bash
-mvn exec:java -Dexec.mainClass="MainClass"
+mvn exec:java -Dexec.mainClass="Main"
 ```
 
-You should be able to see results in standard output:
+You should see the following output:
 
-```
+```bash
 Going to parse: 'id superman'
 Parsed identifier: superman
 ```
 
-_**Congratulations**, you have created your first simple language using nothing else, just plain Java classes._
+---
 
-You can download a [complete source code of getting started example](https://github.com/kpi-tuke/yajco/wiki/examples/yajco_examples.zip) (look in `yajco-example-gettingStarted` directory inside zip) and you can have a look at a [more complex examples](https://github.com/kpi-tuke/yajco/wiki/Examples).
+### Congratulations! 
+
+You have now created your first simple language using only plain Java classes and YAJCo.
+
+You can download
+the [complete source code of this example](https://github.com/kpi-tuke/yajco-examples/archive/master.zip)
+(see the `getting-started` directory inside the ZIP)
+or explore [more complex examples](https://github.com/kpi-tuke/yajco-examples).
