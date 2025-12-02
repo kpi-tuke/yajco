@@ -2,7 +2,7 @@
 
 ## Overview
 
-This release includes 149 non-merge commits and represents a significant evolution of YAJCo, focusing on language pattern expansion, Java modernization, improved multi-parser capabilities, and better type system support. It also adds support for ANTLR4 parer generator. 
+This release includes 149 non-merge commits and represents a significant evolution of YAJCo, focusing on language pattern expansion, Java modernization, improved multi-parser capabilities, and better type system support. It also adds support for ANTLR4 parser generator. 
 
 ## Major Changes
 
