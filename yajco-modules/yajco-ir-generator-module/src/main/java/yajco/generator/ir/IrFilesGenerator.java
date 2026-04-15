@@ -4,50 +4,18 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import yajco.generator.FilesGenerator;
 import yajco.generator.GeneratorException;
-import yajco.model.BindingNotationPart;
-import yajco.model.CompoundNotationPart;
-import yajco.model.Concept;
-import yajco.model.Language;
-import yajco.model.LocalVariablePart;
-import yajco.model.MixedRepetitionPart;
-import yajco.model.Notation;
-import yajco.model.NotationPart;
-import yajco.model.OptionalPart;
-import yajco.model.Property;
-import yajco.model.PropertyReferencePart;
-import yajco.model.SkipDef;
-import yajco.model.TokenDef;
-import yajco.model.TokenPart;
-import yajco.model.UnorderedParamPart;
+import yajco.model.*;
 import yajco.model.pattern.NotationPartPattern;
-import yajco.model.pattern.impl.Identifier;
-import yajco.model.pattern.impl.Operator;
-import yajco.model.pattern.impl.References;
-import yajco.model.pattern.impl.Separator;
-import yajco.model.pattern.impl.Token;
-import yajco.model.type.ArrayType;
-import yajco.model.type.ComponentType;
-import yajco.model.type.ListType;
-import yajco.model.type.ListTypeWithShared;
-import yajco.model.type.OptionalType;
-import yajco.model.type.OrderedSetType;
-import yajco.model.type.PrimitiveType;
-import yajco.model.type.ReferenceType;
-import yajco.model.type.SetType;
-import yajco.model.type.Type;
+import yajco.model.pattern.impl.*;
+import yajco.model.type.*;
 
 import javax.annotation.processing.Filer;
 import javax.tools.FileObject;
 import javax.tools.StandardLocation;
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.Writer;
-import java.util.Locale;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 public class IrFilesGenerator implements FilesGenerator {
     private static final String GENERATE_TOOLS_KEY = "yajco.generateTools";
@@ -64,8 +32,8 @@ public class IrFilesGenerator implements FilesGenerator {
         String option = properties.getProperty(GENERATE_TOOLS_KEY, "").toLowerCase();
         if (!option.contains("all") && !option.contains(PROPERTY_ENABLER)) {
             System.out.println(getClass().getCanonicalName()
-                    + ": IR not generated - property disabled (set "
-                    + GENERATE_TOOLS_KEY + " to '" + PROPERTY_ENABLER + "' or 'all')");
+                + ": IR not generated - property disabled (set "
+                + GENERATE_TOOLS_KEY + " to '" + PROPERTY_ENABLER + "' or 'all')");
             return;
         }
 
@@ -95,21 +63,21 @@ public class IrFilesGenerator implements FilesGenerator {
     private String defaultFileName(Language language, Properties properties) {
         String resolvedLanguageName = resolveLanguageName(language, properties);
         String languageName = resolvedLanguageName == null || resolvedLanguageName.isEmpty()
-                ? "language"
-                : resolvedLanguageName;
+            ? "language"
+            : resolvedLanguageName;
         return languageName + DEFAULT_OUTPUT_SUFFIX;
     }
 
     private Map<String, Object> buildIr(Language language, Properties properties) {
-        Map<String, Object> root = new LinkedHashMap<String, Object>();
+        Map<String, Object> root = new LinkedHashMap<>();
         root.put("irVersion", IR_VERSION);
 
-        Map<String, Object> producer = new LinkedHashMap<String, Object>();
+        Map<String, Object> producer = new LinkedHashMap<>();
         producer.put("name", "yajco");
         producer.put("version", PRODUCER_VERSION);
         root.put("producer", producer);
 
-        Map<String, Object> languageInfo = new LinkedHashMap<String, Object>();
+        Map<String, Object> languageInfo = new LinkedHashMap<>();
         languageInfo.put("name", resolveLanguageName(language, properties));
         languageInfo.put("entryConcept", getEntryConcept(language));
         languageInfo.put("fileExtensions", resolveFileExtensions(properties));
@@ -131,10 +99,10 @@ public class IrFilesGenerator implements FilesGenerator {
     private List<String> resolveFileExtensions(Properties properties) {
         String configured = properties.getProperty(FILE_EXTENSIONS_KEY);
         if (configured == null || configured.trim().isEmpty()) {
-            return new ArrayList<String>();
+            return new ArrayList<>();
         }
 
-        List<String> extensions = new ArrayList<String>();
+        List<String> extensions = new ArrayList<>();
         String[] parts = configured.split(",");
         for (String part : parts) {
             String value = part.trim();
@@ -152,7 +120,7 @@ public class IrFilesGenerator implements FilesGenerator {
         }
 
         try (InputStream stream = IrFilesGenerator.class.getClassLoader().getResourceAsStream(
-                "META-INF/maven/sk.tuke.yajco/yajco-ir-generator-module/pom.properties")) {
+            "META-INF/maven/sk.tuke.yajco/yajco-ir-generator-module/pom.properties")) {
             if (stream != null) {
                 Properties properties = new Properties();
                 properties.load(stream);
@@ -174,10 +142,12 @@ public class IrFilesGenerator implements FilesGenerator {
         return language.getConcepts().get(0).getName();
     }
 
+    // ── Tokens ──────────────────────────────────────────────────────────
+
     private List<Map<String, Object>> toTokens(List<TokenDef> tokens, List<SkipDef> skips) {
-        List<Map<String, Object>> serialized = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> serialized = new ArrayList<>();
         for (TokenDef token : tokens) {
-            Map<String, Object> item = new LinkedHashMap<String, Object>();
+            Map<String, Object> item = new LinkedHashMap<>();
             item.put("name", token.getName());
             item.put("pattern", token.getRegexp());
             item.put("channel", "default");
@@ -185,30 +155,46 @@ public class IrFilesGenerator implements FilesGenerator {
             serialized.add(item);
         }
         for (SkipDef skip : skips) {
-            Map<String, Object> item = new LinkedHashMap<String, Object>();
+            Map<String, Object> item = new LinkedHashMap<>();
             item.put("name", "SKIP_" + serialized.size());
             item.put("pattern", skip.getRegexp());
             item.put("channel", "skip");
-            item.put("role", "whitespace");
+            item.put("role", classifySkipRole(skip.getRegexp()));
             serialized.add(item);
         }
         return serialized;
     }
 
+    // ── Concepts ────────────────────────────────────────────────────────
+
     private List<Map<String, Object>> toConcepts(List<Concept> concepts) {
-        List<Map<String, Object>> serialized = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> serialized = new ArrayList<>();
         for (Concept concept : concepts) {
-            Map<String, Object> item = new LinkedHashMap<String, Object>();
+            Map<String, Object> item = new LinkedHashMap<>();
             item.put("name", concept.getName());
             item.put("abstract", concept.getConcreteSyntax().isEmpty());
             item.put("parent", concept.getParent() == null ? null : concept.getParent().getName());
 
+            // Operator: null when absent
             Operator operator = concept.getPattern(Operator.class);
             if (operator != null) {
-                Map<String, Object> operatorMap = new LinkedHashMap<String, Object>();
+                Map<String, Object> operatorMap = new LinkedHashMap<>();
                 operatorMap.put("precedence", operator.getPriority());
                 operatorMap.put("associativity", operator.getAssociativity() == null ? null : operator.getAssociativity().name());
                 item.put("operator", operatorMap);
+            } else {
+                item.put("operator", null);
+            }
+
+            // Parentheses: null when absent
+            Parentheses parentheses = concept.getPattern(Parentheses.class);
+            if (parentheses != null) {
+                Map<String, Object> parenthesesMap = new LinkedHashMap<>();
+                parenthesesMap.put("left", parentheses.getLeft());
+                parenthesesMap.put("right", parentheses.getRight());
+                item.put("parentheses", parenthesesMap);
+            } else {
+                item.put("parentheses", null);
             }
 
             item.put("properties", toProperties(concept));
@@ -218,20 +204,26 @@ public class IrFilesGenerator implements FilesGenerator {
         return serialized;
     }
 
+    // ── Properties ──────────────────────────────────────────────────────
+
     private List<Map<String, Object>> toProperties(Concept concept) {
-        List<Map<String, Object>> serialized = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> serialized = new ArrayList<>();
         for (Property property : concept.getAbstractSyntax()) {
-            Map<String, Object> item = new LinkedHashMap<String, Object>();
+            Map<String, Object> item = new LinkedHashMap<>();
             item.put("name", property.getName());
             item.put("type", toType(property.getType()));
             item.put("identifier", property.getPattern(Identifier.class) != null);
 
             BindingInfo bindingInfo = findBindingInfo(concept, property.getName());
             item.put("reference", bindingInfo.hasReferences);
+            item.put("default", null);
 
-            Map<String, Object> syntax = new LinkedHashMap<String, Object>();
+            Map<String, Object> syntax = new LinkedHashMap<>();
             syntax.put("token", bindingInfo.tokenName);
+            syntax.put("before", new ArrayList<String>());
+            syntax.put("after", new ArrayList<String>());
             syntax.put("separator", bindingInfo.separator);
+            syntax.put("keyValueSeparator", null);
             syntax.put("references", bindingInfo.references);
             syntax.put("symbolRole", bindingInfo.symbolRole);
             item.put("syntax", syntax);
@@ -241,10 +233,12 @@ public class IrFilesGenerator implements FilesGenerator {
         return serialized;
     }
 
+    // ── Syntax (notations) ──────────────────────────────────────────────
+
     private List<Map<String, Object>> toSyntax(Concept concept) {
-        List<Map<String, Object>> serialized = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> serialized = new ArrayList<>();
         for (Notation notation : concept.getConcreteSyntax()) {
-            Map<String, Object> item = new LinkedHashMap<String, Object>();
+            Map<String, Object> item = new LinkedHashMap<>();
             item.put("parts", toNotationParts(notation.getParts()));
             serialized.add(item);
         }
@@ -252,7 +246,7 @@ public class IrFilesGenerator implements FilesGenerator {
     }
 
     private List<Map<String, Object>> toNotationParts(List<NotationPart> parts) {
-        List<Map<String, Object>> serialized = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> serialized = new ArrayList<>();
         for (NotationPart part : parts) {
             serialized.add(toNotationPart(part));
         }
@@ -260,7 +254,7 @@ public class IrFilesGenerator implements FilesGenerator {
     }
 
     private Map<String, Object> toNotationPart(NotationPart part) {
-        Map<String, Object> item = new LinkedHashMap<String, Object>();
+        Map<String, Object> item = new LinkedHashMap<>();
         if (part instanceof TokenPart) {
             item.put("kind", "token");
             item.put("token", ((TokenPart) part).getToken());
@@ -305,32 +299,44 @@ public class IrFilesGenerator implements FilesGenerator {
         return "mixedRepetition";
     }
 
+    // ── Notation patterns (kind-discriminated) ──────────────────────────
+
     private List<Map<String, Object>> toNotationPatterns(List<NotationPartPattern> patterns) {
-        List<Map<String, Object>> serialized = new ArrayList<Map<String, Object>>();
+        List<Map<String, Object>> serialized = new ArrayList<>();
         for (NotationPartPattern pattern : patterns) {
-            Map<String, Object> item = new LinkedHashMap<String, Object>();
-            item.put("name", pattern.getClass().getSimpleName());
+            Map<String, Object> item = new LinkedHashMap<>();
             if (pattern instanceof Token) {
+                item.put("kind", "token");
                 item.put("token", ((Token) pattern).getName());
             } else if (pattern instanceof Separator) {
+                item.put("kind", "separator");
                 item.put("separator", ((Separator) pattern).getValue());
             } else if (pattern instanceof References) {
                 References references = (References) pattern;
-                Map<String, Object> refs = new LinkedHashMap<String, Object>();
-                refs.put("concept", references.getConcept() == null ? null : references.getConcept().getName());
-                refs.put("property", references.getProperty() == null ? null : references.getProperty().getName());
-                item.put("references", refs);
+                item.put("kind", "references");
+                item.put("concept", references.getConcept() == null ? null : references.getConcept().getName());
+                item.put("property", references.getProperty() == null ? null : references.getProperty().getName());
+            } else if (pattern instanceof Range) {
+                Range range = (Range) pattern;
+                item.put("kind", "range");
+                item.put("minOccurs", range.getMinOccurs());
+                item.put("maxOccurs", range.getMaxOccurs() == Range.INFINITY ? null : range.getMaxOccurs());
+            } else {
+                // Unknown pattern type — skip or emit minimal info
+                item.put("kind", pattern.getClass().getSimpleName().toLowerCase(Locale.ROOT));
             }
             serialized.add(item);
         }
         return serialized;
     }
 
+    // ── Type serialization (normalized primitive names) ─────────────────
+
     private Map<String, Object> toType(Type type) {
-        Map<String, Object> serialized = new LinkedHashMap<String, Object>();
+        Map<String, Object> serialized = new LinkedHashMap<>();
         if (type instanceof PrimitiveType) {
             serialized.put("kind", "primitive");
-            serialized.put("name", ((PrimitiveType) type).getPrimitiveTypeConst().name());
+            serialized.put("name", normalizePrimitiveName(((PrimitiveType) type).getPrimitiveTypeConst()));
             return serialized;
         }
         if (type instanceof ReferenceType) {
@@ -364,6 +370,23 @@ public class IrFilesGenerator implements FilesGenerator {
         serialized.put("className", type.getClass().getName());
         return serialized;
     }
+
+    private static String normalizePrimitiveName(PrimitiveTypeConst primitiveType) {
+        switch (primitiveType) {
+            case STRING:
+                return "string";
+            case INTEGER:
+                return "integer";
+            case REAL:
+                return "float";
+            case BOOLEAN:
+                return "boolean";
+            default:
+                return primitiveType.name().toLowerCase(Locale.ROOT);
+        }
+    }
+
+    // ── Binding info extraction ─────────────────────────────────────────
 
     private BindingInfo findBindingInfo(Concept concept, String propertyName) {
         for (Notation notation : concept.getConcreteSyntax()) {
@@ -404,7 +427,7 @@ public class IrFilesGenerator implements FilesGenerator {
             } else if (pattern instanceof References) {
                 References references = (References) pattern;
                 info.hasReferences = true;
-                Map<String, Object> referencesMap = new LinkedHashMap<String, Object>();
+                Map<String, Object> referencesMap = new LinkedHashMap<>();
                 referencesMap.put("concept", references.getConcept() == null ? null : references.getConcept().getName());
                 referencesMap.put("property", references.getProperty() == null ? null : references.getProperty().getName());
                 info.references = referencesMap;
@@ -412,6 +435,8 @@ public class IrFilesGenerator implements FilesGenerator {
         }
         return info;
     }
+
+    // ── Symbol role resolution ──────────────────────────────────────────
 
     private String resolvePropertyPartSymbolRole(PropertyReferencePart propertyPart) {
         if (propertyPart.getProperty() == null) {
@@ -435,6 +460,8 @@ public class IrFilesGenerator implements FilesGenerator {
         return "plain";
     }
 
+    // ── Token role classification ───────────────────────────────────────
+
     private String classifyTokenRole(String name, String pattern, String channel) {
         if ("skip".equals(channel)) {
             return "whitespace";
@@ -443,7 +470,12 @@ public class IrFilesGenerator implements FilesGenerator {
         String lowerName = name == null ? "" : name.toLowerCase(Locale.ROOT);
         String lowerPattern = pattern == null ? "" : pattern.toLowerCase(Locale.ROOT);
 
-        if (lowerName.contains("ident") || lowerName.contains("name") || lowerPattern.contains("cname")) {
+        if (lowerName.contains("comment") || lowerPattern.contains("comment")
+            || lowerPattern.contains("//") || lowerPattern.contains("/*")) {
+            return "comment";
+        }
+
+        if (lowerName.contains("ident") || lowerName.contains("name")) {
             return "identifier";
         }
         if (lowerName.contains("string") || lowerPattern.contains("string") || lowerPattern.contains("escaped")) {
@@ -452,24 +484,63 @@ public class IrFilesGenerator implements FilesGenerator {
         if (lowerName.contains("number") || lowerName.contains("value") || lowerPattern.contains("[0-9") || lowerPattern.contains("digit")) {
             return "number";
         }
-        if (isPunctuationPattern(pattern)) {
+        if (isBracketPattern(pattern)) {
+            return "bracket";
+        }
+        if (isDelimiterPattern(pattern)) {
+            return "delimiter";
+        }
+        if (isOperatorPattern(pattern)) {
             return "operator";
         }
 
         return "keyword";
     }
 
-    private boolean isPunctuationPattern(String pattern) {
+    private String classifySkipRole(String pattern) {
+        String lowerPattern = pattern == null ? "" : pattern.toLowerCase(Locale.ROOT);
+        if (lowerPattern.contains("//") || lowerPattern.contains("/*") || lowerPattern.contains("comment")) {
+            return "comment";
+        }
+        return "whitespace";
+    }
+
+    private boolean isBracketPattern(String pattern) {
         if (pattern == null || pattern.isEmpty()) {
             return false;
         }
+        String trimmed = pattern.trim();
+        return trimmed.equals("(") || trimmed.equals(")") || trimmed.equals("{")
+            || trimmed.equals("}") || trimmed.equals("[") || trimmed.equals("]")
+            || trimmed.equals("\\(") || trimmed.equals("\\)")
+            || trimmed.equals("\\{") || trimmed.equals("\\}")
+            || trimmed.equals("\\[") || trimmed.equals("\\]")
+            // Regex character-class forms: [(], [)], [{], [}], [[], []]
+            || trimmed.equals("[(]") || trimmed.equals("[)]")
+            || trimmed.equals("[{]") || trimmed.equals("[}]")
+            || trimmed.equals("[[]") || trimmed.equals("[]]");
+    }
 
-        if (pattern.startsWith("[") && pattern.endsWith("]") && pattern.length() <= 4) {
-            return true;
+    private boolean isDelimiterPattern(String pattern) {
+        if (pattern == null || pattern.isEmpty()) {
+            return false;
         }
+        String trimmed = pattern.trim();
+        return trimmed.equals(",") || trimmed.equals(";") || trimmed.equals(":") || trimmed.equals(".");
+    }
 
+    private boolean isOperatorPattern(String pattern) {
+        if (pattern == null || pattern.isEmpty()) {
+            return false;
+        }
+        // If the entire pattern is non-alphanumeric non-whitespace and not a bracket/delimiter
+        if (isBracketPattern(pattern) || isDelimiterPattern(pattern)) {
+            return false;
+        }
         return pattern.matches("^[^a-zA-Z0-9\\s]+$");
     }
+
+    // ── Inner types ─────────────────────────────────────────────────────
 
     private static final class BindingInfo {
         private String tokenName;
@@ -480,7 +551,7 @@ public class IrFilesGenerator implements FilesGenerator {
 
         private static BindingInfo empty() {
             BindingInfo info = new BindingInfo();
-            info.references = new LinkedHashMap<String, Object>();
+            info.references = null;
             info.symbolRole = "plain";
             return info;
         }
