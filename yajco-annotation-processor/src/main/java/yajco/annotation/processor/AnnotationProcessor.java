@@ -129,6 +129,7 @@ public class AnnotationProcessor extends AbstractProcessor {
 
                     Parser parserAnnotation = parserAnnotationElement.getAnnotation(Parser.class);
                     this.extractOptionsFromParserAnnotation(parserAnnotation);
+                    this.extractLanguageAnnotation(parserAnnotationElement);
 
                     // Extract the main element, package or type can be annotated with @Parser.
                     ElementKind parserAnnotationElemKind = parserAnnotationElement.getKind();
@@ -194,7 +195,7 @@ public class AnnotationProcessor extends AbstractProcessor {
                     processTypeElement(mainElement);
 
                     // Add tokens and skips into language.
-                    addTokensAndSkipsIntoLanguage(parserAnnotation);
+                    addTokensAndSkipsIntoLanguage(parserAnnotation, parserAnnotationElement);
 
                     // Convert properties to language settings.
                     language.setSettings(LanguageSetting.convertToLanguageSetting(properties));
@@ -294,6 +295,105 @@ public class AnnotationProcessor extends AbstractProcessor {
     }
 
     /**
+     * Extracts metadata from {@code @Language} annotation and stores it in properties.
+     * When {@code @Language} is present, IR generation is automatically enabled.
+     *
+     * @param element The element annotated with both @Parser and potentially @Language.
+     */
+    private void extractLanguageAnnotation(Element element) {
+        yajco.annotation.config.Language lang = element.getAnnotation(yajco.annotation.config.Language.class);
+        if (lang == null) {
+            return;
+        }
+
+        // Auto-enable IR generation when @Language is present
+        String tools = properties.getProperty("yajco.generateTools", "");
+        if (!tools.toLowerCase().contains("ir") && !tools.toLowerCase().contains("all")) {
+            properties.setProperty("yajco.generateTools",
+                tools.isEmpty() ? "ir" : tools + ",ir");
+        }
+
+        // Language name
+        if (!lang.name().isEmpty()) {
+            properties.setProperty("yajco.ir.languageName", lang.name());
+        }
+
+        // Description
+        if (!lang.description().isEmpty()) {
+            properties.setProperty("yajco.ir.description", lang.description());
+        }
+
+        // Version
+        if (!lang.version().isEmpty()) {
+            properties.setProperty("yajco.ir.version", lang.version());
+        }
+
+        // File extensions (joined as comma-separated string)
+        if (lang.fileExtensions().length > 0) {
+            properties.setProperty("yajco.ir.fileExtensions",
+                String.join(",", lang.fileExtensions()));
+        }
+
+        // Comment syntax — stored as explicit properties for the IR generator
+        if (!lang.lineComment().isEmpty()) {
+            properties.setProperty("yajco.ir.lineComment", lang.lineComment());
+        }
+        if (lang.blockComment().length == 2) {
+            properties.setProperty("yajco.ir.blockComment.start", lang.blockComment()[0]);
+            properties.setProperty("yajco.ir.blockComment.end", lang.blockComment()[1]);
+        }
+
+        // IR file name defaults to {languageName}.ir.json if not already set
+        if (!properties.containsKey("yajco.ir.file") && !lang.name().isEmpty()) {
+            properties.setProperty("yajco.ir.file", lang.name() + ".ir.json");
+        }
+    }
+
+    /**
+     * Generates skip rules from {@code @Language} comment syntax and adds them
+     * to the parser's skip list. This allows users to specify comment syntax once
+     * in {@code @Language} without needing a separate {@code @Skip} annotation.
+     *
+     * @param element The element annotated with @Language.
+     * @param existingSkips The skip list from @Parser to check for duplicates.
+     * @return Additional SkipDef entries to add to the language.
+     */
+    private List<SkipDef> buildCommentSkipsFromLanguage(Element element, List<SkipDef> existingSkips) {
+        yajco.annotation.config.Language lang = element.getAnnotation(yajco.annotation.config.Language.class);
+        if (lang == null) {
+            return Collections.emptyList();
+        }
+
+        // Collect existing skip patterns to avoid duplicates
+        Set<String> existingPatterns = new HashSet<>();
+        for (SkipDef skip : existingSkips) {
+            existingPatterns.add(skip.getRegexp());
+        }
+
+        List<SkipDef> commentSkips = new ArrayList<>();
+
+        // Line comment: prefix → prefix + ".*"
+        if (!lang.lineComment().isEmpty()) {
+            String pattern = escapeRegex(lang.lineComment()) + ".*";
+            if (!existingPatterns.contains(pattern)) {
+                commentSkips.add(new SkipDef(pattern));
+            }
+        }
+
+        // Block comment: [start, end] → start + "(?:(?!" + end + ")[\\s\\S])*" + end
+        if (lang.blockComment().length == 2) {
+            String start = escapeRegex(lang.blockComment()[0]);
+            String end = escapeRegex(lang.blockComment()[1]);
+            String pattern = start + "(?:(?!" + end + ")[\\s\\S])*" + end;
+            if (!existingPatterns.contains(pattern)) {
+                commentSkips.add(new SkipDef(pattern));
+            }
+        }
+
+        return commentSkips;
+    }
+
+    /**
      * Loads language concepts, skips and tokens from languages included as JAR files.
      */
     private void addLanguageConceptsFromIncludedJARs() {
@@ -315,10 +415,12 @@ public class AnnotationProcessor extends AbstractProcessor {
 
     /**
      * Adds tokens and skips defined in @Parser annotation into language.
+     * Also adds comment skip rules from @Language if present.
      *
      * @param parserAnnotation @Parser annotation object
+     * @param parserAnnotationElement The annotated element (for reading @Language)
      */
-    private void addTokensAndSkipsIntoLanguage(Parser parserAnnotation) {
+    private void addTokensAndSkipsIntoLanguage(Parser parserAnnotation, Element parserAnnotationElement) {
         List<TokenDef> tokens = new ArrayList<>();
         List<SkipDef> skips = new ArrayList<>();
         for (yajco.annotation.config.TokenDef tokenDef : parserAnnotation.tokens()) {
@@ -333,6 +435,11 @@ public class AnnotationProcessor extends AbstractProcessor {
         if (skips.isEmpty()) {
             skips.add(new SkipDef("\\s"));
         }
+
+        // Add comment skip rules from @Language (avoids duplicate @Skip for comments)
+        List<SkipDef> commentSkips = buildCommentSkipsFromLanguage(parserAnnotationElement, skips);
+        skips.addAll(commentSkips);
+
         addToListAsSet(language.getSkips(), skips, true);
         addToListAsSet(language.getTokens(), tokens, true);
     }

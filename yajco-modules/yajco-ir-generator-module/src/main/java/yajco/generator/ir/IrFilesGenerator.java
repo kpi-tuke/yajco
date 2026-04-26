@@ -17,6 +17,10 @@ import java.io.InputStream;
 import java.io.Writer;
 import java.util.*;
 
+/**
+ * Generates an IR JSON file from a YAJCo {@link Language} model.
+ * Registered as a {@link FilesGenerator} SPI service.
+ */
 public class IrFilesGenerator implements FilesGenerator {
     private static final String GENERATE_TOOLS_KEY = "yajco.generateTools";
     private static final String PROPERTY_ENABLER = "ir";
@@ -58,6 +62,9 @@ public class IrFilesGenerator implements FilesGenerator {
                 }
             }
         }
+
+        System.out.println(getClass().getCanonicalName()
+            + ": IR file generated successfully: " + fileName);
     }
 
     private String defaultFileName(Language language, Properties properties) {
@@ -79,8 +86,11 @@ public class IrFilesGenerator implements FilesGenerator {
 
         Map<String, Object> languageInfo = new LinkedHashMap<>();
         languageInfo.put("name", resolveLanguageName(language, properties));
+        languageInfo.put("description", resolveDescription(properties));
+        languageInfo.put("version", resolveLanguageVersion(properties));
         languageInfo.put("entryConcept", getEntryConcept(language));
         languageInfo.put("fileExtensions", resolveFileExtensions(properties));
+        languageInfo.put("comments", resolveCommentSyntax(language.getSkips(), properties));
         root.put("language", languageInfo);
 
         root.put("tokens", toTokens(language.getTokens(), language.getSkips()));
@@ -111,6 +121,50 @@ public class IrFilesGenerator implements FilesGenerator {
             }
         }
         return extensions;
+    }
+
+    private String resolveDescription(Properties properties) {
+        String description = properties.getProperty("yajco.ir.description");
+        return (description != null && !description.trim().isEmpty()) ? description.trim() : null;
+    }
+
+    private String resolveLanguageVersion(Properties properties) {
+        String version = properties.getProperty("yajco.ir.version");
+        return (version != null && !version.trim().isEmpty()) ? version.trim() : null;
+    }
+
+    /**
+     * Resolves comment syntax, preferring explicit properties from @Language
+     * over heuristic detection from skip patterns.
+     */
+    private Map<String, Object> resolveCommentSyntax(List<SkipDef> skips, Properties properties) {
+        // Check for explicit comment properties (set by @Language annotation)
+        String explicitLine = properties.getProperty("yajco.ir.lineComment");
+        String explicitBlockStart = properties.getProperty("yajco.ir.blockComment.start");
+        String explicitBlockEnd = properties.getProperty("yajco.ir.blockComment.end");
+
+        boolean hasExplicit = (explicitLine != null && !explicitLine.isEmpty())
+            || (explicitBlockStart != null && !explicitBlockStart.isEmpty());
+
+        if (hasExplicit) {
+            Map<String, Object> comments = new LinkedHashMap<>();
+            comments.put("lineComment",
+                (explicitLine != null && !explicitLine.isEmpty()) ? explicitLine : null);
+
+            if (explicitBlockStart != null && !explicitBlockStart.isEmpty()
+                && explicitBlockEnd != null && !explicitBlockEnd.isEmpty()) {
+                List<String> block = new ArrayList<>();
+                block.add(explicitBlockStart);
+                block.add(explicitBlockEnd);
+                comments.put("blockComment", block);
+            } else {
+                comments.put("blockComment", null);
+            }
+            return comments;
+        }
+
+        // Fall back to heuristic detection from skip patterns
+        return detectCommentSyntax(skips);
     }
 
     private static String detectProducerVersion() {
@@ -173,9 +227,9 @@ public class IrFilesGenerator implements FilesGenerator {
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("name", concept.getName());
             item.put("abstract", concept.getConcreteSyntax().isEmpty());
+            item.put("enum", concept.getPattern(yajco.model.pattern.impl.Enum.class) != null);
             item.put("parent", concept.getParent() == null ? null : concept.getParent().getName());
 
-            // Operator: null when absent
             Operator operator = concept.getPattern(Operator.class);
             if (operator != null) {
                 Map<String, Object> operatorMap = new LinkedHashMap<>();
@@ -186,7 +240,6 @@ public class IrFilesGenerator implements FilesGenerator {
                 item.put("operator", null);
             }
 
-            // Parentheses: null when absent
             Parentheses parentheses = concept.getPattern(Parentheses.class);
             if (parentheses != null) {
                 Map<String, Object> parenthesesMap = new LinkedHashMap<>();
@@ -218,14 +271,21 @@ public class IrFilesGenerator implements FilesGenerator {
             item.put("reference", bindingInfo.hasReferences);
             item.put("default", null);
 
+            List<List<String>> beforeAfter = findBeforeAfterTokens(concept, property.getName());
             Map<String, Object> syntax = new LinkedHashMap<>();
             syntax.put("token", bindingInfo.tokenName);
-            syntax.put("before", new ArrayList<String>());
-            syntax.put("after", new ArrayList<String>());
+            syntax.put("before", beforeAfter.get(0));
+            syntax.put("after", beforeAfter.get(1));
             syntax.put("separator", bindingInfo.separator);
             syntax.put("keyValueSeparator", null);
             syntax.put("references", bindingInfo.references);
-            syntax.put("symbolRole", bindingInfo.symbolRole);
+
+            // Identifier properties are symbol definitions regardless of References patterns
+            String symbolRole = bindingInfo.symbolRole;
+            if ("plain".equals(symbolRole) && property.getPattern(Identifier.class) != null) {
+                symbolRole = "definition";
+            }
+            syntax.put("symbolRole", symbolRole);
             item.put("syntax", syntax);
 
             serialized.add(item);
@@ -235,11 +295,67 @@ public class IrFilesGenerator implements FilesGenerator {
 
     // ── Syntax (notations) ──────────────────────────────────────────────
 
+    /** Returns [beforeTokens, afterTokens] — contiguous TokenParts adjacent to the named property. */
+    private List<List<String>> findBeforeAfterTokens(Concept concept, String propertyName) {
+        for (Notation notation : concept.getConcreteSyntax()) {
+            List<List<String>> result = findBeforeAfterInParts(notation.getParts(), propertyName);
+            if (result != null) {
+                return result;
+            }
+        }
+        return Arrays.asList(new ArrayList<>(), new ArrayList<>());
+    }
+
+    private List<List<String>> findBeforeAfterInParts(List<NotationPart> parts, String propertyName) {
+        for (int i = 0; i < parts.size(); i++) {
+            NotationPart part = parts.get(i);
+            if (part instanceof PropertyReferencePart) {
+                PropertyReferencePart propPart = (PropertyReferencePart) part;
+                if (propPart.getProperty() != null
+                    && propertyName.equals(propPart.getProperty().getName())) {
+                    List<String> before = new ArrayList<>();
+                    List<String> after = new ArrayList<>();
+
+                    for (int j = i - 1; j >= 0; j--) {
+                        if (parts.get(j) instanceof TokenPart) {
+                            before.add(0, ((TokenPart) parts.get(j)).getToken());
+                        } else {
+                            break;
+                        }
+                    }
+
+                    for (int j = i + 1; j < parts.size(); j++) {
+                        if (parts.get(j) instanceof TokenPart) {
+                            after.add(((TokenPart) parts.get(j)).getToken());
+                        } else {
+                            break;
+                        }
+                    }
+
+                    return Arrays.asList(before, after);
+                }
+            }
+            // Recurse into compound parts
+            if (part instanceof CompoundNotationPart) {
+                List<List<String>> nested = findBeforeAfterInParts(
+                    ((CompoundNotationPart) part).getParts(), propertyName);
+                if (nested != null) {
+                    return nested;
+                }
+            }
+        }
+        return null;
+    }
+
     private List<Map<String, Object>> toSyntax(Concept concept) {
         List<Map<String, Object>> serialized = new ArrayList<>();
         for (Notation notation : concept.getConcreteSyntax()) {
             Map<String, Object> item = new LinkedHashMap<>();
             item.put("parts", toNotationParts(notation.getParts()));
+
+            Factory factory = notation.getPattern(Factory.class);
+            item.put("factory", factory == null ? null : factory.getName());
+
             serialized.add(item);
         }
         return serialized;
@@ -321,8 +437,14 @@ public class IrFilesGenerator implements FilesGenerator {
                 item.put("kind", "range");
                 item.put("minOccurs", range.getMinOccurs());
                 item.put("maxOccurs", range.getMaxOccurs() == Range.INFINITY ? null : range.getMaxOccurs());
+            } else if (pattern instanceof Shared) {
+                Shared shared = (Shared) pattern;
+                item.put("kind", "shared");
+                item.put("value", shared.getValue());
+                item.put("separator", shared.getSeparator());
+            } else if (pattern instanceof UniqueValues) {
+                item.put("kind", "uniqueValues");
             } else {
-                // Unknown pattern type — skip or emit minimal info
                 item.put("kind", pattern.getClass().getSimpleName().toLowerCase(Locale.ROOT));
             }
             serialized.add(item);
@@ -471,17 +593,24 @@ public class IrFilesGenerator implements FilesGenerator {
         String lowerPattern = pattern == null ? "" : pattern.toLowerCase(Locale.ROOT);
 
         if (lowerName.contains("comment") || lowerPattern.contains("comment")
-            || lowerPattern.contains("//") || lowerPattern.contains("/*")) {
+            || lowerPattern.contains("//") || lowerPattern.contains("/*")
+            || (lowerPattern.contains("--") && lowerPattern.length() > 2)) {
+            return "comment";
+        }
+        // Shell-style comment
+        if (pattern != null && pattern.startsWith("#") && pattern.length() > 1
+            && !Character.isLetterOrDigit(pattern.charAt(1))) {
             return "comment";
         }
 
-        if (lowerName.contains("ident") || lowerName.contains("name")) {
+        if (lowerName.contains("ident") || lowerName.contains("name")
+            || lowerName.equals("id")) {
             return "identifier";
         }
         if (lowerName.contains("string") || lowerPattern.contains("string") || lowerPattern.contains("escaped")) {
             return "string";
         }
-        if (lowerName.contains("number") || lowerName.contains("value") || lowerPattern.contains("[0-9") || lowerPattern.contains("digit")) {
+        if (lowerName.contains("number") || lowerName.equals("value") || lowerPattern.contains("[0-9") || lowerPattern.contains("digit")) {
             return "number";
         }
         if (isBracketPattern(pattern)) {
@@ -494,12 +623,24 @@ public class IrFilesGenerator implements FilesGenerator {
             return "operator";
         }
 
+        // Fallback: pattern looks like a typical identifier regex
+        if (lowerPattern.startsWith("[a-z") || lowerPattern.startsWith("[_a-z")
+            || lowerPattern.startsWith("[a-za-z") || lowerPattern.startsWith("[_a-za-z")) {
+            return "identifier";
+        }
+
         return "keyword";
     }
 
     private String classifySkipRole(String pattern) {
         String lowerPattern = pattern == null ? "" : pattern.toLowerCase(Locale.ROOT);
-        if (lowerPattern.contains("//") || lowerPattern.contains("/*") || lowerPattern.contains("comment")) {
+        if (lowerPattern.contains("//") || lowerPattern.contains("/*")
+            || (lowerPattern.contains("--") && lowerPattern.length() > 2) || lowerPattern.contains("comment")) {
+            return "comment";
+        }
+        // Shell-style: "#.*", "#[^\n]*"
+        if (lowerPattern.startsWith("#") && lowerPattern.length() > 1
+            && !Character.isLetterOrDigit(lowerPattern.charAt(1))) {
             return "comment";
         }
         return "whitespace";
@@ -533,11 +674,72 @@ public class IrFilesGenerator implements FilesGenerator {
         if (pattern == null || pattern.isEmpty()) {
             return false;
         }
-        // If the entire pattern is non-alphanumeric non-whitespace and not a bracket/delimiter
         if (isBracketPattern(pattern) || isDelimiterPattern(pattern)) {
             return false;
         }
         return pattern.matches("^[^a-zA-Z0-9\\s]+$");
+    }
+
+    // ── Comment syntax detection ──────────────────────────────────────────
+
+    /**
+     * Scans skip tokens to detect line and block comment syntax.
+     * Returns a CommentSyntax map or null when no comments are found.
+     */
+    private Map<String, Object> detectCommentSyntax(List<SkipDef> skips) {
+        String lineComment = null;
+        List<String> blockComment = null;
+
+        for (SkipDef skip : skips) {
+            String pattern = skip.getRegexp();
+            if (pattern == null) {
+                continue;
+            }
+
+            // Block comment: /\*...\*/ pattern
+            if (pattern.contains("/*") && pattern.contains("*/")) {
+                blockComment = new ArrayList<>();
+                blockComment.add("/*");
+                blockComment.add("*/");
+                continue;
+            }
+
+            // Line comments — extract the prefix from common patterns
+            if (lineComment == null) {
+                lineComment = extractLineCommentPrefix(pattern);
+            }
+        }
+
+        if (lineComment == null && blockComment == null) {
+            return null;
+        }
+
+        Map<String, Object> comments = new LinkedHashMap<>();
+        comments.put("lineComment", lineComment);
+        comments.put("blockComment", blockComment);
+        return comments;
+    }
+
+    /**
+     * Extracts a line comment prefix from a regex pattern.
+     * Recognizes common forms: // .*, # .*, -- .*, etc.
+     * Returns null if the pattern is not a recognized line comment pattern.
+     */
+    private String extractLineCommentPrefix(String pattern) {
+        // Patterns like "//.*", "//[^\n]*", etc.
+        if (pattern.startsWith("//")) {
+            return "//";
+        }
+        // Shell-style: "#.*", "#[^\n]*", "#.*\n", etc.
+        if (pattern.startsWith("#") && pattern.length() > 1
+            && !Character.isLetterOrDigit(pattern.charAt(1))) {
+            return "#";
+        }
+        // SQL-style: "--.*", "--[^\n]*", etc.
+        if (pattern.startsWith("--")) {
+            return "--";
+        }
+        return null;
     }
 
     // ── Inner types ─────────────────────────────────────────────────────
