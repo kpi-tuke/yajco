@@ -21,5 +21,6 @@
     <module>yajco-tools-module</module>
     <module>yajco-antlr4-parser-generator-module</module>
     <module>yajco-xtext-module</module>
+    <module>yajco-ir-generator-module</module>
   </modules>
 </project>
