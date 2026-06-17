@@ -52,7 +52,7 @@ Add the following **YAJCo** dependencies to your project’s `pom.xml`:
 <dependencies>
   <dependency>
     <groupId>sk.tuke.yajco</groupId>
-    <artifactId>yajco-annotations</artifactId>
+    <artifactId>yajco-runtime</artifactId>
     <version>${yajco.version}</version>
   </dependency>
   <dependency>

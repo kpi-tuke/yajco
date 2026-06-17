@@ -90,6 +90,7 @@
     <module>yajco-model</module>
     <module>yajco-modules</module>
     <module>yajco-parser</module>
+    <module>yajco-runtime</module>
 <!--    <module>yajco-prototype-modules</module>-->
   </modules>
 

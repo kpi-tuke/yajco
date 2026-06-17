@@ -19,8 +19,13 @@
       <version>${project.version}</version>
     </dependency>
     <dependency>
-      <groupId>sk.tuke.yajco</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>yajco-generator-module</artifactId>
+      <version>${project.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>yajco-runtime</artifactId>
       <version>${project.version}</version>
     </dependency>
     <dependency>
