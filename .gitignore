@@ -23,3 +23,6 @@ buildNumber.properties
 .project
 .factorypath
 .settings/
+
+# Zensical documentation site
+/site

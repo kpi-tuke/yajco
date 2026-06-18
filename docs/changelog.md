@@ -1,3 +1,7 @@
+---
+icon: lucide/history
+---
+
 # Changes from Version 0.5.9 to 0.6.0
 
 ## Overview
@@ -154,6 +158,7 @@ This release includes 149 non-merge commits and represents a significant evoluti
 ## Contributors
 
 Special thanks to all contributors who made this release possible, including pull requests from:
+
 - **Miroslav Remák** - Complete ANTLR4 backend implementation, visitor enhancements, and numerous bug fixes
 - **Michal Fecenko** - Multiple feature additions including new annotations and patterns
 - **Ján Halama** - Integration with Xtext 
