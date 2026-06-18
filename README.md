@@ -188,3 +188,21 @@ You can download
 the [complete source code of this example](https://github.com/kpi-tuke/yajco-examples/archive/master.zip)
 (see the `getting-started` directory inside the ZIP)
 or explore [more complex examples](https://github.com/kpi-tuke/yajco-examples).
+
+---
+
+## YAJCo Development
+
+To build and use development versions of YAJCo, clone the repository and run:
+
+```bash
+mvn clean install
+```
+
+Then use current `SNAPSHOT` versions in your Maven dependencies.
+
+Documentation is built using [Zensical](https://zensical.org/). We suggest using [uv](https://docs.astral.sh/uv/) for running it locally:
+
+```bash
+uvx zensical serve
+```
