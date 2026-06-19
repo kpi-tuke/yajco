@@ -52,19 +52,13 @@ Add the following **YAJCo** dependencies to your project’s `pom.xml`:
 <dependencies>
   <dependency>
     <groupId>sk.tuke.yajco</groupId>
-    <artifactId>yajco-runtime</artifactId>
+    <artifactId>yajco-annotations</artifactId>
     <version>${yajco.version}</version>
   </dependency>
   <dependency>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-beaver-parser-generator-module</artifactId>
     <version>${yajco.version}</version>
-  </dependency>
-  <dependency>
-    <groupId>junit</groupId>
-    <artifactId>junit</artifactId>
-    <version>4.13.1</version>
-    <scope>test</scope>
   </dependency>
 </dependencies>
 
