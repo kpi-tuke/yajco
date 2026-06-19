@@ -6,25 +6,25 @@ icon: lucide/book
 
 ## Overview
 
-**YAJCo is tool for simple specification of languages** and generation of language parser and language supporting tools using only annotated Java classes. Each class represents one language concept and is equivalent to abstract syntax definition. Class can contain methods representing language semantics and annotations for specification of concrete syntax.
+**YAJCo is a tool for simple specification of languages** and generation of language parser and language-supporting tools using only annotated Java classes. Each class represents one language concept and is equivalent to abstract syntax definition. Class can contain methods representing language semantics and annotations for specification of concrete syntax.
 
-Each YAJCo project needs to have one [@Parser](#parser) annotation for specification of root concept and other options.
+Each YAJCo project needs to have one [@Parser](#parser) annotation for specification of the root concept and other options.
 
-In next lines you can find out a little more about our great YAJCo tool, or you can go straight to [examples](https://github.com/kpi-tuke/yajco-examples) page and play with them and then return to this user guide. Either way, if you feel like something is not right or missing from this user guide, please [let us know](Contact-Us).
+In the next lines you can find out a little more about our great YAJCo tool, or you can go straight to [examples project](https://github.com/kpi-tuke/yajco-examples) and play with them and then return to this user guide. Either way, if you feel like something is not right or missing from this user guide, please [let us know](Contact-Us).
 
 ## Abstract Syntax Definition
 
-Abstract syntax of the language consists of definition of language concepts and relations between them. In YAJCo language concepts correspond to classes and therefore, each for class corresponding non-terminal in the grammar is defined.
+Abstract syntax of the language consists of definition of language concepts and relations between them. In YAJCo language concepts correspond to classes, and therefore, each for class corresponding non-terminal in the grammar is defined.
 
 ### Inheritance relation "is-a"
 
-Inheritance or implementation of the interface indicates that one concepts is a special case of its parent concepts, i.e. it can be used in all places where the parent concept is expected. YAJCo automatically uses inheritance relation between classes to construct appropriate grammar rules.
+Inheritance or implementation of the interface indicates that one concept is a special case of its parent concept, i.e., it can be used in all places where the parent concept is expected. YAJCo automatically uses inheritance relation between classes to construct appropriate grammar rules.
 
-| Classes                     | EBNF                             |
-|-----------------------------|----------------------------------|
-| ![](images/inheritance.png) | `Statement ::= Move \| TurnLeft` |
+| Classes                     | EBNF                            |
+|-----------------------------|---------------------------------|
+| ![](images/inheritance.png) | `Statement ::= Move | TurnLeft` |
 
-```java
+```java title="Is-a relation in Java"
 public abstract class Statement {...}
 
 public class Move extends Statement {...}
@@ -40,80 +40,84 @@ A concept is composed from other concepts when description of concept instance i
 |-----------------------------|--------------------------------------|
 | ![](images/composition.png) | `Iteration ::= Expression Statement` |
 
-In object-oriented language this relation can be expressed using class fields that contain instances of subconcept classes. Not all fields, however, correspond to composition relation. Because of this YAJCo uses parameters of <b>class constructor</b> (or factory methods) for the specification of subconcepts. This also provides more flexibility for definition of concrete syntax as it defines also ordering of subconcepts.
+In object-oriented language this relation can be expressed using class fields that contain instances of subconcept classes. Not all fields, however, correspond to composition relation. Because of this YAJCo uses parameters of <b>class constructor</b> (or factory methods) for the specification of subconcepts. This also provides more flexibility for definition of concrete syntax as it defines the ordering of subconcepts.
 
-```java
-Iteration(Expression expression, Statement statement) {...}
+```java title="Composition relation in Java"
+class Iteration {
+    ...
+    public Iteration(Expression expression, Statement statement) {...}
+}
 ```
 
-In addition definition of composition on constructors allows to do some preprocessing and store subconcepts in different form.
+In addition, the definition of composition on constructors allows adding some preprocessing and storing subconcepts in a different form.
 
 
 ### Composition multiplicity
 
 A concept can contain multiple instances of subconcepts. This is automatically inferred from the use of array or one of the standard Java collection types. The multiplicity can be restricted using [@Range](#range) annotation.
 
-YAJCo supports multiplicity with following types:
+YAJCo supports multiplicity with the following types:
 
   * Java arrays
   * `java.util.List`
   * `java.util.Set`
 
-### Referencing (agregation)
-A concept instance description can also contain a reference to instance of another concept that is described elsewhere in the input sentence. In this case only some identifier (marked with [@Identifier](#identifier) annotation) of referred instance is provided as a part of concept instance definition.
+### Referencing (aggregation)
 
-In the object model this relation can be expressed using aggregation. YAJCo again uses constructor parameters as a place, where the relation is described. In this case, parameter is an identifier string marked with [@References](#references) annotation. YAJCo would automatically resolve the reference and inject actual object instance into field with the same type so constructor can actually ignore received identifier.
+A concept instance description can also contain a reference to an instance of another concept that is described elsewhere in the input sentence. In this case only some identifier (marked with [@Identifier](#identifier) annotation) of the referred instance is provided as a part of the concept instance definition.
 
-Simple example of identifiers and references is provided in [Nielsen's DESK language](https://github.com/kpi-tuke/yajco-examples#nielsens-desk-language). For more information about this feature, you can check our paper _[Declarative specification of references in DSLs](http://www.mendeley.com/download/public/27880491/6466511164/71085fd9b9fa436cefae3e71ed71111fcc8f2b06/dl.pdf)_
+In the object model this relation can be expressed using aggregation. YAJCo again uses constructor parameters as a place, where the relation is described. In this case, the parameter is an identifier string marked with [@References](#references) annotation. YAJCo would automatically resolve the reference and inject the actual object instance into the field with the same type so the constructor can actually ignore the received identifier.
+
+A simple example of identifiers and references is provided in [Nielsen's DESK language](https://github.com/kpi-tuke/yajco-examples#nielsens-desk-language). For more information about this feature, you can check our paper [Declarative specification of references in DSLs][declarative-specification]
 
 ## Concrete Syntax Definition
 
-Concrete syntax (notation) for each language concept is specified in a form of annotations attached to class constructors (and factory methods). Constructors allow to describe how an object can be constructed from some input, so it is appropriate to use them also for constructing concept instances from the textual input of language sentence.
+Concrete syntax (notation) for each language concept is specified in a form of annotations attached to class constructors (and factory methods). Constructors allow describing how an object can be constructed from some input, so it is appropriate to use them also for constructing concept instances from the textual input of language sentence.
 
-The annotations allow to specify tokens, that would be used in concepts' concrete representation. Most of described annotations expect token specification as a parameter. Named tokens are defined in [@Parser](#parser) annotation in [@TokenDef](#tokendef) option part. If token would be used only once, it can be specified directly in annotation. If specified string does not represents existing named token, it is taken as exact character sequence to be used in concrete syntax.
+The annotations specify tokens that would be used in concepts' concrete representation. Most of the described annotations expect token specification as a parameter. Named tokens are defined in [@Parser](#parser) annotation in the [@TokenDef](#tokendef) option part. If a token is used only once, it can be specified directly in annotation. If a specified string does not represent an existing named token, it is taken as an exact character sequence to be used in concrete syntax.
 
 ### Keywords and symbols
 
-The simplest form of concrete syntax annotations is a definition of keywords and symbols that must be part of concept concrete representation. These tokens can be placed before or after concept description using [@Before](#before-and-after) and [@After](#before-and-after) annotations associated with concept constructor. Tokens can be also placed between description of subconcepts by using the same annotations on constructor parameters.
+The simplest form of concrete syntax annotations is a definition of keywords and symbols that must be part of concept concrete representation. These tokens can be placed before or after the concept description using [@Before](#before-and-after) and [@After](#before-and-after) annotations associated with the concept constructor. Tokens can be also placed between description of subconcepts by using the same annotations on constructor parameters.
 
-In a case of composition multiplicity it is possible to specify tokens that must be placed between each instance of subelement. This can be done with [@Separator](#separator) annotation.
+In a case of composition multiplicity, it is possible to specify tokens that must be placed between each instance of a subelement. This can be done with [@Separator](#separator) annotation.
 
 ### Alternative notations
 
 It may be possible to describe instances of the same concept using different notations and even with different combinations of subconcepts. This is allowed by the way of using multiple constructors
 
-```
-JAVA:
+```java title="Java"
 @Before("ITERATE")
 Iteration(Expression expr, @Before("TIMES") Statement statement) {...}
     
 @Before("ITERATE")
 Iteration(Expression expr,
     @Before("TIMES") @After("END") Statement[] statement) {...}
-
-
-EBNF:
-Iteration ::= <ITERATE> Expression <TIMES> Statement
-Iteration ::= <ITERATE> Expression <TIMES> Statement* <END>
 ```
 
-Constructors that should not become part of language definition can be marked using [@Exclude](#exclude) annotation.
+```abnf title="EBNF"
+Iteration ::= "ITERATE" Expression "TIMES" Statement
+Iteration ::= "ITERATE" Expression "TIMES" Statement* "END"
+```
+
+Constructors that should not become part of the language definition can be marked using the [@Exclude](#exclude) annotation.
 
 ### Operator definition
-Operators represent a type of language constructs that benefits from special treatment. Otherwise they would require more complex definition of concept relations to express rules of priority and assiciativity.
+Operators represent a type of language constructs that benefits from special treatment. Otherwise, they would require a more complex definition of concept relations to express rules of priority and assiciativity.
 
-In YAJCo it is possible to mark concept using [@Operator](#operator) annotation and define its priority and associativity. Annotation [@Parentheses](#parentheses) can be used to indicate the possibility to use parentheses to explicitly express priority.
+In YAJCo it is possible to mark a concept using [@Operator](#operator) annotation and define its priority and associativity. Annotation [@Parentheses](#parentheses) is used to indicate the possibility to use parentheses to explicitly express priority.
 
 ### Tokens with value
 
-Since language concepts can contain not only other concepts, but also primitive values, like numbers and strings, it is needed to specify their concrete notation. This is done by attaching [@Token](#token) annotation with a regular expression as a parameter to the parameter of the constructor. A string that matches the regular expression is then provided as a value of the parameter.
+Since language concepts can contain not only other concepts, but also primitive values, like numbers and strings, it is necessary to specify their concrete notation. This is done by attaching [@Token](#token) annotation with a regular expression as a parameter to the parameter of the constructor. A string that matches the regular expression is then provided as a value of the parameter.
 
-If you do not use `@Token` annotation YAJCo derives names of tokens from names o parameters. There are no preddefined tokens in YAJCo, so every token needs to be defined in [@Parser](#parser) annotation or with annotations inside concept classes.
+If you do not use `@Token` annotation YAJCo derives names of tokens from names of parameters. There are no predefined tokens in YAJCo, so every token needs to be defined in [@Parser](#parser) annotation or with annotations inside concept classes.
 
-Examples of usage of `@Token` annotation are in all provided [examples](https://github.com/kpi-tuke/yajco-examples) as it is common task to mark parameters as input values.
+Examples of usage of `@Token` annotation are in all provided [examples](https://github.com/kpi-tuke/yajco-examples) as it is a common task to mark parameters as input values.
 
 ## YAJCo annotations
-In next section we will describe each annotation usable in YAJCo language specification.
+
+In the next section we will describe each annotation usable in YAJCo language specification.
 
 ### Main annotations
 
@@ -123,28 +127,41 @@ Parameter:
 
   * `String[] value()`
     * set of actual strings or names of defined tokens
-    * main parameter => does not need to be named in code
+    * the main parameter => does not need to be named in code
 
-Describes placement of language tokens in concrete syntax of language. Can be used as annotation on _constructor_, _factory method_ and _parameters_ in constructors and factory methods. Specified tokens in `value` parameter can be:
+Describes placement of language tokens in the concrete syntax of language. Can be used as an annotation on _constructor_, _factory method_ and _parameters_ in constructors and factory methods. Specified tokens in `value` parameter can be:
 
   * actual textual representation of required tokens
   * names of regex tokens defined with `@TokenDef` inside `@Parser` configuration
 
-```
-Java:                          |  EBNF:
-                               |
-@Before("move")                |  Move ::= <move>
-Move() {}                      |                       
+
+<div class="grid">
+
+```java title="Java"
+@Before("move")
+Move() {}
 ```
 
+```abnf title="EBNF"
+Move ::= "move"
 ```
-Java:                          |  EBNF:
-@Before("iterate")             |  
-@After("end")                  |  Iteration ::= <iterate> Expression <times> Statement <end>
-Iteration(Expression expr,     |
-    @Before("times")           |
-    Statement statement) {...} |
+
+
+```java title="Java"
+@Before("iterate")  
+@After("end")  
+Iteration(Expression expr,
+    @Before("times")
+    Statement statement) {...}
 ```
+
+```abnf title="EBNF"
+Iteration ::= "iterate" Expression
+              "times" Statement
+              "end"
+```
+
+</div>
 
 #### `@Separator`
 
@@ -152,9 +169,9 @@ Parameter:
 
   * `String value()`
     * one string or name of defined tokens to be used as separator in list of elements
-    * main parameter => does not need to be named in code
+    * the main parameter => does not need to be named in code
 
-In case you need to specify token for separation of elements used in array or list, this is the annotation you would need.
+In case you need to specify a token for separation of elements used in array or list, this is the annotation you would need.
 
 Use only on parameters of types:
 
@@ -162,27 +179,35 @@ Use only on parameters of types:
   * `List`
   * `Set`
 
+<div class="grid">
+
+```java title="Java"
+@Before("define")  
+Definition(String ident,
+    @Before("as")
+    @Range(minOccurs = 1)
+    @Separator(";")
+    Statement[] stmts) {...}
 ```
-Java:                          |  EBNF:
-@Before("define")              |  
-Definition(String ident,       |  Definition ::= <define> IDENT <as> Statement (<;> Statement)*
-    @Before("as")              |
-    @Range(minOccurs = 1)      |
-    @Separator(";")            |
-    Statement[] stmts) {...}   |
+
+```abnf title="EBNF"
+Definition ::= "define" IDENT "as"
+               Statement (";" Statement)*
 ```
+
+</div>
 
 #### `@Token`
 
 Parameter:
 
   * `String value()`
-    * one name of defined token to be used as regular expression to parse value for annotated parameter
-    * main parameter => does not need to be named in code
+    * one name of defined token to be used as a regular expression to parse value for an annotated parameter
+    * the main parameter => does not need to be named in code
 
-Since language concepts can contain not only other concepts, but also primitive values, like numbers and strings, it is needed to specify their concrete notation. This is done by attaching `@Token` annotation with a name of a regular expression as a parameter to the parameter of the constructor. Regular expression have to be specified inside `@TokenDef` in `@Parser` configuration annotation. A string that matches the regular expression is then provided as a value of the parameter.
+Since language concepts can contain not only other concepts, but also primitive values, like numbers and strings, it is necessary to specify their concrete notation. This is done by attaching `@Token` annotation with a name of a regular expression as a parameter to the parameter of the constructor. Regular expressions have to be specified inside `@TokenDef` in `@Parser` configuration annotation. A string that matches the regular expression is then provided as a value of the parameter.
 
-In addition, if constructor has parameters of primitive Java types like int or double, YAJCo automatically convert matched strings to appropriate type.
+In addition, if the constructor has parameters of primitive Java types like int or double, YAJCo automatically converts matched strings to the corresponding type.
 
 Annotation `@Token` is not required in case that name of parameter and name of configured token is same (case-insensitive), it that case configured token is automatically maped to parameter.
 
@@ -194,7 +219,11 @@ Annotation `@Token` is not required in case that name of parameter and name of c
     public State(@Token("ID") String id) {
         this.label = id;
     }
------------------------or----------------------
+```
+
+or
+
+```java
     @Before("state")
     @After(";")
     public State(String id) { //parameter name identical with token name, @Token annotation not needed
@@ -207,19 +236,35 @@ Annotation `@Token` is not required in case that name of parameter and name of c
 Parameters:
 
   * `int minOccurs() default 0`
-    * defines minimal number of occurence of elements in annotated list
+    * defines the minimal number of occurrence of elements in the annotated list
   * `int maxOccurs() default -1`
-    * defines maximal number of occurence of elements in annotated list
+    * defines the maximal number of occurrence of elements in the annotated list
     * value `-1` is used for _infinity_
 
 A concept can contain multiple instances of subconcepts. This is automatically inferred from the use of array or one of the standard Java collection types. The multiplicity can be restricted using `@Range` annotation.
 
+<div class="grid">
+
+```java title="Java"
+Program(Statement[] stmts) {...}
 ```
-Java:                          |  EBNF:
-Program(                       |
-    @Range(minOccurs = 1)      |  Program ::= Statement+
-    Statement[] stmts) {...}   |
+
+```abnf title="EBNF"
+Program ::= Statement*
 ```
+
+```java title="Java"
+Program(
+    @Range(minOccurs = 1)
+    Statement[] stmts) {...}
+```
+
+```abnf title="EBNF"
+Program ::= Statement+
+```
+
+</div>
+
 `@Range` can be used on `array`, `List` or `Set` typed parameters of constructors and factory methods only.
 
 #### `@Operator`
@@ -231,7 +276,7 @@ Parameters:
   * `Associativity associativity() default Associativity.AUTO`
     * defines associativity for operator notation, allowed values are `LEFT`, `RIGHT`, `NONE`, `AUTO` (actually translates to `LEFT`)
 
-Operators represent a type of language constructs that benefits from special treatment. Otherwise they would require more complex definition of concept relations to express rules of priority and associativity.
+Operators represent a type of language constructs that benefits from special treatment. Otherwise, they would require a more complex definition of concept relations to express rules of priority and associativity.
 In YAJCo it is possible to mark concept using `@Operator` annotation and
 define its priority and associativity.
 
@@ -252,9 +297,9 @@ For better practical understanding, see [Math expression language](https://githu
 Parameters:
 
   * `String left() default "("`
-    * defines token used for left parentheses, can be specified also as configured named token
+    * defines a token used for left parentheses, can be specified also as a configured named token
   * `String right() default ")"`
-    * defines token used for right parentheses, can be specified also as configured named token
+    * defines a token used for right parentheses, can be specified also as a configured named token
 
 Annotation `@Parentheses` can be used to indicate the possibility to use parentheses to explicitly express priority of operators. Usually annotations `@Operator` and `@Parentheses` are used in same language. In practical approach annotation `@Parentheses` is mostly used on abstract classes, which serve as parent for other more specific classes (language concepts).
 
@@ -276,9 +321,9 @@ For better practical understanding, see [Math expression language](https://githu
 Parameter:
 
   * `String unique() default ""`
-    * used to define scope of uniqueness of marked identifier field, scope is defined using XPath expression
+    * used to define the scope of uniqueness of the marked identifier field, scope is defined using XPath expression
 
-YAJCo annotation `@Identifier` serves for easy specification of referencable identifiers in language concepts (classes). Most of languages uses some sort of referencable names (identifiers). It is possible to mark field of language concept with `@Identifier` annotation. Strings inputed to such field will be automatically checked for uniqueness during parsing of sentence. Standard behavious is checking uniqueness in global scope of a language sentence, but it is possible to specify own scope for uniqueness check using `unique` parameter.
+YAJCo annotation `@Identifier` serves for easy specification of referencable identifiers in language concepts (classes). Most of the languages use some sort of referencable names (identifiers). It is possible to mark field of language concept with `@Identifier` annotation. Strings inputed to such field will be automatically checked for uniqueness during parsing of sentence. Standard behavious is checking uniqueness in global scope of a language sentence, but it is possible to specify own scope for uniqueness check using `unique` parameter.
 
 ```java
 public class Function {
@@ -296,7 +341,7 @@ public class Parameter {
 }
 ```
 
-Simple example of identifiers and references is provided in [Nielsen's DESK language](https://github.com/kpi-tuke/yajco-examples#nielsens-desk-language). For more information about this feature, you can check our paper _[Declarative specification of references in DSLs](http://www.mendeley.com/download/public/27880491/6466511164/71085fd9b9fa436cefae3e71ed71111fcc8f2b06/dl.pdf)_
+A simple example of identifiers and references is provided in [Nielsen's DESK language](https://github.com/kpi-tuke/yajco-examples#nielsens-desk-language). For more information about this feature, you can check our paper [Declarative specification of references in DSLs][declarative-specification]
 
 #### `@References`
 
@@ -305,17 +350,17 @@ Parameters:
   * `Class value()`
     * defines class of referenced language element
   * `String field() default ""`
-    * defines name of class field in which should be injected referenced element
+    * defines the name of the class field in which the referenced element should be injected 
   * `String path() default ""`
-    * defines scope for searching referenced element in, scope is defined in form of XPath expression
+    * defines scope for searching referenced element in (as XPath expression)
   * `boolean create() default false`
-    * states if YAJCo should create element if referenced identifier is not found _(actually not implemented)_
+    * states if YAJCo should create an element if the referenced identifier is not found _(currently not implemented)_
 
-`@References` annotation is used to mark **`String`** parameters of _constructors_ or _factory methods_. Such parameters represents places for referencing existing language structures.
+`@References` annotation is used to mark **`String`** parameters of _constructors_ or _factory methods_. Such parameters represent places for referencing existing language structures.
 
-During parsing YAJCo would inject proper references into the fields of objects using Java reflection mechanism. Reference resolution can be restricted using XPath expression specifying nodes in constructed object tree that would be searched for referred objects. This allows to specify scoping rules and namespaces.
+During parsing YAJCo would inject proper references into the fields of objects using the Java reflection mechanism. Reference resolution can be restricted using XPath expression specifying nodes in the constructed object tree that would be searched for referred objects. This allows specifying scoping rules and namespaces.
 
-It is required to specify type of referencing class using `value` parameter. YAJCo automaticaly searches for field with specified type. If there are more types, it is needed to use `field` parameter to exactly specify targeted field for injection with referenced language structure. Thanks to YAJCo automatic injection it is not required to do anything with actual value of annotated parameter in constructor (as it is possible to see in examples below), value of _String_ parameter is stored internally in YAJCo during parsing phase.
+It is required to specify the type of referencing class using `value` parameter. YAJCo automatically searches for a field with a specified type. If there are more types, it is necessary to use `field` parameter to exactly specify targeted field for injection with referenced language structure. Thanks to YAJCo automatic injection, it is not required to do anything with the actual value of the annotated parameter in the constructor (as it is possible to see in the examples below), value of _String_ parameter is stored internally in YAJCo during the parsing phase.
 
 ```java
 ...
@@ -351,9 +396,10 @@ public Transition(
 ...
 ```
 
-Simple example of identifiers and references is provided in [Nielsen's DESK language](https://github.com/kpi-tuke/yajco-examples#nielsens-desk-language). For more information about this feature, you can check our paper _[Declarative specification of references in DSLs](http://www.mendeley.com/download/public/27880491/6466511164/71085fd9b9fa436cefae3e71ed71111fcc8f2b06/dl.pdf)_
+A simple example of identifiers and references is provided in [Nielsen's DESK language](https://github.com/kpi-tuke/yajco-examples#nielsens-desk-language). For more information about this feature, you can check our paper [Declarative specification of references in DSLs][declarative-specification]
 
 #### `@FactoryMethod`
+
 Serves as marking annotation for specifying static methods, which will be included in creation of abstract syntax. Standard behaviour of YAJCo is to take all constructors as representation of concrete syntax for language concept (class). There can sometimes be problems with specification of all wanted concrete syntax notations with constructors, as they do not allow to have same signature even when annotations are different. Therefore it is sometimes required to create factory methods and mark them with our annotation.
 
 ```java
@@ -371,7 +417,7 @@ public static Statement createExitStatement() {
 ```
 
 #### `@Exclude`
-Annotation `@Exclude` serves to mark constructor as excluded from abstract syntax specification. Any marked constructor will not be included in language specification.
+`@Exclude` annotation serves to mark constructor as excluded from abstract syntax specification. Any marked constructor will not be included in the language specification.
 
 ```java
 ...
@@ -380,7 +426,7 @@ public Statement() {}
 ...
 ```
 
-Annotation `@Exclude` can be used also on class. Such class will be excluded from YAJCo language specification. It is needed when you don't want some class, which is in hierarchy of language concepts to appear in language specification.
+`@Exclude` annotation can also be used on a class. Such class will be excluded from the YAJCo language specification. It is necessary when you don't want some class, which is in the hierarchy of language concepts, to appear in language specification.
 
 ```java
 @Exclude
@@ -401,15 +447,15 @@ Parameters:
   * `String mainNode() default ""`
     * defines name of root language concept, can be in form of full class name or in simple class name in case class is in the same package; if annotation `@Parser` is used on class, this parameter is not needed
   * `TokenDef[] tokens() default {}`
-    * contains list of named lexical symbols (tokens)
+    * contains a list of named lexical symbols (tokens)
   * `Skip[] skips() default {}`
-    * contains list of ignored (whitespace) characters of regular expressions; if left empty, YAJCo automatically includes `\s` regular expression for whitespaces
+    * contains a list of ignored (whitespace) characters as regular expressions; if left empty, YAJCo automatically includes `\s` regular expression for whitespaces
   * `Option[] options() default {}`
-    * provides way for configuration of YAJCo and modules
+    * provides a way for configuration of YAJCo and modules
 
-`@Parser` annotation is main configuration element of YAJCo tool. It is required to use this annotation once in project in order to start YAJCo tool. `@Parser` annotation can be included on class or on package (using `package-info.java` file).
+`@Parser` annotation is main configuration element of YAJCo tool. It is required to use this annotation once in a project in order to start YAJCo tool. `@Parser` annotation can be included on class or on package (using `package-info.java` file).
 
-Its parameters allow to specify root concept of the language, name of the generated parser class. There is also specification of lexical analyzer including definition of named tokens and regular expressions for substring that should be ignored (white-space, comments). And it is one of few input points for configurations of YAJCo and any YAJCo module.
+Its parameters allow specifying the root concept of the language, the name of the generated parser class. There is also specification of lexical analyzer, including definition of named tokens and regular expressions for substring that should be ignored (white-space, comments). And it is one of the few input points for configurations of YAJCo and any YAJCo module.
 
 ```java
 @Parser(className = "yajco.exemple.sml.parser.StateMachineParser",
@@ -435,9 +481,9 @@ import yajco.annotation.config.TokenDef;
 Parameters:
 
   * `String name()`
-    * defines name of lexical symbol (token)
+    * the name of lexical symbol (token)
   * `String regexp()`
-    * defines regular expression for token
+    * regular expression for token
 
 Used as part of configuration in `@Parser` annotation parameter `tokens`.
 
@@ -446,7 +492,7 @@ Used as part of configuration in `@Parser` annotation parameter `tokens`.
 Parameters:
 
   * `String value()`
-    * defines character set or regular expression to be skipped during parsing
+    * a set of characters or regular expression to be skipped during parsing
 
 Used as part of configuration in `@Parser` annotation parameter `skips`.
 
@@ -455,13 +501,14 @@ Used as part of configuration in `@Parser` annotation parameter `skips`.
 Parameters:
 
   * `String name()`
-    * defines name of configuration option
+    * name of the configuration option
   * `String value()`
-    * defines value of configuration option
+    * value of the configuration option
 
 Used as part of configuration in `@Parser` annotation parameter `options`.
 
 ### Printer annotations
+
 YAJCo allows generating printer for specified language. Printer allows to print model of language sentence in form of concrete syntax. In order to specify formatting of printed text, we have introduced new annotations.
 
 #### `@NewLine`
@@ -474,7 +521,7 @@ Parameters:
   * `int level() default 1`
     * defines level of indentation
 
-Specifies indentation of annotated element. Mostly it should be used in combination with `@NewLine`. Annotated element is indented specified number of levels to right in printer output. Indentation is inherited for all subelements of indented element.
+Specifies indentation of the annotated element. Mostly it should be used in combination with `@NewLine`. Annotated element is indented specified number of levels to right in the printer output. Indentation is inherited for all subelements of the indented element.
 
 ## Restrictions
 
@@ -517,3 +564,5 @@ In IntelliJ IDEA it is required to use Maven building and running options instea
 
 ### Eclipse
 Eclipse is pretty without problems, as long as you are able to run Maven builds. We have not experienced any problems, but user interface of Eclipse can be pretty problematic for beginner, so we are not recommending to use it as long as you don't have previous experience with it.
+
+[declarative-specification]: https://annals-csis.org/Volume_1/pliks/342.pdf

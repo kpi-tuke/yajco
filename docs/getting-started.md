@@ -46,7 +46,6 @@ Ensure your project uses at least **JDK 11** by including the following properti
 Add the following **YAJCo** dependencies to your project’s `pom.xml`:
 
 ```xml
-
 <dependencies>
   <dependency>
     <groupId>sk.tuke.yajco</groupId>
