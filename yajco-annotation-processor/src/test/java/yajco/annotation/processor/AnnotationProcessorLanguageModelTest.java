@@ -9,7 +9,8 @@ import org.junit.rules.TemporaryFolder;
 import yajco.model.*;
 import yajco.model.pattern.NotationPartPattern;
 import yajco.model.pattern.Pattern;
-import yajco.model.pattern.impl.Separator;
+import yajco.model.pattern.PatternSupport;
+import yajco.model.pattern.impl.*;
 import yajco.model.type.*;
 
 import java.util.List;
@@ -41,7 +42,7 @@ public class AnnotationProcessorLanguageModelTest {
     }
 
     @Test
-    public void createsLanguageModelFromAnnotatedParserClass() throws Exception {
+    public void shouldCreateLanguageModelFromAnnotatedParserClass() throws Exception {
         Language language = compiler.compileAndReadLanguageModel(
             "test.lang.NumberLiteral",
             "package test.lang;\n"
@@ -67,16 +68,15 @@ public class AnnotationProcessorLanguageModelTest {
         assertNotNull(property);
         assertEquals("yajco.model.type.PrimitiveType", property.getType().getClass().getName());
 
-        assertEquals(1, concept.getConcreteSyntax().size());
-        Notation notation = concept.getConcreteSyntax().get(0);
+        Notation notation = requireSingleNotation(concept);
         assertEquals(2, notation.getParts().size());
-        assertTokenPart(notation.getParts().get(0), "number");
-        assertTrue(notation.getParts().get(1) instanceof PropertyReferencePart);
-        assertEquals("value", ((PropertyReferencePart) notation.getParts().get(1)).getProperty().getName());
+        assertTokenPart(notation, 0, "number");
+        PropertyReferencePart valuePart = assertNotationPart(notation, 1, PropertyReferencePart.class);
+        assertEquals("value", valuePart.getProperty().getName());
     }
 
     @Test
-    public void languageAnnotationAddsMetadataAndCommentSkipsToModel() throws Exception {
+    public void shouldAddMetadataAndCommentSkipsFromLanguageAnnotation() throws Exception {
         Language language = compiler.compileAndReadLanguageModel(
             "test.robot.Robot",
             "package test.robot;\n"
@@ -111,7 +111,7 @@ public class AnnotationProcessorLanguageModelTest {
     }
 
     @Test
-    public void inheritanceRelationIsRecognized() throws Exception {
+    public void shouldRecognizeInheritanceRelation() throws Exception {
         Language language = compiler.compileAndReadLanguageModel(
             source("test.Expression",
                 "package test;\n"
@@ -137,7 +137,7 @@ public class AnnotationProcessorLanguageModelTest {
     }
 
     @Test
-    public void compositionRelationIsRecognized() throws Exception {
+    public void shouldRecognizeCompositionRelation() throws Exception {
         Language language = compiler.compileAndReadLanguageModel(
             source("test.Expression",
                 "package test;\n"
@@ -166,7 +166,7 @@ public class AnnotationProcessorLanguageModelTest {
     }
 
     @Test
-    public void compositionArrayMultiplicityIsRecognized() throws Exception {
+    public void shouldRecognizeArrayCompositionMultiplicity() throws Exception {
         Language language = compiler.compileAndReadLanguageModel(
             source("test.Numbers",
                 "package test;\n"
@@ -188,7 +188,7 @@ public class AnnotationProcessorLanguageModelTest {
     }
 
     @Test
-    public void compositionListMultiplicityIsRecognized() throws Exception {
+    public void shouldRecognizeListCompositionMultiplicity() throws Exception {
         Language language = compiler.compileAndReadLanguageModel(
             source("test.Numbers",
                 "package test;\n"
@@ -211,7 +211,7 @@ public class AnnotationProcessorLanguageModelTest {
     }
 
     @Test
-    public void compositionSetMultiplicityIsRecognized() throws Exception {
+    public void shouldRecognizeSetCompositionMultiplicity() throws Exception {
         Language language = compiler.compileAndReadLanguageModel(
             source("test.Numbers",
                 "package test;\n"
@@ -234,7 +234,7 @@ public class AnnotationProcessorLanguageModelTest {
     }
 
     @Test
-    public void beforeAndAfterOnConcept() throws Exception {
+    public void shouldApplyBeforeAndAfterOnConcept() throws Exception {
         Language language = compiler.compileAndReadLanguageModel(
             source("test.Number",
                 "package test;\n"
@@ -249,16 +249,15 @@ public class AnnotationProcessorLanguageModelTest {
             numberLiteralSource(null)
         );
         Concept number = requireConcept(language, "Number");
-        assertEquals(1, number.getConcreteSyntax().size());
-        Notation notation = number.getConcreteSyntax().get(0);
+        Notation notation = requireSingleNotation(number);
         assertEquals(3, notation.getParts().size());
-        assertTokenPart(notation.getParts().get(0), "begin");
-        assertTrue(notation.getParts().get(1) instanceof PropertyReferencePart);
-        assertTokenPart(notation.getParts().get(2), "end");
+        assertTokenPart(notation, 0, "begin");
+        assertNotationPart(notation, 1, PropertyReferencePart.class);
+        assertTokenPart(notation, 2, "end");
     }
 
     @Test
-    public void beforeAndAfterOnProperty() throws Exception {
+    public void shouldApplyBeforeAndAfterOnProperty() throws Exception {
         Language language = compiler.compileAndReadLanguageModel(
             source("test.Number",
                 "package test;\n"
@@ -271,16 +270,15 @@ public class AnnotationProcessorLanguageModelTest {
             numberLiteralSource(null)
         );
         Concept number = requireConcept(language, "Number");
-        assertEquals(1, number.getConcreteSyntax().size());
-        Notation notation = number.getConcreteSyntax().get(0);
+        Notation notation = requireSingleNotation(number);
         assertEquals(3, notation.getParts().size());
-        assertTokenPart(notation.getParts().get(0), "begin");
-        assertTrue(notation.getParts().get(1) instanceof PropertyReferencePart);
-        assertTokenPart(notation.getParts().get(2), "end");
+        assertTokenPart(notation, 0, "begin");
+        assertNotationPart(notation, 1, PropertyReferencePart.class);
+        assertTokenPart(notation, 2, "end");
     }
 
     @Test
-    public void beforeAndAfterOnConceptAndProperties() throws Exception {
+    public void shouldApplyBeforeAndAfterOnConceptAndProperties() throws Exception {
         Language language = compiler.compileAndReadLanguageModel(
             source("test.Numbers",
                 "package test;\n"
@@ -296,21 +294,20 @@ public class AnnotationProcessorLanguageModelTest {
             numberLiteralSource(null)
         );
         Concept number = requireConcept(language, "Numbers");
-        assertEquals(1, number.getConcreteSyntax().size());
-        Notation notation = number.getConcreteSyntax().get(0);
+        Notation notation = requireSingleNotation(number);
         assertEquals(8, notation.getParts().size());
-        assertTokenPart(notation.getParts().get(0), "begin");
-        assertTokenPart(notation.getParts().get(1), "beforeFirst");
-        assertTrue(notation.getParts().get(2) instanceof PropertyReferencePart);
-        assertTokenPart(notation.getParts().get(3), "afterFirst");
-        assertTokenPart(notation.getParts().get(4), "beforeSecond");
-        assertTrue(notation.getParts().get(5) instanceof PropertyReferencePart);
-        assertTokenPart(notation.getParts().get(6), "afterSecond");
-        assertTokenPart(notation.getParts().get(7), "end");
+        assertTokenPart(notation, 0, "begin");
+        assertTokenPart(notation, 1, "beforeFirst");
+        assertNotationPart(notation, 2, PropertyReferencePart.class);
+        assertTokenPart(notation, 3, "afterFirst");
+        assertTokenPart(notation, 4, "beforeSecond");
+        assertNotationPart(notation, 5, PropertyReferencePart.class);
+        assertTokenPart(notation, 6, "afterSecond");
+        assertTokenPart(notation, 7, "end");
     }
 
     @Test
-    public void separator() throws Exception {
+    public void shouldApplySeparatorPattern() throws Exception {
         Language language = compiler.compileAndReadLanguageModel(
             source("test.Numbers",
                 "package test;\n"
@@ -323,15 +320,168 @@ public class AnnotationProcessorLanguageModelTest {
 
             numberLiteralSource(null)
         );
-
         Concept list = requireConcept(language, "Numbers");
-        Notation notation = list.getConcreteSyntax().get(0);
-        NotationPart notationPart = notation.getParts().get(0);
-        assertTrue(notationPart instanceof PropertyReferencePart);
-        List<NotationPartPattern> patterns = ((PropertyReferencePart)notationPart).getPatterns();
+        Notation notation = requireSingleNotation(list);
+        PropertyReferencePart elementsPart = assertNotationPart(notation, 0, PropertyReferencePart.class);
+        List<NotationPartPattern> patterns = elementsPart.getPatterns();
         assertEquals(1, patterns.size());
         assertTrue(patterns.get(0) instanceof Separator);
         assertEquals(",", ((Separator) patterns.get(0)).getValue());
+    }
+
+    @Test
+    public void shouldMapRangePatternFromAnnotation() throws Exception {
+        Language language = compiler.compileAndReadLanguageModel(
+            source("test.Program",
+                "package test;\n"
+                + "import yajco.annotation.*;\n"
+                + "import yajco.annotation.config.*;\n"
+                + "@Parser(options = @Option(name = \"yajco.generateParser\", value = \"false\"))\n"
+                + "public class Program {\n"
+                + "    public Program(@Range(minOccurs = 1, maxOccurs = 3) NumberLiteral[] statements) {}\n"
+                + "}\n"),
+            numberLiteralSource(null)
+        );
+
+        Concept program = requireConcept(language, "Program");
+        Notation notation = requireSingleNotation(program);
+        assertEquals(1, notation.getParts().size());
+        PropertyReferencePart statements = assertNotationPart(notation, 0, PropertyReferencePart.class);
+        Range range = assertPattern(statements, Range.class);
+        assertEquals(1, range.getMinOccurs());
+        assertEquals(3, range.getMaxOccurs());
+    }
+
+    @Test
+    public void shouldMapOperatorAndParenthesesPatternsFromAnnotations() throws Exception {
+        Language language = compiler.compileAndReadLanguageModel(
+            source("test.Expression",
+                "package test;\n"
+                + "import yajco.annotation.*;\n"
+                + "import yajco.annotation.config.*;\n"
+                + "@Parentheses(left = \"(\", right = \")\")\n"
+                + "@Parser(options = @Option(name = \"yajco.generateParser\", value = \"false\"))\n"
+                + "public abstract class Expression {}\n"),
+            source("test.Add",
+                "package test;\n"
+                + "import yajco.annotation.*;\n"
+                + "import yajco.model.pattern.impl.Associativity;\n"
+                + "public class Add extends Expression {\n"
+                + "    @Operator(priority = 2, associativity = Associativity.RIGHT)\n"
+                + "    public Add(Expression left, @Before(\"+\") Expression right) {}\n"
+                + "}\n"),
+            numberLiteralSource("Expression")
+        );
+
+        Concept expression = requireConcept(language, "Expression");
+        Parentheses parentheses = assertPattern(expression, Parentheses.class);
+        assertEquals("(", parentheses.getLeft());
+        assertEquals(")", parentheses.getRight());
+
+        Concept add = requireConcept(language, "Add");
+        Operator operator = assertPattern(add, Operator.class);
+        assertEquals(2, operator.getPriority());
+        assertEquals(Associativity.RIGHT, operator.getAssociativity());
+    }
+
+    @Test
+    public void shouldCreateReferenceBindingFromIdentifierAndReferencesPatterns() throws Exception {
+        Language language = compiler.compileAndReadLanguageModel(
+            source("test.Call",
+                "package test;\n"
+                + "import yajco.annotation.config.*;\n"
+                + "import yajco.annotation.reference.*;\n"
+                + "@Parser(options = @Option(name = \"yajco.generateParser\", value = \"false\"))\n"
+                + "public class Call {\n"
+                + "    private final Function function;\n"
+                + "    public Call(@References(Function.class) String function) {\n"
+                + "        this.function = null;\n"
+                + "    }\n"
+                + "}\n"),
+            source("test.Function",
+                "package test;\n"
+                + "import yajco.annotation.reference.*;\n"
+                + "public class Function {\n"
+                + "    @Identifier\n"
+                + "    private final String name;\n"
+                + "    public Function(String name) {\n"
+                + "        this.name = name;\n"
+                + "    }\n"
+                + "}\n")
+        );
+
+        Concept function = requireConcept(language, "Function");
+        Property name = function.getProperty("name");
+        assertNotNull(name);
+        assertNotNull(name.getPattern(Identifier.class));
+
+        Concept call = requireConcept(language, "Call");
+        Property functionProperty = call.getProperty("function");
+        assertNotNull(functionProperty);
+        assertReferenceToConcept(function, functionProperty.getType());
+
+        Notation notation = requireSingleNotation(call);
+        assertEquals(1, notation.getParts().size());
+        LocalVariablePart functionPart = assertNotationPart(notation, 0, LocalVariablePart.class);
+        References references = assertPattern(functionPart, References.class);
+        assertEquals(function, references.getConcept());
+        assertNull(references.getProperty());
+
+        Token token = assertPattern(functionPart, Token.class);
+        assertEquals("IDENTIFIER", token.getName());
+    }
+
+    @Test
+    public void shouldAddDefaultIdentifierTokenDefinitionForReferencesAnnotation() throws Exception {
+        Language language = compiler.compileAndReadLanguageModel(
+            source("test.Call",
+                "package test;\n"
+                + "import yajco.annotation.config.*;\n"
+                + "import yajco.annotation.reference.*;\n"
+                + "@Parser(options = @Option(name = \"yajco.generateParser\", value = \"false\"))\n"
+                + "public class Call {\n"
+                + "    public Call(@References(Function.class) String function) {\n"
+                + "    }\n"
+                + "}\n"),
+            source("test.Function",
+                "package test;\n"
+                + "public class Function {\n"
+                + "    public Function(String name) {\n"
+                + "    }\n"
+                + "}\n")
+        );
+
+        TokenDef identifierToken = language.getToken("IDENTIFIER");
+        assertNotNull(identifierToken);
+        assertEquals("[a-zA-Z_][a-zA-Z0-9_]*", identifierToken.getRegexp());
+    }
+
+    @Test
+    public void shouldIncludeFactoryMethodAndIgnoreExcludedConstructor() throws Exception {
+        Language language = compiler.compileAndReadLanguageModel(
+            "test.Statement",
+            "package test;\n"
+                + "import yajco.annotation.*;\n"
+                + "import yajco.annotation.config.*;\n"
+                + "@Parser(options = @Option(name = \"yajco.generateParser\", value = \"false\"))\n"
+                + "public class Statement {\n"
+                + "    @Exclude\n"
+                + "    public Statement() {\n"
+                + "    }\n"
+                + "    @FactoryMethod\n"
+                + "    @Before(\"noop\")\n"
+                + "    public static Statement noop() {\n"
+                + "        return new Statement();\n"
+                + "    }\n"
+                + "}\n");
+
+        Concept statement = requireConcept(language, "Statement");
+        Notation notation = requireSingleNotation(statement);
+        assertEquals(1, notation.getParts().size());
+        assertTokenPart(notation, 0, "noop");
+
+        Factory factory = assertPattern(notation, Factory.class);
+        assertEquals("noop", factory.getName());
     }
 
     private static @NonNull Concept requireConcept(Language language, String name) {
@@ -355,9 +505,30 @@ public class AnnotationProcessorLanguageModelTest {
         throw new AssertionError("Expected skip " + regexp + " in " + language.getSkips());
     }
 
-    private void assertTokenPart(NotationPart notationPart, String token) {
-        assertTrue(notationPart instanceof TokenPart);
-        assertEquals(token, ((TokenPart) notationPart).getToken());
+    private static Notation requireSingleNotation(Concept concept) {
+        assertEquals(1, concept.getConcreteSyntax().size());
+        return concept.getConcreteSyntax().get(0);
+    }
+
+    private static <T extends NotationPart> T assertNotationPart(Notation notation, int index, Class<T> expectedType) {
+        NotationPart notationPart = notation.getParts().get(index);
+        assertTrue("Expected notation part type " + expectedType.getSimpleName() + " but was "
+            + notationPart.getClass().getSimpleName(), expectedType.isInstance(notationPart));
+        return expectedType.cast(notationPart);
+    }
+
+    private static void assertTokenPart(Notation notation, int index, String token) {
+        TokenPart tokenPart = assertNotationPart(notation, index, TokenPart.class);
+        assertEquals(token, tokenPart.getToken());
+    }
+
+    private static <P extends Pattern, S extends PatternSupport<P>, T extends P> T assertPattern(
+        S patternSupport,
+        Class<T> patternClass
+    ) {
+        T pattern = patternSupport.getPattern(patternClass);
+        assertNotNull("Expected pattern " + patternClass.getSimpleName(), pattern);
+        return pattern;
     }
 
     private static void assertReferenceToConcept(Concept concept, Type type) {
