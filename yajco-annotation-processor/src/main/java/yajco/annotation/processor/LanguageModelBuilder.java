@@ -11,14 +11,15 @@ import yajco.model.*;
 import yajco.model.pattern.Pattern;
 import yajco.model.pattern.PatternSupport;
 import yajco.model.pattern.impl.Factory;
-import yajco.model.type.*;
+import yajco.model.type.ListType;
+import yajco.model.type.OptionalType;
+import yajco.model.type.PrimitiveTypeConst;
+import yajco.model.type.Type;
 import yajco.model.utilities.XMLLanguageFormatHelper;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
 import javax.lang.model.type.*;
-import javax.lang.model.type.ArrayType;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.Optional;
@@ -28,7 +29,7 @@ public class LanguageModelBuilder {
     private ProcessingEnvironment processingEnv;
     private final Set<? extends Element> rootElements;
     private Set<String> excludes = new HashSet<>();
-
+    private final TypeResolver typeResolver;
     /**
      * Builded language.
      */
@@ -52,6 +53,7 @@ public class LanguageModelBuilder {
         this.processingEnv = processingEnv;
         this.rootElements = rootElements;
         this.excludes = excludes;
+        this.typeResolver = new TypeResolver(processingEnv.getTypeUtils(), this::resolveReferenceConcept);
     }
 
     public Language createLanguageModel(Element parserAnnotationElement, Parser parserAnnotation) {
@@ -85,6 +87,14 @@ public class LanguageModelBuilder {
         language.setSettings(LanguageSetting.convertToLanguageSetting(properties));
 
         return language;
+    }
+
+    public Concept resolveReferenceConcept(TypeElement typeElement) {
+        if (typeElement != null && isKnownClass(typeElement)) {
+            return processTypeElement(typeElement);
+        } else {
+            return null;
+        }
     }
 
     private @NonNull TypeElement extractMainElement(Element parserAnnotationElement, Parser parserAnnotation) {
@@ -559,7 +569,7 @@ public class LanguageModelBuilder {
                 processParameter(concept, notation, paramElement);
                 excludedCount++;
                 cantBeUnordered = unorderedCount > 0 && excludedCount > 0;
-            } else if (getType(paramElement.asType()) instanceof OptionalType)  {
+            } else if (typeResolver.getType(paramElement.asType()) instanceof OptionalType)  {
                 UnorderedParamPart unorderedParamPart = new UnorderedParamPart(null);
                 OptionalPart optionalPart = (OptionalPart) processCompoundParameter(concept, paramElement, new OptionalPart(null));
                 unorderedParamPart.addPart(optionalPart);
@@ -599,7 +609,7 @@ public class LanguageModelBuilder {
                 processParameter(concept, notation, paramElement);
             } else {
                 // Parameter should be a collection type (List or Array)
-                Type paramType = getType(paramElement.asType());
+                Type paramType = typeResolver.getType(paramElement.asType());
 
                 if (!(paramType instanceof ListType || paramType instanceof ArrayType)) {
                     throw new GeneratorException(
@@ -646,7 +656,10 @@ public class LanguageModelBuilder {
 
                 // Add only fields with property patterns (PropertyPattern).
                 if (hasPatternAnnotations(fieldElement)) {
-                    Property property = new Property(fieldElement.getSimpleName().toString(), getType(fieldElement.asType()), fieldElement);
+                    Property property = new Property(
+                        fieldElement.getSimpleName().toString(),
+                        typeResolver.getType(fieldElement.asType()),
+                        fieldElement);
                     addPatternsFromAnnotations(fieldElement, property);
                     concept.addProperty(property);
                 }
@@ -682,7 +695,7 @@ public class LanguageModelBuilder {
      * @param paramElement Parameter of constructor or factory method.
      */
     private void processParameter(Concept concept, Notation notation, VariableElement paramElement) {
-        Type type = getType(paramElement.asType());
+        Type type = typeResolver.getType(paramElement.asType());
         yajco.annotation.Flag flagAnnotation = paramElement.getAnnotation(yajco.annotation.Flag.class);
 
         // Handle @Flag annotation on boolean parameters
@@ -732,7 +745,7 @@ public class LanguageModelBuilder {
 
             if (references != null) { // @References annotation.
                 //TODO: zatial nie je podpora pre polia referencii, treba to vsak doriesit
-                type = getSimpleType(typeMirror);
+                type = typeResolver.getSimpleType(typeMirror);
                 LocalVariablePart localVariablePart = new LocalVariablePart(paramName, type, paramElement);
                 notation.addPart(localVariablePart);
 
@@ -740,7 +753,7 @@ public class LanguageModelBuilder {
             } else { // Property reference.
                 Property property = concept.getProperty(paramName);
                 if (property == null) {
-                    property = new Property(paramName, getType(typeMirror), null);
+                    property = new Property(paramName, typeResolver.getType(typeMirror), null);
                     concept.addProperty(property);
                 }
 
@@ -812,9 +825,9 @@ public class LanguageModelBuilder {
             Type type;
             List<? extends TypeMirror> types = ((DeclaredType) typeMirror).getTypeArguments();
             if (processingEnv.getTypeUtils().asElement(typeMirror).toString().equals(Optional.class.getName())) {
-                type = getSimpleType(types.get(types.size() - 1));
+                type = typeResolver.getSimpleType(types.get(types.size() - 1));
             } else {
-                type = getSimpleType(typeMirror);
+                type = typeResolver.getSimpleType(typeMirror);
             }
             LocalVariablePart localVariablePart = new LocalVariablePart(paramName, type, paramElement);
             notationPart.addPart(localVariablePart);
@@ -822,7 +835,7 @@ public class LanguageModelBuilder {
         } else { // Property reference.
             Property property = concept.getProperty(paramName);
             if (property == null) {
-                property = new Property(paramName, getType(typeMirror), null);
+                property = new Property(paramName, typeResolver.getType(typeMirror), null);
                 concept.addProperty(property);
             }
 
@@ -997,7 +1010,7 @@ public class LanguageModelBuilder {
             for (Element elem : element.getEnclosedElements()) {
                 if (elem.getKind().isField()) {
                     VariableElement fieldElement = (VariableElement) elem;
-                    Type fieldType = getType(fieldElement.asType());
+                    Type fieldType = typeResolver.getType(fieldElement.asType());
                     if (fieldType instanceof yajco.model.type.ReferenceType) {
                         yajco.model.type.ReferenceType referenceType = (yajco.model.type.ReferenceType) fieldType;
                         if (referenceType.getConcept().equals(referencedConcept)) {
@@ -1011,113 +1024,6 @@ public class LanguageModelBuilder {
             }
         }
         return null;
-    }
-
-    /**
-     * Finds YAJCo model type of parameter.
-     *
-     * @param type Element type.
-     * @return YAJCo model type of parameter.
-     */
-    private Type getType(TypeMirror type) {
-        if (type.getKind() == TypeKind.ARRAY) {
-            return new yajco.model.type.ArrayType(getSimpleType(((ArrayType) type).getComponentType()));
-        } else if (isSpecifiedClassType(type, List.class)) {
-            return getSpecifiedYajcoComponentType(type, ListType.class);
-        } else if (isSpecifiedClassType(type, Set.class)) {
-            return getSpecifiedYajcoComponentType(type, SetType.class);
-        } else if (isSpecifiedClassType(type, Optional.class)) {
-            return getSpecifiedYajcoComponentType(type, OptionalType.class);
-        } else {
-            return getSimpleType(type);
-        }
-    }
-
-    /**
-     * Finds YAJCo component type of element.
-     *
-     * @param type Type of language model element.
-     * @param yajcoType YAJCo model type.
-     * @param <T>
-     * @return YAJCo component type of element.
-     */
-    private <T extends ComponentType> T getSpecifiedYajcoComponentType(TypeMirror type, Class<T> yajcoType) {
-        if (type.getKind() != TypeKind.DECLARED) {
-            throw new GeneratorException("Type " + type.toString() + " is not class or interface");
-        }
-
-        System.out.println("************************ " + type.getKind());
-
-        List<? extends TypeMirror> types = ((DeclaredType) type).getTypeArguments();
-
-        if (types.isEmpty()) {
-            throw new GeneratorException("Not specified type for " + type.toString() + ", please use generics to specify inner type.");
-        } else {
-            try {
-                Constructor constructor = yajcoType.getConstructor(Type.class);
-                if (processingEnv.getTypeUtils().asElement(type).toString().equals(Optional.class.getName())) {
-                    // Component type as Optional. For example Optional<String[]>
-                    return (T) (constructor.newInstance(getType(types.get(types.size() - 1))));
-                }
-                return (T) constructor.newInstance(getSimpleType(types.get(types.size() - 1)));
-            } catch (NoSuchMethodException ex) {
-                throw new GeneratorException("Cannot find constructor for " + yajcoType.getName() + " with only " + Type.class.getName() + " paramater!", ex);
-            } catch (Exception ex) {
-                throw new GeneratorException("Cannot create new object (" + yajcoType.getName() + ") needed for type " + type.toString(), ex);
-            }
-        }
-    }
-
-    private boolean isSpecifiedClassType(TypeMirror type, Class clazz) {
-        TypeElement referencedTypeElement = (TypeElement) processingEnv.getTypeUtils().asElement(type);
-        return clazz != null && referencedTypeElement != null
-               && referencedTypeElement.getQualifiedName().toString().equals(clazz.getName());
-    }
-
-    /**
-     * Finds YAJCo model type of argument.
-     *
-     * @param type Type of language model element.
-     * @return YAJCo model type of argument.
-     */
-    private Type getSimpleType(TypeMirror type) {
-        if (type.getKind().isPrimitive()) {
-            PrimitiveTypeConst primTypeConst = PrimitiveTypeConst.INTEGER;
-            switch (type.getKind()) {
-                case BOOLEAN:
-                    primTypeConst = yajco.model.type.PrimitiveTypeConst.BOOLEAN;
-                    break;
-                case BYTE:
-                case SHORT:
-                case INT:
-                case LONG:
-                    primTypeConst = yajco.model.type.PrimitiveTypeConst.INTEGER;
-                    break;
-                case FLOAT:
-                case DOUBLE:
-                    primTypeConst = yajco.model.type.PrimitiveTypeConst.REAL;
-                    break;
-            }
-            return new yajco.model.type.PrimitiveType(primTypeConst, type);
-        } else if (type.toString().equals(String.class.getName())) {
-            return new yajco.model.type.PrimitiveType(PrimitiveTypeConst.STRING, type);
-        } else if (type.toString().equals(Boolean.class.getName())) {
-            return new yajco.model.type.PrimitiveType(PrimitiveTypeConst.BOOLEAN, type);
-        } else if (type.toString().equals(Byte.class.getName())
-                   || type.toString().equals(Short.class.getName())
-                   || type.toString().equals(Integer.class.getName())
-                   || type.toString().equals(Long.class.getName())) {
-            return new yajco.model.type.PrimitiveType(PrimitiveTypeConst.INTEGER, type);
-        } else if (type.toString().equals(Float.class.getName()) || type.toString().equals(Double.class.getName())) {
-            return new yajco.model.type.PrimitiveType(PrimitiveTypeConst.REAL, type);
-        } else if (type.getKind() == TypeKind.DECLARED) {
-            TypeElement referencedTypeElement = (TypeElement) processingEnv.getTypeUtils().asElement(type);
-            System.out.println("getSimpleType(): referencedTypeElement: " + referencedTypeElement);
-            if (referencedTypeElement != null && isKnownClass(referencedTypeElement)) {
-                return new yajco.model.type.ReferenceType(processTypeElement(referencedTypeElement), referencedTypeElement);
-            }
-        }
-        throw new GeneratorException("Unsupported simple type " + type + " [" + type.getKind() + "]");
     }
 
 //    private yajco.model.pattern.impl.Range getRange(VariableElement paramElement, TypeMirror type) {
