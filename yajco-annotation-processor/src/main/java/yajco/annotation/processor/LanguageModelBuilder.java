@@ -19,7 +19,10 @@ import yajco.model.utilities.XMLLanguageFormatHelper;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
-import javax.lang.model.type.*;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.MirroredTypeException;
+import javax.lang.model.type.TypeMirror;
 import java.lang.reflect.Field;
 import java.util.*;
 import java.util.Optional;
@@ -28,17 +31,14 @@ public class LanguageModelBuilder {
     private Properties properties;
     private ProcessingEnvironment processingEnv;
     private final Set<? extends Element> rootElements;
-    private Set<String> excludes = new HashSet<>();
+    private final Set<String> excludes;
     private final TypeResolver typeResolver;
+    private ConceptRegistry conceptRegistry;
+
     /**
      * Builded language.
      */
     private Language language;
-
-    /**
-     * Set for concepts imported from previous JARs and needed for full analysis.
-     */
-    private Set<Concept> conceptsToProcess = new HashSet<>();
 
     /**
      * Used for creation of string tokens defined by @StringToken annotation.
@@ -65,6 +65,7 @@ public class LanguageModelBuilder {
 
         // Create language.
         language = new Language(mainElement);
+        conceptRegistry = new ConceptRegistry(language, rootElements, excludes, processingEnv.getTypeUtils());
         // Add main package name == language name.
         String mainElementName = mainElement.getQualifiedName().toString();
         String languageName = mainElementName.substring(0, mainElementName.lastIndexOf('.'));
@@ -90,7 +91,7 @@ public class LanguageModelBuilder {
     }
 
     public Concept resolveReferenceConcept(TypeElement typeElement) {
-        if (typeElement != null && isKnownClass(typeElement)) {
+        if (typeElement != null && conceptRegistry.isKnownClass(typeElement)) {
             return processTypeElement(typeElement);
         } else {
             return null;
@@ -260,8 +261,7 @@ public class LanguageModelBuilder {
 
             addToListAsSet(language.getSkips(), incLang.getSkips(), true);
             addToListAsSet(language.getTokens(), incLang.getTokens(), true);
-            conceptsToProcess.addAll(incLang.getConcepts());
-            language.getConcepts().addAll(incLang.getConcepts());
+            conceptRegistry.registerImportedConcepts(incLang.getConcepts());
         }
     }
 
@@ -360,38 +360,16 @@ public class LanguageModelBuilder {
      * @return Processed language concept.
      */
     private Concept processTypeElement(TypeElement typeElement, Concept superConcept) {
-        String name = typeElement.getQualifiedName().toString();
-        System.out.println("---->>> Name: " + name + " [kind:" + typeElement.getKind() + "]");
-        if (excludes.contains(name)) {
+        Concept existing = conceptRegistry.resolveKnown(typeElement);
+        Concept concept = conceptRegistry.getOrCreate(typeElement, superConcept);
+        if (concept == null) {
             return null;
         }
-
-        if (language.getName() != null && !language.getName().isEmpty() && name.startsWith(language.getName())) {
-            name = name.substring(language.getName().length() + 1); // +1 because of dot after package name '.'
-        }
-
-        Concept concept = language.getConcept(name);
-        if (concept != null) { // Already processed
-            if (superConcept != null) { // Set parent
-                concept.setParent(superConcept);
-            }
-            // TODO:toto som tu doplnil len docasne na vyskusanie pre podporu kompozicie jazykov, treba to cele prehodnotit, lebo sa to nachadza aj na konci metody
-            //processDirectSubclasses(typeElement, concept);
-            if (conceptsToProcess.contains(concept)) {
-                conceptsToProcess.remove(concept);
-            } else {
-                return concept;
-            }
-        } else {
-            // Create concept.
-            concept = new Concept(name, typeElement);
-            concept.setParent(superConcept); //Set parent
-            language.addConcept(concept);
+        if (existing != null && !conceptRegistry.consumeImportedConcept(concept)) {
+            return concept;
         }
 
         processTypeElementAccordingToKind(typeElement, concept);
-
-        // Add concept pattern from annotations (ConceptPattern).
         addPatternsFromAnnotations(typeElement, concept);
         processDirectSubclasses(typeElement, concept);
         return concept;
@@ -1082,80 +1060,6 @@ public class LanguageModelBuilder {
                && element.getAnnotation(FactoryMethod.class) != null && element.getAnnotation(Exclude.class) == null;
     }
 
-    /**
-     * Finds if element is already known class.
-     *
-     * @param element Language model element
-     * @return If element is already known class.
-     */
-    private boolean isKnownClass(Element element) {
-        if (element.getKind().isClass() || element.getKind().isInterface()) {
-            if (language.getConcept(((TypeElement) element).getQualifiedName().toString()) != null) {
-                return true;
-            }
-            for (Element elem : rootElements) {
-                if ((elem.getKind().isClass() || elem.getKind().isInterface()) && elem.equals(element)) {
-                    return true;
-                }
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Returns the set of direct subtypes of the passes element.
-     *
-     * @param typeElement type element
-     * @return set of direct subtypes of the element.
-     */
-    private Set<TypeElement> getDirectSubtypes(TypeElement typeElement) {
-        Set<TypeElement> subclassElements = new HashSet<>();
-        for (Element element : rootElements) {
-            if (isDirectSubtype(typeElement, element)) {
-                subclassElements.add((TypeElement) element);
-            }
-        }
-
-        return subclassElements;
-    }
-
-    /**
-     * Returns true if superElement is the direct super class of the element.
-     * Otherwise returns false.
-     *
-     * @param superElement supertype
-     * @param element element
-     * @return true if superElement is the direct super class of the element.
-     */
-    private boolean isDirectSubtype(TypeElement superElement, Element element) {
-        Exclude excludeAnnotation = element.getAnnotation(Exclude.class);
-        int excludeAnnotationsLength = 0;
-        try {
-            if (excludeAnnotation != null) {
-                excludeAnnotation.value();
-            }
-        } catch (MirroredTypesException e) {
-            excludeAnnotationsLength = e.getTypeMirrors().size();
-        }
-        if (excludeAnnotation == null || excludeAnnotationsLength > 0) {
-            if (element.getKind().isClass() || element.getKind().isInterface()) {
-                TypeMirror superType = superElement.asType();
-                TypeElement typeElement = (TypeElement) element;
-                // Test superclass.
-                if (processingEnv.getTypeUtils().isSameType(typeElement.getSuperclass(), superType)) {
-                    return true;
-                }
-                // Test interfaces.
-                for (TypeMirror type : typeElement.getInterfaces()) {
-                    if (processingEnv.getTypeUtils().isSameType(type, superType)) {
-                        return true;
-                    }
-                }
-            }
-        }
-        return false;
-    }
-
     private void addTokenParts(Notation notation, String[] values) {
         for (String value : values) {
             notation.addPart(new TokenPart(value));
@@ -1247,15 +1151,12 @@ public class LanguageModelBuilder {
      * Processes direct subclasses of language model element.
      *
      * @param typeElement Language model element.
-     * @param concept Language concept representing language model element.
+     * @param concept Language concept representing a language model element.
      */
     private void processDirectSubclasses(TypeElement typeElement, Concept concept) {
-        System.out.print("DirectSubtypes of " + typeElement.getSimpleName() + " are: ");
-        for (TypeElement subtypeElement : getDirectSubtypes(typeElement)) {
-            System.out.print(subtypeElement.getSimpleName() + "  ");
+        for (TypeElement subtypeElement : conceptRegistry.directSubtypesOf(typeElement)) {
             processTypeElement(subtypeElement, concept);
         }
-        System.out.println();
     }
 
     /**
