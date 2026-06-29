@@ -9,7 +9,6 @@ import yajco.annotation.reference.References;
 import yajco.generator.GeneratorException;
 import yajco.model.*;
 import yajco.model.pattern.Pattern;
-import yajco.model.pattern.PatternSupport;
 import yajco.model.pattern.impl.Factory;
 import yajco.model.type.ListType;
 import yajco.model.type.OptionalType;
@@ -23,7 +22,6 @@ import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.MirroredTypeException;
 import javax.lang.model.type.TypeMirror;
-import java.lang.reflect.Field;
 import java.util.*;
 import java.util.Optional;
 
@@ -34,6 +32,7 @@ public class LanguageModelBuilder {
     private final Set<String> excludes;
     private final TypeResolver typeResolver;
     private ConceptRegistry conceptRegistry;
+    private PatternMapper patternMapper;
 
     /**
      * Builded language.
@@ -54,6 +53,7 @@ public class LanguageModelBuilder {
         this.rootElements = rootElements;
         this.excludes = excludes;
         this.typeResolver = new TypeResolver(processingEnv.getTypeUtils(), this::resolveReferenceConcept);
+        this.patternMapper = new PatternMapper(processingEnv);
     }
 
     public Language createLanguageModel(Element parserAnnotationElement, Parser parserAnnotation) {
@@ -370,7 +370,7 @@ public class LanguageModelBuilder {
         }
 
         processTypeElementAccordingToKind(typeElement, concept);
-        addPatternsFromAnnotations(typeElement, concept);
+        patternMapper.addPatternsFromAnnotations(typeElement, concept);
         processDirectSubclasses(typeElement, concept);
         return concept;
     }
@@ -525,7 +525,7 @@ public class LanguageModelBuilder {
 
             //TODO: odstranit pri prenesesni @Operator na triedu
             // Add concept pattern from annotations (Type).
-            addPatternsFromAnnotations(constructor, concept);
+            patternMapper.addPatternsFromAnnotations(constructor, concept);
         }
     }
 
@@ -605,7 +605,7 @@ public class LanguageModelBuilder {
                 PropertyReferencePart propertyRefPart = new PropertyReferencePart(property, paramElement);
 
                 // Add patterns from annotations (e.g., @Before, @After on individual parameters)
-                addPatternsFromAnnotations(paramElement, propertyRefPart);
+                patternMapper.addPatternsFromAnnotations(paramElement, propertyRefPart);
 
                 // Add this property reference to the mixed repetition part
                 mixedRepetitionPart.addPart(propertyRefPart);
@@ -633,12 +633,12 @@ public class LanguageModelBuilder {
                 VariableElement fieldElement = (VariableElement) element;
 
                 // Add only fields with property patterns (PropertyPattern).
-                if (hasPatternAnnotations(fieldElement)) {
+                if (patternMapper.hasPatternAnnotations(fieldElement)) {
                     Property property = new Property(
                         fieldElement.getSimpleName().toString(),
                         typeResolver.getType(fieldElement.asType()),
                         fieldElement);
-                    addPatternsFromAnnotations(fieldElement, property);
+                    patternMapper.addPatternsFromAnnotations(fieldElement, property);
                     concept.addProperty(property);
                 }
             }
@@ -759,7 +759,7 @@ public class LanguageModelBuilder {
             }
 
             // Add notation part pattern from annotations (NotationPartPattern).
-            addPatternsFromAnnotations(paramElement, part);
+            patternMapper.addPatternsFromAnnotations(paramElement, part);
 
             // @After annotation.
             if (paramElement.getAnnotation(After.class) != null) {
@@ -829,7 +829,7 @@ public class LanguageModelBuilder {
         }
 
         // Add notation part pattern from annotations (NotationPartPattern).
-        addPatternsFromAnnotations(paramElement, part);
+        patternMapper.addPatternsFromAnnotations(paramElement, part);
 
         // @After annotation.
         if (paramElement.getAnnotation(After.class) != null) {
@@ -1066,87 +1066,6 @@ public class LanguageModelBuilder {
         }
     }
 
-    //TOTO je klucove pre otvorenost procesora, kopiruje vzor uvedeny v anotacii do modelu
-    //TODO - navrhujem doplnit kontrolu podla typu vzoru
-    /**
-     * Finds if language model elements annotation is annotated with @MapsTo annotations.
-     *
-     * @param element Language model element.
-     * @param <T>
-     * @return If elements annotation contains annotated with @MapsTo annotations.
-     */
-    private <T extends Pattern> boolean hasPatternAnnotations(Element element) {
-        for (AnnotationMirror am : element.getAnnotationMirrors()) {
-            Element annotationElement = processingEnv.getTypeUtils().asElement(am.getAnnotationType());
-            MapsTo mapsTo = annotationElement.getAnnotation(MapsTo.class);
-            if (mapsTo != null) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    /**
-     * Adds patterns from annotations to language.
-     *
-     * @param element Language model element.
-     * @param patternSupport Language concept.
-     * @param <T>
-     */
-    private <T extends Pattern> void addPatternsFromAnnotations(Element element, PatternSupport<T> patternSupport) {
-        for (AnnotationMirror am : element.getAnnotationMirrors()) {
-            Element annotationElement = processingEnv.getTypeUtils().asElement(am.getAnnotationType());
-            MapsTo mapsTo = annotationElement.getAnnotation(MapsTo.class);
-            if (mapsTo != null) {
-                System.out.println("Processing annotation pattern: " + am);
-                String mapsToClass = mapsTo.value();
-                //String mapsToClass = null;
-//                try {
-//                    mapsTo.value();
-//                } catch (MirroredTypeException e) {
-//                    mapsToClass = e.getTypeMirror().toString();
-//                }
-
-                patternSupport.addPattern((T) createObjectFromAnnotation(mapsToClass, am));
-            }
-        }
-    }
-
-    /**
-     * Creates object from annotation.
-     *
-     * @param mapsToClass Class that reflects annotation function.
-     * @param am Annotation
-     * @return Pattern
-     */
-    private Pattern createObjectFromAnnotation(String mapsToClass, AnnotationMirror am) {
-        try {
-            Class<? extends Pattern> clazz = (Class<? extends Pattern>) Class.forName(mapsToClass);
-            Pattern pattern = clazz.newInstance();
-            // Copy from annotation into created object, according to the same names of annotation property and field.
-            Map<? extends ExecutableElement, ? extends AnnotationValue> values = processingEnv.getElementUtils().getElementValuesWithDefaults(am);
-            for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : values.entrySet()) {
-                String name = entry.getKey().getSimpleName().toString();
-                // For conversion see javax.​lang.​model.​element.​AnnotationValue
-                // TODO: Does not convert: arrays, annotation and classes
-                Object value = entry.getValue().getValue();
-                System.out.println("  " + name + " = " + value);
-                if (value instanceof VariableElement) {  // Enum value
-                    VariableElement enumField = (VariableElement) value;
-                    value = Enum.valueOf((Class<? extends Enum>) Class.forName(enumField.asType().toString()), enumField.getSimpleName().toString());
-                }
-                Field field = clazz.getDeclaredField(name);
-                field.setAccessible(true);
-                System.out.println(" >" + name + " = " + field.get(pattern));
-                field.set(pattern, value);
-                System.out.println(" >>" + name + " = " + field.get(pattern));
-            }
-            return pattern;
-        } catch (Exception e) {
-            // TODO: upravit vypis
-            throw new GeneratorException("Cannot instantiate class for @MapsTo, class " + mapsToClass, e);
-        }
-    }
     /**
      * Processes direct subclasses of language model element.
      *
