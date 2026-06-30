@@ -143,8 +143,7 @@ public class AnnotationProcessor extends AbstractProcessor {
      */
     private Properties loadSettingsFromSettingsFile() {
         Properties loadedProperties = new Properties();
-        try {
-            InputStream inputStream = getClass().getResourceAsStream(PROPERTY_SETTINGS_FILE);
+        try (InputStream inputStream = getClass().getResourceAsStream(PROPERTY_SETTINGS_FILE)) {
             loadedProperties.load(inputStream);
             logger.debug("Loaded config from file: {}", loadedProperties);
         } catch (Exception e) {
