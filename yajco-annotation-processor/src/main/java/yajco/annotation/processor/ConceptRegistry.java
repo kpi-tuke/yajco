@@ -137,8 +137,11 @@ public class ConceptRegistry {
         }
 
         for (Element elem : rootElements) {
-            if ((elem.getKind().isClass() || elem.getKind().isInterface()) && elem.equals(element)) {
-                return true;
+            if (elem.getKind().isClass() || elem.getKind().isInterface()) {
+                TypeElement rootTypeElement = (TypeElement) elem;
+                if (typeUtils.isSameType(rootTypeElement.asType(), typeElement.asType())) {
+                    return true;
+                }
             }
         }
         return false;
