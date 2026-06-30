@@ -68,7 +68,8 @@ public class LanguageModelBuilder {
         conceptRegistry = new ConceptRegistry(language, rootElements, excludes, processingEnv.getTypeUtils());
         // Add main package name == language name.
         String mainElementName = mainElement.getQualifiedName().toString();
-        String languageName = mainElementName.substring(0, mainElementName.lastIndexOf('.'));
+        int lastDotIndex = mainElementName.lastIndexOf('.');
+        String languageName = lastDotIndex >= 0 ? mainElementName.substring(0, lastDotIndex) : "";
         System.out.println("---- mainElementName: " + mainElementName + " == languageName: " + languageName);
         if (!languageName.isEmpty()) {
             language.setName(languageName);
