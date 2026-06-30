@@ -73,16 +73,13 @@ public class PatternMapper {
                 // For conversion see javax.​lang.​model.​element.​AnnotationValue
                 // TODO: Does not convert: arrays, annotation and classes
                 Object value = entry.getValue().getValue();
-                System.out.println("  " + name + " = " + value);
                 if (value instanceof VariableElement) {  // Enum value
                     VariableElement enumField = (VariableElement) value;
                     value = Enum.valueOf((Class<? extends Enum>) Class.forName(enumField.asType().toString()), enumField.getSimpleName().toString());
                 }
                 Field field = clazz.getDeclaredField(name);
                 field.setAccessible(true);
-                System.out.println(" >" + name + " = " + field.get(pattern));
                 field.set(pattern, value);
-                System.out.println(" >>" + name + " = " + field.get(pattern));
             }
             return pattern;
         } catch (Exception e) {

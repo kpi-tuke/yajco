@@ -63,10 +63,7 @@ public class TypeResolver {
             throw new GeneratorException("Type " + type + " is not class or interface");
         }
 
-        System.out.println("************************ " + type.getKind());
-
         List<? extends TypeMirror> types = ((DeclaredType) type).getTypeArguments();
-
         if (types.isEmpty()) {
             throw new GeneratorException("Not specified type for " + type + ", please use generics to specify inner type.");
         } else {
@@ -129,7 +126,6 @@ public class TypeResolver {
             return new PrimitiveType(PrimitiveTypeConst.REAL, type);
         } else if (type.getKind() == TypeKind.DECLARED) {
             TypeElement referencedTypeElement = (TypeElement) typeUtils.asElement(type);
-            System.out.println("getSimpleType(): referencedTypeElement: " + referencedTypeElement);
             Concept c = conceptGateway.resolveIfKnown(referencedTypeElement);
             if (c != null) return new ReferenceType(c, referencedTypeElement);
         }
