@@ -19,6 +19,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.MirroredTypesException;
 import javax.lang.model.type.TypeMirror;
+import javax.tools.Diagnostic;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.PrintWriter;
@@ -88,6 +89,9 @@ public class AnnotationProcessor extends AbstractProcessor {
                 Set<? extends Element> elements = roundEnv.getElementsAnnotatedWith(yajco.annotation.config.Parser.class);
                 if (elements.isEmpty()) {
                     return false;
+                }
+                if (elements.size() > 1) {
+                    processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING, "More than one @Parser annotation found. Multiple parsers are not fully supported.");
                 }
 
                 // Process each @Parser annotation
