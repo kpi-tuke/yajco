@@ -449,7 +449,7 @@ Parameters:
   * `TokenDef[] tokens() default {}`
     * contains a list of named lexical symbols (tokens)
   * `Skip[] skips() default {}`
-    * contains a list of ignored (whitespace) characters as regular expressions; if left empty, YAJCo automatically includes `\s` regular expression for whitespaces
+    * contains a list of parser skip rules (whitespace/comments/custom regex); if left empty, YAJCo automatically includes `\s`
   * `Option[] options() default {}`
     * provides a way for configuration of YAJCo and modules
 
@@ -464,11 +464,9 @@ Its parameters allow specifying the root concept of the language, the name of th
                 @TokenDef(name = "ID", regexp = "[a-zA-Z][a-zA-Z0-9]*")
         },
         skips = {
-                @Skip("#.*\\n"), //comment
-                @Skip(" "),
-                @Skip("\\t"),
-                @Skip("\\n"),
-                @Skip("\\r")
+                @Skip(whitespace = true),
+                @Skip(lineComment = "#"),
+                @Skip(blockComment = {"/*", "*/"})
         }) package yajco.example.sml.model;
 
 import yajco.annotation.config.Parser;
@@ -491,8 +489,25 @@ Used as part of configuration in `@Parser` annotation parameter `tokens`.
 
 Parameters:
 
-  * `String value()`
-    * a set of characters or regular expression to be skipped during parsing
+  * `String value() default ""`
+    * raw regexp to skip
+  * `boolean whitespace() default false`
+    * shorthand for `\s`
+  * `String lineComment() default ""`
+    * line-comment prefix (for example `//`, `#`, `--`)
+    * generates skip regexp `escape(prefix) + ".*"`
+    * also populates IR comment metadata
+  * `String[] blockComment() default {}`
+    * block-comment delimiters `{start, end}`
+    * must have exactly two elements
+    * generates skip regexp `escape(start) + "(?:(?!" + escape(end) + ")[\\s\\S])*" + escape(end)`
+    * also populates IR comment metadata
+  * `@Deprecated String start() default ""`, `@Deprecated String end() default ""`
+    * legacy comment syntax, kept for backward compatibility
+    * prefer `blockComment = {start, end}`
+
+Priority inside one `@Skip` entry:
+`value` > `whitespace` > `lineComment` > `blockComment` > deprecated `start/end`.
 
 Used as part of configuration in `@Parser` annotation parameter `skips`.
 
