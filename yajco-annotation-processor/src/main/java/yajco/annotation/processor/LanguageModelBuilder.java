@@ -768,26 +768,61 @@ public class LanguageModelBuilder {
         }
 
         if (flagAnnotation != null) {
-            validateBooleanValueTokens(flagAnnotation.value(), "");
-            part.addPattern(new yajco.model.pattern.impl.BooleanValue(flagAnnotation.value(), "", flagAnnotation));
+            validateBooleanValueTokens(new String[] {flagAnnotation.value()}, new String[0]);
+            part.addPattern(new yajco.model.pattern.impl.BooleanValue(new String[] {flagAnnotation.value()}, new String[0], flagAnnotation));
             return;
         }
 
         if (booleanValuePattern != null) {
-            validateBooleanValueTokens(booleanValuePattern.getTrueToken(), booleanValuePattern.getFalseToken());
+            validateBooleanValueTokens(booleanValuePattern.getTrueTokens(), booleanValuePattern.getFalseTokens());
             return;
         }
 
-        part.addPattern(new yajco.model.pattern.impl.BooleanValue("true", "false", paramElement));
+        part.addPattern(new yajco.model.pattern.impl.BooleanValue(new String[] {"true"}, new String[] {"false"}, paramElement));
     }
 
-    private void validateBooleanValueTokens(String trueToken, String falseToken) {
-        if (trueToken.isEmpty() && falseToken.isEmpty()) {
+    private void validateBooleanValueTokens(String[] trueTokens, String[] falseTokens) {
+        validateBooleanValueTokens(trueTokens);
+        validateBooleanValueTokens(falseTokens);
+
+        if (areAllTokensEmpty(trueTokens) && areAllTokensEmpty(falseTokens)) {
             throw new GeneratorException("Boolean value pattern must define at least one non-empty token");
         }
-        if (!trueToken.isEmpty() && trueToken.equals(falseToken)) {
-            throw new GeneratorException("Boolean value pattern must use different tokens for true and false");
+
+        for (String trueToken : trueTokens) {
+            if (trueToken.isEmpty()) {
+                continue;
+            }
+            for (String falseToken : falseTokens) {
+                if (!falseToken.isEmpty() && trueToken.equals(falseToken)) {
+                    throw new GeneratorException("Boolean value pattern must use different tokens for true and false");
+                }
+            }
         }
+    }
+
+    private void validateBooleanValueTokens(String[] tokens) {
+        boolean hasEmptyToken = false;
+        boolean hasNonEmptyToken = false;
+        for (String token : tokens) {
+            if (token.isEmpty()) {
+                hasEmptyToken = true;
+            } else {
+                hasNonEmptyToken = true;
+            }
+        }
+        if (hasEmptyToken && hasNonEmptyToken) {
+            throw new GeneratorException("Boolean value pattern cannot mix empty and non-empty tokens");
+        }
+    }
+
+    private boolean areAllTokensEmpty(String[] tokens) {
+        for (String token : tokens) {
+            if (!token.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

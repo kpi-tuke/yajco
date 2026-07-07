@@ -763,9 +763,9 @@ public class YajcoModelToBNFGrammarTranslator {
     }
 
     private Symbol translateBooleanPropertyRefNotationPart(PropertyReferencePart part, yajco.model.pattern.impl.BooleanValue booleanPattern) {
-        List<Alternative> alternatives = new ArrayList<>(2);
-        addBooleanAlternative(alternatives, booleanPattern.getTrueToken(), true);
-        addBooleanAlternative(alternatives, booleanPattern.getFalseToken(), false);
+        List<Alternative> alternatives = new ArrayList<>();
+        addBooleanAlternatives(alternatives, booleanPattern.getTrueTokens(), true);
+        addBooleanAlternatives(alternatives, booleanPattern.getFalseTokens(), false);
 
         NonterminalSymbol booleanNonterminal = new NonterminalSymbol(
                 "BooleanValue_" + booleanValueID++,
@@ -774,6 +774,19 @@ public class YajcoModelToBNFGrammarTranslator {
         grammar.addNonterminal(booleanNonterminal);
         grammar.addProduction(new Production(booleanNonterminal, alternatives, toPatternList(part.getPatterns())));
         return booleanNonterminal;
+    }
+
+    private void addBooleanAlternatives(List<Alternative> alternatives, String[] tokens, boolean value) {
+        boolean added = false;
+        for (String token : tokens) {
+            if (!token.isEmpty()) {
+                addBooleanAlternative(alternatives, token, value);
+                added = true;
+            }
+        }
+        if (!added) {
+            addBooleanAlternative(alternatives, "", value);
+        }
     }
 
     private void addBooleanAlternative(List<Alternative> alternatives, String token, boolean value) {

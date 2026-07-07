@@ -7,6 +7,7 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -449,11 +450,12 @@ public class ClassGenerator implements FilesGenerator {
             writer.write(")");
         } else if (pattern instanceof BooleanValue) {
             BooleanValue booleanValue = (BooleanValue) pattern;
-            if (booleanValue.getFalseToken().isEmpty()) {
+            if (booleanValue.getTrueTokens().length == 1
+                    && booleanValue.getFalseTokens().length == 0) {
                 writer.write("@Flag(\"" + booleanValue.getTrueToken() + "\")");
             } else {
-                writer.write("@BooleanValue(trueToken = \"" + booleanValue.getTrueToken()
-                        + "\", falseToken = \"" + booleanValue.getFalseToken() + "\")");
+                writer.write("@BooleanValue(trueToken = " + formatStringArray(booleanValue.getTrueTokens())
+                        + ", falseToken = " + formatStringArray(booleanValue.getFalseTokens()) + ")");
             }
         } else if (pattern instanceof Indent) {
             writer.write("@Indent");
@@ -469,5 +471,15 @@ public class ClassGenerator implements FilesGenerator {
             throw new GeneratorException("Not known pattern type: " + pattern.getClass().getCanonicalName());
         }
         writer.write(" ");
+    }
+
+    private String formatStringArray(String[] values) {
+        if (values.length == 0) {
+            return "{}";
+        }
+        if (values.length == 1) {
+            return "\"" + values[0] + "\"";
+        }
+        return "{\"" + String.join("\", \"", Arrays.asList(values)) + "\"}";
     }
 }

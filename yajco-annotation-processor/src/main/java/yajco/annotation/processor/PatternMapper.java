@@ -6,7 +6,9 @@ import yajco.model.pattern.PatternSupport;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.element.*;
+import java.lang.reflect.Array;
 import java.lang.reflect.Field;
+import java.util.List;
 import java.util.Map;
 
 public class PatternMapper {
@@ -70,21 +72,35 @@ public class PatternMapper {
             Map<? extends ExecutableElement, ? extends AnnotationValue> values = processingEnv.getElementUtils().getElementValuesWithDefaults(am);
             for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : values.entrySet()) {
                 String name = entry.getKey().getSimpleName().toString();
-                // For conversion see javax.​lang.​model.​element.​AnnotationValue
-                // TODO: Does not convert: arrays, annotation and classes
-                Object value = entry.getValue().getValue();
-                if (value instanceof VariableElement) {  // Enum value
-                    VariableElement enumField = (VariableElement) value;
-                    value = Enum.valueOf((Class<? extends Enum>) Class.forName(enumField.asType().toString()), enumField.getSimpleName().toString());
-                }
                 Field field = clazz.getDeclaredField(name);
                 field.setAccessible(true);
-                field.set(pattern, value);
+                field.set(pattern, convertValue(field.getType(), entry.getValue().getValue()));
             }
             return pattern;
         } catch (Exception e) {
             // TODO: upravit vypis
             throw new GeneratorException("Cannot instantiate class for @MapsTo, class " + mapsToClass, e);
         }
+    }
+
+    private Object convertValue(Class<?> targetType, Object value) throws ClassNotFoundException {
+        if (value instanceof VariableElement) {
+            VariableElement enumField = (VariableElement) value;
+            return Enum.valueOf((Class<? extends Enum>) Class.forName(enumField.asType().toString()), enumField.getSimpleName().toString());
+        }
+        if (targetType.isArray() && value instanceof List<?>) {
+            Class<?> componentType = targetType.getComponentType();
+            List<?> values = (List<?>) value;
+            Object array = Array.newInstance(componentType, values.size());
+            for (int i = 0; i < values.size(); i++) {
+                Object item = values.get(i);
+                if (item instanceof AnnotationValue) {
+                    item = ((AnnotationValue) item).getValue();
+                }
+                Array.set(array, i, convertValue(componentType, item));
+            }
+            return array;
+        }
+        return value;
     }
 }

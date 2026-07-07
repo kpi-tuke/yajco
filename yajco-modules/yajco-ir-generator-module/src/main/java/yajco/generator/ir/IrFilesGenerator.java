@@ -438,6 +438,8 @@ public class IrFilesGenerator implements FilesGenerator {
                 item.put("kind", "booleanValue");
                 item.put("trueToken", booleanValue.getTrueToken());
                 item.put("falseToken", booleanValue.getFalseToken());
+                item.put("trueTokens", Arrays.asList(booleanValue.getTrueTokens()));
+                item.put("falseTokens", Arrays.asList(booleanValue.getFalseTokens()));
             } else if (pattern instanceof Range) {
                 Range range = (Range) pattern;
                 item.put("kind", "range");
@@ -564,6 +566,8 @@ public class IrFilesGenerator implements FilesGenerator {
                 Map<String, Object> booleanValueMap = new LinkedHashMap<>();
                 booleanValueMap.put("trueToken", booleanValue.getTrueToken());
                 booleanValueMap.put("falseToken", booleanValue.getFalseToken());
+                booleanValueMap.put("trueTokens", Arrays.asList(booleanValue.getTrueTokens()));
+                booleanValueMap.put("falseTokens", Arrays.asList(booleanValue.getFalseTokens()));
                 info.booleanValue = booleanValueMap;
             }
         }

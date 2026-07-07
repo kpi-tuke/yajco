@@ -14,6 +14,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 @MapsTo("yajco.model.pattern.impl.BooleanValue")
 public @interface BooleanValue {
-    String trueToken() default "true";
-    String falseToken() default "false";
+    String[] trueToken() default {"true"};
+    String[] falseToken() default {"false"};
 }

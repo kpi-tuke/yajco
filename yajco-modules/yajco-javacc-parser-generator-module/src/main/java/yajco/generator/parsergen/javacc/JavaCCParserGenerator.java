@@ -560,25 +560,38 @@ public class JavaCCParserGenerator {
             throw new GeneratorException("Missing boolean value pattern for " + notationPartToName(bindingPart));
         }
 
-        String trueToken = tokenOrEmpty(booleanPattern.getTrueToken());
-        String falseToken = tokenOrEmpty(booleanPattern.getFalseToken());
+        String[] trueTokens = nonEmptyTokens(booleanPattern.getTrueTokens());
+        String[] falseTokens = nonEmptyTokens(booleanPattern.getFalseTokens());
         StringBuilder decl = new StringBuilder();
-        if (trueToken.isEmpty() || falseToken.isEmpty()) {
-            boolean defaultValue = trueToken.isEmpty();
-            String token = trueToken.isEmpty() ? falseToken : trueToken;
-            boolean tokenValue = !trueToken.isEmpty();
+        if (trueTokens.length == 0 || falseTokens.length == 0) {
+            boolean defaultValue = trueTokens.length == 0;
+            String[] tokens = trueTokens.length == 0 ? falseTokens : trueTokens;
+            boolean tokenValue = trueTokens.length != 0;
             decl.append("  boolean ").append(variableName).append(" = ").append(defaultValue).append(";\n");
             return new ZeroOrOne(
                     decl.toString(),
                     null,
-                    new Sequence(null, variableName + " = " + tokenValue + ";" + code, new Terminal(createTerminal(token))));
+                    createBooleanExpansion(variableName, code, tokens, tokenValue));
         }
 
         decl.append("  boolean ").append(variableName).append(" = false;\n");
-        List<Expansion> alternatives = new ArrayList<>(2);
-        addBooleanAlternative(alternatives, variableName, code, trueToken, true);
-        addBooleanAlternative(alternatives, variableName, code, falseToken, false);
+        List<Expansion> alternatives = new ArrayList<>(trueTokens.length + falseTokens.length);
+        addBooleanAlternatives(alternatives, variableName, code, trueTokens, true);
+        addBooleanAlternatives(alternatives, variableName, code, falseTokens, false);
         return new Choice(decl.toString(), null, alternatives.toArray(new Expansion[0]));
+    }
+
+    private Expansion createBooleanExpansion(String variableName, String extraCode, String[] tokens, boolean value) {
+        List<Expansion> alternatives = new ArrayList<>(tokens.length);
+        addBooleanAlternatives(alternatives, variableName, extraCode, tokens, value);
+        return alternatives.size() == 1 ? alternatives.get(0) : new Choice(alternatives.toArray(new Expansion[0]));
+    }
+
+    private void addBooleanAlternatives(List<Expansion> alternatives, String variableName, String extraCode,
+            String[] tokens, boolean value) {
+        for (String token : tokens) {
+            addBooleanAlternative(alternatives, variableName, extraCode, token, value);
+        }
     }
 
     private void addBooleanAlternative(List<Expansion> alternatives, String variableName, String extraCode,
@@ -603,6 +616,17 @@ public class JavaCCParserGenerator {
 
     private String tokenOrEmpty(String token) {
         return token == null ? "" : token;
+    }
+
+    private String[] nonEmptyTokens(String[] tokens) {
+        List<String> result = new ArrayList<>(tokens.length);
+        for (String token : tokens) {
+            String value = tokenOrEmpty(token);
+            if (!value.isEmpty()) {
+                result.add(value);
+            }
+        }
+        return result.toArray(new String[0]);
     }
 
     private Map<Integer, List<Concept>> findOperatorsInSubconcepts(Concept concept, Map<Integer, List<Concept>> priorityMap) {

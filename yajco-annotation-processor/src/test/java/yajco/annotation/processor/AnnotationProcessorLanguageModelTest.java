@@ -500,6 +500,28 @@ public class AnnotationProcessorLanguageModelTest {
     }
 
     @Test
+    public void shouldMapBooleanValueTokenArraysFromAnnotation() throws Exception {
+        Language language = compiler.compileAndReadLanguageModel(
+            "test.Light",
+            "package test;\n"
+                + "import yajco.annotation.*;\n"
+                + "import yajco.annotation.config.*;\n"
+                + "@Parser(options = @Option(name = \"yajco.generateParser\", value = \"false\"))\n"
+                + "public class Light {\n"
+                + "    public Light(@BooleanValue(trueToken = {\"on\", \"true\"}, falseToken = {\"off\", \"false\"}) boolean switchedOn) {\n"
+                + "    }\n"
+                + "}\n");
+
+        Concept concept = requireConcept(language, "Light");
+        Notation notation = requireSingleNotation(concept);
+        PropertyReferencePart switchedOnPart = assertNotationPart(notation, 0, PropertyReferencePart.class);
+        yajco.model.pattern.impl.BooleanValue booleanValue =
+            assertPattern(switchedOnPart, yajco.model.pattern.impl.BooleanValue.class);
+        assertArrayEquals(new String[] {"on", "true"}, booleanValue.getTrueTokens());
+        assertArrayEquals(new String[] {"off", "false"}, booleanValue.getFalseTokens());
+    }
+
+    @Test
     public void shouldMapFlagAnnotationToBooleanValuePattern() throws Exception {
         Language language = compiler.compileAndReadLanguageModel(
             "test.Member",

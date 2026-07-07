@@ -330,32 +330,23 @@ public class ModelTranslator {
             return false;
         }
 
-        String trueToken = booleanPattern.getTrueToken();
-        String falseToken = booleanPattern.getFalseToken();
-        if (falseToken.isEmpty() || trueToken.isEmpty()) {
-            String token = falseToken.isEmpty() ? trueToken : falseToken;
-            String tokenRuleName = convertTokenName(token);
-            RulePart rulePart = new RulePart(tokenRuleName);
-            String label = labelProvider.createLabel(tokenRuleName);
-            rulePart.setLabel(label);
+        String[] trueTokens = nonEmptyTokens(booleanPattern.getTrueTokens());
+        String[] falseTokens = nonEmptyTokens(booleanPattern.getFalseTokens());
+        if (falseTokens.length == 0 || trueTokens.length == 0) {
+            List<String> labels = new ArrayList<>();
+            Part rulePart = createBooleanRulePart(falseTokens.length == 0 ? trueTokens : falseTokens, labelProvider, labels);
             parts.add(new ZeroOrOnePart(rulePart));
-            params.add(falseToken.isEmpty()
-                    ? "($ctx." + label + " != null)"
-                    : "($ctx." + label + " == null)");
+            params.add(falseTokens.length == 0 ? anyLabelNotNull(labels) : allLabelsNull(labels));
             return true;
         }
 
-        String trueRuleName = convertTokenName(trueToken);
-        RulePart trueRulePart = new RulePart(trueRuleName);
-        String trueLabel = labelProvider.createLabel(trueRuleName);
-        trueRulePart.setLabel(trueLabel);
+        List<String> trueLabels = new ArrayList<>();
+        List<Part> alternatives = new ArrayList<>(trueTokens.length + falseTokens.length);
+        alternatives.addAll(createBooleanRuleParts(trueTokens, labelProvider, trueLabels));
+        alternatives.addAll(createBooleanRuleParts(falseTokens, labelProvider, new ArrayList<>()));
 
-        String falseRuleName = convertTokenName(falseToken);
-        RulePart falseRulePart = new RulePart(falseRuleName);
-        falseRulePart.setLabel(labelProvider.createLabel(falseRuleName));
-
-        parts.add(new AlternativePart(Arrays.asList(trueRulePart, falseRulePart)));
-        params.add("($ctx." + trueLabel + " != null)");
+        parts.add(new AlternativePart(alternatives));
+        params.add(anyLabelNotNull(trueLabels));
         return true;
     }
 
@@ -365,14 +356,65 @@ public class ModelTranslator {
             return;
         }
 
-        registerBooleanToken(booleanPattern.getTrueToken());
-        registerBooleanToken(booleanPattern.getFalseToken());
+        for (String token : booleanPattern.getTrueTokens()) {
+            registerBooleanToken(token);
+        }
+        for (String token : booleanPattern.getFalseTokens()) {
+            registerBooleanToken(token);
+        }
     }
 
     private void registerBooleanToken(String token) {
         if (!token.isEmpty()) {
             this.tokens.putIfAbsent(convertTokenName(token), Utilities.encodeStringIntoRegex(token));
         }
+    }
+
+    private Part createBooleanRulePart(String[] tokens, LabelProvider labelProvider, List<String> labels) {
+        List<Part> ruleParts = createBooleanRuleParts(tokens, labelProvider, labels);
+        return ruleParts.size() == 1 ? ruleParts.get(0) : new AlternativePart(ruleParts);
+    }
+
+    private List<Part> createBooleanRuleParts(String[] tokens, LabelProvider labelProvider, List<String> labels) {
+        List<Part> ruleParts = new ArrayList<>(tokens.length);
+        for (String token : tokens) {
+            String tokenRuleName = convertTokenName(token);
+            RulePart rulePart = new RulePart(tokenRuleName);
+            String label = labelProvider.createLabel(tokenRuleName);
+            rulePart.setLabel(label);
+            labels.add(label);
+            ruleParts.add(rulePart);
+        }
+        return ruleParts;
+    }
+
+    private String anyLabelNotNull(List<String> labels) {
+        return joinLabelChecks(labels, " != null", " || ");
+    }
+
+    private String allLabelsNull(List<String> labels) {
+        return joinLabelChecks(labels, " == null", " && ");
+    }
+
+    private String joinLabelChecks(List<String> labels, String suffix, String separator) {
+        StringBuilder builder = new StringBuilder("(");
+        for (int i = 0; i < labels.size(); i++) {
+            if (i > 0) {
+                builder.append(separator);
+            }
+            builder.append("$ctx.").append(labels.get(i)).append(suffix);
+        }
+        return builder.append(')').toString();
+    }
+
+    private String[] nonEmptyTokens(String[] tokens) {
+        List<String> values = new ArrayList<>(tokens.length);
+        for (String token : tokens) {
+            if (!token.isEmpty()) {
+                values.add(token);
+            }
+        }
+        return values.toArray(new String[0]);
     }
 
     private yajco.model.pattern.impl.BooleanValue getBooleanValuePattern(BindingNotationPart part) {
