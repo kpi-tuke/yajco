@@ -279,6 +279,7 @@ public class IrFilesGenerator implements FilesGenerator {
             syntax.put("separator", bindingInfo.separator);
             syntax.put("keyValueSeparator", null);
             syntax.put("references", bindingInfo.references);
+            syntax.put("booleanValue", bindingInfo.booleanValue);
 
             // Identifier properties are symbol definitions regardless of References patterns
             String symbolRole = bindingInfo.symbolRole;
@@ -432,6 +433,11 @@ public class IrFilesGenerator implements FilesGenerator {
                 item.put("kind", "references");
                 item.put("concept", references.getConcept() == null ? null : references.getConcept().getName());
                 item.put("property", references.getProperty() == null ? null : references.getProperty().getName());
+            } else if (pattern instanceof yajco.model.pattern.impl.BooleanValue) {
+                yajco.model.pattern.impl.BooleanValue booleanValue = (yajco.model.pattern.impl.BooleanValue) pattern;
+                item.put("kind", "booleanValue");
+                item.put("trueToken", booleanValue.getTrueToken());
+                item.put("falseToken", booleanValue.getFalseToken());
             } else if (pattern instanceof Range) {
                 Range range = (Range) pattern;
                 item.put("kind", "range");
@@ -553,6 +559,12 @@ public class IrFilesGenerator implements FilesGenerator {
                 referencesMap.put("concept", references.getConcept() == null ? null : references.getConcept().getName());
                 referencesMap.put("property", references.getProperty() == null ? null : references.getProperty().getName());
                 info.references = referencesMap;
+            } else if (pattern instanceof yajco.model.pattern.impl.BooleanValue) {
+                yajco.model.pattern.impl.BooleanValue booleanValue = (yajco.model.pattern.impl.BooleanValue) pattern;
+                Map<String, Object> booleanValueMap = new LinkedHashMap<>();
+                booleanValueMap.put("trueToken", booleanValue.getTrueToken());
+                booleanValueMap.put("falseToken", booleanValue.getFalseToken());
+                info.booleanValue = booleanValueMap;
             }
         }
         return info;
@@ -749,11 +761,13 @@ public class IrFilesGenerator implements FilesGenerator {
         private String separator;
         private boolean hasReferences;
         private Map<String, Object> references;
+        private Map<String, Object> booleanValue;
         private String symbolRole;
 
         private static BindingInfo empty() {
             BindingInfo info = new BindingInfo();
             info.references = null;
+            info.booleanValue = null;
             info.symbolRole = "plain";
             return info;
         }

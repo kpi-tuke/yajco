@@ -457,6 +457,87 @@ public class AnnotationProcessorLanguageModelTest {
     }
 
     @Test
+    public void shouldAddDefaultBooleanValuePatternForBooleanParameter() throws Exception {
+        Language language = compiler.compileAndReadLanguageModel(
+            "test.Switch",
+            "package test;\n"
+                + "import yajco.annotation.config.*;\n"
+                + "@Parser(options = @Option(name = \"yajco.generateParser\", value = \"false\"))\n"
+                + "public class Switch {\n"
+                + "    public Switch(boolean enabled) {\n"
+                + "    }\n"
+                + "}\n");
+
+        Concept concept = requireConcept(language, "Switch");
+        Notation notation = requireSingleNotation(concept);
+        PropertyReferencePart enabledPart = assertNotationPart(notation, 0, PropertyReferencePart.class);
+        yajco.model.pattern.impl.BooleanValue booleanValue =
+            assertPattern(enabledPart, yajco.model.pattern.impl.BooleanValue.class);
+        assertEquals("true", booleanValue.getTrueToken());
+        assertEquals("false", booleanValue.getFalseToken());
+    }
+
+    @Test
+    public void shouldMapCustomBooleanValuePatternFromAnnotation() throws Exception {
+        Language language = compiler.compileAndReadLanguageModel(
+            "test.Light",
+            "package test;\n"
+                + "import yajco.annotation.*;\n"
+                + "import yajco.annotation.config.*;\n"
+                + "@Parser(options = @Option(name = \"yajco.generateParser\", value = \"false\"))\n"
+                + "public class Light {\n"
+                + "    public Light(@BooleanValue(trueToken = \"on\", falseToken = \"off\") boolean switchedOn) {\n"
+                + "    }\n"
+                + "}\n");
+
+        Concept concept = requireConcept(language, "Light");
+        Notation notation = requireSingleNotation(concept);
+        PropertyReferencePart switchedOnPart = assertNotationPart(notation, 0, PropertyReferencePart.class);
+        yajco.model.pattern.impl.BooleanValue booleanValue =
+            assertPattern(switchedOnPart, yajco.model.pattern.impl.BooleanValue.class);
+        assertEquals("on", booleanValue.getTrueToken());
+        assertEquals("off", booleanValue.getFalseToken());
+    }
+
+    @Test
+    public void shouldMapFlagAnnotationToBooleanValuePattern() throws Exception {
+        Language language = compiler.compileAndReadLanguageModel(
+            "test.Member",
+            "package test;\n"
+                + "import yajco.annotation.*;\n"
+                + "import yajco.annotation.config.*;\n"
+                + "@Parser(options = @Option(name = \"yajco.generateParser\", value = \"false\"))\n"
+                + "public class Member {\n"
+                + "    public Member(@Flag(\"final\") boolean isFinal, String name) {\n"
+                + "    }\n"
+                + "}\n");
+
+        Concept concept = requireConcept(language, "Member");
+        Notation notation = requireSingleNotation(concept);
+        PropertyReferencePart isFinalPart = assertNotationPart(notation, 0, PropertyReferencePart.class);
+        yajco.model.pattern.impl.BooleanValue booleanValue =
+            assertPattern(isFinalPart, yajco.model.pattern.impl.BooleanValue.class);
+        assertEquals("final", booleanValue.getTrueToken());
+        assertEquals("", booleanValue.getFalseToken());
+    }
+
+    @Test
+    public void shouldRejectBooleanValuePatternWithBothTokensEmpty() throws Exception {
+        String diagnostics = compiler.compileExpectingFailure(
+            source("test.InvalidFlag",
+                "package test;\n"
+                    + "import yajco.annotation.*;\n"
+                    + "import yajco.annotation.config.*;\n"
+                    + "@Parser(options = @Option(name = \"yajco.generateParser\", value = \"false\"))\n"
+                    + "public class InvalidFlag {\n"
+                    + "    public InvalidFlag(@BooleanValue(trueToken = \"\", falseToken = \"\") boolean flag) {\n"
+                    + "    }\n"
+                    + "}\n"));
+
+        assertTrue(diagnostics.contains("Boolean value pattern must define at least one non-empty token"));
+    }
+
+    @Test
     public void shouldIncludeFactoryMethodAndIgnoreExcludedConstructor() throws Exception {
         Language language = compiler.compileAndReadLanguageModel(
             "test.Statement",

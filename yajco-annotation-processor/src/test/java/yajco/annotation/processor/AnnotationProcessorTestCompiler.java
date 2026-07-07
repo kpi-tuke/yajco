@@ -12,6 +12,7 @@ import java.nio.file.Path;
 import java.util.*;
 
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -30,6 +31,28 @@ final class AnnotationProcessorTestCompiler {
     }
 
     Language compileAndReadLanguageModel(SourceSpec... sources) throws IOException {
+        CompilationResult result = compile(sources);
+        assertTrue(diagnosticsToString(result.diagnostics), result.success);
+
+        Path modelXml = result.classOutput.resolve("META-INF/yajco-lang.xml");
+        assertTrue("Expected generated language model at " + modelXml, Files.exists(modelXml));
+        try (InputStream inputStream = Files.newInputStream(modelXml)) {
+            return XMLLanguageFormatHelper.readFromXML(inputStream);
+        }
+    }
+
+    String compileExpectingFailure(SourceSpec... sources) throws IOException {
+        try {
+            CompilationResult result = compile(sources);
+            String diagnostics = diagnosticsToString(result.diagnostics);
+            assertFalse("Expected compilation failure", result.success);
+            return diagnostics;
+        } catch (RuntimeException e) {
+            return exceptionMessages(e);
+        }
+    }
+
+    private CompilationResult compile(SourceSpec... sources) throws IOException {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         assertNotNull("Tests must run on a JDK, not a JRE", compiler);
 
@@ -54,13 +77,7 @@ final class AnnotationProcessorTestCompiler {
             task.setProcessors(Collections.singletonList(new AnnotationProcessor()));
 
             Boolean success = task.call();
-            assertTrue(diagnosticsToString(diagnostics), success);
-        }
-
-        Path modelXml = classOutput.toPath().resolve("META-INF/yajco-lang.xml");
-        assertTrue("Expected generated language model at " + modelXml, Files.exists(modelXml));
-        try (InputStream inputStream = Files.newInputStream(modelXml)) {
-            return XMLLanguageFormatHelper.readFromXML(inputStream);
+            return new CompilationResult(Boolean.TRUE.equals(success), diagnostics, classOutput.toPath());
         }
     }
 
@@ -111,6 +128,21 @@ final class AnnotationProcessorTestCompiler {
         return result.toString();
     }
 
+    private String exceptionMessages(Throwable throwable) {
+        StringBuilder result = new StringBuilder();
+        Throwable current = throwable;
+        while (current != null) {
+            if (current.getMessage() != null && !current.getMessage().isEmpty()) {
+                if (result.length() > 0) {
+                    result.append(System.lineSeparator());
+                }
+                result.append(current.getMessage());
+            }
+            current = current.getCause();
+        }
+        return result.toString();
+    }
+
     static final class SourceSpec {
         private final String className;
         private final String source;
@@ -137,6 +169,18 @@ final class AnnotationProcessorTestCompiler {
         @Override
         public OutputStream openOutputStream() {
             return new ByteArrayOutputStream();
+        }
+    }
+
+    private static final class CompilationResult {
+        private final boolean success;
+        private final DiagnosticCollector<JavaFileObject> diagnostics;
+        private final Path classOutput;
+
+        private CompilationResult(boolean success, DiagnosticCollector<JavaFileObject> diagnostics, Path classOutput) {
+            this.success = success;
+            this.diagnostics = diagnostics;
+            this.classOutput = classOutput;
         }
     }
 }

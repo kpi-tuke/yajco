@@ -38,8 +38,8 @@ import yajco.model.PropertyReferencePart;
 import yajco.model.SkipDef;
 import yajco.model.TokenDef;
 import yajco.model.TokenPart;
-import yajco.model.pattern.NotationPartPattern;
 import yajco.model.pattern.impl.Associativity;
+import yajco.model.pattern.impl.BooleanValue;
 import yajco.model.pattern.impl.Factory;
 import yajco.model.pattern.impl.Operator;
 import yajco.model.pattern.impl.Parentheses;
@@ -50,6 +50,7 @@ import yajco.model.type.ArrayType;
 import yajco.model.type.ComponentType;
 import yajco.model.type.ListType;
 import yajco.model.type.PrimitiveType;
+import yajco.model.type.PrimitiveTypeConst;
 import yajco.model.type.ReferenceType;
 import yajco.model.type.SetType;
 import yajco.model.type.Type;
@@ -539,6 +540,11 @@ public class JavaCCParserGenerator {
     }
 
     private Expansion processSimpleType(BindingNotationPart bindingPart, String variableName, String bindingPartType, String code, int paramNumber) {
+        if (yajco.model.utilities.Utilities.isBooleanType(bindingPartToType(bindingPart))
+                && getBooleanValuePattern(bindingPart) != null) {
+            return generateBooleanExpansion(bindingPart, variableName, code);
+        }
+
         // TODO: Token pattern
         if (stringConversions.containsConversion(bindingPartType)/* || paramElement.getAnnotation(Token.class) != null*/) {
             //Terminal = conversion exists or param has @Token
@@ -546,6 +552,57 @@ public class JavaCCParserGenerator {
         } else { //Nonterminal
             return generateNonteminal(bindingPart, variableName, bindingPartType, code, paramNumber);
         }
+    }
+
+    private Expansion generateBooleanExpansion(BindingNotationPart bindingPart, String variableName, String code) {
+        BooleanValue booleanPattern = getBooleanValuePattern(bindingPart);
+        if (booleanPattern == null) {
+            throw new GeneratorException("Missing boolean value pattern for " + notationPartToName(bindingPart));
+        }
+
+        String trueToken = tokenOrEmpty(booleanPattern.getTrueToken());
+        String falseToken = tokenOrEmpty(booleanPattern.getFalseToken());
+        StringBuilder decl = new StringBuilder();
+        if (trueToken.isEmpty() || falseToken.isEmpty()) {
+            boolean defaultValue = trueToken.isEmpty();
+            String token = trueToken.isEmpty() ? falseToken : trueToken;
+            boolean tokenValue = !trueToken.isEmpty();
+            decl.append("  boolean ").append(variableName).append(" = ").append(defaultValue).append(";\n");
+            return new ZeroOrOne(
+                    decl.toString(),
+                    null,
+                    new Sequence(null, variableName + " = " + tokenValue + ";" + code, new Terminal(createTerminal(token))));
+        }
+
+        decl.append("  boolean ").append(variableName).append(" = false;\n");
+        List<Expansion> alternatives = new ArrayList<>(2);
+        addBooleanAlternative(alternatives, variableName, code, trueToken, true);
+        addBooleanAlternative(alternatives, variableName, code, falseToken, false);
+        return new Choice(decl.toString(), null, alternatives.toArray(new Expansion[0]));
+    }
+
+    private void addBooleanAlternative(List<Expansion> alternatives, String variableName, String extraCode,
+            String token, boolean value) {
+        String code = variableName + " = " + value + ";" + extraCode;
+        alternatives.add(new Sequence(null, code, new Terminal(createTerminal(token))));
+    }
+
+    private BooleanValue getBooleanValuePattern(BindingNotationPart bindingPart) {
+        BooleanValue booleanPattern = bindingPart.getPattern(BooleanValue.class);
+        if (booleanPattern != null) {
+            return booleanPattern;
+        }
+
+        yajco.model.pattern.impl.Flag flagPattern = bindingPart.getPattern(yajco.model.pattern.impl.Flag.class);
+        if (flagPattern == null) {
+            return null;
+        }
+
+        return new BooleanValue(flagPattern.getToken(), "", flagPattern);
+    }
+
+    private String tokenOrEmpty(String token) {
+        return token == null ? "" : token;
     }
 
     private Map<Integer, List<Concept>> findOperatorsInSubconcepts(Concept concept, Map<Integer, List<Concept>> priorityMap) {

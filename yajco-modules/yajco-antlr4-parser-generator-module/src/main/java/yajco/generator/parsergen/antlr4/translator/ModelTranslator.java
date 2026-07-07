@@ -59,6 +59,8 @@ public class ModelTranslator {
                     if (part instanceof TokenPart) {
                         String tokenName = ((TokenPart) part).getToken();
                         this.tokens.putIfAbsent(convertTokenName(tokenName), Utilities.encodeStringIntoRegex(tokenName));
+                    } else if (part instanceof PropertyReferencePart) {
+                        registerBooleanTokens((PropertyReferencePart) part);
                     } else if (part instanceof OptionalPart) {
                         // Register tokens inside OptionalPart (e.g., for Flag pattern)
                         OptionalPart optionalPart = (OptionalPart) part;
@@ -312,6 +314,81 @@ public class ModelTranslator {
         return primaryAlt;
     }
 
+    private boolean appendBooleanValuePart(BindingNotationPart bindingNotationPart, List<Part> parts,
+            List<String> params, LabelProvider labelProvider) {
+        if (!(bindingNotationPart instanceof PropertyReferencePart)) {
+            return false;
+        }
+
+        Type type = ((PropertyReferencePart) bindingNotationPart).getProperty().getType();
+        if (!yajco.model.utilities.Utilities.isBooleanType(type)) {
+            return false;
+        }
+
+        yajco.model.pattern.impl.BooleanValue booleanPattern = getBooleanValuePattern(bindingNotationPart);
+        if (booleanPattern == null) {
+            return false;
+        }
+
+        String trueToken = booleanPattern.getTrueToken();
+        String falseToken = booleanPattern.getFalseToken();
+        if (falseToken.isEmpty() || trueToken.isEmpty()) {
+            String token = falseToken.isEmpty() ? trueToken : falseToken;
+            String tokenRuleName = convertTokenName(token);
+            RulePart rulePart = new RulePart(tokenRuleName);
+            String label = labelProvider.createLabel(tokenRuleName);
+            rulePart.setLabel(label);
+            parts.add(new ZeroOrOnePart(rulePart));
+            params.add(falseToken.isEmpty()
+                    ? "($ctx." + label + " != null)"
+                    : "($ctx." + label + " == null)");
+            return true;
+        }
+
+        String trueRuleName = convertTokenName(trueToken);
+        RulePart trueRulePart = new RulePart(trueRuleName);
+        String trueLabel = labelProvider.createLabel(trueRuleName);
+        trueRulePart.setLabel(trueLabel);
+
+        String falseRuleName = convertTokenName(falseToken);
+        RulePart falseRulePart = new RulePart(falseRuleName);
+        falseRulePart.setLabel(labelProvider.createLabel(falseRuleName));
+
+        parts.add(new AlternativePart(Arrays.asList(trueRulePart, falseRulePart)));
+        params.add("($ctx." + trueLabel + " != null)");
+        return true;
+    }
+
+    private void registerBooleanTokens(PropertyReferencePart part) {
+        yajco.model.pattern.impl.BooleanValue booleanPattern = getBooleanValuePattern(part);
+        if (booleanPattern == null) {
+            return;
+        }
+
+        registerBooleanToken(booleanPattern.getTrueToken());
+        registerBooleanToken(booleanPattern.getFalseToken());
+    }
+
+    private void registerBooleanToken(String token) {
+        if (!token.isEmpty()) {
+            this.tokens.putIfAbsent(convertTokenName(token), Utilities.encodeStringIntoRegex(token));
+        }
+    }
+
+    private yajco.model.pattern.impl.BooleanValue getBooleanValuePattern(BindingNotationPart part) {
+        yajco.model.pattern.impl.BooleanValue booleanPattern = part.getPattern(BooleanValue.class);
+        if (booleanPattern != null) {
+            return booleanPattern;
+        }
+
+        yajco.model.pattern.impl.Flag flagPattern = part.getPattern(Flag.class);
+        if (flagPattern == null) {
+            return null;
+        }
+
+        return new yajco.model.pattern.impl.BooleanValue(flagPattern.getToken(), "", flagPattern);
+    }
+
     private List<Alternative> processConcreteConcept(Concept concept) {
         List<Alternative> alts = new ArrayList<>();
         Enum enumPattern = (Enum) concept.getPattern(Enum.class);
@@ -361,6 +438,9 @@ public class ModelTranslator {
                     }
                 } else if (part instanceof BindingNotationPart) {
                     BindingNotationPart bindingNotationPart = (BindingNotationPart) part;
+                    if (appendBooleanValuePart(bindingNotationPart, parts, params, labelProvider)) {
+                        continue;
+                    }
                     Type type;
                     if (bindingNotationPart instanceof PropertyReferencePart) {
                         type = ((PropertyReferencePart) bindingNotationPart).getProperty().getType();

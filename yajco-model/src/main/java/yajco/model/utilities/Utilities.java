@@ -161,6 +161,15 @@ public class Utilities {
         return false;
     }
 
+    public static boolean isBooleanType(Type type) {
+        if (type instanceof PrimitiveType) {
+            if (((PrimitiveType) type).getPrimitiveTypeConst() == PrimitiveTypeConst.BOOLEAN) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /**
      * Search for the property with the {@link Identifier} pattern in {@code concept} and recursively in its parents.
      *

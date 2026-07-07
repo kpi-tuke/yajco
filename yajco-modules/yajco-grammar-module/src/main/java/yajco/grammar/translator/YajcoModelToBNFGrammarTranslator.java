@@ -41,6 +41,7 @@ public class YajcoModelToBNFGrammarTranslator {
     private Grammar grammar;
     private int arrayID;
     private int optionalID;
+    private int booleanValueID;
     private String sharedPartName;
     private int unorderedParamID;
     private List<NonterminalSymbol> unorderedParamNonterminals;
@@ -52,6 +53,7 @@ public class YajcoModelToBNFGrammarTranslator {
         grammar = null;
         arrayID = 1;
         optionalID = 1;
+        booleanValueID = 1;
         unorderedParamID = 1;
         unorderedParamNonterminals = new ArrayList<NonterminalSymbol>();
     }
@@ -64,6 +66,7 @@ public class YajcoModelToBNFGrammarTranslator {
         this.language = language;
         arrayID = 1;
         optionalID = 1;
+        booleanValueID = 1;
         unorderedParamID = 1;
         unorderedParamNonterminals = new ArrayList<NonterminalSymbol>();
 
@@ -556,8 +559,7 @@ public class YajcoModelToBNFGrammarTranslator {
 
         // Check if this is a Flag pattern (boolean type)
         yajco.model.pattern.impl.Flag flagPattern = (yajco.model.pattern.impl.Flag) notationPart.getPattern(yajco.model.pattern.impl.Flag.class);
-        if (flagPattern != null && type instanceof PrimitiveType
-                && ((PrimitiveType) type).getPrimitiveTypeConst() == PrimitiveTypeConst.BOOLEAN) {
+        if (flagPattern != null && Utilities.isBooleanType(type)) {
             // Flag pattern: token presence = true, absence = false
             List<Alternative> alternatives = new ArrayList<Alternative>();
 
@@ -729,7 +731,10 @@ public class YajcoModelToBNFGrammarTranslator {
         Type type = part.getProperty().getType();
         Symbol symbol;
 
-        if (type instanceof ReferenceType) {
+        yajco.model.pattern.impl.BooleanValue booleanPattern = getBooleanValuePattern(part);
+        if (Utilities.isBooleanType(type) && booleanPattern != null) {
+            symbol = translateBooleanPropertyRefNotationPart(part, booleanPattern);
+        } else if (type instanceof ReferenceType) {
             ReferenceType refType = (ReferenceType) type;
             symbol = new NonterminalSymbol(refType.getConcept().getConceptName(), refType);
         } else if (type instanceof ComponentType) {
@@ -755,6 +760,43 @@ public class YajcoModelToBNFGrammarTranslator {
                 symbol.addPattern(pattern);
         }
         return symbol;
+    }
+
+    private Symbol translateBooleanPropertyRefNotationPart(PropertyReferencePart part, yajco.model.pattern.impl.BooleanValue booleanPattern) {
+        List<Alternative> alternatives = new ArrayList<>(2);
+        addBooleanAlternative(alternatives, booleanPattern.getTrueToken(), true);
+        addBooleanAlternative(alternatives, booleanPattern.getFalseToken(), false);
+
+        NonterminalSymbol booleanNonterminal = new NonterminalSymbol(
+                "BooleanValue_" + booleanValueID++,
+                part.getProperty().getType(),
+                part.getProperty().getName());
+        grammar.addNonterminal(booleanNonterminal);
+        grammar.addProduction(new Production(booleanNonterminal, alternatives, toPatternList(part.getPatterns())));
+        return booleanNonterminal;
+    }
+
+    private void addBooleanAlternative(List<Alternative> alternatives, String token, boolean value) {
+        Alternative alternative = new Alternative();
+        if (!token.isEmpty()) {
+            alternative.addSymbol(getTerminalFor(token));
+        }
+        alternative.addActions(SemLangFactory.createReturnBooleanLiteralActions(value));
+        alternatives.add(alternative);
+    }
+
+    private yajco.model.pattern.impl.BooleanValue getBooleanValuePattern(BindingNotationPart part) {
+        yajco.model.pattern.impl.BooleanValue booleanPattern = part.getPattern(BooleanValue.class);
+        if (booleanPattern != null) {
+            return booleanPattern;
+        }
+
+        yajco.model.pattern.impl.Flag flagPattern = part.getPattern(yajco.model.pattern.impl.Flag.class);
+        if (flagPattern == null) {
+            return null;
+        }
+
+        return new yajco.model.pattern.impl.BooleanValue(flagPattern.getToken(), "", flagPattern);
     }
 
     private Symbol translateLocalVarPart(LocalVariablePart part) {

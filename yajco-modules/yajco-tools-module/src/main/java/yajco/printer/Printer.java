@@ -288,6 +288,8 @@ public class Printer {
             printQuotedString(writer, (QuotedString) pattern);
         } else if(pattern instanceof yajco.model.pattern.impl.Flag) {
             printFlag(writer, (yajco.model.pattern.impl.Flag) pattern);
+        } else if (pattern instanceof yajco.model.pattern.impl.BooleanValue) {
+            printBooleanValue(writer, (yajco.model.pattern.impl.BooleanValue) pattern);
         }else {
             throw new PrinterException("Not supported pattern " + pattern.getClass());
         }
@@ -398,6 +400,14 @@ public class Printer {
     private void printFlag(PrintWriter writer, yajco.model.pattern.impl.Flag flagPattern) {
         writer.print("Flag(\"");
         writer.print(flagPattern.getToken());
+        writer.print("\")");
+    }
+
+    private void printBooleanValue(PrintWriter writer, yajco.model.pattern.impl.BooleanValue booleanValuePattern) {
+        writer.print("BooleanValue(\"");
+        writer.print(booleanValuePattern.getTrueToken());
+        writer.print("\", \"");
+        writer.print(booleanValuePattern.getFalseToken());
         writer.print("\")");
     }
 

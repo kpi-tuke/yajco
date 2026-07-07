@@ -33,6 +33,7 @@ import yajco.model.pattern.NotationPartPattern;
 import yajco.model.pattern.Pattern;
 import yajco.model.pattern.PropertyPattern;
 import yajco.model.pattern.impl.Associativity;
+import yajco.model.pattern.impl.BooleanValue;
 import yajco.model.pattern.impl.Factory;
 import yajco.model.pattern.impl.Identifier;
 import yajco.model.pattern.impl.Operator;
@@ -446,6 +447,14 @@ public class ClassGenerator implements FilesGenerator {
             Separator separator = (Separator) pattern;
             writer.write("@Separator(\"" + separator.getValue() + "\"");
             writer.write(")");
+        } else if (pattern instanceof BooleanValue) {
+            BooleanValue booleanValue = (BooleanValue) pattern;
+            if (booleanValue.getFalseToken().isEmpty()) {
+                writer.write("@Flag(\"" + booleanValue.getTrueToken() + "\")");
+            } else {
+                writer.write("@BooleanValue(trueToken = \"" + booleanValue.getTrueToken()
+                        + "\", falseToken = \"" + booleanValue.getFalseToken() + "\")");
+            }
         } else if (pattern instanceof Indent) {
             writer.write("@Indent");
         } else if (pattern instanceof NewLine) {
@@ -453,6 +462,9 @@ public class ClassGenerator implements FilesGenerator {
         } else if(pattern instanceof Token) {
             Token token = (Token)pattern;
             writer.write("@Token(\"" + token.getName() + "\")");
+        } else if (pattern instanceof yajco.model.pattern.impl.Flag) {
+            yajco.model.pattern.impl.Flag flag = (yajco.model.pattern.impl.Flag) pattern;
+            writer.write("@Flag(\"" + flag.getToken() + "\")");
         } else {
             throw new GeneratorException("Not known pattern type: " + pattern.getClass().getCanonicalName());
         }
