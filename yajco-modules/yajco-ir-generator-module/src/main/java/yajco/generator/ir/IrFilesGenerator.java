@@ -436,10 +436,7 @@ public class IrFilesGenerator implements FilesGenerator {
             } else if (pattern instanceof yajco.model.pattern.impl.BooleanValue) {
                 yajco.model.pattern.impl.BooleanValue booleanValue = (yajco.model.pattern.impl.BooleanValue) pattern;
                 item.put("kind", "booleanValue");
-                item.put("trueToken", booleanValue.getTrueToken());
-                item.put("falseToken", booleanValue.getFalseToken());
-                item.put("trueTokens", Arrays.asList(booleanValue.getTrueTokens()));
-                item.put("falseTokens", Arrays.asList(booleanValue.getFalseTokens()));
+                item.putAll(toBooleanValueMap(booleanValue));
             } else if (pattern instanceof Range) {
                 Range range = (Range) pattern;
                 item.put("kind", "range");
@@ -458,6 +455,15 @@ public class IrFilesGenerator implements FilesGenerator {
             serialized.add(item);
         }
         return serialized;
+    }
+
+    private Map<String, Object> toBooleanValueMap(yajco.model.pattern.impl.BooleanValue booleanValue) {
+        Map<String, Object> booleanValueMap = new LinkedHashMap<>();
+        booleanValueMap.put("trueToken", booleanValue.getTrueToken());
+        booleanValueMap.put("falseToken", booleanValue.getFalseToken());
+        booleanValueMap.put("trueTokens", Arrays.asList(booleanValue.getTrueTokens()));
+        booleanValueMap.put("falseTokens", Arrays.asList(booleanValue.getFalseTokens()));
+        return booleanValueMap;
     }
 
     // ── Type serialization (normalized primitive names) ─────────────────
@@ -563,12 +569,7 @@ public class IrFilesGenerator implements FilesGenerator {
                 info.references = referencesMap;
             } else if (pattern instanceof yajco.model.pattern.impl.BooleanValue) {
                 yajco.model.pattern.impl.BooleanValue booleanValue = (yajco.model.pattern.impl.BooleanValue) pattern;
-                Map<String, Object> booleanValueMap = new LinkedHashMap<>();
-                booleanValueMap.put("trueToken", booleanValue.getTrueToken());
-                booleanValueMap.put("falseToken", booleanValue.getFalseToken());
-                booleanValueMap.put("trueTokens", Arrays.asList(booleanValue.getTrueTokens()));
-                booleanValueMap.put("falseTokens", Arrays.asList(booleanValue.getFalseTokens()));
-                info.booleanValue = booleanValueMap;
+                info.booleanValue = toBooleanValueMap(booleanValue);
             }
         }
         return info;

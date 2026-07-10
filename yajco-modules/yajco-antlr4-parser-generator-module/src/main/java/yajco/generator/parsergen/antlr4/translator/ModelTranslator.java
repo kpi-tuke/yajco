@@ -325,13 +325,17 @@ public class ModelTranslator {
             return false;
         }
 
-        yajco.model.pattern.impl.BooleanValue booleanPattern = getBooleanValuePattern(bindingNotationPart);
+        yajco.model.pattern.impl.BooleanValue booleanPattern = yajco.model.utilities.Utilities.getBooleanValuePattern(bindingNotationPart);
         if (booleanPattern == null) {
             return false;
         }
 
-        String[] trueTokens = nonEmptyTokens(booleanPattern.getTrueTokens());
-        String[] falseTokens = nonEmptyTokens(booleanPattern.getFalseTokens());
+        String[] trueTokens = yajco.model.utilities.Utilities.nonEmptyTokens(booleanPattern.getTrueTokens());
+        String[] falseTokens = yajco.model.utilities.Utilities.nonEmptyTokens(booleanPattern.getFalseTokens());
+        if (trueTokens.length == 0 && falseTokens.length == 0) {
+            throw new GeneratorException("Boolean value pattern for " + booleanBindingName(bindingNotationPart)
+                    + " must define at least one non-empty token");
+        }
         if (falseTokens.length == 0 || trueTokens.length == 0) {
             List<String> labels = new ArrayList<>();
             Part rulePart = createBooleanRulePart(falseTokens.length == 0 ? trueTokens : falseTokens, labelProvider, labels);
@@ -351,15 +355,15 @@ public class ModelTranslator {
     }
 
     private void registerBooleanTokens(PropertyReferencePart part) {
-        yajco.model.pattern.impl.BooleanValue booleanPattern = getBooleanValuePattern(part);
+        yajco.model.pattern.impl.BooleanValue booleanPattern = yajco.model.utilities.Utilities.getBooleanValuePattern(part);
         if (booleanPattern == null) {
             return;
         }
 
-        for (String token : booleanPattern.getTrueTokens()) {
+        for (String token : yajco.model.utilities.Utilities.nonEmptyTokens(booleanPattern.getTrueTokens())) {
             registerBooleanToken(token);
         }
-        for (String token : booleanPattern.getFalseTokens()) {
+        for (String token : yajco.model.utilities.Utilities.nonEmptyTokens(booleanPattern.getFalseTokens())) {
             registerBooleanToken(token);
         }
     }
@@ -407,28 +411,12 @@ public class ModelTranslator {
         return builder.append(')').toString();
     }
 
-    private String[] nonEmptyTokens(String[] tokens) {
-        List<String> values = new ArrayList<>(tokens.length);
-        for (String token : tokens) {
-            if (!token.isEmpty()) {
-                values.add(token);
-            }
+    private String booleanBindingName(BindingNotationPart bindingNotationPart) {
+        if (bindingNotationPart instanceof PropertyReferencePart
+                && ((PropertyReferencePart) bindingNotationPart).getProperty() != null) {
+            return "property '" + ((PropertyReferencePart) bindingNotationPart).getProperty().getName() + "'";
         }
-        return values.toArray(new String[0]);
-    }
-
-    private yajco.model.pattern.impl.BooleanValue getBooleanValuePattern(BindingNotationPart part) {
-        yajco.model.pattern.impl.BooleanValue booleanPattern = part.getPattern(BooleanValue.class);
-        if (booleanPattern != null) {
-            return booleanPattern;
-        }
-
-        yajco.model.pattern.impl.Flag flagPattern = part.getPattern(Flag.class);
-        if (flagPattern == null) {
-            return null;
-        }
-
-        return new yajco.model.pattern.impl.BooleanValue(flagPattern.getToken(), "", flagPattern);
+        return "boolean binding";
     }
 
     private List<Alternative> processConcreteConcept(Concept concept) {

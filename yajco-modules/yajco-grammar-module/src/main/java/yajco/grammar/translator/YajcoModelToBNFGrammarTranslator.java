@@ -763,29 +763,38 @@ public class YajcoModelToBNFGrammarTranslator {
     }
 
     private Symbol translateBooleanPropertyRefNotationPart(PropertyReferencePart part, yajco.model.pattern.impl.BooleanValue booleanPattern) {
+        String[] trueTokens = Utilities.nonEmptyTokens(booleanPattern.getTrueTokens());
+        String[] falseTokens = Utilities.nonEmptyTokens(booleanPattern.getFalseTokens());
+        if (trueTokens.length == 0 && falseTokens.length == 0) {
+            throw new IllegalArgumentException("Boolean value pattern for property '" + part.getProperty().getName()
+                    + "' must define at least one non-empty token");
+        }
+
         List<Alternative> alternatives = new ArrayList<>();
-        addBooleanAlternatives(alternatives, booleanPattern.getTrueTokens(), true);
-        addBooleanAlternatives(alternatives, booleanPattern.getFalseTokens(), false);
+        addBooleanAlternatives(alternatives, trueTokens, true);
+        addBooleanAlternatives(alternatives, falseTokens, false);
 
         NonterminalSymbol booleanNonterminal = new NonterminalSymbol(
                 "BooleanValue_" + booleanValueID++,
                 part.getProperty().getType(),
                 part.getProperty().getName());
+        Production production = new Production(booleanNonterminal, alternatives, toPatternList(part.getPatterns()));
+        Production existingProduction = grammar.getExistingProductionForOptionalNonterminal(booleanNonterminal.getName(), production);
+        if (existingProduction != null) {
+            grammar.addNonterminal(existingProduction.getLhs());
+            grammar.addProduction(existingProduction);
+            booleanValueID--;
+            return existingProduction.getLhs();
+        }
+
         grammar.addNonterminal(booleanNonterminal);
-        grammar.addProduction(new Production(booleanNonterminal, alternatives, toPatternList(part.getPatterns())));
+        grammar.addProduction(production);
         return booleanNonterminal;
     }
 
     private void addBooleanAlternatives(List<Alternative> alternatives, String[] tokens, boolean value) {
-        boolean added = false;
-        for (String token : tokens) {
-            if (!token.isEmpty()) {
-                addBooleanAlternative(alternatives, token, value);
-                added = true;
-            }
-        }
-        if (!added) {
-            addBooleanAlternative(alternatives, "", value);
+        for (String token : Utilities.nonEmptyTokens(tokens)) {
+            addBooleanAlternative(alternatives, token, value);
         }
     }
 
@@ -799,17 +808,7 @@ public class YajcoModelToBNFGrammarTranslator {
     }
 
     private yajco.model.pattern.impl.BooleanValue getBooleanValuePattern(BindingNotationPart part) {
-        yajco.model.pattern.impl.BooleanValue booleanPattern = part.getPattern(BooleanValue.class);
-        if (booleanPattern != null) {
-            return booleanPattern;
-        }
-
-        yajco.model.pattern.impl.Flag flagPattern = part.getPattern(yajco.model.pattern.impl.Flag.class);
-        if (flagPattern == null) {
-            return null;
-        }
-
-        return new yajco.model.pattern.impl.BooleanValue(flagPattern.getToken(), "", flagPattern);
+        return Utilities.getBooleanValuePattern(part);
     }
 
     private Symbol translateLocalVarPart(LocalVariablePart part) {

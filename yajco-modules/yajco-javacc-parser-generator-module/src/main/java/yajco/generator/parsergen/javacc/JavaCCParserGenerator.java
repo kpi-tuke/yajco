@@ -541,7 +541,7 @@ public class JavaCCParserGenerator {
 
     private Expansion processSimpleType(BindingNotationPart bindingPart, String variableName, String bindingPartType, String code, int paramNumber) {
         if (yajco.model.utilities.Utilities.isBooleanType(bindingPartToType(bindingPart))
-                && getBooleanValuePattern(bindingPart) != null) {
+                && yajco.model.utilities.Utilities.getBooleanValuePattern(bindingPart) != null) {
             return generateBooleanExpansion(bindingPart, variableName, code);
         }
 
@@ -555,13 +555,17 @@ public class JavaCCParserGenerator {
     }
 
     private Expansion generateBooleanExpansion(BindingNotationPart bindingPart, String variableName, String code) {
-        BooleanValue booleanPattern = getBooleanValuePattern(bindingPart);
+        BooleanValue booleanPattern = yajco.model.utilities.Utilities.getBooleanValuePattern(bindingPart);
         if (booleanPattern == null) {
             throw new GeneratorException("Missing boolean value pattern for " + notationPartToName(bindingPart));
         }
 
-        String[] trueTokens = nonEmptyTokens(booleanPattern.getTrueTokens());
-        String[] falseTokens = nonEmptyTokens(booleanPattern.getFalseTokens());
+        String[] trueTokens = yajco.model.utilities.Utilities.nonEmptyTokens(booleanPattern.getTrueTokens());
+        String[] falseTokens = yajco.model.utilities.Utilities.nonEmptyTokens(booleanPattern.getFalseTokens());
+        if (trueTokens.length == 0 && falseTokens.length == 0) {
+            throw new GeneratorException("Boolean value pattern for " + notationPartToName(bindingPart)
+                    + " must define at least one non-empty token");
+        }
         StringBuilder decl = new StringBuilder();
         if (trueTokens.length == 0 || falseTokens.length == 0) {
             boolean defaultValue = trueTokens.length == 0;
@@ -582,6 +586,10 @@ public class JavaCCParserGenerator {
     }
 
     private Expansion createBooleanExpansion(String variableName, String extraCode, String[] tokens, boolean value) {
+        if (tokens.length == 0) {
+            throw new GeneratorException("Boolean value pattern must define at least one non-empty token");
+        }
+
         List<Expansion> alternatives = new ArrayList<>(tokens.length);
         addBooleanAlternatives(alternatives, variableName, extraCode, tokens, value);
         return alternatives.size() == 1 ? alternatives.get(0) : new Choice(alternatives.toArray(new Expansion[0]));
@@ -598,35 +606,6 @@ public class JavaCCParserGenerator {
             String token, boolean value) {
         String code = variableName + " = " + value + ";" + extraCode;
         alternatives.add(new Sequence(null, code, new Terminal(createTerminal(token))));
-    }
-
-    private BooleanValue getBooleanValuePattern(BindingNotationPart bindingPart) {
-        BooleanValue booleanPattern = bindingPart.getPattern(BooleanValue.class);
-        if (booleanPattern != null) {
-            return booleanPattern;
-        }
-
-        yajco.model.pattern.impl.Flag flagPattern = bindingPart.getPattern(yajco.model.pattern.impl.Flag.class);
-        if (flagPattern == null) {
-            return null;
-        }
-
-        return new BooleanValue(flagPattern.getToken(), "", flagPattern);
-    }
-
-    private String tokenOrEmpty(String token) {
-        return token == null ? "" : token;
-    }
-
-    private String[] nonEmptyTokens(String[] tokens) {
-        List<String> result = new ArrayList<>(tokens.length);
-        for (String token : tokens) {
-            String value = tokenOrEmpty(token);
-            if (!value.isEmpty()) {
-                result.add(value);
-            }
-        }
-        return result.toArray(new String[0]);
     }
 
     private Map<Integer, List<Concept>> findOperatorsInSubconcepts(Concept concept, Map<Integer, List<Concept>> priorityMap) {

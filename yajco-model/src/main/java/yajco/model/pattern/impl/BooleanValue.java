@@ -19,6 +19,14 @@ public class BooleanValue extends NotationPartPattern {
         this(new String[] {trueToken}, new String[] {falseToken}, null);
     }
 
+    @Before({"BooleanValue", "("})
+    @After(")")
+    public BooleanValue(
+            @Before("{") @After("}") @yajco.annotation.Separator(",") @yajco.annotation.Token("STRING_VALUE") String[] trueTokens,
+            @Before({",", "{"}) @After("}") @yajco.annotation.Separator(",") @yajco.annotation.Token("STRING_VALUE") String[] falseTokens) {
+        this(trueTokens, falseTokens, null);
+    }
+
     @Exclude
     public BooleanValue() {
         super(null);

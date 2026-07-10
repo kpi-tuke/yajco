@@ -404,11 +404,36 @@ public class Printer {
     }
 
     private void printBooleanValue(PrintWriter writer, yajco.model.pattern.impl.BooleanValue booleanValuePattern) {
-        writer.print("BooleanValue(\"");
-        writer.print(booleanValuePattern.getTrueToken());
-        writer.print("\", \"");
-        writer.print(booleanValuePattern.getFalseToken());
-        writer.print("\")");
+        String[] trueTokens = booleanValuePattern.getTrueTokens();
+        String[] falseTokens = booleanValuePattern.getFalseTokens();
+
+        if (trueTokens.length == 1 && falseTokens.length == 1) {
+            writer.print("BooleanValue(\"");
+            writer.print(escape(trueTokens[0]));
+            writer.print("\", \"");
+            writer.print(escape(falseTokens[0]));
+            writer.print("\")");
+            return;
+        }
+
+        writer.print("BooleanValue(");
+        printBooleanTokenArray(writer, trueTokens);
+        writer.print(", ");
+        printBooleanTokenArray(writer, falseTokens);
+        writer.print(")");
+    }
+
+    private void printBooleanTokenArray(PrintWriter writer, String[] tokens) {
+        writer.print("{");
+        for (int i = 0; i < tokens.length; i++) {
+            if (i > 0) {
+                writer.print(", ");
+            }
+            writer.print("\"");
+            writer.print(escape(tokens[i]));
+            writer.print("\"");
+        }
+        writer.print("}");
     }
 
     private void printTokens(PrintWriter writer, List<TokenDef> tokens) {
