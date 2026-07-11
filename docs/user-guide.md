@@ -406,7 +406,7 @@ Parameter:
   * a string or name of a defined token to be used as a flag
   * the main parameter => does not need to be named in code
 
-Denotes a boolean property, where `true` is represented by the presence of the given token, and `false` is represented by its absence. The `@Flag` annotation can be only used on boolean parameters of constructors and factory methods.
+Denotes a boolean property, where `true` is represented by the presence of the given token, and `false` is represented by its absence. The `@Flag` annotation can only be used on primitive `boolean` parameters of constructors and factory methods.
 
 Suppose one of the states in a state machine definition DSL was defined as the initial one using the `initial` keyword. This could be specified in YAJCo by this constructor:
 
