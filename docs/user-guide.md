@@ -398,6 +398,27 @@ public Transition(
 
 A simple example of identifiers and references is provided in [Nielsen's DESK language](https://github.com/kpi-tuke/yajco-examples#nielsens-desk-language). For more information about this feature, you can check our paper [Declarative specification of references in DSLs][declarative-specification]
 
+#### `@Flag`
+
+Parameter:
+
+* `String value()`
+  * a string or name of a defined token to be used as a flag
+  * the main parameter => does not need to be named in code
+
+Denotes a boolean property, where `true` is represented by the presence of the given token, and `false` is represented by its absence. The `@Flag` annotation can only be used on primitive `boolean` parameters of constructors and factory methods.
+
+Suppose one of the states in a state machine definition DSL was defined as the initial one using the `initial` keyword. This could be specified in YAJCo by this constructor:
+
+```java
+public State(@Flag("initial") boolean initial, @Token("ID") String name) {
+    this.initial = initial;
+    this.name = name;
+}
+```
+
+A real-world example is the `static` keyword in Java. A static field is written as `static int f;`, while an instance field simply as `int f;` instead of `instance int f;`.
+
 #### `@FactoryMethod`
 
 Serves as marking annotation for specifying static methods, which will be included in creation of abstract syntax. Standard behaviour of YAJCo is to take all constructors as representation of concrete syntax for language concept (class). There can sometimes be problems with specification of all wanted concrete syntax notations with constructors, as they do not allow to have same signature even when annotations are different. Therefore it is sometimes required to create factory methods and mark them with our annotation.
