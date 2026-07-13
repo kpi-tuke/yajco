@@ -231,6 +231,9 @@ public class LanguageModelBuilder {
         }
         for (Skip skip : parserAnnotation.skips()) {
             SkipConversionResult conversion = convertSkip(skip, parserAnnotationElement);
+            if (conversion.regexp.isEmpty()) {
+                continue;
+            }
             skips.add(new SkipDef(conversion.regexp, skip));
             if (conversion.lineComment != null) {
                 properties.setProperty("yajco.ir.lineComment", conversion.lineComment);
