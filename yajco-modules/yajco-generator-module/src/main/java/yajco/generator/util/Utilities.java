@@ -1,7 +1,10 @@
 package yajco.generator.util;
 
-import com.google.googlejavaformat.java.Formatter;
-import com.google.googlejavaformat.java.FormatterException;
+import com.github.javaparser.JavaParser;
+import com.github.javaparser.ParseResult;
+import com.github.javaparser.ParserConfiguration;
+import com.github.javaparser.ast.CompilationUnit;
+import com.github.javaparser.printer.DefaultPrettyPrinter;
 import yajco.generator.GeneratorException;
 import yajco.model.*;
 import yajco.model.type.*;
@@ -12,7 +15,7 @@ import java.util.*;
 
 public class Utilities {
 
-    private static Formatter formatter;
+    private static JavaParser parser;
 
     public static String toUpperCaseIdent(String ident) {
         return Character.toUpperCase(ident.charAt(0)) + ident.substring(1);
@@ -81,16 +84,17 @@ public class Utilities {
 
     public static void formatCode(File file) {
         try {
-            Formatter formatter = getFormatter();
             String source = java.nio.file.Files.readString(file.toPath());
-            String formatted = formatter.formatSource(source);
+            ParseResult<CompilationUnit> parseResult = getParser().parse(source);
+            if (!parseResult.isSuccessful() || !parseResult.getResult().isPresent()) {
+                throw new GeneratorException("Error formatting file " + file.getAbsolutePath() + ": cannot parse Java source");
+            }
+            String formatted = new DefaultPrettyPrinter().print(parseResult.getResult().get());
             java.nio.file.Files.writeString(file.toPath(), formatted);
         } catch (FileNotFoundException ex) {
             throw new GeneratorException("File " + file.getAbsolutePath() + " is not available", ex);
         } catch (java.io.IOException ex) {
             throw new GeneratorException("Error reading or writing file " + file.getAbsolutePath(), ex);
-        } catch (FormatterException ex) {
-            throw new GeneratorException("Error formatting file " + file.getAbsolutePath(), ex);
         }
     }
 
@@ -206,11 +210,11 @@ public class Utilities {
         return str.toString();
     }
 
-    private synchronized static Formatter getFormatter() {
-        if (formatter == null) {
-            formatter = new Formatter();
+    private synchronized static JavaParser getParser() {
+        if (parser == null) {
+            parser = new JavaParser(new ParserConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_11));
         }
-        return formatter;
+        return parser;
     }
 
     public static String encodeStringIntoTokenName(String s) {
