@@ -494,15 +494,18 @@ Parameters:
   * `boolean whitespace() default false`
     * shorthand for `\s`
   * `String lineComment() default ""`
+    * :sparkles: new in YAJCo 0.7
     * line-comment prefix (for example `//`, `#`, `--`)
     * generates skip regexp `escape(prefix) + ".*"`
     * also populates IR comment metadata
   * `String[] blockComment() default {}`
+    * :sparkles: new in YAJCo 0.7
     * block-comment delimiters `{start, end}`
     * must have exactly two elements
     * generates skip regexp `escape(start) + "(?:(?!" + escape(end) + ")[\\s\\S])*" + escape(end)`
     * also populates IR comment metadata
-  * `@Deprecated String start() default ""`, `@Deprecated String end() default ""`
+  * `String start() default ""`, `String end() default ""`
+    * :warning: deprecated in YAJCo 0.7
     * legacy comment syntax, kept for backward compatibility
     * prefer `blockComment = {start, end}`
 
