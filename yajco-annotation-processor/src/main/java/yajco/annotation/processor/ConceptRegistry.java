@@ -1,6 +1,6 @@
 package yajco.annotation.processor;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.Nullable;
 import yajco.annotation.Exclude;
 import yajco.model.Concept;
 import yajco.model.Language;

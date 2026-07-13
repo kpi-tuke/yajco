@@ -1,6 +1,6 @@
 package yajco.annotation.processor;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jspecify.annotations.NonNull;
 import yajco.annotation.*;
 import yajco.annotation.config.Option;
 import yajco.annotation.config.Parser;
