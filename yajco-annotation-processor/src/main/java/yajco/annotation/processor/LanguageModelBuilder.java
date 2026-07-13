@@ -188,63 +188,10 @@ public class LanguageModelBuilder {
                 String.join(",", lang.fileExtensions()));
         }
 
-        // Comment syntax — stored as explicit properties for the IR generator
-        if (!lang.lineComment().isEmpty()) {
-            properties.setProperty("yajco.ir.lineComment", lang.lineComment());
-        }
-        if (lang.blockComment().length == 2) {
-            properties.setProperty("yajco.ir.blockComment.start", lang.blockComment()[0]);
-            properties.setProperty("yajco.ir.blockComment.end", lang.blockComment()[1]);
-        }
-
         // IR file name defaults to {languageName}.ir.json if not already set
         if (!properties.containsKey("yajco.ir.file") && !lang.name().isEmpty()) {
             properties.setProperty("yajco.ir.file", lang.name() + ".ir.json");
         }
-    }
-
-    /**
-     * Generates skip rules from {@code @Language} comment syntax and adds them
-     * to the parser's skip list. This allows users to specify comment syntax once
-     * in {@code @Language} without needing a separate {@code @Skip} annotation.
-     *
-     * @param element The element annotated with @Language.
-     * @param existingSkips The skip list from @Parser to check for duplicates.
-     * @return Additional SkipDef entries to add to the language.
-     */
-    private List<SkipDef> buildCommentSkipsFromLanguage(Element element, List<SkipDef> existingSkips) {
-        yajco.annotation.config.Language lang = element.getAnnotation(yajco.annotation.config.Language.class);
-        if (lang == null) {
-            return Collections.emptyList();
-        }
-
-        // Collect existing skip patterns to avoid duplicates
-        Set<String> existingPatterns = new HashSet<>();
-        for (SkipDef skip : existingSkips) {
-            existingPatterns.add(skip.getRegexp());
-        }
-
-        List<SkipDef> commentSkips = new ArrayList<>();
-
-        // Line comment: prefix → prefix + ".*"
-        if (!lang.lineComment().isEmpty()) {
-            String pattern = escapeRegex(lang.lineComment()) + ".*";
-            if (!existingPatterns.contains(pattern)) {
-                commentSkips.add(new SkipDef(pattern));
-            }
-        }
-
-        // Block comment: [start, end] → start + "(?:(?!" + end + ")[\\s\\S])*" + end
-        if (lang.blockComment().length == 2) {
-            String start = escapeRegex(lang.blockComment()[0]);
-            String end = escapeRegex(lang.blockComment()[1]);
-            String pattern = start + "(?:(?!" + end + ")[\\s\\S])*" + end;
-            if (!existingPatterns.contains(pattern)) {
-                commentSkips.add(new SkipDef(pattern));
-            }
-        }
-
-        return commentSkips;
     }
 
     /**
@@ -269,6 +216,9 @@ public class LanguageModelBuilder {
     /**
      * Adds tokens and skips defined in @Parser annotation into language.
      * Also adds comment skip rules from @Language if present.
+     * Extracts comment metadata from {@code @Skip(lineComment=...)} and
+     * {@code @Skip(blockComment=...)} entries in {@code @Parser.skips()} and stores
+     * them as IR properties.
      *
      * @param parserAnnotation @Parser annotation object
      * @param parserAnnotationElement The annotated element (for reading @Language)
@@ -280,8 +230,18 @@ public class LanguageModelBuilder {
             tokens.add(new TokenDef(tokenDef.name(), tokenDef.regexp(), tokenDef));
         }
         for (Skip skip : parserAnnotation.skips()) {
-            String regexp = convertSkipToRegexp(skip);
-            skips.add(new SkipDef(regexp, skip));
+            SkipConversionResult conversion = convertSkip(skip, parserAnnotationElement);
+            if (conversion.regexp.isEmpty()) {
+                continue;
+            }
+            skips.add(new SkipDef(conversion.regexp, skip));
+            if (conversion.lineComment != null) {
+                properties.setProperty("yajco.ir.lineComment", conversion.lineComment);
+            }
+            if (conversion.blockCommentStart != null) {
+                properties.setProperty("yajco.ir.blockComment.start", conversion.blockCommentStart);
+                properties.setProperty("yajco.ir.blockComment.end", conversion.blockCommentEnd);
+            }
         }
 
         // Add default white space for skips if empty.
@@ -289,47 +249,76 @@ public class LanguageModelBuilder {
             skips.add(new SkipDef("\\s"));
         }
 
-        // Add comment skip rules from @Language (avoids duplicate @Skip for comments)
-        List<SkipDef> commentSkips = buildCommentSkipsFromLanguage(parserAnnotationElement, skips);
-        skips.addAll(commentSkips);
-
         addToListAsSet(language.getSkips(), skips, true);
         addToListAsSet(language.getTokens(), tokens, true);
     }
 
+    private static final class SkipConversionResult {
+        private final String regexp;
+        private final String lineComment;
+        private final String blockCommentStart;
+        private final String blockCommentEnd;
+
+        private SkipConversionResult(String regexp, String lineComment, String blockCommentStart, String blockCommentEnd) {
+            this.regexp = regexp;
+            this.lineComment = lineComment;
+            this.blockCommentStart = blockCommentStart;
+            this.blockCommentEnd = blockCommentEnd;
+        }
+    }
+
     /**
-     * Converts @Skip annotation parameters into a regular expression.
-     * Supports syntactic sugar for whitespace and comment patterns.
+     * Converts @Skip annotation parameters into parser skip regexp and optional
+     * IR comment metadata.
      *
      * @param skip @Skip annotation object
-     * @return Regular expression string
+     * @param element The annotated element, used for error reporting
+     * @return Skip conversion output containing regexp and optional comment metadata
      */
-    private String convertSkipToRegexp(Skip skip) {
+    private SkipConversionResult convertSkip(Skip skip, Element element) {
         // If value is explicitly set, use it directly (highest priority)
         if (!skip.value().isEmpty()) {
-            return skip.value();
+            return new SkipConversionResult(skip.value(), null, null, null);
         }
 
         // Handle whitespace flag
         if (skip.whitespace()) {
-            return "\\s";
+            return new SkipConversionResult("\\s", null, null, null);
         }
 
-        // Handle comment patterns with start and optional end
+        // Handle line comment: prefix → "prefix.*"
+        if (!skip.lineComment().isEmpty()) {
+            return new SkipConversionResult(escapeRegex(skip.lineComment()) + ".*", skip.lineComment(), null, null);
+        }
+
+        // Handle block comment: [start, end] → "start(?:(?!end)[\s\S])*end"
+        if (skip.blockComment().length != 0) {
+            if (skip.blockComment().length != 2) {
+                error("@Skip blockComment must have exactly 2 elements: {start, end}, e.g. {\"/*\", \"*/\"}.", element);
+                return new SkipConversionResult("", null, null, null);
+            }
+            String start = escapeRegex(skip.blockComment()[0]);
+            String end = escapeRegex(skip.blockComment()[1]);
+            return new SkipConversionResult(
+                start + "(?:(?!" + end + ")[\\s\\S])*" + end,
+                null,
+                skip.blockComment()[0],
+                skip.blockComment()[1]);
+        }
+
+        // Handle deprecated comment patterns with start and optional end
         if (!skip.start().isEmpty()) {
             String start = escapeRegex(skip.start());
             if (!skip.end().isEmpty()) {
-                // Multi-line comment with explicit end: start...end
                 String end = escapeRegex(skip.end());
-                return start + "(?:(?!" + end + ")[\\s\\S])*" + end;
+                return new SkipConversionResult(start + "(?:(?!" + end + ")[\\s\\S])*" + end, null, skip.start(), skip.end());
             } else {
-                // Single-line comment: start until end of line
-                return start + ".*";
+                return new SkipConversionResult(start + ".*", skip.start(), null, null);
             }
         }
 
         // If nothing is specified, return empty string (should not happen in practice)
-        return "";
+        return new SkipConversionResult("", null, null, null);
     }
 
     /**
@@ -342,6 +331,17 @@ public class LanguageModelBuilder {
         return literal.replaceAll("([\\\\.*+?^${}()|\\[\\]])", "\\\\$1");
     }
 
+
+    /**
+     * Reports a compilation error via the annotation processing {@link javax.annotation.processing.Messager}.
+     * The error is attached to the given element, so IDEs and javac can point to the exact location.
+     *
+     * @param message Error message to display
+     * @param element The annotated element where the error occurred
+     */
+    private void error(String message, Element element) {
+        processingEnv.getMessager().printMessage(javax.tools.Diagnostic.Kind.ERROR, message, element);
+    }
 
     /**
      * Processes language model elements.

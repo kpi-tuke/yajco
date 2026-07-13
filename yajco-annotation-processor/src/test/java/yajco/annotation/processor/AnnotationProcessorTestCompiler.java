@@ -11,6 +11,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
@@ -30,6 +31,23 @@ final class AnnotationProcessorTestCompiler {
     }
 
     Language compileAndReadLanguageModel(SourceSpec... sources) throws IOException {
+        CompilationResult result = compile(sources);
+        assertTrue(result.diagnosticsToString(), result.success);
+
+        Path modelXml = result.classOutput.toPath().resolve("META-INF/yajco-lang.xml");
+        assertTrue("Expected generated language model at " + modelXml, Files.exists(modelXml));
+        try (InputStream inputStream = Files.newInputStream(modelXml)) {
+            return XMLLanguageFormatHelper.readFromXML(inputStream);
+        }
+    }
+
+    List<Diagnostic<? extends JavaFileObject>> compileExpectingErrors(SourceSpec... sources) throws IOException {
+        CompilationResult result = compile(sources);
+        assertFalse("Expected compilation to fail, but it succeeded", result.success);
+        return result.errors();
+    }
+
+    private CompilationResult compile(SourceSpec... sources) throws IOException {
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         assertNotNull("Tests must run on a JDK, not a JRE", compiler);
 
@@ -52,15 +70,40 @@ final class AnnotationProcessorTestCompiler {
                 null,
                 sourceFiles(sources));
             task.setProcessors(Collections.singletonList(new AnnotationProcessor()));
+            return new CompilationResult(task.call(), classOutput, diagnostics.getDiagnostics());
+        }
+    }
 
-            Boolean success = task.call();
-            assertTrue(diagnosticsToString(diagnostics), success);
+    private static final class CompilationResult {
+        final boolean success;
+        final File classOutput;
+        final List<Diagnostic<? extends JavaFileObject>> diagnostics;
+
+        CompilationResult(boolean success, File classOutput, List<Diagnostic<? extends JavaFileObject>> diagnostics) {
+            this.success = success;
+            this.classOutput = classOutput;
+            this.diagnostics = diagnostics;
         }
 
-        Path modelXml = classOutput.toPath().resolve("META-INF/yajco-lang.xml");
-        assertTrue("Expected generated language model at " + modelXml, Files.exists(modelXml));
-        try (InputStream inputStream = Files.newInputStream(modelXml)) {
-            return XMLLanguageFormatHelper.readFromXML(inputStream);
+        List<Diagnostic<? extends JavaFileObject>> errors() {
+            List<Diagnostic<? extends JavaFileObject>> errors = new ArrayList<>();
+            for (Diagnostic<? extends JavaFileObject> d : diagnostics) {
+                if (d.getKind() == Diagnostic.Kind.ERROR) {
+                    errors.add(d);
+                }
+            }
+            return errors;
+        }
+
+        String diagnosticsToString() {
+            StringBuilder result = new StringBuilder();
+            for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics) {
+                result.append(diagnostic.getKind())
+                    .append(": ")
+                    .append(diagnostic.getMessage(Locale.ROOT))
+                    .append(System.lineSeparator());
+            }
+            return result.toString();
         }
     }
 
@@ -96,17 +139,6 @@ final class AnnotationProcessorTestCompiler {
                 result.append(File.pathSeparator);
             }
             result.append(new File(url.getFile()).getAbsolutePath());
-        }
-        return result.toString();
-    }
-
-    private String diagnosticsToString(DiagnosticCollector<JavaFileObject> diagnostics) {
-        StringBuilder result = new StringBuilder();
-        for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
-            result.append(diagnostic.getKind())
-                .append(": ")
-                .append(diagnostic.getMessage(Locale.ROOT))
-                .append(System.lineSeparator());
         }
         return result.toString();
     }
