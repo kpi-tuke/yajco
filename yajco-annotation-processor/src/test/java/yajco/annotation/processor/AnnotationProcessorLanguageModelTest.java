@@ -550,7 +550,7 @@ public class AnnotationProcessorLanguageModelTest {
 
     @Test
     public void shouldRejectBooleanValuePatternWithBothTokensEmpty() throws Exception {
-        String diagnostics = compiler.compileExpectingFailure(
+        AnnotationProcessorTestCompiler.CompilationFailure failure = compiler.compileExpectingFailure(
             source("test.InvalidFlag",
                 "package test;\n"
                     + "import yajco.annotation.*;\n"
@@ -561,7 +561,7 @@ public class AnnotationProcessorLanguageModelTest {
                     + "    }\n"
                     + "}\n"));
 
-        assertTrue(diagnostics.contains("Boolean value pattern must define at least one non-empty token"));
+        assertTrue(failure.diagnosticsText().contains("Boolean value pattern must define at least one non-empty token"));
     }
 
     @Test
@@ -646,8 +646,8 @@ public class AnnotationProcessorLanguageModelTest {
 
     @Test
     public void shouldReportErrorForSkipBlockCommentWithWrongNumberOfElements() throws Exception {
-        List<javax.tools.Diagnostic<? extends javax.tools.JavaFileObject>> errors =
-            compiler.compileExpectingErrors(
+        AnnotationProcessorTestCompiler.CompilationFailure failure =
+            compiler.compileExpectingFailure(
                 source("test.robot.Robot",
                     "package test.robot;\n"
                         + "import yajco.annotation.config.*;\n"
@@ -659,9 +659,6 @@ public class AnnotationProcessorLanguageModelTest {
                         + "    public Robot() {}\n"
                         + "}\n"));
 
-        assertTrue("Expected at least one error", errors.size() >= 1);
-        boolean found = errors.stream().anyMatch(d ->
-            d.getMessage(java.util.Locale.ROOT).contains("blockComment must have exactly 2 elements"));
-        assertTrue("Expected error about blockComment element count, got: " + errors, found);
+        assertTrue(failure.diagnosticsText().contains("blockComment must have exactly 2 elements"));
     }
 }

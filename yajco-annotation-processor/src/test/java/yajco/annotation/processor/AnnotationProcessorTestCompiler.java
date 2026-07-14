@@ -41,19 +41,13 @@ final class AnnotationProcessorTestCompiler {
         }
     }
 
-    List<Diagnostic<? extends JavaFileObject>> compileExpectingErrors(SourceSpec... sources) throws IOException {
-        CompilationResult result = compile(sources);
-        assertFalse("Expected compilation to fail, but it succeeded", result.success);
-        return result.errors();
-    }
-
-    String compileExpectingFailure(SourceSpec... sources) throws IOException {
+    CompilationFailure compileExpectingFailure(SourceSpec... sources) throws IOException {
         try {
             CompilationResult result = compile(sources);
             assertFalse("Expected compilation failure", result.success);
-            return result.diagnosticsToString();
+            return new CompilationFailure(result.errors(), result.diagnosticsToString());
         } catch (RuntimeException e) {
-            return exceptionMessages(e);
+            return new CompilationFailure(Collections.emptyList(), exceptionMessages(e));
         }
     }
 
@@ -172,6 +166,24 @@ final class AnnotationProcessorTestCompiler {
         @Override
         public OutputStream openOutputStream() {
             return new ByteArrayOutputStream();
+        }
+    }
+
+    static final class CompilationFailure {
+        private final List<Diagnostic<? extends JavaFileObject>> errors;
+        private final String diagnosticsText;
+
+        private CompilationFailure(List<Diagnostic<? extends JavaFileObject>> errors, String diagnosticsText) {
+            this.errors = errors;
+            this.diagnosticsText = diagnosticsText;
+        }
+
+        List<Diagnostic<? extends JavaFileObject>> errors() {
+            return errors;
+        }
+
+        String diagnosticsText() {
+            return diagnosticsText;
         }
     }
 

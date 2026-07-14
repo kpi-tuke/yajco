@@ -750,7 +750,8 @@ public class LanguageModelBuilder {
     private void processBooleanValuePattern(Type type, BindingNotationPart part, VariableElement paramElement,
             yajco.annotation.Flag flagAnnotation, yajco.annotation.BooleanValue booleanValueAnnotation) {
         if (flagAnnotation != null && booleanValueAnnotation != null) {
-            throw new GeneratorException("@Flag and @BooleanValue cannot be used together");
+            error("@Flag and @BooleanValue cannot be used together", paramElement);
+            return;
         }
 
         yajco.model.pattern.impl.BooleanValue booleanValuePattern = part.getPattern(yajco.model.pattern.impl.BooleanValue.class);
@@ -760,33 +761,39 @@ public class LanguageModelBuilder {
         }
 
         if (hasBooleanPattern && !Utilities.isBooleanType(type)) {
-            throw new GeneratorException("Boolean value patterns can only be used on boolean parameters");
+            error("Boolean value patterns can only be used on boolean parameters", paramElement);
+            return;
         }
 
         if (hasBooleanPattern && part.getPattern(yajco.model.pattern.impl.Token.class) != null) {
-            throw new GeneratorException("Boolean value patterns cannot be combined with @Token or @StringToken");
+            error("Boolean value patterns cannot be combined with @Token or @StringToken", paramElement);
+            return;
         }
 
         if (flagAnnotation != null) {
-            validateBooleanValueTokens(new String[] {flagAnnotation.value()}, new String[0]);
+            if (!validateBooleanValueTokens(new String[] {flagAnnotation.value()}, new String[0], paramElement)) {
+                return;
+            }
             part.addPattern(new yajco.model.pattern.impl.BooleanValue(new String[] {flagAnnotation.value()}, new String[0], flagAnnotation));
             return;
         }
 
         if (booleanValuePattern != null) {
-            validateBooleanValueTokens(booleanValuePattern.getTrueTokens(), booleanValuePattern.getFalseTokens());
+            validateBooleanValueTokens(booleanValuePattern.getTrueTokens(), booleanValuePattern.getFalseTokens(), paramElement);
             return;
         }
 
         part.addPattern(new yajco.model.pattern.impl.BooleanValue(new String[] {"true"}, new String[] {"false"}, paramElement));
     }
 
-    private void validateBooleanValueTokens(String[] trueTokens, String[] falseTokens) {
-        validateBooleanValueTokens(trueTokens);
-        validateBooleanValueTokens(falseTokens);
+    private boolean validateBooleanValueTokens(String[] trueTokens, String[] falseTokens, Element element) {
+        if (!validateBooleanValueTokens(trueTokens, element) || !validateBooleanValueTokens(falseTokens, element)) {
+            return false;
+        }
 
         if (areAllTokensEmpty(trueTokens) && areAllTokensEmpty(falseTokens)) {
-            throw new GeneratorException("Boolean value pattern must define at least one non-empty token");
+            error("Boolean value pattern must define at least one non-empty token", element);
+            return false;
         }
 
         for (String trueToken : trueTokens) {
@@ -795,13 +802,15 @@ public class LanguageModelBuilder {
             }
             for (String falseToken : falseTokens) {
                 if (!falseToken.isEmpty() && trueToken.equals(falseToken)) {
-                    throw new GeneratorException("Boolean value pattern must use different tokens for true and false");
+                    error("Boolean value pattern must use different tokens for true and false", element);
+                    return false;
                 }
             }
         }
+        return true;
     }
 
-    private void validateBooleanValueTokens(String[] tokens) {
+    private boolean validateBooleanValueTokens(String[] tokens, Element element) {
         boolean hasEmptyToken = false;
         boolean hasNonEmptyToken = false;
         for (String token : tokens) {
@@ -812,8 +821,10 @@ public class LanguageModelBuilder {
             }
         }
         if (hasEmptyToken && hasNonEmptyToken) {
-            throw new GeneratorException("Boolean value pattern cannot mix empty and non-empty tokens");
+            error("Boolean value pattern cannot mix empty and non-empty tokens", element);
+            return false;
         }
+        return true;
     }
 
     private boolean areAllTokensEmpty(String[] tokens) {
