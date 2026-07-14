@@ -1,7 +1,7 @@
 package yajco.annotation.processor;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -85,11 +85,16 @@ public class AnnotationProcessorLanguageModelTest {
                 + "    name = \"robot\",\n"
                 + "    description = \"Robot commands\",\n"
                 + "    version = \"1.0\",\n"
-                + "    fileExtensions = {\".robot\"},\n"
-                + "    lineComment = \"//\",\n"
-                + "    blockComment = {\"/*\", \"*/\"}\n"
+                + "    fileExtensions = {\".robot\"}\n"
                 + ")\n"
-                + "@Parser(options = @Option(name = \"yajco.generateParser\", value = \"false\"))\n"
+                + "@Parser(\n"
+                + "    skips = {\n"
+                + "        @Skip(whitespace=true),\n"
+                + "        @Skip(lineComment=\"//\"),\n"
+                + "        @Skip(blockComment={\"/*\", \"*/\"})\n"
+                + "    },\n"
+                + "    options = @Option(name = \"yajco.generateParser\", value = \"false\")\n"
+                + ")\n"
                 + "public class Robot {\n"
                 + "    public Robot() {\n"
                 + "    }\n"
@@ -637,5 +642,26 @@ public class AnnotationProcessorLanguageModelTest {
     private static void assertReferenceToConcept(Concept concept, Type type) {
         assertEquals(ReferenceType.class, type.getClass());
         assertEquals(concept, ((ReferenceType) type).getConcept());
+    }
+
+    @Test
+    public void shouldReportErrorForSkipBlockCommentWithWrongNumberOfElements() throws Exception {
+        List<javax.tools.Diagnostic<? extends javax.tools.JavaFileObject>> errors =
+            compiler.compileExpectingErrors(
+                source("test.robot.Robot",
+                    "package test.robot;\n"
+                        + "import yajco.annotation.config.*;\n"
+                        + "@Parser(\n"
+                        + "    skips = { @Skip(blockComment={\"/*\"}) },\n"
+                        + "    options = @Option(name = \"yajco.generateParser\", value = \"false\")\n"
+                        + ")\n"
+                        + "public class Robot {\n"
+                        + "    public Robot() {}\n"
+                        + "}\n"));
+
+        assertTrue("Expected at least one error", errors.size() >= 1);
+        boolean found = errors.stream().anyMatch(d ->
+            d.getMessage(java.util.Locale.ROOT).contains("blockComment must have exactly 2 elements"));
+        assertTrue("Expected error about blockComment element count, got: " + errors, found);
     }
 }

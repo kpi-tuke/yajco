@@ -77,10 +77,11 @@
 
     <!-- Dependency versions -->
     <junit.version>4.13.2</junit.version>
+    <jspecify.version>1.0.0</jspecify.version>
     <velocity.version>2.4.1</velocity.version>
     <slf4j.version>2.0.16</slf4j.version>
     <xstream.version>1.4.21</xstream.version>
-    <google-java-format.version>1.21.0</google-java-format.version>
+    <javaparser.version>3.28.2</javaparser.version>
   </properties>
 
   <modules>
@@ -103,9 +104,14 @@
         <scope>test</scope>
       </dependency>
       <dependency>
-        <groupId>com.google.googlejavaformat</groupId>
-        <artifactId>google-java-format</artifactId>
-        <version>${google-java-format.version}</version>
+        <groupId>org.jspecify</groupId>
+        <artifactId>jspecify</artifactId>
+        <version>${jspecify.version}</version>
+      </dependency>
+      <dependency>
+        <groupId>com.github.javaparser</groupId>
+        <artifactId>javaparser-core</artifactId>
+        <version>${javaparser.version}</version>
       </dependency>
       <dependency>
         <groupId>org.apache.velocity</groupId>

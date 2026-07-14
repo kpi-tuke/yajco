@@ -11,8 +11,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
 
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 /**
@@ -41,12 +41,17 @@ final class AnnotationProcessorTestCompiler {
         }
     }
 
+    List<Diagnostic<? extends JavaFileObject>> compileExpectingErrors(SourceSpec... sources) throws IOException {
+        CompilationResult result = compile(sources);
+        assertFalse("Expected compilation to fail, but it succeeded", result.success);
+        return result.errors();
+    }
+
     String compileExpectingFailure(SourceSpec... sources) throws IOException {
         try {
             CompilationResult result = compile(sources);
-            String diagnostics = diagnosticsToString(result.diagnostics);
             assertFalse("Expected compilation failure", result.success);
-            return diagnostics;
+            return result.diagnosticsToString();
         } catch (RuntimeException e) {
             return exceptionMessages(e);
         }
@@ -75,9 +80,7 @@ final class AnnotationProcessorTestCompiler {
                 null,
                 sourceFiles(sources));
             task.setProcessors(Collections.singletonList(new AnnotationProcessor()));
-
-            Boolean success = task.call();
-            return new CompilationResult(Boolean.TRUE.equals(success), diagnostics, classOutput.toPath());
+            return new CompilationResult(Boolean.TRUE.equals(task.call()), classOutput.toPath(), diagnostics);
         }
     }
 
@@ -174,13 +177,34 @@ final class AnnotationProcessorTestCompiler {
 
     private static final class CompilationResult {
         private final boolean success;
-        private final DiagnosticCollector<JavaFileObject> diagnostics;
         private final Path classOutput;
+        private final DiagnosticCollector<JavaFileObject> diagnostics;
 
-        private CompilationResult(boolean success, DiagnosticCollector<JavaFileObject> diagnostics, Path classOutput) {
+        private CompilationResult(boolean success, Path classOutput, DiagnosticCollector<JavaFileObject> diagnostics) {
             this.success = success;
-            this.diagnostics = diagnostics;
             this.classOutput = classOutput;
+            this.diagnostics = diagnostics;
+        }
+
+        private List<Diagnostic<? extends JavaFileObject>> errors() {
+            List<Diagnostic<? extends JavaFileObject>> errors = new ArrayList<>();
+            for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
+                if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
+                    errors.add(diagnostic);
+                }
+            }
+            return errors;
+        }
+
+        private String diagnosticsToString() {
+            StringBuilder result = new StringBuilder();
+            for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
+                result.append(diagnostic.getKind())
+                    .append(": ")
+                    .append(diagnostic.getMessage(Locale.ROOT))
+                    .append(System.lineSeparator());
+            }
+            return result.toString();
         }
     }
 }

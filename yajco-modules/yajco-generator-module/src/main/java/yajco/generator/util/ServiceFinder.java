@@ -13,6 +13,18 @@ import yajco.generator.parsergen.CompilerGenerator;
 
 public class ServiceFinder {
 
+    /**
+     * Discovers and loads all FilesGenerator implementations via ServiceLoader.
+     * Filters generators based on enabled/disabled properties and validates required dependencies.
+     * 
+     * <p>Property format: Use the fully qualified class name as key with "true"/"false" value:
+     * <br>Example: {@code com.example.MyGenerator=false} (case-insensitive)
+     * <br>Default: generators are enabled if property not specified
+     * 
+     * @param properties configuration properties to enable/disable generators
+     * @return Set of all enabled FilesGenerator instances with satisfied dependencies
+     * @throws GeneratorException if a required @DependsOn dependency is missing
+     */
     public static Set<FilesGenerator> findFilesGenerators(Properties properties) {
         Map<String, FilesGenerator> generators = new HashMap<String, FilesGenerator>();
         ServiceLoader<FilesGenerator> compilerServiceLoader = ServiceLoader.load(FilesGenerator.class, ServiceFinder.class.getClassLoader());
@@ -41,6 +53,12 @@ public class ServiceFinder {
         return new HashSet<FilesGenerator>(generators.values());
     }
 
+    /**
+     * Discovers the CompilerGenerator implementation via ServiceLoader.
+     * Returns the first implementation found; logs warning if multiple exist.
+     * 
+     * @return the first CompilerGenerator found, or null if none available
+     */
     public static CompilerGenerator findCompilerGenerator() {
         ServiceLoader<CompilerGenerator> compilerServiceLoader = ServiceLoader.load(CompilerGenerator.class, ServiceFinder.class.getClassLoader());
         CompilerGenerator compilerGenerator = null;
