@@ -59,8 +59,10 @@ public class ModelTranslator {
                     if (part instanceof TokenPart) {
                         String tokenName = ((TokenPart) part).getToken();
                         this.tokens.putIfAbsent(convertTokenName(tokenName), Utilities.encodeStringIntoRegex(tokenName));
+                    } else if (part instanceof PropertyReferencePart) {
+                        registerBooleanTokens((PropertyReferencePart) part);
                     } else if (part instanceof OptionalPart) {
-                        // Register tokens inside OptionalPart (e.g., for Flag pattern)
+                        // Register tokens inside OptionalPart.
                         OptionalPart optionalPart = (OptionalPart) part;
                         for (NotationPart innerPart : optionalPart.getParts()) {
                             if (innerPart instanceof TokenPart) {
@@ -312,6 +314,111 @@ public class ModelTranslator {
         return primaryAlt;
     }
 
+    private boolean appendBooleanValuePart(BindingNotationPart bindingNotationPart, List<Part> parts,
+            List<String> params, LabelProvider labelProvider) {
+        if (!(bindingNotationPart instanceof PropertyReferencePart)) {
+            return false;
+        }
+
+        Type type = ((PropertyReferencePart) bindingNotationPart).getProperty().getType();
+        if (!yajco.model.utilities.Utilities.isBooleanType(type)) {
+            return false;
+        }
+
+        yajco.model.pattern.impl.BooleanValue booleanPattern = yajco.model.utilities.Utilities.getBooleanValuePattern(bindingNotationPart);
+        if (booleanPattern == null) {
+            return false;
+        }
+
+        String[] trueTokens = yajco.model.utilities.Utilities.nonEmptyTokens(booleanPattern.getTrueTokens());
+        String[] falseTokens = yajco.model.utilities.Utilities.nonEmptyTokens(booleanPattern.getFalseTokens());
+        if (trueTokens.length == 0 && falseTokens.length == 0) {
+            throw new GeneratorException("Boolean value pattern for " + booleanBindingName(bindingNotationPart)
+                    + " must define at least one non-empty token");
+        }
+        if (falseTokens.length == 0 || trueTokens.length == 0) {
+            List<String> labels = new ArrayList<>();
+            Part rulePart = createBooleanRulePart(falseTokens.length == 0 ? trueTokens : falseTokens, labelProvider, labels);
+            parts.add(new ZeroOrOnePart(rulePart));
+            params.add(falseTokens.length == 0 ? anyLabelNotNull(labels) : allLabelsNull(labels));
+            return true;
+        }
+
+        List<String> trueLabels = new ArrayList<>();
+        List<Part> alternatives = new ArrayList<>(trueTokens.length + falseTokens.length);
+        alternatives.addAll(createBooleanRuleParts(trueTokens, labelProvider, trueLabels));
+        alternatives.addAll(createBooleanRuleParts(falseTokens, labelProvider, new ArrayList<>()));
+
+        parts.add(new AlternativePart(alternatives));
+        params.add(anyLabelNotNull(trueLabels));
+        return true;
+    }
+
+    private void registerBooleanTokens(PropertyReferencePart part) {
+        yajco.model.pattern.impl.BooleanValue booleanPattern = yajco.model.utilities.Utilities.getBooleanValuePattern(part);
+        if (booleanPattern == null) {
+            return;
+        }
+
+        for (String token : yajco.model.utilities.Utilities.nonEmptyTokens(booleanPattern.getTrueTokens())) {
+            registerBooleanToken(token);
+        }
+        for (String token : yajco.model.utilities.Utilities.nonEmptyTokens(booleanPattern.getFalseTokens())) {
+            registerBooleanToken(token);
+        }
+    }
+
+    private void registerBooleanToken(String token) {
+        if (!token.isEmpty()) {
+            this.tokens.putIfAbsent(convertTokenName(token), Utilities.encodeStringIntoRegex(token));
+        }
+    }
+
+    private Part createBooleanRulePart(String[] tokens, LabelProvider labelProvider, List<String> labels) {
+        List<Part> ruleParts = createBooleanRuleParts(tokens, labelProvider, labels);
+        return ruleParts.size() == 1 ? ruleParts.get(0) : new AlternativePart(ruleParts);
+    }
+
+    private List<Part> createBooleanRuleParts(String[] tokens, LabelProvider labelProvider, List<String> labels) {
+        List<Part> ruleParts = new ArrayList<>(tokens.length);
+        for (String token : tokens) {
+            String tokenRuleName = convertTokenName(token);
+            RulePart rulePart = new RulePart(tokenRuleName);
+            String label = labelProvider.createLabel(tokenRuleName);
+            rulePart.setLabel(label);
+            labels.add(label);
+            ruleParts.add(rulePart);
+        }
+        return ruleParts;
+    }
+
+    private String anyLabelNotNull(List<String> labels) {
+        return joinLabelChecks(labels, " != null", " || ");
+    }
+
+    private String allLabelsNull(List<String> labels) {
+        return joinLabelChecks(labels, " == null", " && ");
+    }
+
+    private String joinLabelChecks(List<String> labels, String suffix, String separator) {
+        StringBuilder builder = new StringBuilder("(");
+        for (int i = 0; i < labels.size(); i++) {
+            if (i > 0) {
+                builder.append(separator);
+            }
+            builder.append("$ctx.").append(labels.get(i)).append(suffix);
+        }
+        return builder.append(')').toString();
+    }
+
+    private String booleanBindingName(BindingNotationPart bindingNotationPart) {
+        if (bindingNotationPart instanceof PropertyReferencePart
+                && ((PropertyReferencePart) bindingNotationPart).getProperty() != null) {
+            return "property '" + ((PropertyReferencePart) bindingNotationPart).getProperty().getName() + "'";
+        }
+        return "boolean binding";
+    }
+
     private List<Alternative> processConcreteConcept(Concept concept) {
         List<Alternative> alts = new ArrayList<>();
         Enum enumPattern = (Enum) concept.getPattern(Enum.class);
@@ -326,41 +433,11 @@ public class ModelTranslator {
                 if (part instanceof TokenPart) {
                     String tokenName = ((TokenPart) part).getToken();
                     parts.add(new RulePart(convertTokenName(tokenName)));
-                } else if (part instanceof OptionalPart) {
-                    OptionalPart optionalPart = (OptionalPart) part;
-                    // Handle Flag pattern: check if this optional part contains a flag
-                    PropertyReferencePart flagPropertyPart = null;
-                    String flagToken = null;
-                    for (NotationPart innerPart : optionalPart.getParts()) {
-                        if (innerPart instanceof TokenPart) {
-                            flagToken = ((TokenPart) innerPart).getToken();
-                        } else if (innerPart instanceof PropertyReferencePart) {
-                            PropertyReferencePart propPart = (PropertyReferencePart) innerPart;
-                            yajco.model.pattern.impl.Flag flagPattern =
-                                (yajco.model.pattern.impl.Flag) propPart.getPattern(yajco.model.pattern.impl.Flag.class);
-                            if (flagPattern != null) {
-                                flagPropertyPart = propPart;
-                            }
-                        }
-                    }
-
-                    if (flagPropertyPart != null && flagToken != null) {
-                        // This is a Flag pattern: token presence = true, absence = false
-                        String tokenRuleName = convertTokenName(flagToken);
-                        RulePart rulePart = new RulePart(tokenRuleName);
-                        String label = labelProvider.createLabel(tokenRuleName);
-                        rulePart.setLabel(label);
-                        // Wrap in ZeroOrOnePart to make it optional in ANTLR grammar
-                        ZeroOrOnePart optionalRulePart = new ZeroOrOnePart(rulePart);
-                        parts.add(optionalRulePart);
-                        // Generate: ($label != null) for boolean parameter
-                        params.add("($ctx." + label + " != null)");
-                    } else {
-                        // Handle regular optional parts (not flags)
-                        throw new GeneratorException("Non-flag optional parts are not yet supported in ANTLR4 generator");
-                    }
                 } else if (part instanceof BindingNotationPart) {
                     BindingNotationPart bindingNotationPart = (BindingNotationPart) part;
+                    if (appendBooleanValuePart(bindingNotationPart, parts, params, labelProvider)) {
+                        continue;
+                    }
                     Type type;
                     if (bindingNotationPart instanceof PropertyReferencePart) {
                         type = ((PropertyReferencePart) bindingNotationPart).getProperty().getType();

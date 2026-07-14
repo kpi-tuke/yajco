@@ -12,8 +12,8 @@ import yajco.model.pattern.Pattern;
 import yajco.model.pattern.impl.Factory;
 import yajco.model.type.ListType;
 import yajco.model.type.OptionalType;
-import yajco.model.type.PrimitiveTypeConst;
 import yajco.model.type.Type;
+import yajco.model.utilities.Utilities;
 import yajco.model.utilities.XMLLanguageFormatHelper;
 
 import javax.annotation.processing.ProcessingEnvironment;
@@ -676,32 +676,9 @@ public class LanguageModelBuilder {
     private void processParameter(Concept concept, Notation notation, VariableElement paramElement) {
         Type type = typeResolver.getType(paramElement.asType());
         yajco.annotation.Flag flagAnnotation = paramElement.getAnnotation(yajco.annotation.Flag.class);
+        yajco.annotation.BooleanValue booleanValueAnnotation = paramElement.getAnnotation(yajco.annotation.BooleanValue.class);
 
-        // Handle @Flag annotation on boolean parameters
-        if (flagAnnotation != null) {
-            if (!(type instanceof yajco.model.type.PrimitiveType
-                  && ((yajco.model.type.PrimitiveType) type).getPrimitiveTypeConst() == PrimitiveTypeConst.BOOLEAN)) {
-                throw new GeneratorException("@Flag annotation can only be used on boolean parameters");
-            }
-
-            String paramName = paramElement.getSimpleName().toString();
-            Property property = concept.getProperty(paramName);
-            if (property == null) {
-                property = new Property(paramName, type, null);
-                concept.addProperty(property);
-            }
-
-            // Create an optional part containing the flag token
-            OptionalPart optionalPart = new OptionalPart(null);
-            optionalPart.addPart(new TokenPart(flagAnnotation.value()));
-
-            // Add property reference with Flag pattern
-            PropertyReferencePart propertyRefPart = new PropertyReferencePart(property, paramElement);
-            propertyRefPart.addPattern(new yajco.model.pattern.impl.Flag(flagAnnotation.value(), flagAnnotation));
-            optionalPart.addPart(propertyRefPart);
-
-            notation.addPart(optionalPart);
-        } else if (type instanceof OptionalType) {
+        if (type instanceof OptionalType) {
             OptionalPart optionalPart = (OptionalPart) processCompoundParameter(concept, paramElement, new OptionalPart(null));
             notation.addPart(optionalPart);
         } else {
@@ -761,12 +738,102 @@ public class LanguageModelBuilder {
 
             // Add notation part pattern from annotations (NotationPartPattern).
             patternMapper.addPatternsFromAnnotations(paramElement, part);
+            processBooleanValuePattern(type, part, paramElement, flagAnnotation, booleanValueAnnotation);
 
             // @After annotation.
             if (paramElement.getAnnotation(After.class) != null) {
                 addTokenParts(notation, paramElement.getAnnotation(After.class).value());
             }
         }
+    }
+
+    private void processBooleanValuePattern(Type type, BindingNotationPart part, VariableElement paramElement,
+            yajco.annotation.Flag flagAnnotation, yajco.annotation.BooleanValue booleanValueAnnotation) {
+        if (flagAnnotation != null && booleanValueAnnotation != null) {
+            error("@Flag and @BooleanValue cannot be used together", paramElement);
+            return;
+        }
+
+        yajco.model.pattern.impl.BooleanValue booleanValuePattern = part.getPattern(yajco.model.pattern.impl.BooleanValue.class);
+        boolean hasBooleanPattern = flagAnnotation != null || booleanValuePattern != null;
+        if (!hasBooleanPattern && !Utilities.isBooleanType(type)) {
+            return;
+        }
+
+        if (hasBooleanPattern && !Utilities.isBooleanType(type)) {
+            error("Boolean value patterns can only be used on boolean parameters", paramElement);
+            return;
+        }
+
+        if (hasBooleanPattern && part.getPattern(yajco.model.pattern.impl.Token.class) != null) {
+            error("Boolean value patterns cannot be combined with @Token or @StringToken", paramElement);
+            return;
+        }
+
+        if (flagAnnotation != null) {
+            if (!validateBooleanValueTokens(new String[] {flagAnnotation.value()}, new String[0], paramElement)) {
+                return;
+            }
+            part.addPattern(new yajco.model.pattern.impl.BooleanValue(new String[] {flagAnnotation.value()}, new String[0], flagAnnotation));
+            return;
+        }
+
+        if (booleanValuePattern != null) {
+            validateBooleanValueTokens(booleanValuePattern.getTrueTokens(), booleanValuePattern.getFalseTokens(), paramElement);
+            return;
+        }
+
+        part.addPattern(new yajco.model.pattern.impl.BooleanValue(new String[] {"true"}, new String[] {"false"}, paramElement));
+    }
+
+    private boolean validateBooleanValueTokens(String[] trueTokens, String[] falseTokens, Element element) {
+        if (!validateBooleanValueTokens(trueTokens, element) || !validateBooleanValueTokens(falseTokens, element)) {
+            return false;
+        }
+
+        if (areAllTokensEmpty(trueTokens) && areAllTokensEmpty(falseTokens)) {
+            error("Boolean value pattern must define at least one non-empty token", element);
+            return false;
+        }
+
+        for (String trueToken : trueTokens) {
+            if (trueToken.isEmpty()) {
+                continue;
+            }
+            for (String falseToken : falseTokens) {
+                if (!falseToken.isEmpty() && trueToken.equals(falseToken)) {
+                    error("Boolean value pattern must use different tokens for true and false", element);
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+    private boolean validateBooleanValueTokens(String[] tokens, Element element) {
+        boolean hasEmptyToken = false;
+        boolean hasNonEmptyToken = false;
+        for (String token : tokens) {
+            if (token.isEmpty()) {
+                hasEmptyToken = true;
+            } else {
+                hasNonEmptyToken = true;
+            }
+        }
+        if (hasEmptyToken && hasNonEmptyToken) {
+            error("Boolean value pattern cannot mix empty and non-empty tokens", element);
+            return false;
+        }
+        return true;
+    }
+
+    private boolean areAllTokensEmpty(String[] tokens) {
+        for (String token : tokens) {
+            if (!token.isEmpty()) {
+                return false;
+            }
+        }
+        return true;
     }
 
     /**

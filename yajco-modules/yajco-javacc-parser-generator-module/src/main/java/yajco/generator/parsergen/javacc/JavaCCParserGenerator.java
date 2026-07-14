@@ -38,8 +38,8 @@ import yajco.model.PropertyReferencePart;
 import yajco.model.SkipDef;
 import yajco.model.TokenDef;
 import yajco.model.TokenPart;
-import yajco.model.pattern.NotationPartPattern;
 import yajco.model.pattern.impl.Associativity;
+import yajco.model.pattern.impl.BooleanValue;
 import yajco.model.pattern.impl.Factory;
 import yajco.model.pattern.impl.Operator;
 import yajco.model.pattern.impl.Parentheses;
@@ -50,6 +50,7 @@ import yajco.model.type.ArrayType;
 import yajco.model.type.ComponentType;
 import yajco.model.type.ListType;
 import yajco.model.type.PrimitiveType;
+import yajco.model.type.PrimitiveTypeConst;
 import yajco.model.type.ReferenceType;
 import yajco.model.type.SetType;
 import yajco.model.type.Type;
@@ -539,6 +540,11 @@ public class JavaCCParserGenerator {
     }
 
     private Expansion processSimpleType(BindingNotationPart bindingPart, String variableName, String bindingPartType, String code, int paramNumber) {
+        if (yajco.model.utilities.Utilities.isBooleanType(bindingPartToType(bindingPart))
+                && yajco.model.utilities.Utilities.getBooleanValuePattern(bindingPart) != null) {
+            return generateBooleanExpansion(bindingPart, variableName, code);
+        }
+
         // TODO: Token pattern
         if (stringConversions.containsConversion(bindingPartType)/* || paramElement.getAnnotation(Token.class) != null*/) {
             //Terminal = conversion exists or param has @Token
@@ -546,6 +552,60 @@ public class JavaCCParserGenerator {
         } else { //Nonterminal
             return generateNonteminal(bindingPart, variableName, bindingPartType, code, paramNumber);
         }
+    }
+
+    private Expansion generateBooleanExpansion(BindingNotationPart bindingPart, String variableName, String code) {
+        BooleanValue booleanPattern = yajco.model.utilities.Utilities.getBooleanValuePattern(bindingPart);
+        if (booleanPattern == null) {
+            throw new GeneratorException("Missing boolean value pattern for " + notationPartToName(bindingPart));
+        }
+
+        String[] trueTokens = yajco.model.utilities.Utilities.nonEmptyTokens(booleanPattern.getTrueTokens());
+        String[] falseTokens = yajco.model.utilities.Utilities.nonEmptyTokens(booleanPattern.getFalseTokens());
+        if (trueTokens.length == 0 && falseTokens.length == 0) {
+            throw new GeneratorException("Boolean value pattern for " + notationPartToName(bindingPart)
+                    + " must define at least one non-empty token");
+        }
+        StringBuilder decl = new StringBuilder();
+        if (trueTokens.length == 0 || falseTokens.length == 0) {
+            boolean defaultValue = trueTokens.length == 0;
+            String[] tokens = trueTokens.length == 0 ? falseTokens : trueTokens;
+            boolean tokenValue = trueTokens.length != 0;
+            decl.append("  boolean ").append(variableName).append(" = ").append(defaultValue).append(";\n");
+            return new ZeroOrOne(
+                    decl.toString(),
+                    null,
+                    createBooleanExpansion(variableName, code, tokens, tokenValue));
+        }
+
+        decl.append("  boolean ").append(variableName).append(" = false;\n");
+        List<Expansion> alternatives = new ArrayList<>(trueTokens.length + falseTokens.length);
+        addBooleanAlternatives(alternatives, variableName, code, trueTokens, true);
+        addBooleanAlternatives(alternatives, variableName, code, falseTokens, false);
+        return new Choice(decl.toString(), null, alternatives.toArray(new Expansion[0]));
+    }
+
+    private Expansion createBooleanExpansion(String variableName, String extraCode, String[] tokens, boolean value) {
+        if (tokens.length == 0) {
+            throw new GeneratorException("Boolean value pattern must define at least one non-empty token");
+        }
+
+        List<Expansion> alternatives = new ArrayList<>(tokens.length);
+        addBooleanAlternatives(alternatives, variableName, extraCode, tokens, value);
+        return alternatives.size() == 1 ? alternatives.get(0) : new Choice(alternatives.toArray(new Expansion[0]));
+    }
+
+    private void addBooleanAlternatives(List<Expansion> alternatives, String variableName, String extraCode,
+            String[] tokens, boolean value) {
+        for (String token : tokens) {
+            addBooleanAlternative(alternatives, variableName, extraCode, token, value);
+        }
+    }
+
+    private void addBooleanAlternative(List<Expansion> alternatives, String variableName, String extraCode,
+            String token, boolean value) {
+        String code = variableName + " = " + value + ";" + extraCode;
+        alternatives.add(new Sequence(null, code, new Terminal(createTerminal(token))));
     }
 
     private Map<Integer, List<Concept>> findOperatorsInSubconcepts(Concept concept, Map<Integer, List<Concept>> priorityMap) {

@@ -7,6 +7,7 @@ import java.io.Writer;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Properties;
@@ -33,6 +34,7 @@ import yajco.model.pattern.NotationPartPattern;
 import yajco.model.pattern.Pattern;
 import yajco.model.pattern.PropertyPattern;
 import yajco.model.pattern.impl.Associativity;
+import yajco.model.pattern.impl.BooleanValue;
 import yajco.model.pattern.impl.Factory;
 import yajco.model.pattern.impl.Identifier;
 import yajco.model.pattern.impl.Operator;
@@ -446,6 +448,15 @@ public class ClassGenerator implements FilesGenerator {
             Separator separator = (Separator) pattern;
             writer.write("@Separator(\"" + separator.getValue() + "\"");
             writer.write(")");
+        } else if (pattern instanceof BooleanValue) {
+            BooleanValue booleanValue = (BooleanValue) pattern;
+            if (booleanValue.getTrueTokens().length == 1
+                    && booleanValue.getFalseTokens().length == 0) {
+                writer.write("@Flag(\"" + booleanValue.getTrueToken() + "\")");
+            } else {
+                writer.write("@BooleanValue(trueToken = " + formatStringArray(booleanValue.getTrueTokens())
+                        + ", falseToken = " + formatStringArray(booleanValue.getFalseTokens()) + ")");
+            }
         } else if (pattern instanceof Indent) {
             writer.write("@Indent");
         } else if (pattern instanceof NewLine) {
@@ -457,5 +468,15 @@ public class ClassGenerator implements FilesGenerator {
             throw new GeneratorException("Not known pattern type: " + pattern.getClass().getCanonicalName());
         }
         writer.write(" ");
+    }
+
+    private String formatStringArray(String[] values) {
+        if (values.length == 0) {
+            return "{}";
+        }
+        if (values.length == 1) {
+            return "\"" + values[0] + "\"";
+        }
+        return "{\"" + String.join("\", \"", Arrays.asList(values)) + "\"}";
     }
 }

@@ -32,19 +32,23 @@ final class AnnotationProcessorTestCompiler {
 
     Language compileAndReadLanguageModel(SourceSpec... sources) throws IOException {
         CompilationResult result = compile(sources);
-        assertTrue(result.diagnosticsToString(), result.success);
+        assertTrue(diagnosticsToString(result.diagnostics), result.success);
 
-        Path modelXml = result.classOutput.toPath().resolve("META-INF/yajco-lang.xml");
+        Path modelXml = result.classOutput.resolve("META-INF/yajco-lang.xml");
         assertTrue("Expected generated language model at " + modelXml, Files.exists(modelXml));
         try (InputStream inputStream = Files.newInputStream(modelXml)) {
             return XMLLanguageFormatHelper.readFromXML(inputStream);
         }
     }
 
-    List<Diagnostic<? extends JavaFileObject>> compileExpectingErrors(SourceSpec... sources) throws IOException {
-        CompilationResult result = compile(sources);
-        assertFalse("Expected compilation to fail, but it succeeded", result.success);
-        return result.errors();
+    CompilationFailure compileExpectingFailure(SourceSpec... sources) throws IOException {
+        try {
+            CompilationResult result = compile(sources);
+            assertFalse("Expected compilation failure", result.success);
+            return new CompilationFailure(result.errors(), result.diagnosticsToString());
+        } catch (RuntimeException e) {
+            return new CompilationFailure(Collections.emptyList(), exceptionMessages(e));
+        }
     }
 
     private CompilationResult compile(SourceSpec... sources) throws IOException {
@@ -70,40 +74,7 @@ final class AnnotationProcessorTestCompiler {
                 null,
                 sourceFiles(sources));
             task.setProcessors(Collections.singletonList(new AnnotationProcessor()));
-            return new CompilationResult(task.call(), classOutput, diagnostics.getDiagnostics());
-        }
-    }
-
-    private static final class CompilationResult {
-        final boolean success;
-        final File classOutput;
-        final List<Diagnostic<? extends JavaFileObject>> diagnostics;
-
-        CompilationResult(boolean success, File classOutput, List<Diagnostic<? extends JavaFileObject>> diagnostics) {
-            this.success = success;
-            this.classOutput = classOutput;
-            this.diagnostics = diagnostics;
-        }
-
-        List<Diagnostic<? extends JavaFileObject>> errors() {
-            List<Diagnostic<? extends JavaFileObject>> errors = new ArrayList<>();
-            for (Diagnostic<? extends JavaFileObject> d : diagnostics) {
-                if (d.getKind() == Diagnostic.Kind.ERROR) {
-                    errors.add(d);
-                }
-            }
-            return errors;
-        }
-
-        String diagnosticsToString() {
-            StringBuilder result = new StringBuilder();
-            for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics) {
-                result.append(diagnostic.getKind())
-                    .append(": ")
-                    .append(diagnostic.getMessage(Locale.ROOT))
-                    .append(System.lineSeparator());
-            }
-            return result.toString();
+            return new CompilationResult(Boolean.TRUE.equals(task.call()), classOutput.toPath(), diagnostics);
         }
     }
 
@@ -143,6 +114,32 @@ final class AnnotationProcessorTestCompiler {
         return result.toString();
     }
 
+    private String diagnosticsToString(DiagnosticCollector<JavaFileObject> diagnostics) {
+        StringBuilder result = new StringBuilder();
+        for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
+            result.append(diagnostic.getKind())
+                .append(": ")
+                .append(diagnostic.getMessage(Locale.ROOT))
+                .append(System.lineSeparator());
+        }
+        return result.toString();
+    }
+
+    private String exceptionMessages(Throwable throwable) {
+        StringBuilder result = new StringBuilder();
+        Throwable current = throwable;
+        while (current != null) {
+            if (current.getMessage() != null && !current.getMessage().isEmpty()) {
+                if (result.length() > 0) {
+                    result.append(System.lineSeparator());
+                }
+                result.append(current.getMessage());
+            }
+            current = current.getCause();
+        }
+        return result.toString();
+    }
+
     static final class SourceSpec {
         private final String className;
         private final String source;
@@ -169,6 +166,57 @@ final class AnnotationProcessorTestCompiler {
         @Override
         public OutputStream openOutputStream() {
             return new ByteArrayOutputStream();
+        }
+    }
+
+    static final class CompilationFailure {
+        private final List<Diagnostic<? extends JavaFileObject>> errors;
+        private final String diagnosticsText;
+
+        private CompilationFailure(List<Diagnostic<? extends JavaFileObject>> errors, String diagnosticsText) {
+            this.errors = errors;
+            this.diagnosticsText = diagnosticsText;
+        }
+
+        List<Diagnostic<? extends JavaFileObject>> errors() {
+            return errors;
+        }
+
+        String diagnosticsText() {
+            return diagnosticsText;
+        }
+    }
+
+    private static final class CompilationResult {
+        private final boolean success;
+        private final Path classOutput;
+        private final DiagnosticCollector<JavaFileObject> diagnostics;
+
+        private CompilationResult(boolean success, Path classOutput, DiagnosticCollector<JavaFileObject> diagnostics) {
+            this.success = success;
+            this.classOutput = classOutput;
+            this.diagnostics = diagnostics;
+        }
+
+        private List<Diagnostic<? extends JavaFileObject>> errors() {
+            List<Diagnostic<? extends JavaFileObject>> errors = new ArrayList<>();
+            for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
+                if (diagnostic.getKind() == Diagnostic.Kind.ERROR) {
+                    errors.add(diagnostic);
+                }
+            }
+            return errors;
+        }
+
+        private String diagnosticsToString() {
+            StringBuilder result = new StringBuilder();
+            for (Diagnostic<? extends JavaFileObject> diagnostic : diagnostics.getDiagnostics()) {
+                result.append(diagnostic.getKind())
+                    .append(": ")
+                    .append(diagnostic.getMessage(Locale.ROOT))
+                    .append(System.lineSeparator());
+            }
+            return result.toString();
         }
     }
 }

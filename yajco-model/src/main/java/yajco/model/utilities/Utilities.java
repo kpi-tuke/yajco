@@ -1,5 +1,6 @@
 package yajco.model.utilities;
 
+import yajco.model.BindingNotationPart;
 import yajco.model.Concept;
 import yajco.model.Language;
 import yajco.model.LocalVariablePart;
@@ -12,6 +13,8 @@ import yajco.model.pattern.NotationPartPattern;
 import yajco.model.pattern.Pattern;
 import yajco.model.pattern.PatternSupport;
 import yajco.model.pattern.PropertyPattern;
+import yajco.model.pattern.impl.BooleanValue;
+import yajco.model.pattern.impl.Flag;
 import yajco.model.pattern.impl.Identifier;
 import yajco.model.pattern.impl.References;
 import yajco.model.type.PrimitiveType;
@@ -159,6 +162,43 @@ public class Utilities {
             }
         }
         return false;
+    }
+
+    public static boolean isBooleanType(Type type) {
+        if (type instanceof PrimitiveType) {
+            if (((PrimitiveType) type).getPrimitiveTypeConst() == PrimitiveTypeConst.BOOLEAN) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static BooleanValue getBooleanValuePattern(BindingNotationPart part) {
+        BooleanValue booleanPattern = part.getPattern(BooleanValue.class);
+        if (booleanPattern != null) {
+            return booleanPattern;
+        }
+
+        Flag flagPattern = part.getPattern(Flag.class);
+        if (flagPattern == null) {
+            return null;
+        }
+
+        return new BooleanValue(flagPattern.getToken(), "", flagPattern);
+    }
+
+    public static String[] nonEmptyTokens(String[] tokens) {
+        if (tokens == null || tokens.length == 0) {
+            return new String[0];
+        }
+
+        List<String> values = new ArrayList<String>(tokens.length);
+        for (String token : tokens) {
+            if (token != null && !token.isEmpty()) {
+                values.add(token);
+            }
+        }
+        return values.toArray(new String[0]);
     }
 
     /**
