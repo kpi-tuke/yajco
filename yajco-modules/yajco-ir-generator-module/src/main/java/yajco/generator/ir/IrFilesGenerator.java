@@ -279,7 +279,6 @@ public class IrFilesGenerator implements FilesGenerator {
             syntax.put("separator", bindingInfo.separator);
             syntax.put("keyValueSeparator", null);
             syntax.put("references", bindingInfo.references);
-            syntax.put("booleanValue", bindingInfo.booleanValue);
 
             // Identifier properties are symbol definitions regardless of References patterns
             String symbolRole = bindingInfo.symbolRole;
@@ -433,10 +432,6 @@ public class IrFilesGenerator implements FilesGenerator {
                 item.put("kind", "references");
                 item.put("concept", references.getConcept() == null ? null : references.getConcept().getName());
                 item.put("property", references.getProperty() == null ? null : references.getProperty().getName());
-            } else if (pattern instanceof yajco.model.pattern.impl.BooleanValue) {
-                yajco.model.pattern.impl.BooleanValue booleanValue = (yajco.model.pattern.impl.BooleanValue) pattern;
-                item.put("kind", "booleanValue");
-                item.putAll(toBooleanValueMap(booleanValue));
             } else if (pattern instanceof Range) {
                 Range range = (Range) pattern;
                 item.put("kind", "range");
@@ -455,15 +450,6 @@ public class IrFilesGenerator implements FilesGenerator {
             serialized.add(item);
         }
         return serialized;
-    }
-
-    private Map<String, Object> toBooleanValueMap(yajco.model.pattern.impl.BooleanValue booleanValue) {
-        Map<String, Object> booleanValueMap = new LinkedHashMap<>();
-        booleanValueMap.put("trueToken", booleanValue.getTrueToken());
-        booleanValueMap.put("falseToken", booleanValue.getFalseToken());
-        booleanValueMap.put("trueTokens", Arrays.asList(booleanValue.getTrueTokens()));
-        booleanValueMap.put("falseTokens", Arrays.asList(booleanValue.getFalseTokens()));
-        return booleanValueMap;
     }
 
     // ── Type serialization (normalized primitive names) ─────────────────
@@ -567,9 +553,6 @@ public class IrFilesGenerator implements FilesGenerator {
                 referencesMap.put("concept", references.getConcept() == null ? null : references.getConcept().getName());
                 referencesMap.put("property", references.getProperty() == null ? null : references.getProperty().getName());
                 info.references = referencesMap;
-            } else if (pattern instanceof yajco.model.pattern.impl.BooleanValue) {
-                yajco.model.pattern.impl.BooleanValue booleanValue = (yajco.model.pattern.impl.BooleanValue) pattern;
-                info.booleanValue = toBooleanValueMap(booleanValue);
             }
         }
         return info;
