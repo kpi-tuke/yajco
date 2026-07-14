@@ -749,13 +749,11 @@ public class IrFilesGenerator implements FilesGenerator {
         private String separator;
         private boolean hasReferences;
         private Map<String, Object> references;
-        private Map<String, Object> booleanValue;
         private String symbolRole;
 
         private static BindingInfo empty() {
             BindingInfo info = new BindingInfo();
             info.references = null;
-            info.booleanValue = null;
             info.symbolRole = "plain";
             return info;
         }
