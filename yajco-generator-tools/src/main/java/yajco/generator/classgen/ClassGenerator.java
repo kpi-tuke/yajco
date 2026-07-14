@@ -464,9 +464,6 @@ public class ClassGenerator implements FilesGenerator {
         } else if(pattern instanceof Token) {
             Token token = (Token)pattern;
             writer.write("@Token(\"" + token.getName() + "\")");
-        } else if (pattern instanceof yajco.model.pattern.impl.Flag) {
-            yajco.model.pattern.impl.Flag flag = (yajco.model.pattern.impl.Flag) pattern;
-            writer.write("@Flag(\"" + flag.getToken() + "\")");
         } else {
             throw new GeneratorException("Not known pattern type: " + pattern.getClass().getCanonicalName());
         }
