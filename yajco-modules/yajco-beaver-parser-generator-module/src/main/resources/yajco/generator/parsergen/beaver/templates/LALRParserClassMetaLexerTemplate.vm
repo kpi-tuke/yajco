@@ -10,7 +10,7 @@ package $parserClassPackageName;
 import java.io.StringReader;
 import ${parserPackageName}.$scannerClassName;
 
-public class $parserClassName implements yajco.generator.parsergen.Parser<$mainElementClassName, LALRParseException> {
+public class $parserClassName implements yajco.parser.Parser<$mainElementClassName, LALRParseException> {
     private static ${parserPackageName}.$parserClassName parser;
 
     @Override
@@ -35,5 +35,10 @@ public class $parserClassName implements yajco.generator.parsergen.Parser<$mainE
         } catch (${parserPackageName}.${parserClassName}.Exception e) {
             throw new ParseException("Problem parsing source code ", e);
         }
+    }
+
+    @Override
+    public Class<$mainElementClassName> mainNodeType() {
+        return ${mainElementClassName}.class;
     }
 }

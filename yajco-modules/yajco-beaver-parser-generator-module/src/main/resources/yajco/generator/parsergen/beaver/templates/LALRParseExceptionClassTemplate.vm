@@ -2,7 +2,7 @@
 ##Input - parserClassPackageName
 package $parserClassPackageName;
 
-public class ParseException extends yajco.generator.parsergen.ParseException {
+public class ParseException extends yajco.parser.ParseException {
     public ParseException(String message, Throwable cause) {
         super(message, cause);
     }

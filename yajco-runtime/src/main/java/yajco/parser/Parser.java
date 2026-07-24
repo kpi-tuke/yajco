@@ -1,4 +1,4 @@
-package yajco.generator.parsergen;
+package yajco.parser;
 
 import java.io.Reader;
 
@@ -13,4 +13,9 @@ public interface Parser<T, E extends ParseException> {
     T parse(String input) throws E;
 
     T parse(Reader reader) throws E;
+
+    /**
+     * @return Type of the main (root) node in the parsed AST
+     */
+    Class<T> mainNodeType();
 }

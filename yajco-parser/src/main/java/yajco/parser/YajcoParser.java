@@ -2,7 +2,7 @@ package yajco.parser;
 
 import yajco.parser.beaver.YajcoParserScanner;
 
-public class YajcoParser implements yajco.generator.parsergen.Parser<yajco.model.Language, LALRParseException> {
+public class YajcoParser implements Parser<yajco.model.Language, LALRParseException> {
     private static yajco.parser.beaver.YajcoParser parser;
 
     @Override
@@ -31,6 +31,11 @@ public class YajcoParser implements yajco.generator.parsergen.Parser<yajco.model
         } catch(java.io.IOException e) {
             throw new LALRParseException("Problem reading input file", e);
         }
+    }
+
+    @Override
+    public Class<yajco.model.Language> mainNodeType() {
+        return yajco.model.Language.class;
     }
 
     private String readAsString(java.io.Reader r) throws java.io.IOException {

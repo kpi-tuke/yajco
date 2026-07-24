@@ -2,6 +2,7 @@ package yajco.generator.parsergen;
 
 import yajco.generator.FilesGenerator;
 import yajco.model.Language;
+import yajco.parser.Parser;
 
 import javax.annotation.processing.Filer;
 import javax.tools.FileObject;

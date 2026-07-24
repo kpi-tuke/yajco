@@ -7,7 +7,7 @@
 ## Input - translatorClassName
 package $parserClassPackageName;
 
-public class $parserClassName implements yajco.generator.parsergen.Parser<$mainElementClassName, LisaParseException> {
+public class $parserClassName implements yajco.parser.Parser<$mainElementClassName, LisaParseException> {
     private static ${parserPackageName}.$parserClassName parser;
 
     @Override
@@ -38,6 +38,11 @@ public class $parserClassName implements yajco.generator.parsergen.Parser<$mainE
         } catch(java.io.IOException e) {
             throw new LisaParseException("Problem reading input file", e);
         }
+    }
+
+    @Override
+    public Class<$mainElementClassName> mainNodeType() {
+        return ${mainElementClassName}.class;
     }
 
     private String readAsString(java.io.Reader r) throws java.io.IOException {

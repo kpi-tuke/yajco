@@ -9,7 +9,7 @@ package $parserClassPackageName;
 
 import ${parserPackageName}.$scannerClassName;
 
-public class $parserClassName implements yajco.generator.parsergen.Parser<$mainElementClassName, ParseException> {
+public class $parserClassName implements yajco.parser.Parser<$mainElementClassName, ParseException> {
     private static ${parserPackageName}.$parserClassName parser;
 
     @Override
@@ -48,5 +48,10 @@ public class $parserClassName implements yajco.generator.parsergen.Parser<$mainE
             sb.append(line + "\n");
         }
         return sb.toString();
+    }
+
+    @Override
+    public Class<$mainElementClassName> mainNodeType() {
+        return ${mainElementClassName}.class;
     }
 }
