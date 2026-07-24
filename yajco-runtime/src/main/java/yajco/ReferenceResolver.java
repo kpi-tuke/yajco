@@ -54,18 +54,18 @@ public class ReferenceResolver {
     private final Set<Class<?>> classesWithoutIdentifiers = new HashSet<>();
 
     /** List of nodes requiring reference. */
-    private List<ReferenceItem> nodesToResolve = new ArrayList<ReferenceItem>();
+    private List<ReferenceItem> nodesToResolve = new ArrayList<>();
 
     /** List of all objects that have been registered in the resolver. */
-    private List<Object> registeredObjects = new ArrayList<Object>();
+    private List<Object> registeredObjects = new ArrayList<>();
 
     /** List of all objects that their post construct methods have been executed,
      * not participating in active reference resolving, only they can be injected
      * to other objects if contains @Identifier field */
-    private List<Object> postConstructExecutedObjects = new ArrayList<Object>();
+    private List<Object> postConstructExecutedObjects = new ArrayList<>();
 
     /** Cache map od post construct methods (with annotation PostConstruct) for classes of registered objects. */
-    private Map<Class<?>, List<Method>> postConstructMethods = new HashMap<Class<?>, List<Method>>();
+    private Map<Class<?>, List<Method>> postConstructMethods = new HashMap<>();
 
     private ReferenceResolver() {
         try {
@@ -124,7 +124,7 @@ public class ReferenceResolver {
     }
 
     public List<Object> getUnresolvedObjects() {
-        List<Object> unresolvedObjects = new ArrayList<Object>();
+        List<Object> unresolvedObjects = new ArrayList<>();
         for (ReferenceItem referenceItem : nodesToResolve) {
             unresolvedObjects.add(referenceItem.referencingObject);
         }
@@ -143,7 +143,7 @@ public class ReferenceResolver {
         testUniqueness();
 
         //Resolve references
-        List<ReferenceItem> resolvedNodes = new ArrayList<ReferenceItem>();
+        List<ReferenceItem> resolvedNodes = new ArrayList<>();
         for (ReferenceItem ri : nodesToResolve) {
             if (resolveReference(ri)) {
                 resolvedNodes.add(ri);
@@ -217,11 +217,11 @@ public class ReferenceResolver {
         for (Object param : objects) {
             if (param != null) {
                 // If param is Optional get inner Object.
-                if (param instanceof Optional && ((Optional) param).isPresent()) {
-                    param = ((Optional) param).get();
+                if (param instanceof Optional && ((Optional<?>) param).isPresent()) {
+                    param = ((Optional<?>) param).get();
                 }
                 if (param instanceof Collection) {
-                    param = ((Collection)param).toArray();
+                    param = ((Collection<?>)param).toArray();
                 }
                 if (param.getClass().isArray()) {
                     int length = Array.getLength(param);
@@ -270,8 +270,6 @@ public class ReferenceResolver {
 
     private boolean resolveReference(ReferenceItem ri) {
         try {
-            //System.out.println("Resolving reference: " + ri);
-
             //Create xpath expression
             String expr;
 
@@ -281,16 +279,15 @@ public class ReferenceResolver {
             }
 
             if ("".equals(ri.references.path())) {
-                expr = "//" + ri.referencedClass.getName() + "[" + IDENT_ELEMENT_NAME + "/text()='" + ri.referencingValue.toString() + "']";
+                expr = "//" + ri.referencedClass.getName() + "[" + IDENT_ELEMENT_NAME + "/text()='" + ri.referencingValue + "']";
             } else {
                 if (ri.references.path().contains("##cmp##")) {
-                    expr = ri.references.path().replace("##cmp##", IDENT_ELEMENT_NAME + "/text()='" + ri.referencingValue.toString()+"'");
+                    expr = ri.references.path().replace("##cmp##", IDENT_ELEMENT_NAME + "/text()='" + ri.referencingValue + "'");
                 } else {
-                    expr = ri.references.path() + "[" + IDENT_ELEMENT_NAME + "/text()='" + ri.referencingValue.toString() + "']";
+                    expr = ri.references.path() + "[" + IDENT_ELEMENT_NAME + "/text()='" + ri.referencingValue + "']";
                 }
             }
 
-            //System.out.println("Evaluating XPath: " + expr);
             XPathExpression xexpr = xpath.compile(expr);
 
             //Select node
@@ -319,8 +316,8 @@ public class ReferenceResolver {
         Annotation[][] allAnnotations;
 
         if (accesibleObject instanceof Constructor) {
-            params = ((Constructor)accesibleObject).getParameterTypes();
-            allAnnotations = ((Constructor)accesibleObject).getParameterAnnotations();
+            params = ((Constructor<?>)accesibleObject).getParameterTypes();
+            allAnnotations = ((Constructor<?>)accesibleObject).getParameterAnnotations();
         } else if (accesibleObject instanceof Method) {
             params = ((Method)accesibleObject).getParameterTypes();
             allAnnotations = ((Method)accesibleObject).getParameterAnnotations();
@@ -332,11 +329,11 @@ public class ReferenceResolver {
             for (Annotation annotation : allAnnotations[i]) {
                 if (annotation instanceof References) {
                     References references = (References) annotation;
-                    Class referencedClass = references.value();
-                    String fielddName = references.field();
+                    Class<?> referencedClass = references.value();
+                    String fieldName = references.field();
                     //TODO: Tu to tiez asi zavisi od pola
                     Object referencingValue = objects[i];
-                    Field referencingField = getFieldOfType(clazz, referencedClass, fielddName);
+                    Field referencingField = getFieldOfType(clazz, referencedClass, fieldName);
                     ReferenceItem ri = new ReferenceItem(references, referencedClass, object, referencingValue, referencingField);
                     nodesToResolve.add(ri);
                 }
@@ -344,8 +341,8 @@ public class ReferenceResolver {
         }
     }
 
-    private AccessibleObject findConstructor(Class clazz, String methodName, Object[] objects) {
-        List<AccessibleObject> list = new ArrayList<AccessibleObject>();
+    private AccessibleObject findConstructor(Class<?> clazz, String methodName, Object[] objects) {
+        List<AccessibleObject> list = new ArrayList<>();
         if (methodName == null || methodName.isEmpty()) {
             list.addAll(Arrays.asList(clazz.getDeclaredConstructors()));
         } else {
@@ -354,7 +351,7 @@ public class ReferenceResolver {
         for (AccessibleObject ao : list) {
             Class<?>[] parameterTypes = new Class<?>[0];
             if (ao instanceof Constructor) {
-                parameterTypes = ((Constructor)ao).getParameterTypes();
+                parameterTypes = ((Constructor<?>)ao).getParameterTypes();
             } else if (ao instanceof Method) {
                 Method method = (Method)ao;
                 if (!method.getName().equals(methodName)) {
@@ -363,7 +360,6 @@ public class ReferenceResolver {
                 }
                 parameterTypes = method.getParameterTypes();
             }
-            //System.out.println(constructor + " " + Arrays.toString(constructor.getDeclaredAnnotations()));
             if (ao.getAnnotation(Exclude.class) != null) {
                 continue;
             }
@@ -372,11 +368,9 @@ public class ReferenceResolver {
                 continue;
             }
             boolean found = true;
-//            System.out.println("******************* "+constructor.toGenericString());
-//            System.out.println("*****************++ "+objects.length + " / " + constructor.getParameterTypes().length);
 
             for (int i = 0; i < parameterTypes.length; i++) {
-                Class class1 = parameterTypes[i];
+                Class<?> class1 = parameterTypes[i];
                 Object object = objects[i];
 
                 if (class1.isPrimitive()) {
@@ -399,8 +393,6 @@ public class ReferenceResolver {
                     }
                 }
 
-//                System.out.println("*** Class "+i+": "+class1.getName()+" / "+objects[i].getClass().getName());
-
                 if (object != null && !class1.isInstance(object)) {
                     found = false;
                     break;
@@ -409,17 +401,16 @@ public class ReferenceResolver {
             if (!found) {
                 continue;
             }
-            //System.out.println("********* THIS IS IT!");
             return ao;
         }
 
         throw new RuntimeException("Suitable constructor does not exist '" + clazz + "' for values " + Arrays.toString(objects));
     }
 
-    private Field getFieldOfType(Class clazz, Class type, String fielddName) {
+    private Field getFieldOfType(Class<?> clazz, Class<?> type, String fieldName) {
         for (Field field : clazz.getDeclaredFields()) {
             if (field.getType().equals(type)) {
-                if ("".equals(fielddName) || fielddName.equals(field.getName())) {
+                if ("".equals(fieldName) || fieldName.equals(field.getName())) {
                     return field;
                 }
             }
@@ -511,7 +502,7 @@ public class ReferenceResolver {
     }
 
     private void invokePostConstructMethods() {
-        List<Object> toPostConstruct = new ArrayList<Object>(registeredObjects);
+        List<Object> toPostConstruct = new ArrayList<>(registeredObjects);
         toPostConstruct.removeAll(postConstructExecutedObjects);
         for (ReferenceItem ri : nodesToResolve) {
             toPostConstruct.remove(ri.referencingObject);
@@ -539,7 +530,7 @@ public class ReferenceResolver {
     }
 
     private List<Method> findPostConstructMethods(Class<?> clazz) {
-        List<Method> methods = new ArrayList<Method>();
+        List<Method> methods = new ArrayList<>();
 
         for (Method method : clazz.getMethods()) {
             if (method.getAnnotation(PostConstruct.class) != null) {
@@ -566,7 +557,7 @@ public class ReferenceResolver {
      * Representation of referenced element.
      */
     private static class ReferenceItem {
-        private final Class referencedClass;
+        private final Class<?> referencedClass;
 
         private final Object referencingObject;
 
@@ -576,7 +567,7 @@ public class ReferenceResolver {
 
         private final References references;
 
-        public ReferenceItem(References references, Class referencedClass, Object referencingObject, Object referencingValue, Field referencingField) {
+        public ReferenceItem(References references, Class<?> referencedClass, Object referencingObject, Object referencingValue, Field referencingField) {
             this.references = references;
             this.referencedClass = referencedClass;
             this.referencingObject = referencingObject;
