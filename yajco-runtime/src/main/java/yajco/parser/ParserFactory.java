@@ -1,15 +1,11 @@
-package yajco;
-
-import yajco.parser.ParseException;
-import yajco.parser.Parser;
-import yajco.parser.ParserFor;
+package yajco.parser;
 
 import java.util.ServiceLoader;
 
 public class ParserFactory {
     @SuppressWarnings("unchecked")
     public static <T> Parser<T, ? extends ParseException> getParser(Class<T> mainNodeType) {
-        Parser<T, ? extends ParseException> match = ServiceLoader.load(Parser.class).stream()
+        return ServiceLoader.load(Parser.class).stream()
             .filter(p -> isParserFor(p.type(), mainNodeType))
             .reduce((p1, p2) -> {
                 throw new IllegalStateException(
@@ -18,7 +14,6 @@ public class ParserFactory {
             })
             .map(ServiceLoader.Provider::get)
             .orElseThrow(() -> new IllegalArgumentException("No parser for " + mainNodeType.getName()));
-        return match;
     }
 
     private static boolean isParserFor(Class<?> parser, Class<?> mainNodeType) {
