@@ -34,8 +34,8 @@ public class $parserClassName implements yajco.parser.Parser<$mainElementName, P
   }
 
   @Override
-  public Class<$mainElementClassName> mainNodeType() {
-      return ${mainElementClassName}.class;
+  public Class<$mainElementName> mainNodeType() {
+      return ${mainElementName}.class;
   }
 
   private String readAsString(java.io.Reader r) throws java.io.IOException {
