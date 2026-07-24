@@ -590,18 +590,4 @@ Specifies indentation of the annotated element. Mostly it should be used in comb
       com.google.SearchConcept
     ```
 
-## IDEs how-to
-Using Maven project with YAJCo in most common IDEs can provide better language specification experience, but there are also some possible problems.
-
-### Netbeans
-Netbeans has problems with generated sources during compile time and sometimes cannot index them as existing sources, therefore it does not provide them for error checking. Even when build and run is working OK with Maven in Netbeans, project report fictious Netbeans' errors. It is pretty problematic, when you are trying to use generated parser in main class as it shows errors, but compile and run is OK. Netbeans is OK editor for YAJCo projects, just ignore errors concerning generated classes.
-
-### IntelliJ IDEA
-In IntelliJ IDEA it is required to use Maven building and running options instead of classical IDEs build and run options, as they are influencing annotated source code for YAJCo language specification in unexpected manner (mostly with Beaver parser generator, JavaCC parser generator seams OK)
-
-`Run` configuration should not use internal `make` but rather use Maven `package` or `compile` goals before running main class with configuration.
-
-### Eclipse
-Eclipse is pretty without problems, as long as you are able to run Maven builds. We have not experienced any problems, but user interface of Eclipse can be pretty problematic for beginner, so we are not recommending to use it as long as you don't have previous experience with it.
-
 [declarative-specification]: https://annals-csis.org/Volume_1/pliks/342.pdf
