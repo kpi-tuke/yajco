@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 
+@yajco.parser.ParserFor(${mainElementClassName}.class)
 public class $parserClassName implements yajco.parser.Parser<$mainElementClassName, ParseException> {
     @Override
     public $mainElementClassName parse(String input) throws ParseException {
@@ -30,11 +31,6 @@ public class $parserClassName implements yajco.parser.Parser<$mainElementClassNa
         } catch (java.io.IOException e) {
             throw new ParseException("Failed to read input file", e);
         }
-    }
-
-    @Override
-    public Class<$mainElementClassName> mainNodeType() {
-        return ${mainElementClassName}.class;
     }
 
     private String readAsString(java.io.Reader r) throws java.io.IOException {

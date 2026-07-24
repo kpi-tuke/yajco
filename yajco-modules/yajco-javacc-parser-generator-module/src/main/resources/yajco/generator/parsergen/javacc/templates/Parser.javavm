@@ -2,6 +2,7 @@
 #set( $tokenManagerClassName = $parserJavaCCPackageName + "." + $parserClassName + "TokenManager")
 package $parserPackageName;
 
+@yajco.parser.ParserFor(${mainElementName}.class)
 public class $parserClassName implements yajco.parser.Parser<$mainElementName, ParseException> {
   private static $parserJavaCCClassName _parser;
 
@@ -31,11 +32,6 @@ public class $parserClassName implements yajco.parser.Parser<$mainElementName, P
     } catch(java.io.IOException e) {
       throw new ParseException("Problem reading input file", e);
     }
-  }
-
-  @Override
-  public Class<$mainElementName> mainNodeType() {
-      return ${mainElementName}.class;
   }
 
   private String readAsString(java.io.Reader r) throws java.io.IOException {
