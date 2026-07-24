@@ -9,7 +9,8 @@ package $parserClassPackageName;
 
 import ${parserPackageName}.$scannerClassName;
 
-public class $parserClassName implements yajco.generator.parsergen.Parser<$mainElementClassName, ParseException> {
+@yajco.parser.ParserFor(${mainElementClassName}.class)
+public class $parserClassName implements yajco.parser.Parser<$mainElementClassName, ParseException> {
     private static ${parserPackageName}.$parserClassName parser;
 
     @Override

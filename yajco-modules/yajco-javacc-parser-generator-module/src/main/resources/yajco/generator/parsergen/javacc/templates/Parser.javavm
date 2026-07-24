@@ -2,7 +2,8 @@
 #set( $tokenManagerClassName = $parserJavaCCPackageName + "." + $parserClassName + "TokenManager")
 package $parserPackageName;
 
-public class $parserClassName implements yajco.generator.parsergen.Parser<$mainElementName, ParseException> {
+@yajco.parser.ParserFor(${mainElementName}.class)
+public class $parserClassName implements yajco.parser.Parser<$mainElementName, ParseException> {
   private static $parserJavaCCClassName _parser;
 
   @Override

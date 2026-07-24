@@ -7,7 +7,8 @@
 ## Input - translatorClassName
 package $parserClassPackageName;
 
-public class $parserClassName implements yajco.generator.parsergen.Parser<$mainElementClassName, LisaParseException> {
+@yajco.parser.ParserFor(${mainElementClassName}.class)
+public class $parserClassName implements yajco.parser.Parser<$mainElementClassName, LisaParseException> {
     private static ${parserPackageName}.$parserClassName parser;
 
     @Override

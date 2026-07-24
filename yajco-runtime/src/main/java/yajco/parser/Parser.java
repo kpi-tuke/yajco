@@ -1,4 +1,4 @@
-package yajco.generator.parsergen;
+package yajco.parser;
 
 import java.io.Reader;
 

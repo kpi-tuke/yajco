@@ -6,7 +6,8 @@ import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.BailErrorStrategy;
 import org.antlr.v4.runtime.misc.ParseCancellationException;
 
-public class $parserClassName implements yajco.generator.parsergen.Parser<$mainElementClassName, ParseException> {
+@yajco.parser.ParserFor(${mainElementClassName}.class)
+public class $parserClassName implements yajco.parser.Parser<$mainElementClassName, ParseException> {
     @Override
     public $mainElementClassName parse(String input) throws ParseException {
         TokenSource lexer = new ${ANTLRLexerFullClassName}(CharStreams.fromString(input));

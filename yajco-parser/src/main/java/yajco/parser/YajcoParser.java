@@ -2,7 +2,8 @@ package yajco.parser;
 
 import yajco.parser.beaver.YajcoParserScanner;
 
-public class YajcoParser implements yajco.generator.parsergen.Parser<yajco.model.Language, LALRParseException> {
+@yajco.parser.ParserFor(yajco.model.Language.class)
+public class YajcoParser implements Parser<yajco.model.Language, LALRParseException> {
     private static yajco.parser.beaver.YajcoParser parser;
 
     @Override
