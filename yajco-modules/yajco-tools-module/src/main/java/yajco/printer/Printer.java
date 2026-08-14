@@ -366,7 +366,7 @@ public class Printer {
     private void printShared(PrintWriter writer, Shared pattern) {
         writer.print("Shared part");
         writer.print("(");
-        writer.print(pattern.getValue());
+        writer.print("\"" + pattern.getSeparator() + "\"");
         writer.print(")");
     }
 

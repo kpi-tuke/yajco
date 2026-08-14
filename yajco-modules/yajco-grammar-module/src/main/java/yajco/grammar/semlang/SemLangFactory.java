@@ -23,43 +23,43 @@ public final class SemLangFactory {
     }
 
     public static List<Action> createNewClassInstanceActions(String classType, List<Symbol> symbols) {
-        return createClassInstanceActions(classType, null, symbolsToRValues(symbols, null));
+        return createClassInstanceActions(classType, null, symbolsToRValues(symbols));
     }
 
     public static List<Action> createNewClassInstanceAndReturnActions(String classType, List<Symbol> symbols) {
-        return createClassInstanceAndReturnActions(classType, null, symbolsToRValues(symbols, null));
+        return createClassInstanceAndReturnActions(classType, null, symbolsToRValues(symbols));
     }
 
     public static List<Action> createNewOptionalClassInstanceAndReturnActions(List<Symbol> symbols) {
-        return createOptionalClassInstanceAndReturnActions(symbolsToRValues(symbols, null));
+        return createOptionalClassInstanceAndReturnActions(symbolsToRValues(symbols));
     }
 
     public static List<Action> createNewUnorderedParamClassInstanceAndReturnActions(List<Symbol> symbols, String varName) {
-        return createUnorderedParamClassInstanceAndReturnActions(symbolsToRValues(symbols, null), varName);
+        return createUnorderedParamClassInstanceAndReturnActions(symbolsToRValues(symbols), varName);
     }
 
     public static List<Action> createFactoryClassInstanceActions(String classType, String factoryMethodName, List<Symbol> symbols) {
-        return createClassInstanceActions(classType, factoryMethodName, symbolsToRValues(symbols, null));
+        return createClassInstanceActions(classType, factoryMethodName, symbolsToRValues(symbols));
     }
 
     public static List<Action> createFactoryClassInstanceAndReturnActions(String classType, String factoryMethodName, List<Symbol> symbols) {
-        return createClassInstanceAndReturnActions(classType, factoryMethodName, symbolsToRValues(symbols, null));
+        return createClassInstanceAndReturnActions(classType, factoryMethodName, symbolsToRValues(symbols));
     }
 
     public static List<Action> createRefResolverNewClassInstRegisterActions(String classType, List<Symbol> symbols) {
-        return createReferenceResolverRegisterActions(classType, null, symbolsToRValues(symbols, null));
+        return createReferenceResolverRegisterActions(classType, null, symbolsToRValues(symbols));
     }
 
-    public static List<Action> createRefResolverNewClassInstRegisterAndReturnActions(String classType, List<Symbol> symbols, String sharedPartName) {
-        return createReferenceResolverRegisterAndReturnActions(classType, null, symbolsToRValues(symbols, sharedPartName));
+    public static List<Action> createRefResolverNewClassInstRegisterAndReturnActions(String classType, List<Symbol> symbols) {
+        return createReferenceResolverRegisterAndReturnActions(classType, null, symbolsToRValues(symbols));
     }
 
     public static List<Action> createRefResolverFactoryClassInstRegisterActions(String classType, String factoryMethodName, List<Symbol> symbols) {
-        return createReferenceResolverRegisterActions(classType, factoryMethodName, symbolsToRValues(symbols, null));
+        return createReferenceResolverRegisterActions(classType, factoryMethodName, symbolsToRValues(symbols));
     }
 
-    public static List<Action> createRefResolverFactoryClassInstRegisterAndReturnActions(String classType, String factoryMethodName, List<Symbol> symbols, String sharedPartName) {
-        return createReferenceResolverRegisterAndReturnActions(classType, factoryMethodName, symbolsToRValues(symbols, sharedPartName));
+    public static List<Action> createRefResolverFactoryClassInstRegisterAndReturnActions(String classType, String factoryMethodName, List<Symbol> symbols) {
+        return createReferenceResolverRegisterAndReturnActions(classType, factoryMethodName, symbolsToRValues(symbols));
     }
 
     private static List<Action> createEnumInstanceActions(String enumType, String enumConstant) {
@@ -112,10 +112,6 @@ public final class SemLangFactory {
         return createCollectionAndAddElementsAndReturnActions(varName, new OrderedSetType(varType), Collections.singletonList(new RValue(symbol)));
     }
 
-    public static List<Action> createListWithSharedAndAddElementAndReturnActions(Type varType, String varName, Symbol symbol) {
-        return createCollectionAndAddElementsAndReturnActions(varName, new ListTypeWithShared(varType), Collections.singletonList(new RValue(symbol)));
-    }
-
     public static List<Action> createListAndAddElementsActions(Type varType, String varName, List<Symbol> symbols) {
         return createCollectionAndAddElementsActions(varName, new ListType(varType), simpleSymbolsToRValues(symbols));
     }
@@ -130,6 +126,29 @@ public final class SemLangFactory {
 
     public static List<Action> createHashMapAndPutElementsAndReturnActions(Type varType, String varName, List<Symbol> symbol) {
         return createCollectionAndAddElementsAndReturnActions(varName, new HashMapType(varType), simpleSymbolsToRValues(symbol));
+    }
+
+    public static List<Action> createSharedListAndReturnActions(
+            Type varType,
+            String varName,
+            String classType,
+            String factoryMethodName,
+            Symbol repeatedValues,
+            String repeatedParameterName,
+            List<Symbol> constructorParameters) {
+        List<Action> actions = new ArrayList<Action>(4);
+        ListType collectionType = new ListType(varType);
+        actions.add(new DefineVariableAction(collectionType, varName));
+        actions.add(new AssignAction(new LValue(varName), new RValue(new CreateCollectionInstanceAction(collectionType))));
+        actions.add(new AddSharedElementsToCollectionAction(
+                new LValue(varName),
+                classType,
+                factoryMethodName,
+                repeatedValues,
+                repeatedParameterName,
+                constructorParameters));
+        actions.add(new ReturnAction(new RValue(varName)));
+        return actions;
     }
 
     private static List<Action> createReturnValueActions(RValue value) {
@@ -253,7 +272,7 @@ public final class SemLangFactory {
         return actions;
     }
 
-    private static List<RValue> symbolsToRValues(List<Symbol> symbols, String sharedPartName) {
+    private static List<RValue> symbolsToRValues(List<Symbol> symbols) {
         List<RValue> rValues = new ArrayList<RValue>(symbols.size());
         for (Symbol symbol : symbols) {
             if (symbol instanceof TerminalSymbol) {
@@ -277,11 +296,7 @@ public final class SemLangFactory {
                 } else if (type instanceof UnorderedParamType) {
                     rValues.add(new RValue(new ConvertUnorderedParamsToObjectAction(((ComponentType) type), new RValue(symbol))));
                 } else if (type instanceof ComponentType /*&& !(type instanceof ListType)*/) {
-                    if (sharedPartName != null) {
-                        rValues.add(new RValue(new ConvertListWithSharedToCollectionAction(((ComponentType) type), sharedPartName, new RValue(symbol))));
-                    } else {
-                        rValues.add(new RValue(new ConvertListToCollectionAction(((ComponentType) type), new RValue(symbol))));
-                    }
+                    rValues.add(new RValue(new ConvertListToCollectionAction(((ComponentType) type), new RValue(symbol))));
                 } else {
                     rValues.add(new RValue(symbol));
                 }
