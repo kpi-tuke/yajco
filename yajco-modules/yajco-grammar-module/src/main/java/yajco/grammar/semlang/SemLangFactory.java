@@ -146,7 +146,7 @@ public final class SemLangFactory {
                 factoryMethodName,
                 repeatedValues,
                 repeatedParameterName,
-                constructorParameters));
+                symbolsToRValues(constructorParameters)));
         actions.add(new ReturnAction(new RValue(varName)));
         return actions;
     }

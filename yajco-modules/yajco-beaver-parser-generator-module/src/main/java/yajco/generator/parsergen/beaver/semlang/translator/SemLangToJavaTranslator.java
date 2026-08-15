@@ -6,7 +6,6 @@ import yajco.grammar.type.HashMapType;
 import yajco.grammar.type.ObjectType;
 import yajco.grammar.type.UnorderedParamType;
 import yajco.grammar.NonterminalSymbol;
-import yajco.grammar.Symbol;
 import yajco.model.Language;
 import yajco.model.type.*;
 
@@ -327,11 +326,12 @@ public class SemLangToJavaTranslator {
         writer.print(")");
     }
 
-    private void translateSharedConstructorParameter(AddSharedElementsToCollectionAction action, Symbol parameter, String repeatedValueVar, PrintStream writer) {
-        if (parameter.getVarName() != null && parameter.getVarName().equals(action.getRepeatedParameterName())) {
+    private void translateSharedConstructorParameter(AddSharedElementsToCollectionAction action, RValue parameter, String repeatedValueVar, PrintStream writer) {
+        if (parameter.getSymbol() != null
+                && action.getRepeatedParameterName().equals(parameter.getSymbol().getVarName())) {
             writer.print(repeatedValueVar);
         } else {
-            translateRValue(new RValue(parameter), writer);
+            translateRValue(parameter, writer);
         }
     }
 

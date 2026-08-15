@@ -10,7 +10,7 @@ public class AddSharedElementsToCollectionAction extends Action {
     private final String factoryMethodName;
     private final Symbol repeatedValues;
     private final String repeatedParameterName;
-    private final List<Symbol> constructorParameters;
+    private final List<RValue> constructorParameters;
 
     public AddSharedElementsToCollectionAction(
             LValue collection,
@@ -18,7 +18,7 @@ public class AddSharedElementsToCollectionAction extends Action {
             String factoryMethodName,
             Symbol repeatedValues,
             String repeatedParameterName,
-            List<Symbol> constructorParameters) {
+            List<RValue> constructorParameters) {
         this.collection = collection;
         this.classType = classType;
         this.factoryMethodName = factoryMethodName;
@@ -47,7 +47,7 @@ public class AddSharedElementsToCollectionAction extends Action {
         return repeatedParameterName;
     }
 
-    public List<Symbol> getConstructorParameters() {
+    public List<RValue> getConstructorParameters() {
         return constructorParameters;
     }
 
