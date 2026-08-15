@@ -283,23 +283,43 @@ public class SemLangToJavaTranslator {
         writer.print(" : ");
         translateRValue(new RValue(action.getRepeatedValues()), writer);
         writer.print(") { ");
+        List<RValue> constructorParameters = materializeSharedConstructorParameters(action, repeatedValueVar, writer);
         translateLValue(action.getCollection(), writer);
+        if (action.getCollection().getSymbol() != null) {
+            writer.print(".getWrappedObject()");
+        }
         writer.print(".add(");
-        translateSharedClassInstance(action, repeatedValueVar, writer);
+        translateSharedClassInstance(action, constructorParameters, writer);
         writer.print("); ");
         writer.print("} ");
     }
 
-    private void translateSharedClassInstance(AddSharedElementsToCollectionAction action, String repeatedValueVar, PrintStream writer) {
+    private List<RValue> materializeSharedConstructorParameters(
+            AddSharedElementsToCollectionAction action,
+            String repeatedValueVar,
+            PrintStream writer) {
         List<RValue> constructorParameters = new ArrayList<RValue>(action.getConstructorParameters().size());
-        for (RValue parameter : action.getConstructorParameters()) {
+        for (int i = 0; i < action.getConstructorParameters().size(); i++) {
+            RValue parameter = action.getConstructorParameters().get(i);
+            String parameterVar = "__sharedParameter" + i;
+            writer.print("final var ");
+            writer.print(parameterVar);
+            writer.print(" = ");
             if (isRepeatedSharedConstructorParameter(action, parameter)) {
-                constructorParameters.add(new RValue(repeatedValueVar));
+                writer.print(repeatedValueVar);
             } else {
-                constructorParameters.add(parameter);
+                translateRValue(parameter, writer);
             }
+            writer.print("; ");
+            constructorParameters.add(new RValue(parameterVar));
         }
+        return constructorParameters;
+    }
 
+    private void translateSharedClassInstance(
+            AddSharedElementsToCollectionAction action,
+            List<RValue> constructorParameters,
+            PrintStream writer) {
         ReferenceResolverRegisterAction registerAction;
         if (action.getFactoryMethodName() == null || action.getFactoryMethodName().isEmpty()) {
             registerAction = new ReferenceResolverRegisterAction(action.getClassType(), constructorParameters);

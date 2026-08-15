@@ -3,11 +3,15 @@ package yajco.grammar.translator;
 import org.junit.Test;
 import yajco.grammar.NonterminalSymbol;
 import yajco.grammar.bnf.Grammar;
+import yajco.grammar.semlang.AddSharedElementsToCollectionAction;
+import yajco.grammar.semlang.Action;
+import yajco.grammar.semlang.ActionType;
 import yajco.model.Concept;
 import yajco.model.Language;
 import yajco.model.Notation;
 import yajco.model.Property;
 import yajco.model.PropertyReferencePart;
+import yajco.model.TokenDef;
 import yajco.model.pattern.impl.BooleanValue;
 import yajco.model.pattern.impl.Shared;
 import yajco.model.type.ListType;
@@ -70,5 +74,45 @@ public class YajcoModelToBNFGrammarTranslatorTest {
                 () -> YajcoModelToBNFGrammarTranslator.getInstance().translate(language));
 
         assertEquals("@Shared in concept 'Item' requires exactly one notation; found 2.", exception.getMessage());
+    }
+
+    @Test
+    public void shouldGenerateSharedCollectionAction() {
+        Property value = new Property("value", new PrimitiveType(PrimitiveTypeConst.STRING), null);
+        Property suffix = new Property("suffix", new PrimitiveType(PrimitiveTypeConst.STRING), null);
+        PropertyReferencePart sharedSuffix = new PropertyReferencePart(suffix, null);
+        sharedSuffix.addPattern(new Shared(","));
+        Concept item = new Concept("Item", new Property[] {value, suffix}, new Notation[] {
+                new Notation(new yajco.model.NotationPart[] {
+                        new PropertyReferencePart(value, null), sharedSuffix
+                })
+        });
+
+        Property items = new Property("items", new ListType(new ReferenceType(item, null)), null);
+        Concept root = new Concept("Root", new Property[] {items}, new Notation[] {
+                new Notation(new yajco.model.NotationPart[] {new PropertyReferencePart(items, null)})
+        });
+        Language language = new Language(
+                "test",
+                Arrays.asList(new TokenDef("VALUE", "[a-z]+"), new TokenDef("SUFFIX", "[a-z]+")),
+                new ArrayList<>(),
+                Arrays.asList(root, item));
+
+        Grammar grammar = YajcoModelToBNFGrammarTranslator.getInstance().translate(language);
+
+        NonterminalSymbol sharedGroup = grammar.getNonterminal("ItemWithSharedPartSuffix");
+        assertNotNull(sharedGroup);
+        Action generatedAction = grammar
+                .getProduction(sharedGroup)
+                .getRhs()
+                .get(0)
+                .getActions()
+                .get(2);
+        assertEquals(ActionType.ADD_SHARED_ELEMENTS_TO_COLLECTION, generatedAction.getActionType());
+        AddSharedElementsToCollectionAction action = (AddSharedElementsToCollectionAction) generatedAction;
+        assertEquals("list", action.getCollection().getVarName());
+        assertEquals(2, action.getConstructorParameters().size());
+        assertEquals("value", action.getConstructorParameters().get(0).getSymbol().getVarName());
+        assertEquals("suffix", action.getConstructorParameters().get(1).getSymbol().getVarName());
     }
 }
