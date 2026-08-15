@@ -1015,7 +1015,7 @@ public class YajcoModelToBNFGrammarTranslator {
         for (NotationPart part : layout.sharedAndSuffixParts) {
             Symbol symbol = translateSharedGroupNotationPart(concept, part);
             alternative.addSymbol(symbol);
-            if (part instanceof BindingNotationPart) {
+            if (part instanceof BindingNotationPart || part instanceof CompoundNotationPart) {
                 constructorParameters.add(symbol);
             }
         }
