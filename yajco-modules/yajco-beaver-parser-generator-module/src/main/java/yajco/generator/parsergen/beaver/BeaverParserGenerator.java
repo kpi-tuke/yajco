@@ -80,7 +80,6 @@ public class BeaverParserGenerator {
 //        }
         writer.println("%import \"" + parserPackageName + ".SymbolListImpl\";");
         writer.println("%import \"" + parserPackageName + ".SymbolLinkedHashSetImpl\";");
-        writer.println("%import \"" + parserPackageName + ".SymbolListImplWithShared\";");
         writer.println("%import \"" + parserPackageName + ".QuotedStringUtils\";");
         writer.println("%import \"" + parserPackageName + ".SymbolHashMapImpl\";");
         writer.println("%import \"" + parserPackageName + ".SymbolUnorderedParam\";");

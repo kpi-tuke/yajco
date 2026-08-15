@@ -6,14 +6,12 @@ import yajco.annotation.Exclude;
 import yajco.model.pattern.NotationPartPattern;
 
 public class Shared extends NotationPartPattern {
-    private String value;
     private String separator;
 
     @Before({"Shared", "part", "("})
     @After(")")
-    public Shared(String sharedPart, String separator) {
+    public Shared(String separator) {
         super(null);
-        this.value = sharedPart;
         this.separator = separator;
     }
 
@@ -23,12 +21,9 @@ public class Shared extends NotationPartPattern {
     }
 
     @Exclude
-    public Shared(String sharedPart, String separator, Object sourceElement) {
+    public Shared(String separator, Object sourceElement) {
         super(sourceElement);
-    }
-
-    public String getValue() {
-        return this.value;
+        this.separator = separator;
     }
 
     public String getSeparator() {

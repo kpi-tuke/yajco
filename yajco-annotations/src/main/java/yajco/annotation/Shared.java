@@ -11,6 +11,5 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 @MapsTo("yajco.model.pattern.impl.Shared")
 public @interface Shared {
-    String value();
     String separator();
 }

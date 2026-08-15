@@ -42,7 +42,6 @@ public class YajcoModelToBNFGrammarTranslator {
     private int arrayID;
     private int optionalID;
     private int booleanValueID;
-    private String sharedPartName;
     private int unorderedParamID;
     private List<NonterminalSymbol> unorderedParamNonterminals;
     private MixedRepetitionPart currentMixedRepetitionPart;  // Track current mixed repetition
@@ -294,9 +293,9 @@ public class YajcoModelToBNFGrammarTranslator {
 
             // Then add constructor creation
             if (factoryPattern != null) {
-                alternative.addActions(SemLangFactory.createRefResolverFactoryClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), factoryPattern.getName(), distributedParameters, this.sharedPartName));
+                alternative.addActions(SemLangFactory.createRefResolverFactoryClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), factoryPattern.getName(), distributedParameters));
             } else {
-                alternative.addActions(SemLangFactory.createRefResolverNewClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), distributedParameters, this.sharedPartName));
+                alternative.addActions(SemLangFactory.createRefResolverNewClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), distributedParameters));
             }
 
             // Clear mixed repetition state
@@ -306,20 +305,18 @@ public class YajcoModelToBNFGrammarTranslator {
             // Normal processing without mixed repetition
             if (factoryPattern != null) {
 //            if (opPattern == null) {
-                alternative.addActions(SemLangFactory.createRefResolverFactoryClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), factoryPattern.getName(), parameters, this.sharedPartName));
+                alternative.addActions(SemLangFactory.createRefResolverFactoryClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), factoryPattern.getName(), parameters));
 //            } else {
 //                alternative.addActions(SemLangFactory.createFactoryClassInstanceAndReturnActions(Utilities.getFullConceptClassName(language, concept), factoryPattern.getName(), parameters));
 //            }
             } else {
 //            if (opPattern == null) {
-                alternative.addActions(SemLangFactory.createRefResolverNewClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), parameters, this.sharedPartName));
+                alternative.addActions(SemLangFactory.createRefResolverNewClassInstRegisterAndReturnActions(Utilities.getFullConceptClassName(language, concept), parameters));
 //            } else {
 //                alternative.addActions(SemLangFactory.createNewClassInstanceAndReturnActions(Utilities.getFullConceptClassName(language, concept), parameters));
 //            }
             }
         }
-        this.sharedPartName = null;
-
         return alternative;
     }
 
@@ -340,7 +337,7 @@ public class YajcoModelToBNFGrammarTranslator {
         production.addAlternative(alternative);
 
         grammar.addProduction(production);
-        grammar.addSequence(lhs.getName(), this.unorderedParamNonterminals.size(), this.unorderedParamNonterminals.size(), null, false, null, lhs);
+        grammar.addSequence(lhs.getName(), this.unorderedParamNonterminals.size(), this.unorderedParamNonterminals.size(), null, false, lhs);
 
         return new NonterminalSymbol(lhs.getName(), new ObjectType(), DEFAULT_PARAMS_SYMBOL_VAR_NAME);
     }
@@ -805,7 +802,8 @@ public class YajcoModelToBNFGrammarTranslator {
         final ComponentType cmpType = (ComponentType) part.getProperty().getType();
         final Type innerType = cmpType.getComponentType();
         final Symbol symbol;
-        final String separator, sharedPartName;
+        final String separator;
+        SharedPropertyInfo sharedInfo = null;
         final int min, max;
         final boolean unique;
 
@@ -826,10 +824,16 @@ public class YajcoModelToBNFGrammarTranslator {
         Separator sepPattern = (Separator) part.getPattern(Separator.class);
         Range rangePattern = (Range) part.getPattern(Range.class);
         UniqueValues uniqueValuesPattern = (UniqueValues) part.getPattern(UniqueValues.class);
-        Shared sharedPattern = (Shared) part.getPattern(Shared.class);
+        if (part.getPattern(Shared.class) != null) {
+            throw new IllegalArgumentException("@Shared must be placed on a property of the listed concept, not on list property '" + part.getProperty().getName() + "'.");
+        }
+
+        if (innerType instanceof ReferenceType) {
+            ReferenceType refType = (ReferenceType) innerType;
+            sharedInfo = findSharedPropertyInConcept(refType.getConcept());
+        }
 
         unique = uniqueValuesPattern != null;
-        sharedPartName = sharedPattern != null ? sharedPattern.getValue() : "";
         separator = sepPattern != null ? sepPattern.getValue() : "";
         min = rangePattern != null ? rangePattern.getMinOccurs() : 0;
         max = rangePattern != null ? rangePattern.getMaxOccurs() : Range.INFINITY;
@@ -837,13 +841,14 @@ public class YajcoModelToBNFGrammarTranslator {
         if (cmpType instanceof OptionalType) {
             return symbol;
         }
-        return getOrCreateSequenceProductionFor(symbol, min, max, separator, cmpType, unique, sharedPattern, sharedPartName);
+        return getOrCreateSequenceProductionFor(symbol, min, max, separator, cmpType, unique, sharedInfo);
     }
 
     private NonterminalSymbol translateOptionalComponentTypePropertyRef(ComponentType cmpType, PropertyReferencePart part) {
         final Type innerType = cmpType.getComponentType();
         final Symbol symbol;
-        final String separator, sharedPartName;
+        final String separator;
+        SharedPropertyInfo sharedInfo = null;
         final int min, max;
         final boolean unique;
 
@@ -861,27 +866,30 @@ public class YajcoModelToBNFGrammarTranslator {
         Separator sepPattern = (Separator) part.getPattern(Separator.class);
         Range rangePattern = (Range) part.getPattern(Range.class);
         UniqueValues uniqueValuesPattern = (UniqueValues) part.getPattern(UniqueValues.class);
-        Shared sharedPattern = (Shared) part.getPattern(Shared.class);
+        if (part.getPattern(Shared.class) != null) {
+            throw new IllegalArgumentException("@Shared must be placed on a property of the listed concept, not on list property '" + part.getProperty().getName() + "'.");
+        }
+
+        if (innerType instanceof ReferenceType) {
+            ReferenceType refType = (ReferenceType) innerType;
+            sharedInfo = findSharedPropertyInConcept(refType.getConcept());
+        }
 
         unique = uniqueValuesPattern != null;
-        sharedPartName = sharedPattern != null ? sharedPattern.getValue() : "";
         separator = sepPattern != null ? sepPattern.getValue() : "";
         min = rangePattern != null ? rangePattern.getMinOccurs() : 1;
         max = rangePattern != null ? rangePattern.getMaxOccurs() : Range.INFINITY;
 
-        return getOrCreateSequenceProductionFor(symbol, min, max, separator, cmpType, unique, sharedPattern, sharedPartName);
+        return getOrCreateSequenceProductionFor(symbol, min, max, separator, cmpType, unique, sharedInfo);
     }
 
-    private NonterminalSymbol getOrCreateSequenceProductionFor(Symbol symbol, int minOccurs, int maxOccurs, String separator, ComponentType cmpType, boolean unique, Shared sharedPattern, String sharedPartName) {
-        NonterminalSymbol nonterminal = grammar.getSequenceNonterminalFor(symbol.toString(), minOccurs, maxOccurs, separator, unique, sharedPartName);
+    private NonterminalSymbol getOrCreateSequenceProductionFor(Symbol symbol, int minOccurs, int maxOccurs, String separator, ComponentType cmpType, boolean unique, SharedPropertyInfo sharedInfo) {
+        Symbol sequenceSymbol = sharedInfo != null ? getOrCreateSharedGroupProductionFor(cmpType, sharedInfo) : symbol;
+        NonterminalSymbol nonterminal = grammar.getSequenceNonterminalFor(sequenceSymbol.toString(), minOccurs, maxOccurs, separator, unique);
         if (nonterminal != null) {
             return new NonterminalSymbol(nonterminal.getName(), cmpType, nonterminal.getVarName());
         }
-        if (sharedPattern != null) {
-            return createSequenceProductionWithSharedFor(symbol, minOccurs, maxOccurs, separator, cmpType, sharedPattern);
-        } else {
-            return createSequenceProductionFor(symbol, minOccurs, maxOccurs, separator, cmpType, unique);
-        }
+        return createSequenceProductionFor(sequenceSymbol, minOccurs, maxOccurs, separator, cmpType, unique);
     }
 
     private NonterminalSymbol createSequenceProductionFor(Symbol symbol, int minOccurs, int maxOccurs, String separator, ComponentType cmpType, boolean unique) {
@@ -957,50 +965,138 @@ public class YajcoModelToBNFGrammarTranslator {
         }
 
         grammar.addProduction(production);
-        grammar.addSequence(symbol.toString(), minOccurs, maxOccurs, separator, unique, null, lhs);
+        grammar.addSequence(symbol.toString(), minOccurs, maxOccurs, separator, unique, lhs);
 
         return new NonterminalSymbol(lhs.getName(), cmpType);
     }
 
-    private NonterminalSymbol createSequenceProductionWithSharedFor(Symbol symbol, int minOccurs, int maxOccurs, String separator, ComponentType cmpType, Shared shared) {
-        NonterminalSymbol nonterminal = grammar.getSequenceNonterminalFor(symbol.toString(), minOccurs, maxOccurs, separator, false, null);
-        if (nonterminal == null) {
-            nonterminal = createSequenceProductionFor(symbol, minOccurs, maxOccurs, separator, cmpType, false);
+    private NonterminalSymbol getOrCreateSharedGroupProductionFor(ComponentType cmpType, SharedPropertyInfo sharedInfo) {
+        if (!(cmpType.getComponentType() instanceof ReferenceType)) {
+            throw new IllegalArgumentException("@Shared can only be used for lists of concepts.");
         }
 
-        this.sharedPartName = Character.toUpperCase(shared.getValue().charAt(0)) + shared.getValue().substring(1);
-
-        NonterminalSymbol lhs = grammar.getSequenceNonterminalFor(nonterminal.toString(), minOccurs, maxOccurs, separator, false, null);
-        if (lhs == null) {
-            lhs = new NonterminalSymbol(symbol.getName() + "Array" + arrayID++ + DEFAUL_SYMBOL_WITH_SHARED_SUFFIX, new ListTypeWithShared(cmpType.getComponentType()));
+        ReferenceType elementType = (ReferenceType) cmpType.getComponentType();
+        Concept concept = elementType.getConcept();
+        String groupName = concept.getConceptName() + DEFAUL_SYMBOL_WITH_SHARED_SUFFIX + capitalize(sharedInfo.propertyName);
+        NonterminalSymbol existing = grammar.getNonterminal(groupName);
+        if (existing != null) {
+            return new NonterminalSymbol(existing.getName(), existing.getReturnType(), DEFAULT_ELEMENT_NAME);
         }
+
+        SharedNotationLayout layout = createSharedNotationLayout(concept, sharedInfo);
+        Symbol repeatedValue = translateSharedGroupNotationPart(concept, layout.repeatedPart);
+        ComponentType repeatedValuesType = new ListType(repeatedValue.getReturnType());
+        NonterminalSymbol repeatedValuesProduction = createSequenceProductionFor(
+                repeatedValue,
+                1,
+                Range.INFINITY,
+                sharedInfo.pattern.getSeparator(),
+                repeatedValuesType,
+                false);
+        NonterminalSymbol repeatedValues = new NonterminalSymbol(
+                repeatedValuesProduction.getName(),
+                repeatedValuesProduction.getReturnType(),
+                layout.repeatedParameterName + "s");
+
+        NonterminalSymbol lhs = new NonterminalSymbol(groupName, new ListType(cmpType.getComponentType()));
         grammar.addNonterminal(lhs);
 
-        TerminalSymbol sepTerminal = getTerminalFor(shared.getSeparator());
-        Production production = new Production(lhs);
-
-        NonterminalSymbol rhsNonterminal = new NonterminalSymbol(lhs.getName(), lhs.getReturnType(), DEFAULT_LIST_NAME);
-        Alternative alternative1 = new Alternative();
-        Alternative alternative2 = new Alternative();
-
-        alternative1.addSymbol(rhsNonterminal);
-        if (sepTerminal != null) {
-            alternative1.addSymbol(sepTerminal);
+        Alternative alternative = new Alternative();
+        for (NotationPart part : layout.prefixParts) {
+            alternative.addSymbol(translateSharedGroupNotationPart(concept, part));
         }
-        alternative1.addSymbol(nonterminal);
-        nonterminal.setVarName(DEFAULT_ELEMENT_NAME);
-        alternative1.addActions(SemLangFactory.createAddElementToCollectionAndReturnActions(rhsNonterminal, nonterminal));
+        alternative.addSymbol(repeatedValues);
+        for (NotationPart part : layout.beforeSharedParts) {
+            alternative.addSymbol(translateSharedGroupNotationPart(concept, part));
+        }
 
-        alternative2.addSymbol(nonterminal);
-        alternative2.addActions(SemLangFactory.createListWithSharedAndAddElementAndReturnActions(cmpType.getComponentType(), DEFAULT_LIST_NAME, nonterminal));
+        List<Symbol> constructorParameters = new ArrayList<Symbol>();
+        constructorParameters.add(repeatedValue.withVarName(layout.repeatedParameterName));
+        for (NotationPart part : layout.sharedAndSuffixParts) {
+            Symbol symbol = translateSharedGroupNotationPart(concept, part);
+            alternative.addSymbol(symbol);
+            if (part instanceof BindingNotationPart || part instanceof CompoundNotationPart) {
+                constructorParameters.add(symbol);
+            }
+        }
 
-        production.addAlternative(alternative1);
-        production.addAlternative(alternative2);
+        Factory factoryPattern = (Factory) sharedInfo.notation.getPattern(Factory.class);
+        alternative.addActions(SemLangFactory.createSharedListAndReturnActions(
+                cmpType.getComponentType(),
+                DEFAULT_LIST_NAME,
+                Utilities.getFullConceptClassName(language, concept),
+                factoryPattern != null ? factoryPattern.getName() : null,
+                repeatedValues,
+                layout.repeatedParameterName,
+                constructorParameters));
 
+        Production production = new Production(lhs, Collections.singletonList(alternative), toPatternList(sharedInfo.notation.getPatterns()));
         grammar.addProduction(production);
-        grammar.addSequence(nonterminal.toString(), 1, Range.INFINITY, shared.getSeparator(), false, shared.getValue(), lhs);
 
-        return new NonterminalSymbol(lhs.getName(), cmpType);
+        return new NonterminalSymbol(lhs.getName(), lhs.getReturnType(), DEFAULT_ELEMENT_NAME);
+    }
+
+    private SharedNotationLayout createSharedNotationLayout(Concept concept, SharedPropertyInfo sharedInfo) {
+        List<NotationPart> parts = sharedInfo.notation.getParts();
+        int repeatedPartIndex = -1;
+        for (int i = 0; i < sharedInfo.partIndex; i++) {
+            if (parts.get(i) instanceof BindingNotationPart) {
+                repeatedPartIndex = i;
+                break;
+            }
+        }
+        if (repeatedPartIndex == -1) {
+            throw new IllegalArgumentException("@Shared property '" + sharedInfo.propertyName + "' in concept '" + concept.getConceptName() + "' has no preceding property to repeat.");
+        }
+
+        int beforeSharedStart = sharedInfo.partIndex;
+        while (beforeSharedStart > repeatedPartIndex && parts.get(beforeSharedStart - 1) instanceof TokenPart) {
+            beforeSharedStart--;
+        }
+        if (beforeSharedStart - repeatedPartIndex != 1) {
+            throw new IllegalArgumentException("@Shared in concept '" + concept.getConceptName() + "' currently supports exactly one repeated property before the shared property.");
+        }
+
+        NotationPart repeatedPart = parts.get(repeatedPartIndex);
+        if (!(repeatedPart instanceof BindingNotationPart)) {
+            throw new IllegalArgumentException("@Shared in concept '" + concept.getConceptName() + "' must repeat a binding property.");
+        }
+
+        return new SharedNotationLayout(
+                new ArrayList<NotationPart>(parts.subList(0, repeatedPartIndex)),
+                (BindingNotationPart) repeatedPart,
+                getBindingPartName((BindingNotationPart) repeatedPart),
+                new ArrayList<NotationPart>(parts.subList(beforeSharedStart, sharedInfo.partIndex)),
+                new ArrayList<NotationPart>(parts.subList(sharedInfo.partIndex, parts.size())));
+    }
+
+    private Symbol translateSharedGroupNotationPart(Concept concept, NotationPart part) {
+        if (part instanceof TokenPart) {
+            return translateTokenNotationPart((TokenPart) part);
+        } else if (part instanceof PropertyReferencePart) {
+            return translatePropertyRefNotationPart((PropertyReferencePart) part);
+        } else if (part instanceof LocalVariablePart) {
+            return translateLocalVarPart((LocalVariablePart) part);
+        } else if (part instanceof OptionalPart) {
+            return translateOptionalPart(concept, (OptionalPart) part);
+        }
+        throw new IllegalArgumentException("Unknown notation part: '" + part.getClass().getCanonicalName() + "'!");
+    }
+
+    private String getBindingPartName(BindingNotationPart part) {
+        if (part instanceof PropertyReferencePart) {
+            return ((PropertyReferencePart) part).getProperty().getName();
+        } else if (part instanceof LocalVariablePart) {
+            return ((LocalVariablePart) part).getName();
+        }
+        throw new IllegalArgumentException("Unsupported repeated @Shared binding part: '" + part.getClass().getCanonicalName() + "'!");
+    }
+
+    private String capitalize(String value) {
+        if (value == null || value.isEmpty()) {
+            return "";
+        }
+        return Character.toUpperCase(value.charAt(0)) + value.substring(1);
     }
 
     private void processParenthesesOperator() {
@@ -1045,6 +1141,71 @@ public class YajcoModelToBNFGrammarTranslator {
         newList.addAll(list);
 
         return newList;
+    }
+
+    /**
+     * Container for shared property info found in a concept.
+     */
+    private static class SharedPropertyInfo {
+        final Shared pattern;
+        final String propertyName;
+        final Notation notation;
+        final int partIndex;
+        
+        SharedPropertyInfo(Shared pattern, String propertyName, Notation notation, int partIndex) {
+            this.pattern = pattern;
+            this.propertyName = propertyName;
+            this.notation = notation;
+            this.partIndex = partIndex;
+        }
+    }
+
+    private static class SharedNotationLayout {
+        final List<NotationPart> prefixParts;
+        final BindingNotationPart repeatedPart;
+        final String repeatedParameterName;
+        final List<NotationPart> beforeSharedParts;
+        final List<NotationPart> sharedAndSuffixParts;
+
+        SharedNotationLayout(
+                List<NotationPart> prefixParts,
+                BindingNotationPart repeatedPart,
+                String repeatedParameterName,
+                List<NotationPart> beforeSharedParts,
+                List<NotationPart> sharedAndSuffixParts) {
+            this.prefixParts = prefixParts;
+            this.repeatedPart = repeatedPart;
+            this.repeatedParameterName = repeatedParameterName;
+            this.beforeSharedParts = beforeSharedParts;
+            this.sharedAndSuffixParts = sharedAndSuffixParts;
+        }
+    }
+
+    /**
+     * Finds the shared property in a concept's notation.
+     *
+     * Grouped shared productions currently model one notation. Rejecting a
+     * shared concept with multiple notations prevents the other alternatives
+     * from becoming unreachable.
+     */
+    private SharedPropertyInfo findSharedPropertyInConcept(Concept concept) {
+        for (Notation notation : concept.getConcreteSyntax()) {
+            for (int i = 0; i < notation.getParts().size(); i++) {
+                NotationPart part = notation.getParts().get(i);
+                if (part instanceof PropertyReferencePart) {
+                    PropertyReferencePart propRef = (PropertyReferencePart) part;
+                    Shared shared = (Shared) propRef.getPattern(Shared.class);
+                    if (shared != null) {
+                        if (concept.getConcreteSyntax().size() != 1) {
+                            throw new IllegalArgumentException("@Shared in concept '" + concept.getConceptName()
+                                    + "' requires exactly one notation; found " + concept.getConcreteSyntax().size() + ".");
+                        }
+                        return new SharedPropertyInfo(shared, propRef.getProperty().getName(), notation, i);
+                    }
+                }
+            }
+        }
+        return null;
     }
 
     //    private List<Symbol> toSymbolList(Symbol symbol) {

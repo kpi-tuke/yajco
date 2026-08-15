@@ -440,7 +440,6 @@ public class IrFilesGenerator implements FilesGenerator {
             } else if (pattern instanceof Shared) {
                 Shared shared = (Shared) pattern;
                 item.put("kind", "shared");
-                item.put("value", shared.getValue());
                 item.put("separator", shared.getSeparator());
             } else if (pattern instanceof UniqueValues) {
                 item.put("kind", "uniqueValues");
@@ -467,7 +466,7 @@ public class IrFilesGenerator implements FilesGenerator {
             serialized.put("name", referenceType.getConcept() == null ? null : referenceType.getConcept().getName());
             return serialized;
         }
-        if (type instanceof ListType || type instanceof ListTypeWithShared) {
+        if (type instanceof ListType) {
             serialized.put("kind", "list");
             serialized.put("itemType", toType(((ComponentType) type).getComponentType()));
             return serialized;
