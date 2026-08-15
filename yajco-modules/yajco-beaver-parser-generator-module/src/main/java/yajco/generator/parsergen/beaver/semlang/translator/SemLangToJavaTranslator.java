@@ -10,6 +10,7 @@ import yajco.model.Language;
 import yajco.model.type.*;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.List;
 
 public class SemLangToJavaTranslator {
@@ -284,55 +285,36 @@ public class SemLangToJavaTranslator {
         writer.print(") { ");
         translateLValue(action.getCollection(), writer);
         writer.print(".add(");
-        writer.print(REFERENCE_RESOLVER_CLASS_NAME);
-        writer.print(".getInstance().register(");
         translateSharedClassInstance(action, repeatedValueVar, writer);
-        if (action.getFactoryMethodName() != null && !action.getFactoryMethodName().isEmpty()) {
-            writer.print(", \"");
-            writer.print(action.getFactoryMethodName());
-            writer.print("\"");
-        }
-        if (!action.getConstructorParameters().isEmpty()) {
-            writer.print(", (Object)");
-            for (int i = 0; i < action.getConstructorParameters().size(); i++) {
-                translateSharedConstructorParameter(action, action.getConstructorParameters().get(i), repeatedValueVar, writer);
-                if (i != (action.getConstructorParameters().size() - 1)) {
-                    writer.print(", ");
-                }
-            }
-        }
-        writer.print(")); ");
+        writer.print("); ");
         writer.print("} ");
     }
 
     private void translateSharedClassInstance(AddSharedElementsToCollectionAction action, String repeatedValueVar, PrintStream writer) {
-        if (action.getFactoryMethodName() == null || action.getFactoryMethodName().isEmpty()) {
-            writer.print("new ");
-            writer.print(action.getClassType());
-            writer.print("(");
-        } else {
-            writer.print(action.getClassType());
-            writer.print(".");
-            writer.print(action.getFactoryMethodName());
-            writer.print("(");
-        }
-
-        for (int i = 0; i < action.getConstructorParameters().size(); i++) {
-            translateSharedConstructorParameter(action, action.getConstructorParameters().get(i), repeatedValueVar, writer);
-            if (i != (action.getConstructorParameters().size() - 1)) {
-                writer.print(", ");
+        List<RValue> constructorParameters = new ArrayList<RValue>(action.getConstructorParameters().size());
+        for (RValue parameter : action.getConstructorParameters()) {
+            if (isRepeatedSharedConstructorParameter(action, parameter)) {
+                constructorParameters.add(new RValue(repeatedValueVar));
+            } else {
+                constructorParameters.add(parameter);
             }
         }
-        writer.print(")");
+
+        ReferenceResolverRegisterAction registerAction;
+        if (action.getFactoryMethodName() == null || action.getFactoryMethodName().isEmpty()) {
+            registerAction = new ReferenceResolverRegisterAction(action.getClassType(), constructorParameters);
+        } else {
+            registerAction = new ReferenceResolverRegisterAction(
+                    action.getClassType(),
+                    action.getFactoryMethodName(),
+                    constructorParameters);
+        }
+        translateReferenceResolverRegisterAction(registerAction, writer);
     }
 
-    private void translateSharedConstructorParameter(AddSharedElementsToCollectionAction action, RValue parameter, String repeatedValueVar, PrintStream writer) {
-        if (parameter.getSymbol() != null
-                && action.getRepeatedParameterName().equals(parameter.getSymbol().getVarName())) {
-            writer.print(repeatedValueVar);
-        } else {
-            translateRValue(parameter, writer);
-        }
+    private boolean isRepeatedSharedConstructorParameter(AddSharedElementsToCollectionAction action, RValue parameter) {
+        return parameter.getSymbol() != null
+                && action.getRepeatedParameterName().equals(parameter.getSymbol().getVarName());
     }
 
     private void translateCreateClassInstanceAction(CreateClassInstanceAction action, PrintStream writer) {
