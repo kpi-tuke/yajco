@@ -2,15 +2,53 @@
 icon: lucide/history
 ---
 
-# Changes from Version 0.5.9 to 0.6.0
+# Changelog
 
-## Overview
+## Version 0.7.0
+
+### Overview
+
+This release adds JSON intermediate-representation generation, configurable boolean tokens, and a runtime parser API. It also redesigns the `@Shared` pattern, improves comment configuration, modernizes generated-source formatting, and publishes the documentation site.
+
+### New Features
+
+- **IR generator module** - Added `yajco-ir-generator-module`, which exports annotated language models as JSON intermediate representation for the editor and IDE plugin generator currently in development (#51).
+  - The downstream generator produces TextMate-style highlighting rules, Tree-sitter grammars, and an LSP server.
+  - Added the package-level `@Language` annotation for language metadata such as name, version, and file extensions.
+- **Configurable boolean tokens** - Added `@BooleanValue` to define custom tokens for `true` and `false`, including multiple tokens for each value (#59).
+  - Default boolean tokens remain `true` and `false`.
+- **Parser factory** - Added `ParserFactory.getParser(mainNodeType)` for discovering and instantiating generated parsers without importing their generated classes directly (#63).
+  - Generated parsers are annotated with `@ParserFor` to identify their main node type.
+
+### Improvements
+
+- **Comment configuration** - `@Skip` now has explicit `lineComment` and `blockComment` properties, with validation for block-comment delimiters (#58).
+- **Source formatting** - Replaced google-java-format with the JavaParser pretty-printer, removing the reliance on JDK-internal APIs and supporting newer JDKs more reliably (#61).
+- **Annotation processor** - Refactored language-model construction, concept registration, type resolution, and pattern mapping into dedicated components, with expanded unit-test coverage (#52).
+- **Documentation** - Migrated documentation from the wiki to the GitHub Pages site and added a documentation publishing workflow.
+- **Dependencies** - Updated `jackson-databind` in the IR generator to 2.22.1 (#62).
+
+### Breaking Changes
+
+- **`@Shared` pattern redesign** - `@Shared` is now applied directly to the shared element rather than the collection that uses it (#64).
+  - The annotation no longer has a `value` property; configure only its separator on the shared element.
+  - The specialized shared-list type and its parser support were removed.
+- **Runtime API relocation** - `Parser`, `ParseException`, lexer classes, and `ReferenceResolver` moved to the new `yajco-runtime` artifact.
+  - `Parser` and `ParseException` moved to the runtime module as part of the parser-factory API (#63).
+  - Update dependencies and imports to use `yajco-runtime` and the `yajco.parser` package.
+- **Comment syntax migration** - Configure comments through `@Parser(skips = ...)`; comment syntax is no longer specified in `@Language` (#58).
+  - Migrate deprecated `@Skip.start` and `@Skip.end` properties to `lineComment` and `blockComment`.
+
+
+## Changes from Version 0.5.9 to 0.6.0
+
+### Overview
 
 This release includes 149 non-merge commits and represents a significant evolution of YAJCo, focusing on language pattern expansion, Java modernization, improved multi-parser capabilities, and better type system support. It also adds support for ANTLR4 parser generator. 
 
-## Major Changes
+### Major Changes
 
-### New Language Patterns
+#### New Language Patterns
 
 - **Flag Pattern** - Initial implementation for Beaver and Antlr4 (d727693)
   - Allows boolean flags in language syntax
@@ -31,7 +69,7 @@ This release includes 149 non-merge commits and represents a significant evoluti
 - **Whitespace and Comment Patterns** - Implemented as parameters to existing `@Skip` annotation (39c52ad)
   - Simplified definition of whitespace and comment handling
 
-### Other New Features
+#### Other New Features
 
 - **Automatic IDENTIFIER Token** - Now automatically added and used for properties marked with `@Identifier` and `@References` (bb8ab1c)
   - Reduces boilerplate in language definitions
@@ -41,13 +79,13 @@ This release includes 149 non-merge commits and represents a significant evoluti
 
 - **`@UniqueValues`** - Ensures uniqueness constraints on language elements
 
-### Type System Enhancements
+#### Type System Enhancements
 
 - **Optional Type Support** - Added comprehensive support for `java.util.Optional<T>` throughout the codebase
   - Visitor and Printer properly handle optional types
   - No need to return `Optional<T>` from getter methods (method overloading resolves it)
 
-### Java & Build System Updates
+#### Java & Build System Updates
 
 - **Upgraded to Java 11** - Annotation processor and annotations updated to support Java 11 (fe8272e, 973fda4)
 - **Code Formatter Change** - Replaced Jalopy with google-java-format (c914dcf)
@@ -61,7 +99,7 @@ This release includes 149 non-merge commits and represents a significant evoluti
   - Fixed xstream compatibility with latest Java
   - Bumped junit from 4.12 to 4.13.1
 
-### New Parser Generator Backend: ANTLR4
+#### New Parser Generator Backend: ANTLR4
 
 - **ANTLR4 Support Added** - Complete implementation of ANTLR4 parser generator backend (8391ced and subsequent commits)
   - Previously YAJCo supported Beaver and JavaCC backends
@@ -71,14 +109,14 @@ This release includes 149 non-merge commits and represents a significant evoluti
   - Improved error reporting for lexer and parser errors
   - Note: Not all language patterns are supported yet (work in progress)
 
-### Experimental Xtext Support
+#### Experimental Xtext Support
 
 - **Xtext Integration** - Experimental support for Xtext framework (e086621)
   - Added integration of YAJCo with Xtext
   - Xtext module moved into yajco-modules (2eb6d4d)
   - Removed dependency of annotation processor on Xtext module (c9edc84)
 
-### Multi-Parser Support
+#### Multi-Parser Support
 
 - **Multiple Parsers** - Now allows multiple parsers in the same project (a5b9bcc)
   - Can use different parser backends (Beaver, JavaCC, ANTLR4) simultaneously
@@ -87,14 +125,14 @@ This release includes 149 non-merge commits and represents a significant evoluti
   - Better interoperability between different parser implementations
 - **Service Provider Interface (SPI)** - Generated parsers registered as service providers in each CompilerGenerator
 
-### License Change
+#### License Change
 
 - **Changed from GNU LGPL v3 to MIT License** (f4bc11a)
   - More permissive licensing for broader adoption
 
-## Bug Fixes & Improvements
+### Bug Fixes & Improvements
 
-### Parser & Grammar Generation
+#### Parser & Grammar Generation
 
 - Fixed `@Identifier` recognition in base classes (7af4908)
 - Fixed `@FactoryMethod` causing exceptions in ReferenceResolver (49e234e)
@@ -102,14 +140,14 @@ This release includes 149 non-merge commits and represents a significant evoluti
 - Fixed missing separator in sequences with finite `@Range.maxOccurs` (5fd0279)
 - More reliable generation of actions for UnorderedParameters grammar rules (e203576)
 
-### Code Generation
+#### Code Generation
 
 - Fixed Printer optional unboxing issues (829bf51, 0997b24)
 - Improved indentation in generated Visitor (6b5634b)
 - Fixed compile errors in generated visitor by unboxing Optional values (97acc60)
 - Optimized imports in Utilities.java (6b76997)
 
-### Reference Resolution
+#### Reference Resolution
 
 - Fixed ReferenceResolver hash issues (bded7b3)
   - Changed HashMap to IdentityHashMap to handle objects with custom hashCode()
@@ -117,14 +155,14 @@ This release includes 149 non-merge commits and represents a significant evoluti
 
 - Resolve identifier fields from parent classes recursively (ff68f45)
 
-### ANTLR4 Module
+#### ANTLR4 Module
 
 - Removed SecurityManager hack for running Antlr4 (2284628)
 - Unified lexical analysis across parser generators
 - Multiple bug fixes and improvements for ANTLR4 grammar generation
 
 
-## Project Infrastructure
+### Project Infrastructure
 
 - **CI/CD Migration** - Migrated from Travis CI to GitHub Actions (ea984bb)
 - **Build Scripts** - Created Maven workflow for GitHub Actions
@@ -134,7 +172,7 @@ This release includes 149 non-merge commits and represents a significant evoluti
   - Updated project metadata and URLs
   - Cleaned up examples and removed unnecessary documentation files (45a02e8)
 
-## Refactoring & Code Quality
+### Refactoring & Code Quality
 
 - **Symbol Management**:
   - Symbol is now Cloneable (483bdf4)
@@ -149,13 +187,13 @@ This release includes 149 non-merge commits and represents a significant evoluti
   - Consistent indentation using spaces throughout project (b2cf7b8)
   - Removed backwards-compatibility code and unnecessary abstractions
 
-## Breaking Changes
+### Breaking Changes
 
 - Minimum Java version is now 11
 - License changed from LGPL v3 to MIT
 - Some internal APIs refactored for better type safety
 
-## Contributors
+### Contributors
 
 Special thanks to all contributors who made this release possible, including pull requests from:
 
