@@ -9,14 +9,18 @@ import yajco.model.Notation;
 import yajco.model.Property;
 import yajco.model.PropertyReferencePart;
 import yajco.model.pattern.impl.BooleanValue;
+import yajco.model.pattern.impl.Shared;
+import yajco.model.type.ListType;
 import yajco.model.type.PrimitiveType;
 import yajco.model.type.PrimitiveTypeConst;
+import yajco.model.type.ReferenceType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThrows;
 
 public class YajcoModelToBNFGrammarTranslatorTest {
 
@@ -36,5 +40,35 @@ public class YajcoModelToBNFGrammarTranslatorTest {
         assertNotNull(grammar.getProduction(booleanFlag));
         assertEquals(2, grammar.getProduction(booleanFlag).getRhs().size());
         assertEquals("", grammar.getProduction(booleanFlag).getRhs().get(1).toString());
+    }
+
+    @Test
+    public void shouldRejectSharedConceptWithMultipleNotations() {
+        Property value = new Property("value", new PrimitiveType(PrimitiveTypeConst.STRING), null);
+        Property suffix = new Property("suffix", new PrimitiveType(PrimitiveTypeConst.STRING), null);
+        PropertyReferencePart sharedSuffix = new PropertyReferencePart(suffix, null);
+        sharedSuffix.addPattern(new Shared(","));
+
+        Notation sharedNotation = new Notation(new yajco.model.NotationPart[] {
+                new PropertyReferencePart(value, null), sharedSuffix
+        });
+        Notation otherNotation = new Notation(new yajco.model.NotationPart[] {
+                new PropertyReferencePart(value, null)
+        });
+        Concept item = new Concept("Item", new Property[] {value, suffix}, new Notation[] {
+                sharedNotation, otherNotation
+        });
+
+        Property items = new Property("items", new ListType(new ReferenceType(item, null)), null);
+        Concept root = new Concept("Root", new Property[] {items}, new Notation[] {
+                new Notation(new yajco.model.NotationPart[] {new PropertyReferencePart(items, null)})
+        });
+        Language language = new Language("test", new ArrayList<>(), new ArrayList<>(), Arrays.asList(root, item));
+
+        IllegalArgumentException exception = assertThrows(
+                IllegalArgumentException.class,
+                () -> YajcoModelToBNFGrammarTranslator.getInstance().translate(language));
+
+        assertEquals("@Shared in concept 'Item' requires exactly one notation; found 2.", exception.getMessage());
     }
 }

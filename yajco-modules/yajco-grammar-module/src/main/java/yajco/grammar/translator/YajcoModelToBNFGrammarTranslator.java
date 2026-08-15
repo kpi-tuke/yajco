@@ -1182,9 +1182,11 @@ public class YajcoModelToBNFGrammarTranslator {
     }
 
     /**
-     * Find the first shared property in a concept's notations.
-     * Returns the Shared pattern and property name if found.
-     * Used to detect shared properties when generating grouped list productions.
+     * Finds the shared property in a concept's notation.
+     *
+     * Grouped shared productions currently model one notation. Rejecting a
+     * shared concept with multiple notations prevents the other alternatives
+     * from becoming unreachable.
      */
     private SharedPropertyInfo findSharedPropertyInConcept(Concept concept) {
         for (Notation notation : concept.getConcreteSyntax()) {
@@ -1194,6 +1196,10 @@ public class YajcoModelToBNFGrammarTranslator {
                     PropertyReferencePart propRef = (PropertyReferencePart) part;
                     Shared shared = (Shared) propRef.getPattern(Shared.class);
                     if (shared != null) {
+                        if (concept.getConcreteSyntax().size() != 1) {
+                            throw new IllegalArgumentException("@Shared in concept '" + concept.getConceptName()
+                                    + "' requires exactly one notation; found " + concept.getConcreteSyntax().size() + ".");
+                        }
                         return new SharedPropertyInfo(shared, propRef.getProperty().getName(), notation, i);
                     }
                 }
