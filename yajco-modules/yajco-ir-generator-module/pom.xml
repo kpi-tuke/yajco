@@ -4,9 +4,10 @@
   <parent>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-modules</artifactId>
-    <version>0.7.0</version>
+    <version>0.8.0-SNAPSHOT</version>
   </parent>
   <artifactId>yajco-ir-generator-module</artifactId>
+  <version>0.6.0</version>
   <packaging>jar</packaging>
   <name>yajco-ir-generator-module</name>
   <description>YAJCo DSL IR generator module</description>
@@ -15,12 +16,12 @@
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>yajco-generator-module</artifactId>
-      <version>${project.version}</version>
+      <version>0.8.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>yajco-model</artifactId>
-      <version>${project.version}</version>
+      <version>0.8.0-SNAPSHOT</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
