@@ -39,7 +39,7 @@ Ensure your project uses at least **JDK 11** by including the following properti
 <properties>
   <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
   <maven.compiler.release>11</maven.compiler.release>
-  <yajco.version>0.6.0</yajco.version>
+  <yajco.version>0.7.0</yajco.version>
 </properties>
 ```
 
@@ -50,6 +50,11 @@ Add the following **YAJCo** dependencies to your project’s `pom.xml`:
   <dependency>
     <groupId>sk.tuke.yajco</groupId>
     <artifactId>yajco-annotations</artifactId>
+    <version>${yajco.version}</version>
+  </dependency>
+  <dependency>
+    <groupId>sk.tuke.yajco</groupId>
+    <artifactId>yajco-runtime</artifactId>
     <version>${yajco.version}</version>
   </dependency>
   <dependency>
